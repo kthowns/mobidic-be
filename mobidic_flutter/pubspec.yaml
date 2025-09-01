@@ -38,6 +38,7 @@ dependencies:
   flutter_dotenv: ^5.2.1
   flutter_launcher_icons: ^0.14.4
   kakao_flutter_sdk: ^1.9.7+3
+  url_launcher: ^6.1.10
 
 dev_dependencies:
   flutter_test:
@@ -63,7 +64,7 @@ flutter:
   assets:
     - assets/images/mobidic_icon.png
     - assets/images/kakao_login_medium_wide.png
-    - assets/.env
+    - .env
   fonts:
     - family: Baloo2
       fonts:
