@@ -11,28 +11,47 @@ import 'package:mobidic_flutter/viewmodel/join_view_model.dart';
 import 'package:provider/provider.dart';
 
 late final String apiBaseUrl;
-late final String kakaoNativeAppKey;
-
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
   if (!kIsWeb) {
-    // 모바일(Android/iOS)
-    await dotenv.load(fileName: "assets/.env");
-    apiBaseUrl = dotenv.env['API_BASE_URL'] ?? "";
-  } else {
-    // 웹
-    apiBaseUrl = const String.fromEnvironment('API_BASE_URL');
+    await dotenv.load(fileName: ".env");
   }
-  if (apiBaseUrl == "") throw Exception('Missing API_BASE_URL');
 
-  kakaoNativeAppKey = dotenv.env['KAKAO_NATIVE_APP_KEY'] ?? "";
-  if (kakaoNativeAppKey == "") throw Exception('Missing KAKAO_NATIVE_APP_KEY');
+  apiBaseUrl = await loadApiBaseUrl();
 
-  KakaoSdk.init(nativeAppKey: kakaoNativeAppKey);
+  if (!kIsWeb) {
+    await initKakaoSdk();
+  }
 
   runApp(
     MultiProvider(providers: getProviders(apiBaseUrl), child: const MyApp()),
   );
+}
+
+Future<void> initKakaoSdk() async {
+  String kakaoNativeAppKey = dotenv.env['KAKAO_NATIVE_APP_KEY'] ?? "";
+
+  if (kakaoNativeAppKey == "") throw Exception('Missing KAKAO_NATIVE_APP_KEY');
+  debugPrint('KAKAO_NATIVE_APP_KEY: $kakaoNativeAppKey');
+
+  KakaoSdk.init(nativeAppKey: kakaoNativeAppKey);
+}
+
+Future<String> loadApiBaseUrl() async {
+  String url = "";
+
+  if (!kIsWeb) {
+    // 모바일(Android/iOS)
+    url = dotenv.env['API_BASE_URL'] ?? "";
+  } else {
+    // 웹
+    url = const String.fromEnvironment('API_BASE_URL');
+  }
+
+  if (url == "") throw Exception('Missing API_BASE_URL');
+
+  return url;
 }
 
 class MyApp extends StatelessWidget {

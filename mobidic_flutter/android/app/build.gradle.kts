@@ -1,3 +1,6 @@
+import java.util.Properties
+import java.io.FileInputStream
+
 plugins {
     id("com.android.application")
     id("kotlin-android")
@@ -8,7 +11,7 @@ plugins {
 android {
     namespace = "com.kimtaeyang.mobidic_flutter"
     compileSdk = flutter.compileSdkVersion
-    ndkVersion = flutter.ndkVersion
+    ndkVersion = "27.0.12077973"
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
@@ -29,8 +32,12 @@ android {
         versionCode = flutter.versionCode
         versionName = flutter.versionName
 
-        // val kakaoNativeAppKey = project.findProperty("kakao_native_app_key") ?: ""
-        // manifestPlaceholders["KAKAO_NATIVE_APP_KEY"] = kakaoNativeAppKey
+        val localPropertiesFile = rootProject.file("local.properties")
+        val localProperties = Properties().apply {
+            load(localPropertiesFile.inputStream())
+        }
+        val kakaoNativeAppKey = localProperties.getProperty("kakao_native_app_key") ?: ""
+        manifestPlaceholders["KAKAO_NATIVE_APP_KEY"] = kakaoNativeAppKey
     }
 
     buildTypes {
