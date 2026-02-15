@@ -14,10 +14,6 @@ late final String apiBaseUrl;
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  if (!kIsWeb) {
-    await dotenv.load(fileName: ".env");
-  }
-
   apiBaseUrl = await loadApiBaseUrl();
 
   if (!kIsWeb) {
@@ -39,15 +35,10 @@ Future<void> initKakaoSdk() async {
 }
 
 Future<String> loadApiBaseUrl() async {
+  await dotenv.load(fileName: ".env");
   String url = "";
 
-  if (!kIsWeb) {
-    // 모바일(Android/iOS)
-    url = dotenv.env['API_BASE_URL'] ?? "";
-  } else {
-    // 웹
-    url = const String.fromEnvironment('API_BASE_URL');
-  }
+  url = dotenv.env['API_BASE_URL'] ?? "https://api.example.com";
 
   if (url == "") throw Exception('Missing API_BASE_URL');
 
