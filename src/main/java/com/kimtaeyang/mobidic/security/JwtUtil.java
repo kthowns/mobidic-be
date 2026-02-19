@@ -1,6 +1,6 @@
 package com.kimtaeyang.mobidic.security;
 
-import com.kimtaeyang.mobidic.config.JwtProperties;
+import com.kimtaeyang.mobidic.common.config.JwtProperties;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;

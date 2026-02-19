@@ -1,11 +1,11 @@
 package com.kimtaeyang.mobidic.integration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.kimtaeyang.mobidic.dto.AddVocabRequestDto;
-import com.kimtaeyang.mobidic.dto.AddWordRequestDto;
-import com.kimtaeyang.mobidic.dto.member.JoinRequestDto;
-import com.kimtaeyang.mobidic.dto.member.LoginDto;
-import com.kimtaeyang.mobidic.repository.MemberRepository;
+import com.kimtaeyang.mobidic.dictionary.dto.AddVocabularyRequestDto;
+import com.kimtaeyang.mobidic.dictionary.dto.AddWordRequestDto;
+import com.kimtaeyang.mobidic.auth.dto.SignUpRequestDto;
+import com.kimtaeyang.mobidic.auth.dto.LoginDto;
+import com.kimtaeyang.mobidic.user.repository.UserRepository;
 import com.kimtaeyang.mobidic.security.JwtUtil;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
@@ -23,8 +23,8 @@ import java.io.FileInputStream;
 import java.nio.file.Paths;
 import java.util.UUID;
 
-import static com.kimtaeyang.mobidic.code.AuthResponseCode.UNAUTHORIZED;
-import static com.kimtaeyang.mobidic.code.GeneralResponseCode.TOO_BIG_FILE_SIZE;
+import static com.kimtaeyang.mobidic.common.code.AuthResponseCode.UNAUTHORIZED;
+import static com.kimtaeyang.mobidic.common.code.GeneralResponseCode.TOO_BIG_FILE_SIZE;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -42,14 +42,14 @@ public class PronunciationIntegrationTest {
     private ObjectMapper objectMapper;
 
     @Autowired
-    private MemberRepository memberRepository;
+    private UserRepository userRepository;
 
     @Autowired
     private JwtUtil jwtUtil;
 
     @AfterEach
     void tearDown() {
-        memberRepository.deleteAll();
+        userRepository.deleteAll();
     }
 
     @Test
@@ -139,7 +139,7 @@ public class PronunciationIntegrationTest {
     }
 
     private UUID addVocabAndGetId(UUID memberId, String token) throws Exception {
-        AddVocabRequestDto addVocabRequest = AddVocabRequestDto.builder()
+        AddVocabularyRequestDto addVocabRequest = AddVocabularyRequestDto.builder()
                 .title("title")
                 .description("description")
                 .build();
@@ -176,7 +176,7 @@ public class PronunciationIntegrationTest {
     }
 
     private String loginAndGetToken(String email, String nickname) throws Exception {
-        JoinRequestDto joinRequest = JoinRequestDto.builder()
+        SignUpRequestDto joinRequest = SignUpRequestDto.builder()
                 .email(email)
                 .nickname(nickname)
                 .password("testTest1")

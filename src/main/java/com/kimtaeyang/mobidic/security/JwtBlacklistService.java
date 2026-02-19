@@ -1,6 +1,6 @@
 package com.kimtaeyang.mobidic.security;
 
-import com.kimtaeyang.mobidic.exception.ApiException;
+import com.kimtaeyang.mobidic.common.exception.ApiException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 
-import static com.kimtaeyang.mobidic.code.AuthResponseCode.INVALID_TOKEN;
+import static com.kimtaeyang.mobidic.common.code.AuthResponseCode.INVALID_TOKEN;
 
 @Service
 @RequiredArgsConstructor

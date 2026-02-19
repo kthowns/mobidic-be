@@ -1,11 +1,12 @@
 package com.kimtaeyang.mobidic.service;
 
-import com.kimtaeyang.mobidic.config.JwtProperties;
-import com.kimtaeyang.mobidic.dto.member.JoinRequestDto;
-import com.kimtaeyang.mobidic.dto.member.LoginDto;
-import com.kimtaeyang.mobidic.dto.member.MemberDto;
-import com.kimtaeyang.mobidic.entity.Member;
-import com.kimtaeyang.mobidic.repository.MemberRepository;
+import com.kimtaeyang.mobidic.auth.service.AuthService;
+import com.kimtaeyang.mobidic.common.config.JwtProperties;
+import com.kimtaeyang.mobidic.auth.dto.SignUpRequestDto;
+import com.kimtaeyang.mobidic.auth.dto.LoginDto;
+import com.kimtaeyang.mobidic.user.dto.UserDto;
+import com.kimtaeyang.mobidic.user.entity.User;
+import com.kimtaeyang.mobidic.user.repository.UserRepository;
 import com.kimtaeyang.mobidic.security.JwtBlacklistService;
 import com.kimtaeyang.mobidic.security.JwtUtil;
 import org.junit.jupiter.api.DisplayName;
@@ -49,7 +50,7 @@ class AuthServiceTest {
     private PasswordEncoder passwordEncoder;
 
     @Autowired
-    private MemberRepository memberRepository; // mock
+    private UserRepository userRepository; // mock
 
     @Autowired
     private JwtUtil jwtUtil;
@@ -64,33 +65,33 @@ class AuthServiceTest {
         String rawPassword = "test1234";
         String encodedPassword = passwordEncoder.encode(rawPassword);
 
-        JoinRequestDto request = JoinRequestDto.builder()
+        SignUpRequestDto request = SignUpRequestDto.builder()
                 .email("user@example.com")
                 .nickname("tester")
                 .password(rawPassword)
                 .build();
 
-        Member memberToReturn = Member.builder()
+        User userToReturn = User.builder()
                 .email(request.getEmail())
                 .nickname(request.getNickname())
                 .password(encodedPassword)
                 .build();
 
         // mocking
-        Mockito.when(memberRepository.countByNickname(anyString()))
+        Mockito.when(userRepository.countByNickname(anyString()))
                 .thenReturn(0);
-        Mockito.when(memberRepository.countByEmail(anyString()))
+        Mockito.when(userRepository.countByEmail(anyString()))
                 .thenReturn(0);
-        Mockito.when(memberRepository.save(Mockito.any(Member.class)))
-                .thenReturn(memberToReturn);
+        Mockito.when(userRepository.save(Mockito.any(User.class)))
+                .thenReturn(userToReturn);
 
         // when
-        MemberDto response = authService.join(request);
+        UserDto response = authService.join(request);
 
         // then
         assertEquals(request.getEmail(), response.getEmail());
         assertEquals(request.getNickname(), response.getNickname());
-        Mockito.verify(memberRepository).save(Mockito.any(Member.class));
+        Mockito.verify(userRepository).save(Mockito.any(User.class));
     }
 
     @Test
@@ -103,7 +104,7 @@ class AuthServiceTest {
                 .password(rawPassword)
                 .build();
 
-        Member principal = Member.builder()
+        User principal = User.builder()
                 .id(UUID.randomUUID())
                 .email(request.getEmail())
                 .build();
@@ -148,8 +149,8 @@ class AuthServiceTest {
     @TestConfiguration
     static class TestConfig {
         @Bean
-        public MemberRepository memberRepository() {
-            return Mockito.mock(MemberRepository.class);
+        public UserRepository memberRepository() {
+            return Mockito.mock(UserRepository.class);
         }
 
         @Bean

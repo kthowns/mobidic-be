@@ -1,6 +1,6 @@
 package com.kimtaeyang.mobidic.security.accesshandler;
 
-import com.kimtaeyang.mobidic.entity.Member;
+import com.kimtaeyang.mobidic.user.entity.User;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
@@ -13,7 +13,7 @@ public abstract class AccessHandler {
 
     public final UUID getCurrentMemberId() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        return ((Member) auth.getPrincipal()).getId();
+        return ((User) auth.getPrincipal()).getId();
     }
     abstract boolean isResourceOwner(UUID resourceId);
 }

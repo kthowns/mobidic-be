@@ -1,4 +1,4 @@
-POST http://127.0.0.1:8080/api/vocab/1585f2b7-51d9-4cee-b2e6-a07f2ff6b01f
+POST http://127.0.0.1:8080/api/vocabulary/1585f2b7-51d9-4cee-b2e6-a07f2ff6b01f
 Content-Type: application/json
 Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIxNTg1ZjJiNy01MWQ5LTRjZWUtYjJlNi1hMDdmMmZmNmIwMWYiLCJpYXQiOjE3NDY2ODQzMzksImV4cCI6MTc0Njc3MDczOX0.TzEucUGazE9NIWu52oEmXg9VBWxk0HfRYCdkIz471XTNRaECAACB0Azk1f4O0d9yYEUlOtBsaIdVRDKlbtmp8w
 

@@ -1,4 +1,4 @@
-GET http://127.0.0.1:8080/api/vocab/detail?vId=a2385897-aab3-4269-a650-17a0e01c83b6
+GET http://127.0.0.1:8080/api/vocabulary/detail?vId=a2385897-aab3-4269-a650-17a0e01c83b6
 Content-Type: application/json
 Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiI4ZjYzODRkNS0wMTJiLTQwOGUtODhkNS01ODZhNWE4MmFlOTAiLCJpYXQiOjE3NDQwMTQyOTYsImV4cCI6MTc0NDEwMDY5Nn0.2Jw8m0y1NvPsWKTtypHLbQLAICcZHriKHUupC8q7TQ_XEwwt5Kb_vPpofV857lfSc27tzLzbDMcnIqOEctWlNg
 

@@ -1,9 +1,9 @@
 package com.kimtaeyang.mobidic.security.accesshandler;
 
-import com.kimtaeyang.mobidic.entity.Rate;
-import com.kimtaeyang.mobidic.entity.Vocab;
-import com.kimtaeyang.mobidic.entity.Word;
-import com.kimtaeyang.mobidic.repository.RateRepository;
+import com.kimtaeyang.mobidic.statistic.entity.Statistic;
+import com.kimtaeyang.mobidic.dictionary.entity.Vocabulary;
+import com.kimtaeyang.mobidic.dictionary.entity.Word;
+import com.kimtaeyang.mobidic.statistic.repository.StatisticRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,14 +14,14 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class RateAccessHandler extends AccessHandler {
-    private final RateRepository rateRepository;
+    private final StatisticRepository statisticRepository;
 
     @Override
     boolean isResourceOwner(UUID resourceId) {
-        return rateRepository.findById(resourceId)
-                .map(Rate::getWord)
-                .map(Word::getVocab)
-                .map(Vocab::getMember)
+        return statisticRepository.findById(resourceId)
+                .map(Statistic::getWord)
+                .map(Word::getVocabulary)
+                .map(Vocabulary::getUser)
                 .filter((m) -> getCurrentMemberId().equals(m.getId()))
                 .isPresent();
     }

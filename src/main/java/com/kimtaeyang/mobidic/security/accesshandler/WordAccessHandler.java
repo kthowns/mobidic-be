@@ -1,8 +1,8 @@
 package com.kimtaeyang.mobidic.security.accesshandler;
 
-import com.kimtaeyang.mobidic.entity.Vocab;
-import com.kimtaeyang.mobidic.entity.Word;
-import com.kimtaeyang.mobidic.repository.WordRepository;
+import com.kimtaeyang.mobidic.dictionary.entity.Vocabulary;
+import com.kimtaeyang.mobidic.dictionary.entity.Word;
+import com.kimtaeyang.mobidic.dictionary.repository.WordRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,8 +18,8 @@ public class WordAccessHandler extends AccessHandler {
     @Override
     boolean isResourceOwner(UUID resourceId) {
         return wordRepository.findById(resourceId)
-                .map(Word::getVocab)
-                .map(Vocab::getMember)
+                .map(Word::getVocabulary)
+                .map(Vocabulary::getUser)
                 .filter((m) -> getCurrentMemberId().equals(m.getId()))
                 .isPresent();
     }

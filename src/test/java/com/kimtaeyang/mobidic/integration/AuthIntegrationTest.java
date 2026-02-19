@@ -1,9 +1,9 @@
 package com.kimtaeyang.mobidic.integration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.kimtaeyang.mobidic.dto.member.JoinRequestDto;
-import com.kimtaeyang.mobidic.dto.member.LoginDto;
-import com.kimtaeyang.mobidic.repository.MemberRepository;
+import com.kimtaeyang.mobidic.auth.dto.SignUpRequestDto;
+import com.kimtaeyang.mobidic.auth.dto.LoginDto;
+import com.kimtaeyang.mobidic.user.repository.UserRepository;
 import com.kimtaeyang.mobidic.security.JwtUtil;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
@@ -20,9 +20,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.HashMap;
 import java.util.UUID;
 
-import static com.kimtaeyang.mobidic.code.AuthResponseCode.LOGIN_FAILED;
-import static com.kimtaeyang.mobidic.code.AuthResponseCode.UNAUTHORIZED;
-import static com.kimtaeyang.mobidic.code.GeneralResponseCode.*;
+import static com.kimtaeyang.mobidic.common.code.AuthResponseCode.LOGIN_FAILED;
+import static com.kimtaeyang.mobidic.common.code.AuthResponseCode.UNAUTHORIZED;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -43,18 +42,18 @@ public class AuthIntegrationTest {
     private JwtUtil jwtUtil;
 
     @Autowired
-    private MemberRepository memberRepository;
+    private UserRepository userRepository;
 
     @AfterEach
     void cleanUp() {
-        memberRepository.deleteAll();
+        userRepository.deleteAll();
     }
 
     @DisplayName("[Auth][Integration] Join test")
     @Test
     @Transactional
     void joinTest() throws Exception {
-        JoinRequestDto request = JoinRequestDto.builder()
+        SignUpRequestDto request = SignUpRequestDto.builder()
                 .email("test@test.com")
                 .nickname("test")
                 .password("testTest1")
@@ -112,7 +111,7 @@ public class AuthIntegrationTest {
     @DisplayName("[Auth][Integration] Login test")
     @Test
     void loginTest() throws Exception {
-        JoinRequestDto joinRequest = JoinRequestDto.builder()
+        SignUpRequestDto joinRequest = SignUpRequestDto.builder()
                 .email("qwerq@test.com")
                 .nickname("qwerq")
                 .password("qwerqwe1")
@@ -175,7 +174,7 @@ public class AuthIntegrationTest {
     @DisplayName("[Auth][Integration] Logout test")
     @Test
     void logoutTest() throws Exception {
-        JoinRequestDto joinRequest = JoinRequestDto.builder()
+        SignUpRequestDto joinRequest = SignUpRequestDto.builder()
                 .email("test@test.com")
                 .nickname("test")
                 .password("testTest1")
@@ -248,7 +247,7 @@ public class AuthIntegrationTest {
     }
 
     private String loginAndGetToken(String email, String nickname) throws Exception {
-        JoinRequestDto joinRequest = JoinRequestDto.builder()
+        SignUpRequestDto joinRequest = SignUpRequestDto.builder()
                 .email(email)
                 .nickname(nickname)
                 .password("testTest1")

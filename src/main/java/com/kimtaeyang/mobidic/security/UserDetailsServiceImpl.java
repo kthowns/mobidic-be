@@ -1,29 +1,29 @@
 package com.kimtaeyang.mobidic.security;
 
-import com.kimtaeyang.mobidic.entity.Member;
-import com.kimtaeyang.mobidic.repository.MemberRepository;
+import com.kimtaeyang.mobidic.user.entity.User;
+import com.kimtaeyang.mobidic.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import static com.kimtaeyang.mobidic.code.AuthResponseCode.NO_MEMBER;
+import static com.kimtaeyang.mobidic.common.code.AuthResponseCode.NO_MEMBER;
 
 @Service
 @RequiredArgsConstructor
 public class UserDetailsServiceImpl  implements UserDetailsService {
-    private final MemberRepository memberRepository;
+    private final UserRepository userRepository;
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        Member member = memberRepository.findByEmail(email)
+        User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException(NO_MEMBER.getMessage()));
 
-        if(!member.getIsActive()){
+        if(!user.getIsActive()){
             throw new UsernameNotFoundException(NO_MEMBER.getMessage());
         }
 
-        return member;
+        return user;
     }
 }

@@ -3,13 +3,15 @@ package com.kimtaeyang.mobidic.integration;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.kimtaeyang.mobidic.dto.*;
-import com.kimtaeyang.mobidic.dto.member.JoinRequestDto;
-import com.kimtaeyang.mobidic.dto.member.LoginDto;
-import com.kimtaeyang.mobidic.model.WordWithDefs;
-import com.kimtaeyang.mobidic.repository.MemberRepository;
+import com.kimtaeyang.mobidic.auth.dto.SignUpRequestDto;
+import com.kimtaeyang.mobidic.auth.dto.LoginDto;
+import com.kimtaeyang.mobidic.dictionary.model.WordWithDefs;
+import com.kimtaeyang.mobidic.quiz.dto.QuizDto;
+import com.kimtaeyang.mobidic.quiz.dto.QuizStatisticDto;
+import com.kimtaeyang.mobidic.user.repository.UserRepository;
 import com.kimtaeyang.mobidic.security.JwtUtil;
-import com.kimtaeyang.mobidic.type.PartOfSpeech;
+import com.kimtaeyang.mobidic.dictionary.type.PartOfSpeech;
+import com.kimtaeyang.mobidic.dictionary.dto.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -42,14 +44,14 @@ public class QuizIntegrationTest {
     private ObjectMapper objectMapper;
 
     @Autowired
-    private MemberRepository memberRepository;
+    private UserRepository userRepository;
 
     @Autowired
     private JwtUtil jwtUtil;
 
     @AfterEach
     void tearDown() {
-        memberRepository.deleteAll();
+        userRepository.deleteAll();
     }
 
     @Test
@@ -73,7 +75,7 @@ public class QuizIntegrationTest {
                 .andExpect(status().isOk())
                 .andReturn();
         JsonNode data = objectMapper.readTree(quizResult.getResponse().getContentAsString()).path("data");
-        List<QuestionDto> resultQuestions = objectMapper.readValue(data.toString(), new TypeReference<>() {
+        List<QuizDto> resultQuestions = objectMapper.readValue(data.toString(), new TypeReference<>() {
         });
 
         assertEquals(savedWords.size(), resultQuestions.size());
@@ -100,13 +102,13 @@ public class QuizIntegrationTest {
                 .andExpect(status().isOk())
                 .andReturn();
         JsonNode data = objectMapper.readTree(quizResult.getResponse().getContentAsString()).path("data");
-        List<QuestionDto> quizs = objectMapper.readValue(data.toString(), new TypeReference<>() {
+        List<QuizDto> quizs = objectMapper.readValue(data.toString(), new TypeReference<>() {
         });
 
         for (int i = 0; i < savedWords.size(); i++) {
-            QuestionRateDto.Request rateRequest = QuestionRateDto.Request.builder()
+            QuizStatisticDto.Request rateRequest = QuizStatisticDto.Request.builder()
                     .token(quizs.get(i).getToken())
-                    .answer(savedWords.get(i).getDefDtos().getFirst().getDefinition())
+                    .answer(savedWords.get(i).getDefinitionDtos().getFirst().getDefinition())
                     .build();
 
             mockMvc.perform(post("/api/quiz/rate/ox")
@@ -117,7 +119,7 @@ public class QuizIntegrationTest {
                     .andExpect(jsonPath("$.data.isCorrect")
                             .value(true))
                     .andExpect(jsonPath("$.data.correctAnswer")
-                            .value(savedWords.get(i).getDefDtos().getFirst().getDefinition()));
+                            .value(savedWords.get(i).getDefinitionDtos().getFirst().getDefinition()));
         }
     }
 
@@ -142,12 +144,12 @@ public class QuizIntegrationTest {
                 .andExpect(status().isOk())
                 .andReturn();
         JsonNode data = objectMapper.readTree(quizResult.getResponse().getContentAsString()).path("data");
-        List<QuestionDto> resultQuestions = objectMapper.readValue(data.toString(), new TypeReference<>() {
+        List<QuizDto> resultQuestions = objectMapper.readValue(data.toString(), new TypeReference<>() {
         });
 
         assertEquals(savedWords.size(), resultQuestions.size());
-        for (QuestionDto questionDto : resultQuestions) {
-            String stem = questionDto.getStem();
+        for (QuizDto quizDto : resultQuestions) {
+            String stem = quizDto.getStem();
             int cnt = 0;
             for (int i = 0; i < stem.length(); i++) {
                 if (stem.charAt(i) == '_') {
@@ -179,7 +181,7 @@ public class QuizIntegrationTest {
                 .andExpect(status().isOk())
                 .andReturn();
         JsonNode data = objectMapper.readTree(quizResult.getResponse().getContentAsString()).path("data");
-        List<QuestionDto> quizs = objectMapper.readValue(data.toString(), new TypeReference<>() {
+        List<QuizDto> quizs = objectMapper.readValue(data.toString(), new TypeReference<>() {
         });
 
         for (int i = 0; i < savedWords.size(); i++) {
@@ -208,7 +210,7 @@ public class QuizIntegrationTest {
                 }
             }
 
-            QuestionRateDto.Request rateRequest = QuestionRateDto.Request.builder()
+            QuizStatisticDto.Request rateRequest = QuizStatisticDto.Request.builder()
                     .token(quizs.get(i).getToken())
                     .answer(realAnswer.toString())
                     .build();
@@ -252,16 +254,16 @@ public class QuizIntegrationTest {
                     .andReturn();
             json = wordsResult.getResponse().getContentAsString();
             data = objectMapper.readTree(json).path("data");
-            List<DefDto> defDtos = objectMapper.readValue(data.toString(), new TypeReference<>() {
+            List<DefinitionDto> definitionDtos = objectMapper.readValue(data.toString(), new TypeReference<>() {
             });
-            wordWithDefs.add(new WordWithDefs(wordDto, defDtos));
+            wordWithDefs.add(new WordWithDefs(wordDto, definitionDtos));
         }
 
         return wordWithDefs;
     }
 
     private UUID addVocabAndGetId(UUID memberId, String token) throws Exception {
-        AddVocabRequestDto addVocabRequest = AddVocabRequestDto.builder()
+        AddVocabularyRequestDto addVocabRequest = AddVocabularyRequestDto.builder()
                 .title("title")
                 .description("description")
                 .build();
@@ -298,7 +300,7 @@ public class QuizIntegrationTest {
     }
 
     private UUID addDefAndGetId(UUID wordId, String token, String def, PartOfSpeech part) throws Exception {
-        AddDefRequestDto addDefRequest = AddDefRequestDto.builder()
+        AddDefinitionRequestDto addDefRequest = AddDefinitionRequestDto.builder()
                 .definition(def)
                 .part(part)
                 .build();
@@ -317,7 +319,7 @@ public class QuizIntegrationTest {
     }
 
     private String loginAndGetToken(String email, String nickname) throws Exception {
-        JoinRequestDto joinRequest = JoinRequestDto.builder()
+        SignUpRequestDto joinRequest = SignUpRequestDto.builder()
                 .email(email)
                 .nickname(nickname)
                 .password("testTest1")

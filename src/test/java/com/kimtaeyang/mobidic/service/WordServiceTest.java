@@ -1,15 +1,16 @@
 package com.kimtaeyang.mobidic.service;
 
-import com.kimtaeyang.mobidic.dto.AddWordRequestDto;
-import com.kimtaeyang.mobidic.dto.WordDto;
-import com.kimtaeyang.mobidic.entity.Member;
-import com.kimtaeyang.mobidic.entity.Rate;
-import com.kimtaeyang.mobidic.entity.Vocab;
-import com.kimtaeyang.mobidic.entity.Word;
-import com.kimtaeyang.mobidic.repository.DefRepository;
-import com.kimtaeyang.mobidic.repository.RateRepository;
-import com.kimtaeyang.mobidic.repository.VocabRepository;
-import com.kimtaeyang.mobidic.repository.WordRepository;
+import com.kimtaeyang.mobidic.dictionary.dto.AddWordRequestDto;
+import com.kimtaeyang.mobidic.dictionary.dto.WordDto;
+import com.kimtaeyang.mobidic.dictionary.entity.Vocabulary;
+import com.kimtaeyang.mobidic.user.entity.User;
+import com.kimtaeyang.mobidic.statistic.entity.Statistic;
+import com.kimtaeyang.mobidic.dictionary.entity.Word;
+import com.kimtaeyang.mobidic.dictionary.repository.DefinitionRepository;
+import com.kimtaeyang.mobidic.statistic.repository.StatisticRepository;
+import com.kimtaeyang.mobidic.dictionary.repository.VocabularyRepository;
+import com.kimtaeyang.mobidic.dictionary.repository.WordRepository;
+import com.kimtaeyang.mobidic.dictionary.service.WordService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -39,13 +40,13 @@ class WordServiceTest {
     @Autowired
     private WordRepository wordRepository;
     @Autowired
-    private VocabRepository vocabRepository;
+    private VocabularyRepository vocabularyRepository;
 
     @Autowired
-    private DefRepository defRepository;
+    private DefinitionRepository definitionRepository;
 
     @Autowired
-    private RateRepository rateRepository;
+    private StatisticRepository statisticRepository;
 
     @Autowired
     private WordService wordService;
@@ -65,9 +66,9 @@ class WordServiceTest {
                 ArgumentCaptor.forClass(Word.class);
 
         //given
-        given(vocabRepository.findById(any(UUID.class)))
-                .willReturn(Optional.of(Mockito.mock(Vocab.class)));
-        given(wordRepository.countByExpressionAndVocab(anyString(), any(Vocab.class)))
+        given(vocabularyRepository.findById(any(UUID.class)))
+                .willReturn(Optional.of(Mockito.mock(Vocabulary.class)));
+        given(wordRepository.countByExpressionAndVocabulary(anyString(), any(Vocabulary.class)))
                 .willReturn(0);
         given(wordRepository.save(any(Word.class)))
                 .willAnswer(invocation -> {
@@ -93,11 +94,11 @@ class WordServiceTest {
         resetMock();
 
         Word defaultWord = Word.builder()
-                .vocab(Mockito.mock(Vocab.class))
+                .vocabulary(Mockito.mock(Vocabulary.class))
                 .expression("expression")
                 .build();
 
-        Rate defaultRate = Rate.builder()
+        Statistic defaultRate = Statistic.builder()
                 .word(defaultWord)
                 .isLearned(0)
                 .incorrectCount(4)
@@ -108,18 +109,18 @@ class WordServiceTest {
         words.add(defaultWord);
 
         //given
-        given(vocabRepository.findById(any(UUID.class)))
-                .willReturn(Optional.of(Mockito.mock(Vocab.class)));
-        given(wordRepository.findByVocab(any(Vocab.class)))
+        given(vocabularyRepository.findById(any(UUID.class)))
+                .willReturn(Optional.of(Mockito.mock(Vocabulary.class)));
+        given(wordRepository.findByVocabulary(any(Vocabulary.class)))
                 .willReturn(words);
-        given(rateRepository.findRateByWord(any(Word.class)))
+        given(statisticRepository.findRateByWord(any(Word.class)))
                 .willReturn(Optional.of(defaultRate));
 
         //when
         List<WordDto> response = wordService.getWordsByVocabId(UUID.randomUUID());
 
         //then
-        assertEquals(words.getFirst().getVocab().getId(), response.getFirst().getVocabId());
+        assertEquals(words.getFirst().getVocabulary().getId(), response.getFirst().getVocabId());
         assertEquals(words.getFirst().getExpression(), response.getFirst().getExpression());
     }
 
@@ -132,7 +133,7 @@ class WordServiceTest {
 
         Word defaultWord = Word.builder()
                 .id(wordId)
-                .vocab(Mockito.mock(Vocab.class))
+                .vocabulary(Mockito.mock(Vocabulary.class))
                 .expression("expression")
                 .build();
 
@@ -147,7 +148,7 @@ class WordServiceTest {
         //given
         given(wordRepository.findById(any(UUID.class)))
                 .willReturn(Optional.of(defaultWord));
-        given(vocabRepository.countByTitleAndMemberAndIdNot(anyString(), any(Member.class), any(UUID.class)))
+        given(vocabularyRepository.countByTitleAndUserAndIdNot(anyString(), any(User.class), any(UUID.class)))
                 .willReturn(0);
         given(wordRepository.save(any(Word.class)))
                 .willAnswer(invocation -> {
@@ -175,22 +176,22 @@ class WordServiceTest {
         }
 
         @Bean
-        public VocabRepository vocabRepository() {
-            return Mockito.mock(VocabRepository.class);
+        public VocabularyRepository vocabRepository() {
+            return Mockito.mock(VocabularyRepository.class);
         }
 
         @Bean
-        public DefRepository defRepository() {
-            return Mockito.mock(DefRepository.class);
+        public DefinitionRepository defRepository() {
+            return Mockito.mock(DefinitionRepository.class);
         }
 
         @Bean
-        public RateRepository rateRepository() {
-            return Mockito.mock(RateRepository.class);
+        public StatisticRepository rateRepository() {
+            return Mockito.mock(StatisticRepository.class);
         }
     }
 
     private void resetMock() {
-        Mockito.reset(wordRepository, vocabRepository, defRepository, rateRepository);
+        Mockito.reset(wordRepository, vocabularyRepository, definitionRepository, statisticRepository);
     }
 }

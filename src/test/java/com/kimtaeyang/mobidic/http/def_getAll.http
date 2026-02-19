@@ -1,4 +1,4 @@
-GET http://127.0.0.1:8080/api/def/all?wId=12335526-722f-47cd-991e-fee02ca01618
+GET http://127.0.0.1:8080/api/definition/all?wId=12335526-722f-47cd-991e-fee02ca01618
 Content-Type: application/json
 Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhMWYxMDhjNS1mMjY2LTQxYWEtOTJlNC1iODVhNDM2NmU1MDEiLCJpYXQiOjE3NDQwOTc3MjYsImV4cCI6MTc0NDE4NDEyNn0.RBOafLOE4v8RY0JZ4m3peCpZ_1P0dI4y8IwvsGwDOgSK7ScSM5wm2v6FOrGsaKX7WVeOu36EoTP4doq4VnaYMQ
 

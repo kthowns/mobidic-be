@@ -1,7 +1,7 @@
 package com.kimtaeyang.mobidic.security;
 
-import com.kimtaeyang.mobidic.entity.Member;
-import com.kimtaeyang.mobidic.exception.AuthAuthenticationEntryPoint;
+import com.kimtaeyang.mobidic.user.entity.User;
+import com.kimtaeyang.mobidic.common.exception.AuthAuthenticationEntryPoint;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -53,7 +53,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         //JWT Claim 에 포함된 정보만 갖는 Member 객체
         UUID id = jwtUtil.getIdFromToken(token);
-        Member claim = Member.builder()
+        User claim = User.builder()
                 .id(id)
                 .build();
 

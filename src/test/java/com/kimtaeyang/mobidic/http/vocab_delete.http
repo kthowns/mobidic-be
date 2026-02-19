@@ -1,4 +1,4 @@
-DELETE http://127.0.0.1:8080/api/vocab/0097276d-ff4b-4038-9606-fcbcfa9ac6f9
+DELETE http://127.0.0.1:8080/api/vocabulary/0097276d-ff4b-4038-9606-fcbcfa9ac6f9
 Content-Type: application/json
 Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiI4ZjYzODRkNS0wMTJiLTQwOGUtODhkNS01ODZhNWE4MmFlOTAiLCJpYXQiOjE3NDM4NDQwODEsImV4cCI6MTc0MzkzMDQ4MX0.L23oGpqqD27rjC7uR1mJ5QuoN4YXZAk8hyaaTqdPN6xj3QFmOIWSHKAxss_CBaTno2Yc8mFUyRoQgWRM5XD1-w
 
