@@ -120,7 +120,7 @@ class WordServiceTest {
         List<WordDto> response = wordService.getWordsByVocabId(UUID.randomUUID());
 
         //then
-        assertEquals(words.getFirst().getVocabulary().getId(), response.getFirst().getVocabId());
+        assertEquals(words.getFirst().getVocabulary().getId(), response.getFirst().getVocabularyId());
         assertEquals(words.getFirst().getExpression(), response.getFirst().getExpression());
     }
 

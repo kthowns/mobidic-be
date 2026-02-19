@@ -6,7 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Data
@@ -15,14 +15,14 @@ import java.util.UUID;
 @Builder
 public class WordDto {
     private UUID id;
-    private UUID vocabId;
+    private UUID vocabularyId;
     private String expression;
-    private Timestamp createdAt;
+    private LocalDateTime createdAt;
 
-    public static WordDto fromEntity (Word word) {
+    public static WordDto fromEntity(Word word) {
         return WordDto.builder()
                 .id(word.getId())
-                .vocabId(word.getVocabulary().getId())
+                .vocabularyId(word.getVocabulary().getId())
                 .expression(word.getExpression())
                 .createdAt(word.getCreatedAt())
                 .build();

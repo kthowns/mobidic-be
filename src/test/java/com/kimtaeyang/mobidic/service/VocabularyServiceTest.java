@@ -104,7 +104,7 @@ class VocabularyServiceTest {
         List<VocabularyDto> response = vocabularyService.getVocabulariesByUserId(UUID.randomUUID());
 
         //then
-        assertEquals(vocabularies.getFirst().getUser().getId(), response.getFirst().getMemberId());
+        assertEquals(vocabularies.getFirst().getUser().getId(), response.getFirst().getUserId());
         assertEquals(vocabularies.getFirst().getTitle(), response.getFirst().getTitle());
         assertEquals(vocabularies.getFirst().getDescription(), response.getFirst().getDescription());
     }
