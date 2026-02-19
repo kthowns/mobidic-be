@@ -104,15 +104,15 @@ public class StatisticIntegrationTest {
         String email = "test@test.com";
         String nickname = "test";
         String token = loginAndGetToken(email, nickname);
-        UUID memberId = jwtUtil.getIdFromToken(token);
-        UUID vocabId = addVocabAndGetId(memberId, token);
-        UUID wordId = addWordAndGetId(vocabId, token);
+        UUID userId = jwtUtil.getIdFromToken(token);
+        UUID vocabularyId = addVocabAndGetId(userId, token);
+        UUID wordId = addWordAndGetId(vocabularyId, token);
 
         //Success
         mockMvc.perform(get("/api/rate/v")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + token)
-                        .param("vId", vocabId.toString()))
+                        .param("vId", vocabularyId.toString()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data")
                         .value(0.0));
@@ -120,7 +120,7 @@ public class StatisticIntegrationTest {
         //Fail without token
         mockMvc.perform(get("/api/rate/v")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .param("vId", vocabId.toString()))
+                        .param("vId", vocabularyId.toString()))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.message")
                         .value(UNAUTHORIZED.getMessage()));
@@ -129,7 +129,7 @@ public class StatisticIntegrationTest {
         mockMvc.perform(get("/api/rate/v")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + jwtUtil.generateToken(UUID.randomUUID()))
-                        .param("vId", vocabId.toString()))
+                        .param("vId", vocabularyId.toString()))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.message")
                         .value(UNAUTHORIZED.getMessage()));

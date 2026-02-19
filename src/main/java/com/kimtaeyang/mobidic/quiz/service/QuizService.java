@@ -4,7 +4,7 @@ import com.kimtaeyang.mobidic.common.code.GeneralResponseCode;
 import com.kimtaeyang.mobidic.common.exception.ApiException;
 import com.kimtaeyang.mobidic.dictionary.dto.VocabularyDto;
 import com.kimtaeyang.mobidic.dictionary.dto.WordDto;
-import com.kimtaeyang.mobidic.dictionary.model.WordWithDefs;
+import com.kimtaeyang.mobidic.dictionary.model.WordWithDefinitions;
 import com.kimtaeyang.mobidic.dictionary.service.DefinitionService;
 import com.kimtaeyang.mobidic.dictionary.service.VocabularyService;
 import com.kimtaeyang.mobidic.dictionary.service.WordService;
@@ -39,19 +39,19 @@ public class QuizService {
     private final CryptoService cryptoService;
     private final DefinitionService definitionService;
 
-    @PreAuthorize("@vocabAccessHandler.ownershipCheck(#vocabId)")
-    public List<QuizDto> getOXQuizzes(UUID vocabId) {
-        return generateQuestions(vocabId, QuizType.OX);
+    @PreAuthorize("@vocabAccessHandler.ownershipCheck(#vocabularyId)")
+    public List<QuizDto> getOXQuizzes(UUID vocabularyId) {
+        return generateQuestions(vocabularyId, QuizType.OX);
     }
 
-    @PreAuthorize("@vocabAccessHandler.ownershipCheck(#vocabId)")
-    public List<QuizDto> getBlankQuizzes(UUID vocabId) {
-        return generateQuestions(vocabId, QuizType.BLANK);
+    @PreAuthorize("@vocabAccessHandler.ownershipCheck(#vocabularyId)")
+    public List<QuizDto> getBlankQuizzes(UUID vocabularyId) {
+        return generateQuestions(vocabularyId, QuizType.BLANK);
     }
 
-    @PreAuthorize("@userAccessHandler.ownershipCheck(#memberId)")
+    @PreAuthorize("@userAccessHandler.ownershipCheck(#userId)")
     public QuizStatisticDto.Response rateQuestion(
-            UUID memberId,
+            UUID userId,
             QuizStatisticDto.Request request
     ) {
         String key = cryptoService.decrypt(request.getToken()); //복호화
@@ -73,27 +73,27 @@ public class QuizService {
         return response;
     }
 
-    private List<QuizDto> generateQuestions(UUID vocabId, QuizType quizType) {
-        VocabularyDto vocab = vocabularyService.getVocabById(vocabId);
+    private List<QuizDto> generateQuestions(UUID vocabularyId, QuizType quizType) {
+        VocabularyDto vocabulary = vocabularyService.getVocabById(vocabularyId);
 
-        List<WordWithDefs> wordsWithDefs = new ArrayList<>();
-        List<WordDto> wordDtos = wordService.getWordsByVocabId(vocab.getId());
+        List<WordWithDefinitions> wordsWithDefs = new ArrayList<>();
+        List<WordDto> wordDtos = wordService.getWordsByVocabId(vocabulary.getId());
         if (wordDtos.isEmpty()) {
             return List.of();
         }
 
         for (WordDto wordDto : wordDtos) {
-            WordWithDefs wordWithDefs = WordWithDefs.builder()
+            WordWithDefinitions wordWithDefinitions = WordWithDefinitions.builder()
                     .wordDto(wordDto)
                     .definitionDtos(definitionService.getDefinitionsByWordId(wordDto.getId()))
                     .build();
 
-            wordsWithDefs.add(wordWithDefs);
+            wordsWithDefs.add(wordWithDefinitions);
         }
 
         QuizGenerator quizGenerator = QuizGeneratorFactory.get(quizType);
 
-        List<Quiz> quizzes = quizGenerator.generate(vocab.getUserId(), wordsWithDefs);
+        List<Quiz> quizzes = quizGenerator.generate(vocabulary.getUserId(), wordsWithDefs);
         List<QuizDto> quizDtos = new ArrayList<>();
 
         for (Quiz quiz : quizzes) {
@@ -112,7 +112,7 @@ public class QuizService {
 
     private String registerQuestion(Quiz quiz, long expSec) {
         String key = QUESTION_PREFIX
-                + ":" + quiz.getMemberId()
+                + ":" + quiz.getUserId()
                 + ":" + quiz.getWordId()
                 + ":" + quiz.getId();
 

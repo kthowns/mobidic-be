@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kimtaeyang.mobidic.auth.dto.SignUpRequestDto;
 import com.kimtaeyang.mobidic.auth.dto.LoginDto;
-import com.kimtaeyang.mobidic.dictionary.model.WordWithDefs;
+import com.kimtaeyang.mobidic.dictionary.model.WordWithDefinitions;
 import com.kimtaeyang.mobidic.quiz.dto.QuizDto;
 import com.kimtaeyang.mobidic.quiz.dto.QuizStatisticDto;
 import com.kimtaeyang.mobidic.user.repository.UserRepository;
@@ -66,7 +66,7 @@ public class QuizIntegrationTest {
         PartOfSpeech[] sampleParts = {PartOfSpeech.INTERJECTION, PartOfSpeech.NOUN, PartOfSpeech.VERB,
                 PartOfSpeech.VERB, PartOfSpeech.ADJECTIVE};
 
-        List<WordWithDefs> savedWords = addWordsAndGetDetails(sampleWords, sampleDefs, sampleParts
+        List<WordWithDefinitions> savedWords = addWordsAndGetDetails(sampleWords, sampleDefs, sampleParts
                 , vocabId, token);
 
         MvcResult quizResult = mockMvc.perform(get("/api/quiz/generate//ox")
@@ -93,7 +93,7 @@ public class QuizIntegrationTest {
         PartOfSpeech[] sampleParts = {PartOfSpeech.INTERJECTION, PartOfSpeech.NOUN, PartOfSpeech.VERB,
                 PartOfSpeech.VERB, PartOfSpeech.ADJECTIVE};
 
-        List<WordWithDefs> savedWords = addWordsAndGetDetails(sampleWords, sampleDefs, sampleParts
+        List<WordWithDefinitions> savedWords = addWordsAndGetDetails(sampleWords, sampleDefs, sampleParts
                 , vocabId, token);
 
         MvcResult quizResult = mockMvc.perform(get("/api/quiz/generate/ox")
@@ -135,7 +135,7 @@ public class QuizIntegrationTest {
         PartOfSpeech[] sampleParts = {PartOfSpeech.INTERJECTION, PartOfSpeech.NOUN, PartOfSpeech.VERB,
                 PartOfSpeech.VERB, PartOfSpeech.ADJECTIVE};
 
-        List<WordWithDefs> savedWords = addWordsAndGetDetails(sampleWords, sampleDefs, sampleParts
+        List<WordWithDefinitions> savedWords = addWordsAndGetDetails(sampleWords, sampleDefs, sampleParts
                 , vocabId, token);
 
         MvcResult quizResult = mockMvc.perform(get("/api/quiz/generate/blank")
@@ -172,7 +172,7 @@ public class QuizIntegrationTest {
         PartOfSpeech[] sampleParts = {PartOfSpeech.INTERJECTION, PartOfSpeech.NOUN, PartOfSpeech.VERB,
                 PartOfSpeech.VERB, PartOfSpeech.ADJECTIVE};
 
-        List<WordWithDefs> savedWords = addWordsAndGetDetails(sampleWords, sampleDefs, sampleParts
+        List<WordWithDefinitions> savedWords = addWordsAndGetDetails(sampleWords, sampleDefs, sampleParts
                 , vocabId, token);
 
         MvcResult quizResult = mockMvc.perform(get("/api/quiz/generate/blank")
@@ -226,8 +226,8 @@ public class QuizIntegrationTest {
         }
     }
 
-    private List<WordWithDefs> addWordsAndGetDetails(String[] sampleWords, String[] sampleDefs,
-                                                     PartOfSpeech[] sampleParts, UUID vocabId, String token) throws Exception {
+    private List<WordWithDefinitions> addWordsAndGetDetails(String[] sampleWords, String[] sampleDefs,
+                                                            PartOfSpeech[] sampleParts, UUID vocabId, String token) throws Exception {
         for (int i = 0; i < sampleWords.length; i++) {
             UUID wordId = addWordAndGetId(vocabId, token, sampleWords[i]);
             UUID defId = addDefAndGetId(wordId, token, sampleDefs[i], sampleParts[i]);
@@ -244,7 +244,7 @@ public class QuizIntegrationTest {
         List<WordDto> wordDtos = objectMapper.readValue(data.toString(), new TypeReference<>() {
         });
 
-        List<WordWithDefs> wordWithDefs = new ArrayList<>();
+        List<WordWithDefinitions> wordWithDefs = new ArrayList<>();
         for (WordDto wordDto : wordDtos) {
             wordsResult = mockMvc.perform(get("/api/def/all")
                             .contentType(MediaType.APPLICATION_JSON)
@@ -256,7 +256,7 @@ public class QuizIntegrationTest {
             data = objectMapper.readTree(json).path("data");
             List<DefinitionDto> definitionDtos = objectMapper.readValue(data.toString(), new TypeReference<>() {
             });
-            wordWithDefs.add(new WordWithDefs(wordDto, definitionDtos));
+            wordWithDefs.add(new WordWithDefinitions(wordDto, definitionDtos));
         }
 
         return wordWithDefs;

@@ -1,10 +1,12 @@
 package com.kimtaeyang.mobidic.integration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.kimtaeyang.mobidic.auth.dto.SignUpRequestDto;
 import com.kimtaeyang.mobidic.auth.dto.LoginDto;
-import com.kimtaeyang.mobidic.user.repository.UserRepository;
+import com.kimtaeyang.mobidic.auth.dto.SignUpRequestDto;
+import com.kimtaeyang.mobidic.common.code.AuthResponseCode;
+import com.kimtaeyang.mobidic.common.code.GeneralResponseCode;
 import com.kimtaeyang.mobidic.security.JwtUtil;
+import com.kimtaeyang.mobidic.user.repository.UserRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -20,8 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.HashMap;
 import java.util.UUID;
 
-import static com.kimtaeyang.mobidic.common.code.AuthResponseCode.LOGIN_FAILED;
-import static com.kimtaeyang.mobidic.common.code.AuthResponseCode.UNAUTHORIZED;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -76,7 +76,7 @@ public class AuthIntegrationTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.message")
-                        .value(DUPLICATED_EMAIL.getMessage()));
+                        .value(GeneralResponseCode.DUPLICATED_EMAIL.getMessage()));
 
         //Fail with duplicated Nickname
         request.setEmail("test2@test.com");
@@ -86,7 +86,7 @@ public class AuthIntegrationTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.message")
-                        .value(DUPLICATED_NICKNAME.getMessage()));
+                        .value(GeneralResponseCode.DUPLICATED_NICKNAME.getMessage()));
 
         //Email, nickname, password format fail
         request.setEmail("test@test");
@@ -103,7 +103,7 @@ public class AuthIntegrationTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message")
-                        .value(INVALID_REQUEST_BODY.getMessage()))
+                        .value(GeneralResponseCode.INVALID_REQUEST_BODY.getMessage()))
                 .andExpect(jsonPath("$.errors")
                         .value(expectedErrors));
     }
@@ -148,7 +148,7 @@ public class AuthIntegrationTest {
                         .content(objectMapper.writeValueAsString(loginRequest)))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.message")
-                        .value(LOGIN_FAILED.getMessage()));
+                        .value(AuthResponseCode.LOGIN_FAILED.getMessage()));
 
         //Login fail invalid email
         loginRequest.setEmail("wrong@email.com");
@@ -157,7 +157,7 @@ public class AuthIntegrationTest {
                         .content(objectMapper.writeValueAsString(loginRequest)))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.message")
-                        .value(LOGIN_FAILED.getMessage()));
+                        .value(AuthResponseCode.LOGIN_FAILED.getMessage()));
 
         //Login fail invalid email pattern
         loginRequest.setEmail("wrong");
@@ -166,7 +166,7 @@ public class AuthIntegrationTest {
                         .content(objectMapper.writeValueAsString(loginRequest)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message")
-                        .value(INVALID_REQUEST_BODY.getMessage()))
+                        .value(GeneralResponseCode.INVALID_REQUEST_BODY.getMessage()))
                 .andExpect(jsonPath("$.errors.email")
                         .value("Invalid email pattern"));
     }
@@ -215,7 +215,7 @@ public class AuthIntegrationTest {
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.message")
-                        .value(UNAUTHORIZED.getMessage()));
+                        .value(AuthResponseCode.UNAUTHORIZED.getMessage()));
     }
 
     @Test
@@ -243,7 +243,7 @@ public class AuthIntegrationTest {
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.message")
-                        .value(UNAUTHORIZED.getMessage()));
+                        .value(AuthResponseCode.UNAUTHORIZED.getMessage()));
     }
 
     private String loginAndGetToken(String email, String nickname) throws Exception {

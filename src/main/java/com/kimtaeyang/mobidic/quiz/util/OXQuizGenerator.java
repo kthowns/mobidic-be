@@ -2,7 +2,7 @@ package com.kimtaeyang.mobidic.quiz.util;
 
 import com.kimtaeyang.mobidic.dictionary.dto.DefinitionDto;
 import com.kimtaeyang.mobidic.quiz.model.Quiz;
-import com.kimtaeyang.mobidic.dictionary.model.WordWithDefs;
+import com.kimtaeyang.mobidic.dictionary.model.WordWithDefinitions;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,19 +11,19 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class OXQuizGenerator extends QuizGenerator {
     @Override
-    public List<Quiz> generate(UUID memberId, List<WordWithDefs> orgWordsWithDefs) {
-        List<WordWithDefs> wordsWithDefs = new ArrayList<>(orgWordsWithDefs);
+    public List<Quiz> generate(UUID memberId, List<WordWithDefinitions> orgWordsWithDefs) {
+        List<WordWithDefinitions> wordsWithDefs = new ArrayList<>(orgWordsWithDefs);
         derange(wordsWithDefs);
 
         ArrayList<String> options = new ArrayList<>();
         ArrayList<Quiz> quizzes = new ArrayList<>();
 
-        for (WordWithDefs wordWithDefs : wordsWithDefs) {
+        for (WordWithDefinitions wordWithDefinitions : wordsWithDefs) {
             String option = "";
 
-            if (wordWithDefs.getDefinitionDtos() != null && !wordWithDefs.getDefinitionDtos().isEmpty()) {
-                int randIdx = ThreadLocalRandom.current().nextInt(wordWithDefs.getDefinitionDtos().size());
-                option = wordWithDefs.getDefinitionDtos().get(randIdx).getDefinition();
+            if (wordWithDefinitions.getDefinitionDtos() != null && !wordWithDefinitions.getDefinitionDtos().isEmpty()) {
+                int randIdx = ThreadLocalRandom.current().nextInt(wordWithDefinitions.getDefinitionDtos().size());
+                option = wordWithDefinitions.getDefinitionDtos().get(randIdx).getDefinition();
             }
 
             options.add(option); //단어당 랜덤한 하나의 뜻 추출하여 options에 저장
@@ -44,7 +44,7 @@ public class OXQuizGenerator extends QuizGenerator {
                     Quiz.builder()
                             .id(UUID.randomUUID())
                             .wordId(wordsWithDefs.get(i).getWordDto().getId())
-                            .memberId(memberId)
+                            .userId(memberId)
                             .stem(wordsWithDefs.get(i).getWordDto().getExpression())
                             .answer(answer)
                             .options(List.of(options.get(i)))

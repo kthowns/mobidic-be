@@ -12,7 +12,7 @@ import java.util.List;
 @NoArgsConstructor
 @ToString
 @Builder
-public class WordWithDefs {
+public class WordWithDefinitions {
     private WordDto wordDto;
     private List<DefinitionDto> definitionDtos;
 }

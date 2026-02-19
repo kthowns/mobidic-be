@@ -14,7 +14,7 @@ import java.util.UUID;
 @Builder
 public class Quiz {
     private UUID id;
-    private UUID memberId;
+    private UUID userId;
     private UUID wordId;
     private String stem;
     private List<String> options;

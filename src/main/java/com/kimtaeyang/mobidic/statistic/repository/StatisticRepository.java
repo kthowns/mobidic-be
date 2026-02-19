@@ -1,9 +1,9 @@
 package com.kimtaeyang.mobidic.statistic.repository;
 
 import com.kimtaeyang.mobidic.dictionary.entity.Vocabulary;
-import com.kimtaeyang.mobidic.user.entity.User;
-import com.kimtaeyang.mobidic.statistic.entity.Statistic;
 import com.kimtaeyang.mobidic.dictionary.entity.Word;
+import com.kimtaeyang.mobidic.statistic.entity.Statistic;
+import com.kimtaeyang.mobidic.user.entity.User;
 import io.lettuce.core.dynamic.annotation.Param;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -14,10 +14,10 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface StatisticRepository extends JpaRepository<Statistic, UUID> {
-    @Query("select (1.0*sum(r.isLearned)) / count(w)"+
-            " from Word w join Statistic r"+
-            " on w = r.word"+
-            " where w.vocab = :vocab")
+    @Query("select (1.0*sum(r.isLearned)) / count(w)" +
+            " from Word w join Statistic r" +
+            " on w = r.word" +
+            " where w.vocabulary = :vocabulary")
     Optional<Double> getVocabLearningRate(@Param("vocab") Vocabulary vocabulary);
 
     Optional<Statistic> findRateByWord(Word word);
@@ -36,12 +36,12 @@ public interface StatisticRepository extends JpaRepository<Statistic, UUID> {
 
     @Query("select r from Statistic r" +
             " join Word w on w.id = r.wordId" +
-            " where w.vocab = :vocab")
+            " where w.vocabulary = :vocabulary")
     List<Statistic> findByVocab(Vocabulary vocabulary);
 
     @Query("select r from Statistic r" +
             " join Word w on w.id = r.wordId" +
-            " join Vocabulary v on v.id = w.vocab.id" +
-            " where v.member = :member")
+            " join Vocabulary v on v.id = w.vocabulary.id" +
+            " where v.user = :user")
     List<Statistic> findByMember(User user);
 }

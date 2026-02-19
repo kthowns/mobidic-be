@@ -1,12 +1,12 @@
 package com.kimtaeyang.mobidic.service;
 
-import com.kimtaeyang.mobidic.statistic.dto.StatisticDto;
-import com.kimtaeyang.mobidic.statistic.entity.Statistic;
 import com.kimtaeyang.mobidic.dictionary.entity.Vocabulary;
 import com.kimtaeyang.mobidic.dictionary.entity.Word;
-import com.kimtaeyang.mobidic.statistic.repository.StatisticRepository;
 import com.kimtaeyang.mobidic.dictionary.repository.VocabularyRepository;
 import com.kimtaeyang.mobidic.dictionary.repository.WordRepository;
+import com.kimtaeyang.mobidic.statistic.dto.StatisticDto;
+import com.kimtaeyang.mobidic.statistic.entity.Statistic;
+import com.kimtaeyang.mobidic.statistic.repository.StatisticRepository;
 import com.kimtaeyang.mobidic.statistic.service.StatisticService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -50,8 +50,8 @@ class StatisticServiceTest {
 
         UUID wordId = UUID.randomUUID();
 
-          defaultRate = Statistic.builder()
-                .word(Mockito.mock(Word.class))
+        Statistic defaultStatistic = Statistic.builder()
+                .word(mock(Word.class))
                 .wordId(wordId)
                 .correctCount(3)
                 .incorrectCount(5)
@@ -60,18 +60,18 @@ class StatisticServiceTest {
 
         //given
         given(wordRepository.findById(any(UUID.class)))
-                .willReturn(Optional.of(Mockito.mock(Word.class)));
+                .willReturn(Optional.of(mock(Word.class)));
         given(statisticRepository.findRateByWord(any(Word.class)))
-                .willReturn(Optional.of(defaultRate));
+                .willReturn(Optional.of(defaultStatistic));
 
         //when
         StatisticDto response = statisticService.getRateByWordId(UUID.randomUUID());
 
         //then
-        assertEquals(defaultRate.getWordId(), response.getWordId());
-        assertEquals(defaultRate.getIsLearned(), response.getIsLearned());
-        assertEquals(defaultRate.getCorrectCount(), response.getCorrectCount());
-        assertEquals(defaultRate.getIncorrectCount(), response.getIncorrectCount());
+        assertEquals(defaultStatistic.getWordId(), response.getWordId());
+        assertEquals(defaultStatistic.getIsLearned(), response.getIsLearned());
+        assertEquals(defaultStatistic.getCorrectCount(), response.getCorrectCount());
+        assertEquals(defaultStatistic.getIncorrectCount(), response.getIncorrectCount());
     }
 
     @Test
@@ -138,7 +138,9 @@ class StatisticServiceTest {
     @TestConfiguration
     static class TestConfig {
         @Bean
-        public VocabularyRepository vocabRepository() { return Mockito.mock(VocabularyRepository.class); }
+        public VocabularyRepository vocabRepository() {
+            return Mockito.mock(VocabularyRepository.class);
+        }
 
         @Bean
         public StatisticRepository rateRepository() {
