@@ -5,7 +5,7 @@ import com.kimtaeyang.mobidic.auth.dto.LoginDto;
 import com.kimtaeyang.mobidic.auth.dto.SignUpRequestDto;
 import com.kimtaeyang.mobidic.common.code.AuthResponseCode;
 import com.kimtaeyang.mobidic.common.code.GeneralResponseCode;
-import com.kimtaeyang.mobidic.security.JwtUtil;
+import com.kimtaeyang.mobidic.security.jwt.JwtProvider;
 import com.kimtaeyang.mobidic.user.repository.UserRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
@@ -39,7 +39,7 @@ public class AuthIntegrationTest {
     private ObjectMapper objectMapper;
 
     @Autowired
-    private JwtUtil jwtUtil;
+    private JwtProvider jwtProvider;
 
     @Autowired
     private UserRepository userRepository;
@@ -138,7 +138,7 @@ public class AuthIntegrationTest {
         String json = result.getResponse().getContentAsString();
         String token = objectMapper.readTree(json).path("data").path("token").asText();
 
-        assertThat(jwtUtil.validateToken(token));
+        assertThat(jwtProvider.validateToken(token));
 
         loginRequest.setPassword("wrongPassword");
 
@@ -200,7 +200,7 @@ public class AuthIntegrationTest {
         String loginJson = loginResult.getResponse().getContentAsString();
         String token = objectMapper.readTree(loginJson).path("data").path("token").asText();
 
-        UUID memberId = jwtUtil.getIdFromToken(token);
+        UUID memberId = jwtProvider.getIdFromToken(token);
 
         mockMvc.perform(post("/api/auth/logout")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -225,7 +225,7 @@ public class AuthIntegrationTest {
         String nickname = "test";
 
         String token = loginAndGetToken(email, nickname);
-        UUID memberId = jwtUtil.getIdFromToken(token);
+        UUID memberId = jwtProvider.getIdFromToken(token);
 
         //Withdraw success
         mockMvc.perform(patch("/api/user/withdraw/" + memberId.toString())

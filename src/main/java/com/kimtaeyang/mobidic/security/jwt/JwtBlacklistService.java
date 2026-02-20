@@ -1,4 +1,4 @@
-package com.kimtaeyang.mobidic.security;
+package com.kimtaeyang.mobidic.security.jwt;
 
 import com.kimtaeyang.mobidic.common.exception.ApiException;
 import lombok.RequiredArgsConstructor;
@@ -14,16 +14,16 @@ import static com.kimtaeyang.mobidic.common.code.AuthResponseCode.INVALID_TOKEN;
 @RequiredArgsConstructor
 public class JwtBlacklistService {
     private final RedisTemplate<String, String> redisTemplate;
-    private final JwtUtil jwtUtil;
+    private final JwtProvider jwtProvider;
     private static final String LOGOUT_PREFIX = "logout:";
     private static final String WITHDRAWN_PREFIX = "withdraw:";
     @Value("${jwt.exp}")
     private Long exp;
 
     public void logoutToken(String token) {
-        long remain = jwtUtil.getExpirationFromToken(token).getTime() - System.currentTimeMillis();
+        long remain = jwtProvider.getExpirationFromToken(token).getTime() - System.currentTimeMillis();
 
-        if(isTokenLogout(token)) {
+        if (isTokenLogout(token)) {
             throw new ApiException(INVALID_TOKEN);
         }
 
@@ -35,12 +35,12 @@ public class JwtBlacklistService {
     }
 
     public void withdrawToken(String token) {
-        if(isTokenLogout(token)) {
+        if (isTokenLogout(token)) {
             throw new ApiException(INVALID_TOKEN);
         }
 
         redisTemplate.opsForValue().set(
-                WITHDRAWN_PREFIX + jwtUtil.getIdFromToken(token),
+                WITHDRAWN_PREFIX + jwtProvider.getIdFromToken(token),
                 "true",
                 Duration.ofMillis(exp)
         );
@@ -51,6 +51,6 @@ public class JwtBlacklistService {
     }
 
     public boolean isTokenWithdrawn(String token) {
-        return redisTemplate.hasKey(WITHDRAWN_PREFIX + jwtUtil.getIdFromToken(token));
+        return redisTemplate.hasKey(WITHDRAWN_PREFIX + jwtProvider.getIdFromToken(token));
     }
 }

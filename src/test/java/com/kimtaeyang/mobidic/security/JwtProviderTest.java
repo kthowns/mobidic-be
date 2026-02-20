@@ -1,6 +1,7 @@
 package com.kimtaeyang.mobidic.security;
 
-import com.kimtaeyang.mobidic.common.config.JwtProperties;
+import com.kimtaeyang.mobidic.security.jwt.JwtProperties;
+import com.kimtaeyang.mobidic.security.jwt.JwtProvider;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -21,12 +22,12 @@ import static org.mockito.BDDMockito.given;
 
 @ExtendWith(MockitoExtension.class)
 @ActiveProfiles("dev")
-class JwtUtilTest {
+class JwtProviderTest {
     @Mock
     private JwtProperties jwtProperties;
 
     @InjectMocks
-    private JwtUtil jwtUtil;
+    private JwtProvider jwtProvider;
 
     private final long testExp = 10000L;
     private final String testKey = UUID.randomUUID().toString();
@@ -43,7 +44,7 @@ class JwtUtilTest {
                 .willReturn(Keys.hmacShaKeyFor(testKey.getBytes(StandardCharsets.UTF_8)));
 
         //when
-        String token = jwtUtil.generateToken(uid);
+        String token = jwtProvider.generateToken(uid);
         Claims claims = Jwts.parser()
                 .verifyWith(jwtProperties.getSecretKey())
                 .build()
@@ -64,9 +65,9 @@ class JwtUtilTest {
                 .willReturn(testExp);
         given(jwtProperties.getSecretKey())
                 .willReturn(Keys.hmacShaKeyFor(testKey.getBytes(StandardCharsets.UTF_8)));
-        String token = jwtUtil.generateToken(uid);
+        String token = jwtProvider.generateToken(uid);
         //when
-        boolean isValid = jwtUtil.validateToken(token);
+        boolean isValid = jwtProvider.validateToken(token);
         //then
         assertThat(isValid);
     }
@@ -81,10 +82,10 @@ class JwtUtilTest {
                 .willReturn(1L);
         given(jwtProperties.getSecretKey())
                 .willReturn(Keys.hmacShaKeyFor(testKey.getBytes(StandardCharsets.UTF_8)));
-        String token = jwtUtil.generateToken(uid);
+        String token = jwtProvider.generateToken(uid);
 
         //when
-        boolean isValid = jwtUtil.validateToken(token);
+        boolean isValid = jwtProvider.validateToken(token);
 
         //then
         assertThat(!isValid);
@@ -100,10 +101,10 @@ class JwtUtilTest {
                 .willReturn(testExp);
         given(jwtProperties.getSecretKey())
                 .willReturn(Keys.hmacShaKeyFor(testKey.getBytes(StandardCharsets.UTF_8)));
-        String token = jwtUtil.generateToken(uuid);
+        String token = jwtProvider.generateToken(uuid);
 
         //when
-        UUID resultId = jwtUtil.getIdFromToken(token);
+        UUID resultId = jwtProvider.getIdFromToken(token);
 
         //then
         assertEquals(uuid, resultId);

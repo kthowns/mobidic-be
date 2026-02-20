@@ -6,8 +6,8 @@ import com.kimtaeyang.mobidic.user.dto.UserDto;
 import com.kimtaeyang.mobidic.user.entity.User;
 import com.kimtaeyang.mobidic.common.exception.ApiException;
 import com.kimtaeyang.mobidic.user.repository.UserRepository;
-import com.kimtaeyang.mobidic.security.JwtBlacklistService;
-import com.kimtaeyang.mobidic.security.JwtUtil;
+import com.kimtaeyang.mobidic.security.jwt.JwtBlacklistService;
+import com.kimtaeyang.mobidic.security.jwt.JwtProvider;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,7 +32,7 @@ import static com.kimtaeyang.mobidic.common.code.GeneralResponseCode.DUPLICATED_
 public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final UserRepository userRepository;
-    private final JwtUtil jwtUtil;
+    private final JwtProvider jwtProvider;
     private final PasswordEncoder passwordEncoder;
     private final JwtBlacklistService jwtBlacklistService;
 
@@ -46,7 +46,7 @@ public class AuthService {
 
         return LoginDto.Response.builder()
                 .memberId(user.getId().toString())
-                .token(jwtUtil.generateToken(user.getId()))
+                .token(jwtProvider.generateToken(user.getId()))
                 .build();
     }
 

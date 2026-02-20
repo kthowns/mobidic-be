@@ -1,26 +1,22 @@
 package com.kimtaeyang.mobidic.service;
 
-import com.kimtaeyang.mobidic.auth.service.AuthService;
-import com.kimtaeyang.mobidic.common.config.JwtProperties;
-import com.kimtaeyang.mobidic.auth.dto.SignUpRequestDto;
 import com.kimtaeyang.mobidic.auth.dto.LoginDto;
+import com.kimtaeyang.mobidic.auth.dto.SignUpRequestDto;
+import com.kimtaeyang.mobidic.auth.service.AuthService;
+import com.kimtaeyang.mobidic.config.ServiceTestConfig;
+import com.kimtaeyang.mobidic.security.jwt.JwtProvider;
 import com.kimtaeyang.mobidic.user.dto.UserDto;
 import com.kimtaeyang.mobidic.user.entity.User;
 import com.kimtaeyang.mobidic.user.repository.UserRepository;
-import com.kimtaeyang.mobidic.security.JwtBlacklistService;
-import com.kimtaeyang.mobidic.security.JwtUtil;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Bean;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
@@ -35,11 +31,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
 
 @ExtendWith(SpringExtension.class)
-@TestPropertySource(properties = {
-        "jwt.secret=qwerqwerqwerqwerqwerqwerqwerqwer",
-        "jwt.exp=3600"
-})
-@ContextConfiguration(classes = {AuthService.class, AuthServiceTest.TestConfig.class})
+@ContextConfiguration(classes = {AuthService.class, ServiceTestConfig.class})
 @ActiveProfiles("dev")
 class AuthServiceTest {
 
@@ -53,7 +45,7 @@ class AuthServiceTest {
     private UserRepository userRepository; // mock
 
     @Autowired
-    private JwtUtil jwtUtil;
+    private JwtProvider jwtProvider;
 
     @Autowired
     private AuthenticationManager authenticationManager;
@@ -121,8 +113,8 @@ class AuthServiceTest {
         String token = authService.login(request).getToken();
 
         // then
-        assertEquals(principal.getId(), jwtUtil.getIdFromToken(token));
-        assertThat(jwtUtil.validateToken(token));
+        assertEquals(principal.getId(), jwtProvider.getIdFromToken(token));
+        assertThat(jwtProvider.validateToken(token));
     }
 
     @Test
@@ -144,38 +136,5 @@ class AuthServiceTest {
 
         // then
         assertEquals(e.getMessage(), e.getMessage());
-    }
-
-    @TestConfiguration
-    static class TestConfig {
-        @Bean
-        public UserRepository memberRepository() {
-            return Mockito.mock(UserRepository.class);
-        }
-
-        @Bean
-        public PasswordEncoder passwordEncoder() {
-            return new BCryptPasswordEncoder(); // 실제 컴포넌트 사용
-        }
-
-        @Bean
-        public JwtProperties jwtProperties() {
-            return new JwtProperties();
-        }
-
-        @Bean
-        public JwtUtil jwtUtil() {
-            return new JwtUtil(jwtProperties());
-        }
-
-        @Bean
-        public JwtBlacklistService jwtBlacklistService() {
-            return Mockito.mock(JwtBlacklistService.class);
-        }
-
-        @Bean
-        public AuthenticationManager authenticationManager() {
-            return Mockito.mock(AuthenticationManager.class);
-        }
     }
 }

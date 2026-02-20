@@ -1,13 +1,13 @@
 package com.kimtaeyang.mobidic.auth.controller;
 
-import com.kimtaeyang.mobidic.common.code.AuthResponseCode;
-import com.kimtaeyang.mobidic.auth.dto.SignUpRequestDto;
 import com.kimtaeyang.mobidic.auth.dto.LoginDto;
-import com.kimtaeyang.mobidic.user.dto.UserDto;
+import com.kimtaeyang.mobidic.auth.dto.SignUpRequestDto;
+import com.kimtaeyang.mobidic.auth.service.AuthService;
+import com.kimtaeyang.mobidic.common.code.AuthResponseCode;
 import com.kimtaeyang.mobidic.common.dto.ErrorResponse;
 import com.kimtaeyang.mobidic.common.dto.GeneralResponse;
-import com.kimtaeyang.mobidic.security.JwtUtil;
-import com.kimtaeyang.mobidic.auth.service.AuthService;
+import com.kimtaeyang.mobidic.user.dto.UserDto;
+import com.kimtaeyang.mobidic.user.entity.User;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -19,6 +19,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -32,7 +33,6 @@ import java.util.UUID;
 @Tag(name = "인증 관련 서비스", description = "로그인, 회원가입 등")
 public class AuthController {
     private final AuthService authService;
-    private final JwtUtil jwtUtil;
 
     @Operation(
             summary = "로그인",
@@ -91,10 +91,13 @@ public class AuthController {
                     content = @Content(schema = @Schema(hidden = true)))
     })
     @PostMapping("/logout")
-    public ResponseEntity<GeneralResponse<UserDto>> logout(HttpServletRequest request) {
+    public ResponseEntity<GeneralResponse<UserDto>> logout(
+            HttpServletRequest request,
+            @AuthenticationPrincipal User user
+    ) {
         String token = request.getHeader("Authorization").substring(7);
-        UUID memberId = jwtUtil.getIdFromToken(token);
+        UUID userId = user.getId();
 
-        return GeneralResponse.toResponseEntity(AuthResponseCode.LOGOUT_OK, authService.logout(memberId, token));
+        return GeneralResponse.toResponseEntity(AuthResponseCode.LOGOUT_OK, authService.logout(userId, token));
     }
 }

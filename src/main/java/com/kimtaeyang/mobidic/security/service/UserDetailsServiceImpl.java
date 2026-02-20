@@ -1,4 +1,4 @@
-package com.kimtaeyang.mobidic.security;
+package com.kimtaeyang.mobidic.security.service;
 
 import com.kimtaeyang.mobidic.user.entity.User;
 import com.kimtaeyang.mobidic.user.repository.UserRepository;

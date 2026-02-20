@@ -1,4 +1,4 @@
-package com.kimtaeyang.mobidic.common.config;
+package com.kimtaeyang.mobidic.security.jwt;
 
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
