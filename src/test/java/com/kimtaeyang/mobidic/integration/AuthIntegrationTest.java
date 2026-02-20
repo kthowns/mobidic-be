@@ -1,7 +1,7 @@
 package com.kimtaeyang.mobidic.integration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.kimtaeyang.mobidic.auth.dto.LoginDto;
+import com.kimtaeyang.mobidic.auth.dto.LoginRequest;
 import com.kimtaeyang.mobidic.auth.dto.SignUpRequestDto;
 import com.kimtaeyang.mobidic.common.code.AuthResponseCode;
 import com.kimtaeyang.mobidic.common.code.GeneralResponseCode;
@@ -123,7 +123,7 @@ public class AuthIntegrationTest {
                         .content(objectMapper.writeValueAsString(joinRequest)))
                 .andExpect(status().isOk());
 
-        LoginDto.Request loginRequest = LoginDto.Request.builder()
+        LoginRequest loginRequest = LoginRequest.builder()
                 .email(joinRequest.getEmail())
                 .password(joinRequest.getPassword())
                 .build();
@@ -185,7 +185,7 @@ public class AuthIntegrationTest {
                         .content(objectMapper.writeValueAsString(joinRequest)))
                 .andExpect(status().isOk());
 
-        LoginDto.Request loginRequest = LoginDto.Request.builder()
+        LoginRequest loginRequest = LoginRequest.builder()
                 .email(joinRequest.getEmail())
                 .password(joinRequest.getPassword())
                 .build();
@@ -253,7 +253,7 @@ public class AuthIntegrationTest {
                 .password("testTest1")
                 .build();
 
-        LoginDto.Request loginRequest = LoginDto.Request.builder()
+        LoginRequest loginRequest = LoginRequest.builder()
                 .email(joinRequest.getEmail())
                 .password(joinRequest.getPassword())
                 .build();

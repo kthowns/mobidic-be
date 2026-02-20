@@ -1,6 +1,7 @@
 package com.kimtaeyang.mobidic.auth.controller;
 
-import com.kimtaeyang.mobidic.auth.dto.LoginDto;
+import com.kimtaeyang.mobidic.auth.dto.LoginRequest;
+import com.kimtaeyang.mobidic.auth.dto.LoginResponse;
 import com.kimtaeyang.mobidic.auth.dto.SignUpRequestDto;
 import com.kimtaeyang.mobidic.auth.service.AuthService;
 import com.kimtaeyang.mobidic.common.code.AuthResponseCode;
@@ -48,7 +49,7 @@ public class AuthController {
                     content = @Content(schema = @Schema(hidden = true)))
     })
     @PostMapping("/login")
-    public ResponseEntity<GeneralResponse<LoginDto.Response>> login(@Valid @RequestBody LoginDto.Request request) {
+    public ResponseEntity<GeneralResponse<LoginResponse>> login(@Valid @RequestBody LoginRequest request) {
         return GeneralResponse.toResponseEntity(AuthResponseCode.LOGIN_OK, authService.login(request));
     }
 
@@ -71,7 +72,7 @@ public class AuthController {
     })
     @PostMapping("/join")
     public ResponseEntity<GeneralResponse<UserDto>> join(@Valid @RequestBody SignUpRequestDto request) {
-        return GeneralResponse.toResponseEntity(AuthResponseCode.JOIN_OK, authService.join(request));
+        return GeneralResponse.toResponseEntity(AuthResponseCode.JOIN_OK, authService.signUp(request));
     }
 
     @Operation(

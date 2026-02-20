@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kimtaeyang.mobidic.dictionary.dto.AddVocabularyRequestDto;
 import com.kimtaeyang.mobidic.dictionary.dto.VocabularyDto;
 import com.kimtaeyang.mobidic.auth.dto.SignUpRequestDto;
-import com.kimtaeyang.mobidic.auth.dto.LoginDto;
 import com.kimtaeyang.mobidic.user.repository.UserRepository;
 import com.kimtaeyang.mobidic.security.jwt.JwtProvider;
 import org.junit.jupiter.api.AfterEach;

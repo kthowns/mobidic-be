@@ -1,13 +1,14 @@
 package com.kimtaeyang.mobidic.auth.service;
 
+import com.kimtaeyang.mobidic.auth.dto.LoginRequest;
+import com.kimtaeyang.mobidic.auth.dto.LoginResponse;
 import com.kimtaeyang.mobidic.auth.dto.SignUpRequestDto;
-import com.kimtaeyang.mobidic.auth.dto.LoginDto;
-import com.kimtaeyang.mobidic.user.dto.UserDto;
-import com.kimtaeyang.mobidic.user.entity.User;
 import com.kimtaeyang.mobidic.common.exception.ApiException;
-import com.kimtaeyang.mobidic.user.repository.UserRepository;
 import com.kimtaeyang.mobidic.security.jwt.JwtBlacklistService;
 import com.kimtaeyang.mobidic.security.jwt.JwtProvider;
+import com.kimtaeyang.mobidic.user.dto.UserDto;
+import com.kimtaeyang.mobidic.user.entity.User;
+import com.kimtaeyang.mobidic.user.repository.UserRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,21 +38,20 @@ public class AuthService {
     private final JwtBlacklistService jwtBlacklistService;
 
     @Transactional(readOnly = true)
-    public LoginDto.Response login(LoginDto.Request request) {
+    public LoginResponse login(LoginRequest request) {
         Authentication auth = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
         );
 
         User user = (User) auth.getPrincipal();
 
-        return LoginDto.Response.builder()
-                .memberId(user.getId().toString())
-                .token(jwtProvider.generateToken(user.getId()))
+        return LoginResponse.builder()
+                .accessToken(jwtProvider.generateToken(user.getId()))
                 .build();
     }
 
     @Transactional
-    public UserDto join(@Valid SignUpRequestDto request) {
+    public UserDto signUp(@Valid SignUpRequestDto request) {
         if (userRepository.countByNickname(request.getNickname()) > 0) {
             throw new ApiException(DUPLICATED_NICKNAME);
         }

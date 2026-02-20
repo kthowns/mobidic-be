@@ -5,7 +5,6 @@ import com.kimtaeyang.mobidic.dictionary.dto.AddDefinitionRequestDto;
 import com.kimtaeyang.mobidic.dictionary.dto.AddVocabularyRequestDto;
 import com.kimtaeyang.mobidic.dictionary.dto.AddWordRequestDto;
 import com.kimtaeyang.mobidic.auth.dto.SignUpRequestDto;
-import com.kimtaeyang.mobidic.auth.dto.LoginDto;
 import com.kimtaeyang.mobidic.user.repository.UserRepository;
 import com.kimtaeyang.mobidic.security.jwt.JwtProvider;
 import com.kimtaeyang.mobidic.dictionary.type.PartOfSpeech;

@@ -2,7 +2,6 @@ package com.kimtaeyang.mobidic.integration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kimtaeyang.mobidic.auth.dto.SignUpRequestDto;
-import com.kimtaeyang.mobidic.auth.dto.LoginDto;
 import com.kimtaeyang.mobidic.user.dto.UpdateNicknameRequestDto;
 import com.kimtaeyang.mobidic.user.dto.UpdatePasswordRequestDto;
 import com.kimtaeyang.mobidic.user.repository.UserRepository;
