@@ -9,7 +9,7 @@ import com.kimtaeyang.mobidic.dictionary.model.WordWithDefinitions;
 import com.kimtaeyang.mobidic.quiz.dto.QuizDto;
 import com.kimtaeyang.mobidic.quiz.dto.QuizStatisticDto;
 import com.kimtaeyang.mobidic.user.repository.UserRepository;
-import com.kimtaeyang.mobidic.security.JwtUtil;
+import com.kimtaeyang.mobidic.security.jwt.JwtProvider;
 import com.kimtaeyang.mobidic.dictionary.type.PartOfSpeech;
 import com.kimtaeyang.mobidic.dictionary.dto.*;
 import org.junit.jupiter.api.AfterEach;
@@ -47,7 +47,7 @@ public class QuizIntegrationTest {
     private UserRepository userRepository;
 
     @Autowired
-    private JwtUtil jwtUtil;
+    private JwtProvider jwtProvider;
 
     @AfterEach
     void tearDown() {
@@ -58,7 +58,7 @@ public class QuizIntegrationTest {
     @DisplayName("[Quiz][Integration] Ox quiz generate test")
     void oxQuizGenerateTest() throws Exception {
         String token = loginAndGetToken("email@test.com", "password1");
-        UUID memberId = jwtUtil.getIdFromToken(token);
+        UUID memberId = jwtProvider.getIdFromToken(token);
         UUID vocabId = addVocabAndGetId(memberId, token);
 
         String[] sampleWords = {"Hello", "Apple", "Run", "Edit", "Amazing"};
@@ -85,7 +85,7 @@ public class QuizIntegrationTest {
     @DisplayName("[Quiz][Integration] Ox quiz rate test")
     void oxQuizRateTest() throws Exception {
         String token = loginAndGetToken("email@test.com", "password1");
-        UUID memberId = jwtUtil.getIdFromToken(token);
+        UUID memberId = jwtProvider.getIdFromToken(token);
         UUID vocabId = addVocabAndGetId(memberId, token);
 
         String[] sampleWords = {"Hello", "Apple", "Run", "Edit", "Amazing"};
@@ -127,7 +127,7 @@ public class QuizIntegrationTest {
     @DisplayName("[Quiz][Integration] Blank quiz generate test")
     void blankQuizGenerateTest() throws Exception {
         String token = loginAndGetToken("email@test.com", "password1");
-        UUID memberId = jwtUtil.getIdFromToken(token);
+        UUID memberId = jwtProvider.getIdFromToken(token);
         UUID vocabId = addVocabAndGetId(memberId, token);
 
         String[] sampleWords = {"Hello", "Apple", "Run", "Edit", "Amazing"};
@@ -164,7 +164,7 @@ public class QuizIntegrationTest {
     @DisplayName("[Quiz][Integration] Blank quiz rate test")
     void blankQuizRateTest() throws Exception {
         String token = loginAndGetToken("email@test.com", "password1");
-        UUID memberId = jwtUtil.getIdFromToken(token);
+        UUID memberId = jwtProvider.getIdFromToken(token);
         UUID vocabId = addVocabAndGetId(memberId, token);
 
         String[] sampleWords = {"Hello", "Apple", "Run", "Edit", "Amazing"};
