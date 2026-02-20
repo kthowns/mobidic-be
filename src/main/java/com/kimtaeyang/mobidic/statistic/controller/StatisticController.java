@@ -23,7 +23,7 @@ import static com.kimtaeyang.mobidic.common.code.GeneralResponseCode.OK;
 @RestController
 @RequiredArgsConstructor
 @Slf4j
-@RequestMapping("/api/rate/")
+@RequestMapping("/api/statistics/")
 @Tag(name = "통계 관련 서비스", description = "단어장 별 학습률, 단어 난이도 불러오기 등")
 public class StatisticController {
     private final StatisticService statisticService;
@@ -44,12 +44,12 @@ public class StatisticController {
             @ApiResponse(responseCode = "500", description = "서버 오류",
                     content = @Content(schema = @Schema(hidden = true)))
     })
-    @GetMapping("/w")
+    @GetMapping("/word")
     public ResponseEntity<GeneralResponse<StatisticDto>> getRateByWordId(
-            @RequestParam String wId
+            @RequestParam String wordId
     ) {
         return GeneralResponse.toResponseEntity(OK,
-                statisticService.getRateByWordId(UUID.fromString(wId)));
+                statisticService.getRateByWordId(UUID.fromString(wordId)));
     }
 
     @Operation(
@@ -68,12 +68,12 @@ public class StatisticController {
             @ApiResponse(responseCode = "500", description = "서버 오류",
                     content = @Content(schema = @Schema(hidden = true)))
     })
-    @GetMapping("/v")
+    @GetMapping("/vocabulary")
     public ResponseEntity<GeneralResponse<Double>> getVocabLearningRate(
-            @RequestParam String vId
+            @RequestParam String vocabularyId
     ) {
         return GeneralResponse.toResponseEntity(OK,
-                statisticService.getVocabLearningRate(UUID.fromString(vId)));
+                statisticService.getVocabLearningRate(UUID.fromString(vocabularyId)));
     }
 
     @Operation(
@@ -92,11 +92,11 @@ public class StatisticController {
             @ApiResponse(responseCode = "500", description = "서버 오류",
                     content = @Content(schema = @Schema(hidden = true)))
     })
-    @PatchMapping("/tog/{wordId}")
-    public ResponseEntity<GeneralResponse<Void>> toggleRateByWordId(
+    @PatchMapping("/{wordId}/learned")
+    public ResponseEntity<GeneralResponse<Void>> toggleLearnedByWordId(
             @PathVariable String wordId
     ) {
-        statisticService.toggleRateByWordId(UUID.fromString(wordId));
+        statisticService.toggleLearnedByWordId(UUID.fromString(wordId));
 
         return GeneralResponse.toResponseEntity(OK, null);
     }

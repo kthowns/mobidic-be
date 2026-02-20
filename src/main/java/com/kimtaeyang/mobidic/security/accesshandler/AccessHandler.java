@@ -11,9 +11,10 @@ public abstract class AccessHandler {
         return isResourceOwner(resourceId);
     }
 
-    public final UUID getCurrentMemberId() {
+    public final UUID getCurrentUserId() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         return ((User) auth.getPrincipal()).getId();
     }
+
     abstract boolean isResourceOwner(UUID resourceId);
 }

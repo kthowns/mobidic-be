@@ -1,9 +1,9 @@
 package com.kimtaeyang.mobidic.dictionary.controller;
 
-import com.kimtaeyang.mobidic.dictionary.dto.AddVocabularyRequestDto;
-import com.kimtaeyang.mobidic.dictionary.dto.VocabularyDto;
 import com.kimtaeyang.mobidic.common.dto.ErrorResponse;
 import com.kimtaeyang.mobidic.common.dto.GeneralResponse;
+import com.kimtaeyang.mobidic.dictionary.dto.AddVocabularyRequestDto;
+import com.kimtaeyang.mobidic.dictionary.dto.VocabularyDto;
 import com.kimtaeyang.mobidic.dictionary.service.VocabularyService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -26,7 +26,7 @@ import static com.kimtaeyang.mobidic.common.code.GeneralResponseCode.OK;
 @RestController
 @RequiredArgsConstructor
 @Slf4j
-@RequestMapping("/api/vocab")
+@RequestMapping("/api/vocabularies")
 @Tag(name = "단어장 관련 서비스", description = "사용자별 단어장 목록 불러오기, 추가 등")
 public class VocabularyController {
     private final VocabularyService vocabularyService;
@@ -50,7 +50,7 @@ public class VocabularyController {
                     content = @Content(schema = @Schema(hidden = true)))
     })
     @PostMapping("/{memberId}")
-    public ResponseEntity<GeneralResponse<VocabularyDto>> addVocab(
+    public ResponseEntity<GeneralResponse<VocabularyDto>> addVocabulary(
             @PathVariable String memberId,
             @RequestBody @Valid AddVocabularyRequestDto request
     ) {
@@ -75,11 +75,11 @@ public class VocabularyController {
                     content = @Content(schema = @Schema(hidden = true)))
     })
     @GetMapping("/all")
-    public ResponseEntity<GeneralResponse<List<VocabularyDto>>> getAllVocab(
-            @RequestParam String uId
+    public ResponseEntity<GeneralResponse<List<VocabularyDto>>> getAllVocabulary(
+            @RequestParam String userId
     ) {
         return GeneralResponse.toResponseEntity(OK,
-                vocabularyService.getVocabulariesByUserId(UUID.fromString(uId)));
+                vocabularyService.getVocabulariesByUserId(UUID.fromString(userId)));
     }
 
     @Operation(
@@ -99,11 +99,11 @@ public class VocabularyController {
                     content = @Content(schema = @Schema(hidden = true)))
     })
     @GetMapping("/detail")
-    public ResponseEntity<GeneralResponse<VocabularyDto>> getVocabDetail(
-            @RequestParam String vId
+    public ResponseEntity<GeneralResponse<VocabularyDto>> getVocabularyDetail(
+            @RequestParam String vocabularyId
     ) {
         return GeneralResponse.toResponseEntity(OK,
-                vocabularyService.getVocabById(UUID.fromString(vId)));
+                vocabularyService.getVocabularyById(UUID.fromString(vocabularyId)));
     }
 
     @Operation(
@@ -124,13 +124,13 @@ public class VocabularyController {
             @ApiResponse(responseCode = "500", description = "서버 오류",
                     content = @Content(schema = @Schema(hidden = true)))
     })
-    @PatchMapping("/{vocabId}")
-    public ResponseEntity<GeneralResponse<VocabularyDto>> updateVocab(
-            @PathVariable String vocabId,
+    @PatchMapping("/{vocabularyId}")
+    public ResponseEntity<GeneralResponse<VocabularyDto>> updateVocabulary(
+            @PathVariable String vocabularyId,
             @RequestBody @Valid AddVocabularyRequestDto request
     ) {
         return GeneralResponse.toResponseEntity(OK,
-                vocabularyService.updateVocab(UUID.fromString(vocabId), request));
+                vocabularyService.updateVocabulary(UUID.fromString(vocabularyId), request));
     }
 
     @Operation(
@@ -149,11 +149,11 @@ public class VocabularyController {
             @ApiResponse(responseCode = "500", description = "서버 오류",
                     content = @Content(schema = @Schema(hidden = true)))
     })
-    @DeleteMapping("/{vocabId}")
-    public ResponseEntity<GeneralResponse<VocabularyDto>> deleteVocab(
-            @PathVariable String vocabId
+    @DeleteMapping("/{vocabularyId}")
+    public ResponseEntity<GeneralResponse<VocabularyDto>> deleteVocabulary(
+            @PathVariable String vocabularyId
     ) {
         return GeneralResponse.toResponseEntity(OK,
-                vocabularyService.deleteVocab(UUID.fromString(vocabId)));
+                vocabularyService.deleteVocab(UUID.fromString(vocabularyId)));
     }
 }

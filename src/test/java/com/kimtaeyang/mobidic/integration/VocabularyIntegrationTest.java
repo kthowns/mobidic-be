@@ -6,7 +6,7 @@ import com.kimtaeyang.mobidic.dictionary.dto.VocabularyDto;
 import com.kimtaeyang.mobidic.auth.dto.SignUpRequestDto;
 import com.kimtaeyang.mobidic.auth.dto.LoginDto;
 import com.kimtaeyang.mobidic.user.repository.UserRepository;
-import com.kimtaeyang.mobidic.security.JwtUtil;
+import com.kimtaeyang.mobidic.security.jwt.JwtProvider;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -38,7 +38,7 @@ public class VocabularyIntegrationTest {
     private ObjectMapper objectMapper;
 
     @Autowired
-    private JwtUtil jwtUtil;
+    private JwtProvider jwtProvider;
 
     @Autowired
     private UserRepository userRepository;
@@ -65,7 +65,7 @@ public class VocabularyIntegrationTest {
         String email = "test@test.com";
         String nickname = "test";
         String token = loginAndGetToken(email, nickname);
-        UUID memberId = jwtUtil.getIdFromToken(token);
+        UUID memberId = jwtProvider.getIdFromToken(token);
 
         AddVocabularyRequestDto addVocabRequest = AddVocabularyRequestDto.builder()
                 .title("title")
@@ -105,7 +105,7 @@ public class VocabularyIntegrationTest {
         //Fail with unauthorized token
         mockMvc.perform(post("/api/vocab/" + memberId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer " + jwtUtil.generateToken(UUID.randomUUID()))
+                        .header("Authorization", "Bearer " + jwtProvider.generateToken(UUID.randomUUID()))
                         .content(objectMapper.writeValueAsString(addVocabRequest)))
                 .andExpect(status().isUnauthorized())
                 .andExpect(
@@ -147,7 +147,7 @@ public class VocabularyIntegrationTest {
         String email = "test@test.com";
         String nickname = "test";
         String token = loginAndGetToken(email, nickname);
-        UUID memberId = jwtUtil.getIdFromToken(token);
+        UUID memberId = jwtProvider.getIdFromToken(token);
 
         AddVocabularyRequestDto addVocabRequest = AddVocabularyRequestDto.builder()
                 .title("title")
@@ -182,7 +182,7 @@ public class VocabularyIntegrationTest {
         //Fail with unauthorized token
         mockMvc.perform(get("/api/vocab/all")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer " + jwtUtil.generateToken(UUID.randomUUID()))
+                        .header("Authorization", "Bearer " + jwtProvider.generateToken(UUID.randomUUID()))
                         .param("uId", memberId.toString()))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.message")
@@ -204,7 +204,7 @@ public class VocabularyIntegrationTest {
         String email = "test@test.com";
         String nickname = "test";
         String token = loginAndGetToken(email, nickname);
-        UUID memberId = jwtUtil.getIdFromToken(token);
+        UUID memberId = jwtProvider.getIdFromToken(token);
 
         AddVocabularyRequestDto addVocabRequest = AddVocabularyRequestDto.builder()
                 .title("title")
@@ -251,7 +251,7 @@ public class VocabularyIntegrationTest {
         //Fail with unauthorized token
         mockMvc.perform(get("/api/vocab/detail")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer " + jwtUtil.generateToken(UUID.randomUUID()))
+                        .header("Authorization", "Bearer " + jwtProvider.generateToken(UUID.randomUUID()))
                         .param("vId", addVocabResponse.getId().toString()))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.message")
@@ -273,7 +273,7 @@ public class VocabularyIntegrationTest {
         String email = "test@test.com";
         String nickname = "test";
         String token = loginAndGetToken(email, nickname);
-        UUID memberId = jwtUtil.getIdFromToken(token);
+        UUID memberId = jwtProvider.getIdFromToken(token);
 
         AddVocabularyRequestDto addVocabRequest = AddVocabularyRequestDto.builder()
                 .title("title")
@@ -352,7 +352,7 @@ public class VocabularyIntegrationTest {
         //Fail with unauthorized token
         mockMvc.perform(patch("/api/vocab/" + addVocabResponse.getId())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer " + jwtUtil.generateToken(UUID.randomUUID()))
+                        .header("Authorization", "Bearer " + jwtProvider.generateToken(UUID.randomUUID()))
                         .content(objectMapper.writeValueAsString(updateVocabRequest)))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.message")
@@ -389,7 +389,7 @@ public class VocabularyIntegrationTest {
         String email = "test@test.com";
         String nickname = "test";
         String token = loginAndGetToken(email, nickname);
-        UUID memberId = jwtUtil.getIdFromToken(token);
+        UUID memberId = jwtProvider.getIdFromToken(token);
 
         AddVocabularyRequestDto addVocabRequest = AddVocabularyRequestDto.builder()
                 .title("title")
@@ -419,7 +419,7 @@ public class VocabularyIntegrationTest {
         //Fail with unauthorized token
         mockMvc.perform(delete("/api/vocab/" + addVocabResponse.getId())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer " + jwtUtil.generateToken(UUID.randomUUID()))
+                        .header("Authorization", "Bearer " + jwtProvider.generateToken(UUID.randomUUID()))
                         .param("vocabId", addVocabResponse.getId().toString()))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.message")

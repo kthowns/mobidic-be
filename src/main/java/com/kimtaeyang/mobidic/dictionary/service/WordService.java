@@ -4,10 +4,10 @@ import com.kimtaeyang.mobidic.common.code.GeneralResponseCode;
 import com.kimtaeyang.mobidic.dictionary.dto.AddWordRequestDto;
 import com.kimtaeyang.mobidic.dictionary.dto.WordDto;
 import com.kimtaeyang.mobidic.dictionary.entity.Vocabulary;
-import com.kimtaeyang.mobidic.statistic.entity.Statistic;
+import com.kimtaeyang.mobidic.statistic.entity.WordStatistic;
 import com.kimtaeyang.mobidic.dictionary.entity.Word;
 import com.kimtaeyang.mobidic.common.exception.ApiException;
-import com.kimtaeyang.mobidic.statistic.repository.StatisticRepository;
+import com.kimtaeyang.mobidic.statistic.repository.WordStatisticRepository;
 import com.kimtaeyang.mobidic.dictionary.repository.VocabularyRepository;
 import com.kimtaeyang.mobidic.dictionary.repository.WordRepository;
 import lombok.RequiredArgsConstructor;
@@ -26,10 +26,10 @@ import java.util.stream.Collectors;
 public class WordService {
     private final WordRepository wordRepository;
     private final VocabularyRepository vocabularyRepository;
-    private final StatisticRepository statisticRepository;
+    private final WordStatisticRepository wordStatisticRepository;
 
     @Transactional
-    @PreAuthorize("@vocabAccessHandler.ownershipCheck(#vocabId)")
+    @PreAuthorize("@vocabularyAccessHandler.ownershipCheck(#vocabId)")
     public WordDto addWord(UUID vocabId, AddWordRequestDto request) {
         Vocabulary vocabulary = vocabularyRepository.findById(vocabId)
                 .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_VOCAB));
@@ -46,20 +46,20 @@ public class WordService {
                 .build();
         wordRepository.save(word);
 
-        Statistic rate = Statistic.builder()
+        WordStatistic rate = WordStatistic.builder()
                 .word(word)
                 .correctCount(0)
                 .incorrectCount(0)
-                .isLearned(0)
+                .isLearned(true)
                 .build();
-        statisticRepository.save(rate);
+        wordStatisticRepository.save(rate);
 
         return WordDto.fromEntity(word);
     }
 
     @Transactional(readOnly = true)
-    @PreAuthorize("@vocabAccessHandler.ownershipCheck(#vId)")
-    public List<WordDto> getWordsByVocabId(UUID vId) {
+    @PreAuthorize("@vocabularyAccessHandler.ownershipCheck(#vId)")
+    public List<WordDto> getWordsByVocabularyId(UUID vId) {
         Vocabulary vocabulary = vocabularyRepository.findById(vId)
                 .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_VOCAB));
 

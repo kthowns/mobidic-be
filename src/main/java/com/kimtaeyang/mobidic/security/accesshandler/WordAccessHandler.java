@@ -20,7 +20,7 @@ public class WordAccessHandler extends AccessHandler {
         return wordRepository.findById(resourceId)
                 .map(Word::getVocabulary)
                 .map(Vocabulary::getUser)
-                .filter((m) -> getCurrentMemberId().equals(m.getId()))
+                .filter((m) -> getCurrentUserId().equals(m.getId()))
                 .isPresent();
     }
 }

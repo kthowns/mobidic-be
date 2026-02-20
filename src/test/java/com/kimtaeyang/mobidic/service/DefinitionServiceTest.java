@@ -1,21 +1,20 @@
 package com.kimtaeyang.mobidic.service;
 
+import com.kimtaeyang.mobidic.config.ServiceTestConfig;
 import com.kimtaeyang.mobidic.dictionary.dto.AddDefinitionRequestDto;
 import com.kimtaeyang.mobidic.dictionary.dto.DefinitionDto;
 import com.kimtaeyang.mobidic.dictionary.entity.Definition;
 import com.kimtaeyang.mobidic.dictionary.entity.Word;
 import com.kimtaeyang.mobidic.dictionary.repository.DefinitionRepository;
 import com.kimtaeyang.mobidic.dictionary.repository.WordRepository;
-import com.kimtaeyang.mobidic.dictionary.type.PartOfSpeech;
 import com.kimtaeyang.mobidic.dictionary.service.DefinitionService;
+import com.kimtaeyang.mobidic.dictionary.type.PartOfSpeech;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Bean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -30,7 +29,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {DefinitionService.class, DefinitionServiceTest.TestConfig.class})
+@ContextConfiguration(classes = {DefinitionService.class, ServiceTestConfig.class})
 @ActiveProfiles("dev")
 class DefinitionServiceTest {
     @Autowired
@@ -152,19 +151,6 @@ class DefinitionServiceTest {
         assertEquals(defId, response.getId());
         assertEquals(request.getDefinition(), response.getDefinition());
         assertEquals(request.getPart(), response.getPart());
-    }
-
-    @TestConfiguration
-    static class TestConfig {
-        @Bean
-        public DefinitionRepository defRepository() {
-            return Mockito.mock(DefinitionRepository.class);
-        }
-
-        @Bean
-        public WordRepository wordRepository() {
-            return Mockito.mock(WordRepository.class);
-        }
     }
 
     private void resetMock() {

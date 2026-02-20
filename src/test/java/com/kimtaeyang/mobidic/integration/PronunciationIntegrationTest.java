@@ -6,7 +6,7 @@ import com.kimtaeyang.mobidic.dictionary.dto.AddWordRequestDto;
 import com.kimtaeyang.mobidic.auth.dto.SignUpRequestDto;
 import com.kimtaeyang.mobidic.auth.dto.LoginDto;
 import com.kimtaeyang.mobidic.user.repository.UserRepository;
-import com.kimtaeyang.mobidic.security.JwtUtil;
+import com.kimtaeyang.mobidic.security.jwt.JwtProvider;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -45,7 +45,7 @@ public class PronunciationIntegrationTest {
     private UserRepository userRepository;
 
     @Autowired
-    private JwtUtil jwtUtil;
+    private JwtProvider jwtProvider;
 
     @AfterEach
     void tearDown() {
@@ -56,7 +56,7 @@ public class PronunciationIntegrationTest {
     @DisplayName("[Pronunciation][Integration] Rate pronunciation test")
     void ratePronunciationTest() throws Exception {
         String token = loginAndGetToken("test@test.com", "test");
-        UUID memberId = jwtUtil.getIdFromToken(token);
+        UUID memberId = jwtProvider.getIdFromToken(token);
         UUID vocabId = addVocabAndGetId(memberId, token);
         UUID wordId = addWordAndGetId(vocabId, token, "hello");
 
@@ -122,7 +122,7 @@ public class PronunciationIntegrationTest {
         //Fail with unauthorized token
         mockMvc.perform(multipart("/api/pron/rate")
                         .file(largeFile)
-                        .header("Authorization", "Bearer " + jwtUtil.generateToken(UUID.randomUUID()))
+                        .header("Authorization", "Bearer " + jwtProvider.generateToken(UUID.randomUUID()))
                         .param("wordId", wordId.toString()))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.message")

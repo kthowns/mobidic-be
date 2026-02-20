@@ -1,10 +1,10 @@
 package com.kimtaeyang.mobidic.dictionary.controller;
 
 import com.kimtaeyang.mobidic.common.code.GeneralResponseCode;
-import com.kimtaeyang.mobidic.dictionary.dto.AddDefinitionRequestDto;
-import com.kimtaeyang.mobidic.dictionary.dto.DefinitionDto;
 import com.kimtaeyang.mobidic.common.dto.ErrorResponse;
 import com.kimtaeyang.mobidic.common.dto.GeneralResponse;
+import com.kimtaeyang.mobidic.dictionary.dto.AddDefinitionRequestDto;
+import com.kimtaeyang.mobidic.dictionary.dto.DefinitionDto;
 import com.kimtaeyang.mobidic.dictionary.service.DefinitionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -25,7 +25,7 @@ import java.util.UUID;
 @RestController
 @Slf4j
 @RequiredArgsConstructor
-@RequestMapping("/api/def")
+@RequestMapping("/api/definitions")
 @Tag(name = "뜻 관련 서비스", description = "단어 별 뜻 불러오기, 추가, 수정 등")
 public class DefinitionController {
     private final DefinitionService definitionService;
@@ -47,7 +47,7 @@ public class DefinitionController {
                     content = @Content(schema = @Schema(hidden = true)))
     })
     @PostMapping("/{wordId}")
-    public ResponseEntity<GeneralResponse<DefinitionDto>> addDef(
+    public ResponseEntity<GeneralResponse<DefinitionDto>> addDefinition(
             @PathVariable String wordId,
             @RequestBody @Valid AddDefinitionRequestDto request
     ) {
@@ -72,11 +72,11 @@ public class DefinitionController {
                     content = @Content(schema = @Schema(hidden = true)))
     })
     @GetMapping("/all")
-    public ResponseEntity<GeneralResponse<List<DefinitionDto>>> getDefsByWordId(
-            @RequestParam String wId
+    public ResponseEntity<GeneralResponse<List<DefinitionDto>>> getDefinitionsByWordId(
+            @RequestParam String wordId
     ) {
         return GeneralResponse.toResponseEntity(GeneralResponseCode.OK,
-                definitionService.getDefinitionsByWordId(UUID.fromString(wId)));
+                definitionService.getDefinitionsByWordId(UUID.fromString(wordId)));
     }
 
     @Operation(
@@ -97,13 +97,13 @@ public class DefinitionController {
             @ApiResponse(responseCode = "500", description = "서버 오류",
                     content = @Content(schema = @Schema(hidden = true)))
     })
-    @PatchMapping("/{defId}")
-    public ResponseEntity<GeneralResponse<DefinitionDto>> updateDef(
-            @PathVariable String defId,
+    @PatchMapping("/{definitionId}")
+    public ResponseEntity<GeneralResponse<DefinitionDto>> updateDefinition(
+            @PathVariable String definitionId,
             @RequestBody @Valid AddDefinitionRequestDto request
     ) {
         return GeneralResponse.toResponseEntity(GeneralResponseCode.OK,
-                definitionService.updateDefinition(UUID.fromString(defId), request));
+                definitionService.updateDefinition(UUID.fromString(definitionId), request));
     }
 
     @Operation(
@@ -122,11 +122,11 @@ public class DefinitionController {
             @ApiResponse(responseCode = "500", description = "서버 오류",
                     content = @Content(schema = @Schema(hidden = true)))
     })
-    @DeleteMapping("/{defId}")
-    public ResponseEntity<GeneralResponse<DefinitionDto>> deleteDef(
-            @PathVariable String defId
+    @DeleteMapping("/{definitionId}")
+    public ResponseEntity<GeneralResponse<DefinitionDto>> deleteDefinition(
+            @PathVariable String definitionId
     ) {
         return GeneralResponse.toResponseEntity(GeneralResponseCode.OK,
-                definitionService.deleteDefinition(UUID.fromString(defId)));
+                definitionService.deleteDefinition(UUID.fromString(definitionId)));
     }
 }

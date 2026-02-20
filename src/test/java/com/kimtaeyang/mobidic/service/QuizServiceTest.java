@@ -1,25 +1,23 @@
 package com.kimtaeyang.mobidic.service;
 
+import com.kimtaeyang.mobidic.config.ServiceTestConfig;
+import com.kimtaeyang.mobidic.dictionary.dto.DefinitionDto;
+import com.kimtaeyang.mobidic.dictionary.dto.VocabularyDto;
+import com.kimtaeyang.mobidic.dictionary.dto.WordDto;
 import com.kimtaeyang.mobidic.dictionary.model.WordWithDefinitions;
+import com.kimtaeyang.mobidic.dictionary.service.DefinitionService;
+import com.kimtaeyang.mobidic.dictionary.service.VocabularyService;
+import com.kimtaeyang.mobidic.dictionary.service.WordService;
+import com.kimtaeyang.mobidic.dictionary.type.PartOfSpeech;
 import com.kimtaeyang.mobidic.quiz.dto.QuizDto;
 import com.kimtaeyang.mobidic.quiz.dto.QuizStatisticDto;
 import com.kimtaeyang.mobidic.quiz.service.CryptoService;
 import com.kimtaeyang.mobidic.quiz.service.QuizService;
 import com.kimtaeyang.mobidic.statistic.service.StatisticService;
-import com.kimtaeyang.mobidic.dictionary.type.PartOfSpeech;
-import com.kimtaeyang.mobidic.dictionary.dto.DefinitionDto;
-import com.kimtaeyang.mobidic.dictionary.dto.VocabularyDto;
-import com.kimtaeyang.mobidic.dictionary.dto.WordDto;
-import com.kimtaeyang.mobidic.dictionary.service.DefinitionService;
-import com.kimtaeyang.mobidic.dictionary.service.VocabularyService;
-import com.kimtaeyang.mobidic.dictionary.service.WordService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Bean;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.test.context.ActiveProfiles;
@@ -36,7 +34,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {QuizService.class, QuizServiceTest.TestConfig.class})
+@ContextConfiguration(classes = {QuizService.class, ServiceTestConfig.class})
 @ActiveProfiles("dev")
 public class QuizServiceTest {
     @Autowired
@@ -127,7 +125,7 @@ public class QuizServiceTest {
         List<List<DefinitionDto>> defDtos = wordsWithDefs.stream().map(WordWithDefinitions::getDefinitionDtos).toList();
 
         //given
-        given(wordService.getWordsByVocabId(any(UUID.class)))
+        given(wordService.getWordsByVocabularyId(any(UUID.class)))
                 .willReturn(wordsWithDefs.stream().map(WordWithDefinitions::getWordDto).toList());
         given(redisTemplate.opsForValue())
                 .willReturn(valueOperations);
@@ -136,7 +134,7 @@ public class QuizServiceTest {
                     .willReturn(w.getDefinitionDtos());
         }
 
-        given(vocabularyService.getVocabById(any(UUID.class)))
+        given(vocabularyService.getVocabularyById(any(UUID.class)))
                 .willReturn(
                         VocabularyDto.builder()
                                 .id(UUID.randomUUID())
@@ -210,44 +208,6 @@ public class QuizServiceTest {
 
             //then
             assertTrue(response.getIsCorrect());
-        }
-    }
-
-    @TestConfiguration
-    static class TestConfig {
-        @Bean
-        public CryptoService cryptoService() {
-            return new CryptoService();
-        }
-
-        @Bean
-        public WordService wordService() {
-            return Mockito.mock(WordService.class);
-        }
-
-        @Bean
-        public DefinitionService defService() {
-            return Mockito.mock(DefinitionService.class);
-        }
-
-        @Bean
-        public StatisticService rateService() {
-            return Mockito.mock(StatisticService.class);
-        }
-
-        @Bean
-        public VocabularyService vocabService() {
-            return Mockito.mock(VocabularyService.class);
-        }
-
-        @Bean
-        public RedisTemplate redisTemplate() {
-            return Mockito.mock(RedisTemplate.class);
-        }
-
-        @Bean
-        public ValueOperations valueOperations() {
-            return Mockito.mock(ValueOperations.class);
         }
     }
 }

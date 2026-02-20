@@ -1,16 +1,16 @@
 package com.kimtaeyang.mobidic.statistic.service;
 
 import com.kimtaeyang.mobidic.common.code.GeneralResponseCode;
-import com.kimtaeyang.mobidic.dictionary.entity.Vocabulary;
-import com.kimtaeyang.mobidic.statistic.dto.StatisticDto;
-import com.kimtaeyang.mobidic.user.entity.User;
-import com.kimtaeyang.mobidic.statistic.entity.Statistic;
-import com.kimtaeyang.mobidic.dictionary.entity.Word;
 import com.kimtaeyang.mobidic.common.exception.ApiException;
-import com.kimtaeyang.mobidic.user.repository.UserRepository;
-import com.kimtaeyang.mobidic.statistic.repository.StatisticRepository;
+import com.kimtaeyang.mobidic.dictionary.entity.Vocabulary;
+import com.kimtaeyang.mobidic.dictionary.entity.Word;
 import com.kimtaeyang.mobidic.dictionary.repository.VocabularyRepository;
 import com.kimtaeyang.mobidic.dictionary.repository.WordRepository;
+import com.kimtaeyang.mobidic.statistic.dto.StatisticDto;
+import com.kimtaeyang.mobidic.statistic.entity.WordStatistic;
+import com.kimtaeyang.mobidic.statistic.repository.WordStatisticRepository;
+import com.kimtaeyang.mobidic.user.entity.User;
+import com.kimtaeyang.mobidic.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -27,22 +27,20 @@ import static com.kimtaeyang.mobidic.common.code.AuthResponseCode.NO_MEMBER;
 @Slf4j
 public class StatisticService {
     private final WordRepository wordRepository;
-    private final StatisticRepository statisticRepository;
+    private final WordStatisticRepository wordStatisticRepository;
     private final UserRepository userRepository;
     private final VocabularyRepository vocabularyRepository;
 
     @Transactional(readOnly = true)
-    @PreAuthorize("@rateAccessHandler.ownershipCheck(#wordId)")
+    @PreAuthorize("@statisticAccessHandler.ownershipCheck(#wordId)")
     public StatisticDto getRateByWordId(UUID wordId) {
-        Word word = wordRepository.findById(wordId)
-                .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_WORD));
-        Statistic statistic = statisticRepository.findRateByWord(word)
+        WordStatistic wordStatistic = wordStatisticRepository.findById(wordId)
                 .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_RATE));
 
-        return StatisticDto.fromEntity(statistic, calcDifficultyRatio(statistic.getCorrectCount(), statistic.getIncorrectCount()));
+        return StatisticDto.fromEntity(wordStatistic, calcDifficultyRatio(wordStatistic.getCorrectCount(), wordStatistic.getIncorrectCount()));
     }
 
-    @PreAuthorize("@vocabAccessHandler.ownershipCheck(#vocabId)")
+    @PreAuthorize("@vocabularyAccessHandler.ownershipCheck(#vocabId)")
     @Transactional(readOnly = true)
     public Double getVocabLearningRate(UUID vocabId) {
         Vocabulary vocabulary = vocabularyRepository.findById(vocabId)
@@ -50,25 +48,17 @@ public class StatisticService {
         if(wordRepository.countByVocabulary(vocabulary) < 1){
             return 0.0;
         }
-        return statisticRepository.getVocabLearningRate(vocabulary)
+        return wordStatisticRepository.getVocabularyLearningRate(vocabulary)
                 .orElseThrow(() -> new ApiException(GeneralResponseCode.INTERNAL_SERVER_ERROR));
     }
 
     @Transactional
     @PreAuthorize("@wordAccessHandler.ownershipCheck(#wordId)")
-    public void toggleRateByWordId(UUID wordId) {
-        Word word = wordRepository.findById(wordId)
-                .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_WORD));
-        Statistic statistic = statisticRepository.findRateByWord(word)
+    public void toggleLearnedByWordId(UUID wordId) {
+        WordStatistic wordStatistic = wordStatisticRepository.findById(wordId)
                 .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_RATE));
 
-        if(statistic.getIsLearned() > 0){
-            statistic.setIsLearned(0);
-        } else {
-            statistic.setIsLearned(1);
-        }
-
-        statisticRepository.save(statistic);
+        wordStatistic.setLearned(!wordStatistic.isLearned());
     }
 
     @Transactional
@@ -76,7 +66,7 @@ public class StatisticService {
     public void increaseCorrectCount(UUID wordId) {
         Word word = wordRepository.findById(wordId)
                         .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_WORD));
-        statisticRepository.increaseCorrectCount(word);
+        wordStatisticRepository.increaseCorrectCount(word);
     }
 
     @Transactional
@@ -84,18 +74,18 @@ public class StatisticService {
     public void increaseIncorrectCount(UUID wordId) {
         Word word = wordRepository.findById(wordId)
                 .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_WORD));
-        statisticRepository.increaseIncorrectCount(word);
+        wordStatisticRepository.increaseIncorrectCount(word);
     }
 
     @Transactional
-    @PreAuthorize("@vocabAccessHandler.ownershipCheck(#vId)")
+    @PreAuthorize("@vocabularyAccessHandler.ownershipCheck(#vId)")
     public double getAvgAccuracyByVocab(UUID vId) {
         Vocabulary vocabulary = vocabularyRepository.findById(vId)
                 .orElseThrow(()-> new ApiException(GeneralResponseCode.NO_VOCAB));
 
-        List<Statistic> statistics = statisticRepository.findByVocab(vocabulary);
+        List<WordStatistic> wordStatistics = wordStatisticRepository.findByVocab(vocabulary);
 
-        return calcAvgRate(statistics);
+        return calcAvgRate(wordStatistics);
     }
 
     @Transactional
@@ -104,28 +94,28 @@ public class StatisticService {
         User user = userRepository.findById(uId)
                 .orElseThrow(()-> new ApiException(NO_MEMBER));
 
-        List<Statistic> statistics = statisticRepository.findByMember(user);
+        List<WordStatistic> wordStatistics = wordStatisticRepository.findByMember(user);
 
-        return calcAvgRate(statistics);
+        return calcAvgRate(wordStatistics);
     }
 
-    private double calcAvgRate(List<Statistic> statistics) {
-        if(statistics == null || statistics.isEmpty()){
+    private double calcAvgRate(List<WordStatistic> wordStatistics) {
+        if(wordStatistics == null || wordStatistics.isEmpty()){
             return 0.0;
         }
 
         double sum = 0.0;
-        for(Statistic statistic : statistics){
-            if(statistic.getIncorrectCount() == 0){
-                if(statistic.getCorrectCount() > 0){
+        for(WordStatistic wordStatistic : wordStatistics){
+            if(wordStatistic.getIncorrectCount() == 0){
+                if(wordStatistic.getCorrectCount() > 0){
                     sum += 1;
                 }
             } else {
-                sum += (double) statistic.getCorrectCount() / (statistic.getIncorrectCount() + statistic.getCorrectCount());
+                sum += (double) wordStatistic.getCorrectCount() / (wordStatistic.getIncorrectCount() + wordStatistic.getCorrectCount());
             }
         }
 
-        return sum / statistics.size();
+        return sum / wordStatistics.size();
     }
 
     private double calcDifficultyRatio(Integer correct, Integer incorrect) {

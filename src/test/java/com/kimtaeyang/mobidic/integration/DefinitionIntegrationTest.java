@@ -7,7 +7,7 @@ import com.kimtaeyang.mobidic.dictionary.dto.AddWordRequestDto;
 import com.kimtaeyang.mobidic.auth.dto.SignUpRequestDto;
 import com.kimtaeyang.mobidic.auth.dto.LoginDto;
 import com.kimtaeyang.mobidic.user.repository.UserRepository;
-import com.kimtaeyang.mobidic.security.JwtUtil;
+import com.kimtaeyang.mobidic.security.jwt.JwtProvider;
 import com.kimtaeyang.mobidic.dictionary.type.PartOfSpeech;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
@@ -43,7 +43,7 @@ public class DefinitionIntegrationTest {
     private UserRepository userRepository;
 
     @Autowired
-    private JwtUtil jwtUtil;
+    private JwtProvider jwtProvider;
 
     @AfterEach
     void tearDown() {
@@ -56,7 +56,7 @@ public class DefinitionIntegrationTest {
         String email = "test@test.com";
         String nickname = "test";
         String token = loginAndGetToken(email, nickname);
-        UUID memberId = jwtUtil.getIdFromToken(token);
+        UUID memberId = jwtProvider.getIdFromToken(token);
         UUID wordId = addWordAndGetId(memberId, token);
 
         AddDefinitionRequestDto addDefRequest = AddDefinitionRequestDto.builder()
@@ -97,7 +97,7 @@ public class DefinitionIntegrationTest {
         //Fail with unauthorized token
         mockMvc.perform(post("/api/def/" + wordId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer " + jwtUtil.generateToken(UUID.randomUUID()))
+                        .header("Authorization", "Bearer " + jwtProvider.generateToken(UUID.randomUUID()))
                         .content(objectMapper.writeValueAsString(addDefRequest)))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.message")
@@ -131,7 +131,7 @@ public class DefinitionIntegrationTest {
         String email = "test@test.com";
         String nickname = "test";
         String token = loginAndGetToken(email, nickname);
-        UUID memberId = jwtUtil.getIdFromToken(token);
+        UUID memberId = jwtProvider.getIdFromToken(token);
         UUID wordId = addWordAndGetId(memberId, token);
 
         AddDefinitionRequestDto addDefRequest = AddDefinitionRequestDto.builder()
@@ -171,7 +171,7 @@ public class DefinitionIntegrationTest {
         //Fail with unauthorized token
         mockMvc.perform(get("/api/def/all")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer " + jwtUtil.generateToken(UUID.randomUUID()))
+                        .header("Authorization", "Bearer " + jwtProvider.generateToken(UUID.randomUUID()))
                         .param("wId", wordId.toString()))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.message")
@@ -194,7 +194,7 @@ public class DefinitionIntegrationTest {
         String email = "test@test.com";
         String nickname = "test";
         String token = loginAndGetToken(email, nickname);
-        UUID memberId = jwtUtil.getIdFromToken(token);
+        UUID memberId = jwtProvider.getIdFromToken(token);
         UUID wordId = addWordAndGetId(memberId, token);
 
         AddDefinitionRequestDto addDefRequest = AddDefinitionRequestDto.builder()
@@ -271,7 +271,7 @@ public class DefinitionIntegrationTest {
         //Fail with unauthorized token
         mockMvc.perform(patch("/api/def/" + defId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer " + jwtUtil.generateToken(UUID.randomUUID()))
+                        .header("Authorization", "Bearer " + jwtProvider.generateToken(UUID.randomUUID()))
                         .content(objectMapper.writeValueAsString(addDefRequest)))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.message")
@@ -317,7 +317,7 @@ public class DefinitionIntegrationTest {
         String email = "test@test.com";
         String nickname = "test";
         String token = loginAndGetToken(email, nickname);
-        UUID memberId = jwtUtil.getIdFromToken(token);
+        UUID memberId = jwtProvider.getIdFromToken(token);
         UUID wordId = addWordAndGetId(memberId, token);
 
         AddDefinitionRequestDto addDefRequest = AddDefinitionRequestDto.builder()
@@ -346,7 +346,7 @@ public class DefinitionIntegrationTest {
         //Fail with unauthorized token
         mockMvc.perform(delete("/api/def/" + defId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer " + jwtUtil.generateToken(UUID.randomUUID())))
+                        .header("Authorization", "Bearer " + jwtProvider.generateToken(UUID.randomUUID())))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.message")
                         .value(UNAUTHORIZED.getMessage()));

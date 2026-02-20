@@ -6,7 +6,7 @@ import com.kimtaeyang.mobidic.dictionary.dto.AddWordRequestDto;
 import com.kimtaeyang.mobidic.auth.dto.SignUpRequestDto;
 import com.kimtaeyang.mobidic.auth.dto.LoginDto;
 import com.kimtaeyang.mobidic.user.repository.UserRepository;
-import com.kimtaeyang.mobidic.security.JwtUtil;
+import com.kimtaeyang.mobidic.security.jwt.JwtProvider;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -28,7 +28,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("dev")
-public class StatisticIntegrationTest {
+public class WordStatisticIntegrationTest {
     @Autowired
     private MockMvc mockMvc;
 
@@ -39,7 +39,7 @@ public class StatisticIntegrationTest {
     private UserRepository userRepository;
 
     @Autowired
-    private JwtUtil jwtUtil;
+    private JwtProvider jwtProvider;
 
     @AfterEach
     void tearDown() {
@@ -52,7 +52,7 @@ public class StatisticIntegrationTest {
         String email = "test@test.com";
         String nickname = "test";
         String token = loginAndGetToken(email, nickname);
-        UUID memberId = jwtUtil.getIdFromToken(token);
+        UUID memberId = jwtProvider.getIdFromToken(token);
         UUID vocabId = addVocabAndGetId(memberId, token);
         UUID wordId = addWordAndGetId(vocabId, token);
 
@@ -82,7 +82,7 @@ public class StatisticIntegrationTest {
         //Fail with unauthorized token
         mockMvc.perform(get("/api/rate/w")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer " + jwtUtil.generateToken(UUID.randomUUID()))
+                        .header("Authorization", "Bearer " + jwtProvider.generateToken(UUID.randomUUID()))
                         .param("wId", wordId.toString()))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.message")
@@ -104,7 +104,7 @@ public class StatisticIntegrationTest {
         String email = "test@test.com";
         String nickname = "test";
         String token = loginAndGetToken(email, nickname);
-        UUID userId = jwtUtil.getIdFromToken(token);
+        UUID userId = jwtProvider.getIdFromToken(token);
         UUID vocabularyId = addVocabAndGetId(userId, token);
         UUID wordId = addWordAndGetId(vocabularyId, token);
 
@@ -128,7 +128,7 @@ public class StatisticIntegrationTest {
         //Fail with unauthorized token
         mockMvc.perform(get("/api/rate/v")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer " + jwtUtil.generateToken(UUID.randomUUID()))
+                        .header("Authorization", "Bearer " + jwtProvider.generateToken(UUID.randomUUID()))
                         .param("vId", vocabularyId.toString()))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.message")
@@ -150,7 +150,7 @@ public class StatisticIntegrationTest {
         String email = "test@test.com";
         String nickname = "test";
         String token = loginAndGetToken(email, nickname);
-        UUID memberId = jwtUtil.getIdFromToken(token);
+        UUID memberId = jwtProvider.getIdFromToken(token);
         UUID vocabId = addVocabAndGetId(memberId, token);
         UUID wordId = addWordAndGetId(vocabId, token);
 
@@ -191,7 +191,7 @@ public class StatisticIntegrationTest {
         //Fail with unauthorized token
         mockMvc.perform(patch("/api/rate/tog/" + wordId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer " + jwtUtil.generateToken(UUID.randomUUID())))
+                        .header("Authorization", "Bearer " + jwtProvider.generateToken(UUID.randomUUID())))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.message")
                         .value(UNAUTHORIZED.getMessage()));

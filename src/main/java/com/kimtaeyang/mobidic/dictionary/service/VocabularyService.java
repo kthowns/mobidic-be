@@ -63,8 +63,8 @@ public class VocabularyService {
     }
 
     @Transactional(readOnly = true)
-    @PreAuthorize("@vocabAccessHandler.ownershipCheck(#vId)")
-    public VocabularyDto getVocabById(UUID vId) {
+    @PreAuthorize("@vocabularyAccessHandler.ownershipCheck(#vId)")
+    public VocabularyDto getVocabularyById(UUID vId) {
         Vocabulary vocabulary = vocabularyRepository.findById(vId)
                 .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_VOCAB));
 
@@ -72,8 +72,8 @@ public class VocabularyService {
     }
 
     @Transactional
-    @PreAuthorize("@vocabAccessHandler.ownershipCheck(#vocabId)")
-    public VocabularyDto updateVocab(
+    @PreAuthorize("@vocabularyAccessHandler.ownershipCheck(#vocabId)")
+    public VocabularyDto updateVocabulary(
             UUID vocabId, AddVocabularyRequestDto request) {
         Vocabulary vocabulary = vocabularyRepository.findById(vocabId)
                 .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_VOCAB));
@@ -92,7 +92,7 @@ public class VocabularyService {
     }
 
     @Transactional
-    @PreAuthorize("@vocabAccessHandler.ownershipCheck(#vocabId)")
+    @PreAuthorize("@vocabularyAccessHandler.ownershipCheck(#vocabId)")
     public VocabularyDto deleteVocab(UUID vocabId) {
         Vocabulary vocabulary = vocabularyRepository.findById(vocabId)
                 .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_VOCAB));

@@ -1,6 +1,6 @@
 package com.kimtaeyang.mobidic.statistic.dto;
 
-import com.kimtaeyang.mobidic.statistic.entity.Statistic;
+import com.kimtaeyang.mobidic.statistic.entity.WordStatistic;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -16,15 +16,15 @@ public class StatisticDto {
     private UUID wordId;
     private int correctCount;
     private int incorrectCount;
-    private int isLearned;
+    private boolean isLearned;
     private double difficulty;
 
-    public static StatisticDto fromEntity(Statistic rate, double difficulty) {
+    public static StatisticDto fromEntity(WordStatistic wordStatistic, double difficulty) {
         return StatisticDto.builder()
-                .wordId(rate.getWordId())
-                .correctCount(rate.getCorrectCount())
-                .incorrectCount(rate.getIncorrectCount())
-                .isLearned(rate.getIsLearned())
+                .wordId(wordStatistic.getWordId())
+                .correctCount(wordStatistic.getCorrectCount())
+                .incorrectCount(wordStatistic.getIncorrectCount())
+                .isLearned(wordStatistic.isLearned())
                 .difficulty(difficulty)
                 .build();
     }

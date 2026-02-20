@@ -13,14 +13,14 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Slf4j
 @Transactional(readOnly = true)
-public class VocabAccessHandler extends AccessHandler {
+public class VocabularyAccessHandler extends AccessHandler {
     private final VocabularyRepository vocabularyRepository;
 
     @Override
     boolean isResourceOwner(UUID resourceId) {
         return vocabularyRepository.findById(resourceId)
                 .map(Vocabulary::getUser)
-                .filter((m) -> getCurrentMemberId().equals(m.getId()))
+                .filter((m) -> getCurrentUserId().equals(m.getId()))
                 .isPresent();
     }
 }

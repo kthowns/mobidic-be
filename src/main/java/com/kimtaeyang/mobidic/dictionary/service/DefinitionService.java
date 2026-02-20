@@ -59,7 +59,7 @@ public class DefinitionService {
     }
 
     @Transactional
-    @PreAuthorize("@defAccessHandler.ownershipCheck(#defId)")
+    @PreAuthorize("@definitionAccessHandler.ownershipCheck(#defId)")
     public DefinitionDto updateDefinition(UUID defId, AddDefinitionRequestDto request) {
         Definition definition = definitionRepository.findById(defId)
                 .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_DEF));
@@ -78,7 +78,7 @@ public class DefinitionService {
     }
 
     @Transactional
-    @PreAuthorize("@defAccessHandler.ownershipCheck(#defId)")
+    @PreAuthorize("@definitionAccessHandler.ownershipCheck(#defId)")
     public DefinitionDto deleteDefinition(UUID defId) {
         Definition definition = definitionRepository.findById(defId)
                 .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_DEF));

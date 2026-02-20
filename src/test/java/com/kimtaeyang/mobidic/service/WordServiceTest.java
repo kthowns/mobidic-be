@@ -1,13 +1,14 @@
 package com.kimtaeyang.mobidic.service;
 
+import com.kimtaeyang.mobidic.config.ServiceTestConfig;
 import com.kimtaeyang.mobidic.dictionary.dto.AddWordRequestDto;
 import com.kimtaeyang.mobidic.dictionary.dto.WordDto;
 import com.kimtaeyang.mobidic.dictionary.entity.Vocabulary;
+import com.kimtaeyang.mobidic.statistic.entity.WordStatistic;
 import com.kimtaeyang.mobidic.user.entity.User;
-import com.kimtaeyang.mobidic.statistic.entity.Statistic;
 import com.kimtaeyang.mobidic.dictionary.entity.Word;
 import com.kimtaeyang.mobidic.dictionary.repository.DefinitionRepository;
-import com.kimtaeyang.mobidic.statistic.repository.StatisticRepository;
+import com.kimtaeyang.mobidic.statistic.repository.WordStatisticRepository;
 import com.kimtaeyang.mobidic.dictionary.repository.VocabularyRepository;
 import com.kimtaeyang.mobidic.dictionary.repository.WordRepository;
 import com.kimtaeyang.mobidic.dictionary.service.WordService;
@@ -34,7 +35,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {WordService.class, WordServiceTest.TestConfig.class})
+@ContextConfiguration(classes = {WordService.class, ServiceTestConfig.class})
 @ActiveProfiles("dev")
 class WordServiceTest {
     @Autowired
@@ -46,7 +47,7 @@ class WordServiceTest {
     private DefinitionRepository definitionRepository;
 
     @Autowired
-    private StatisticRepository statisticRepository;
+    private WordStatisticRepository wordStatisticRepository;
 
     @Autowired
     private WordService wordService;
@@ -90,7 +91,7 @@ class WordServiceTest {
 
     @Test
     @DisplayName("[WordService] Get words by vocab id success")
-    void getWordsByVocabIdSuccess() {
+    void getWordsByVocabularyIdSuccess() {
         resetMock();
 
         Word defaultWord = Word.builder()
@@ -98,9 +99,9 @@ class WordServiceTest {
                 .expression("expression")
                 .build();
 
-        Statistic defaultRate = Statistic.builder()
+        WordStatistic defaultRate = WordStatistic.builder()
                 .word(defaultWord)
-                .isLearned(0)
+                .isLearned(true)
                 .incorrectCount(4)
                 .correctCount(3)
                 .build();
@@ -113,11 +114,11 @@ class WordServiceTest {
                 .willReturn(Optional.of(Mockito.mock(Vocabulary.class)));
         given(wordRepository.findByVocabulary(any(Vocabulary.class)))
                 .willReturn(words);
-        given(statisticRepository.findRateByWord(any(Word.class)))
+        given(wordStatisticRepository.findById(any(UUID.class)))
                 .willReturn(Optional.of(defaultRate));
 
         //when
-        List<WordDto> response = wordService.getWordsByVocabId(UUID.randomUUID());
+        List<WordDto> response = wordService.getWordsByVocabularyId(UUID.randomUUID());
 
         //then
         assertEquals(words.getFirst().getVocabulary().getId(), response.getFirst().getVocabularyId());
@@ -168,30 +169,7 @@ class WordServiceTest {
         assertEquals(request.getExpression(), response.getExpression());
     }
 
-    @TestConfiguration
-    static class TestConfig {
-        @Bean
-        public WordRepository wordRepository() {
-            return Mockito.mock(WordRepository.class);
-        }
-
-        @Bean
-        public VocabularyRepository vocabRepository() {
-            return Mockito.mock(VocabularyRepository.class);
-        }
-
-        @Bean
-        public DefinitionRepository defRepository() {
-            return Mockito.mock(DefinitionRepository.class);
-        }
-
-        @Bean
-        public StatisticRepository rateRepository() {
-            return Mockito.mock(StatisticRepository.class);
-        }
-    }
-
     private void resetMock() {
-        Mockito.reset(wordRepository, vocabularyRepository, definitionRepository, statisticRepository);
+        Mockito.reset(wordRepository, vocabularyRepository, definitionRepository, wordStatisticRepository);
     }
 }

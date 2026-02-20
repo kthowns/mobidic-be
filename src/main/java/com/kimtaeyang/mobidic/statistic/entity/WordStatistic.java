@@ -15,7 +15,7 @@ import java.util.UUID;
 @Builder
 @Entity
 @Table(name="word_statistics")
-public class Statistic {
+public class WordStatistic {
     @Id
     private UUID wordId;
 
@@ -31,5 +31,5 @@ public class Statistic {
     private int incorrectCount;
 
     @Column(name = "is_learned")
-    private int isLearned;
+    private boolean isLearned;
 }

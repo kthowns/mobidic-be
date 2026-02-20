@@ -27,7 +27,7 @@ import static com.kimtaeyang.mobidic.common.code.GeneralResponseCode.OK;
 @RestController
 @RequiredArgsConstructor
 @Slf4j
-@RequestMapping("/api/pron")
+@RequestMapping("/api/pronunciation")
 @Tag(name = "발음 체크 관련 서비스", description = "발음 점수 체크 등")
 public class PronunciationController {
     private final PronunciationService pronunciationService;

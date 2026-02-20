@@ -18,7 +18,7 @@ public class UserAccessHandler extends AccessHandler {
     @Override
     boolean isResourceOwner(UUID resourceId) {
         return userRepository.findById(resourceId)
-                .filter((m) -> getCurrentMemberId().equals(resourceId))
+                .filter((m) -> getCurrentUserId().equals(resourceId))
                 .isPresent();
     }
 }

@@ -1,9 +1,10 @@
 package com.kimtaeyang.mobidic.pronunciation.service;
 
 import com.kimtaeyang.mobidic.common.code.GeneralResponseCode;
-import com.kimtaeyang.mobidic.dictionary.entity.Word;
 import com.kimtaeyang.mobidic.common.exception.ApiException;
+import com.kimtaeyang.mobidic.dictionary.entity.Word;
 import com.kimtaeyang.mobidic.dictionary.repository.WordRepository;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,7 +30,7 @@ public class PronunciationService {
 
     @PreAuthorize("@wordAccessHandler.ownershipCheck(#wordId)")
     public double ratePronunciation(UUID wordId, MultipartFile record) {
-        if(record.getSize() > 1024 * 100) {
+        if (record.getSize() > 1024 * 100) {
             throw new ApiException(GeneralResponseCode.TOO_BIG_FILE_SIZE);
         }
         Word word = wordRepository.findById(wordId)
@@ -72,7 +73,7 @@ public class PronunciationService {
         int cost;
         for (int i = 1; i <= m; i++) {
             for (int j = 1; j <= n; j++) {
-                cost = X.charAt(i - 1) == Y.charAt(j - 1) ? 0: 1;
+                cost = X.charAt(i - 1) == Y.charAt(j - 1) ? 0 : 1;
                 T[i][j] = Integer.min(Integer.min(T[i - 1][j] + 1, T[i][j - 1] + 1),
                         T[i - 1][j - 1] + cost);
             }
@@ -81,10 +82,10 @@ public class PronunciationService {
         return T[m][n];
     }
 
-    public static int getDamerauLevenshteinDistance(CharSequence source, CharSequence target) {
-        if (source == null || target == null) {
-            throw new IllegalArgumentException("Parameter must not be null");
-        }
+    public static int getDamerauLevenshteinDistance(
+            @NonNull CharSequence source,
+            @NonNull CharSequence target
+    ) {
         int sourceLength = source.length();
         int targetLength = target.length();
         if (sourceLength == 0) return targetLength;

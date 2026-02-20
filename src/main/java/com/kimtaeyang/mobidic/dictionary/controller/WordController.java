@@ -26,7 +26,7 @@ import static com.kimtaeyang.mobidic.common.code.GeneralResponseCode.OK;
 @RestController
 @Slf4j
 @RequiredArgsConstructor
-@RequestMapping("/api/word")
+@RequestMapping("/api/words")
 @Tag(name = "단어 관련 서비스", description = "단어장 별 단어 불러오기, 추가 등")
 public class WordController {
     private final WordService wordService;
@@ -49,13 +49,13 @@ public class WordController {
             @ApiResponse(responseCode = "500", description = "서버 오류",
                     content = @Content(schema = @Schema(hidden = true)))
     })
-    @PostMapping("/{vocabId}")
+    @PostMapping("/{vocabularyId}")
     public ResponseEntity<GeneralResponse<WordDto>> addWord(
-            @PathVariable("vocabId") String vocabId,
+            @PathVariable("vocabularyId") String vocabularyId,
             @RequestBody @Valid AddWordRequestDto request
     ) {
         return GeneralResponse.toResponseEntity(OK,
-                wordService.addWord(UUID.fromString(vocabId), request));
+                wordService.addWord(UUID.fromString(vocabularyId), request));
     }
 
     @Operation(
@@ -126,10 +126,10 @@ public class WordController {
                     content = @Content(schema = @Schema(hidden = true)))
     })
     @GetMapping("/all")
-    public ResponseEntity<GeneralResponse<List<WordDto>>> getWordsByVocabId(
-            @RequestParam String vId
+    public ResponseEntity<GeneralResponse<List<WordDto>>> getWordsByVocabularyId(
+            @RequestParam String vocabularyId
     ) {
         return GeneralResponse.toResponseEntity(OK,
-                wordService.getWordsByVocabId(UUID.fromString(vId)));
+                wordService.getWordsByVocabularyId(UUID.fromString(vocabularyId)));
     }
 }

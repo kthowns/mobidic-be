@@ -1,12 +1,12 @@
 package com.kimtaeyang.mobidic.service;
 
 import com.kimtaeyang.mobidic.auth.service.AuthService;
-import com.kimtaeyang.mobidic.user.dto.UserDto;
+import com.kimtaeyang.mobidic.config.ServiceTestConfig;
 import com.kimtaeyang.mobidic.user.dto.UpdateNicknameRequestDto;
 import com.kimtaeyang.mobidic.user.dto.UpdatePasswordRequestDto;
+import com.kimtaeyang.mobidic.user.dto.UserDto;
 import com.kimtaeyang.mobidic.user.entity.User;
 import com.kimtaeyang.mobidic.user.repository.UserRepository;
-import com.kimtaeyang.mobidic.security.JwtBlacklistService;
 import com.kimtaeyang.mobidic.user.service.UserService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -14,9 +14,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Bean;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
@@ -40,7 +37,7 @@ import static org.mockito.Mockito.verify;
         "jwt.exp=3600"
 })
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {UserService.class, UserServiceTest.TestConfig.class})
+@ContextConfiguration(classes = {UserService.class, ServiceTestConfig.class})
 @ActiveProfiles("dev")
 class UserServiceTest {
     @Autowired
@@ -168,29 +165,6 @@ class UserServiceTest {
         User savedUser = memberCaptor.getValue();
 
         assertThat(passwordEncoder.matches(request.getPassword(), savedUser.getPassword()));
-    }
-
-    @TestConfiguration
-    static class TestConfig {
-        @Bean
-        public UserRepository memberRepository() {
-            return Mockito.mock(UserRepository.class);
-        }
-
-        @Bean
-        public JwtBlacklistService jwtBlacklistService() {
-            return Mockito.mock(JwtBlacklistService.class);
-        }
-
-        @Bean
-        public PasswordEncoder passwordEncoder() {
-            return new BCryptPasswordEncoder();
-        }
-
-        @Bean
-        public AuthService authService() {
-            return Mockito.mock(AuthService.class);
-        }
     }
 
     private void resetMock() {

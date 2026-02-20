@@ -1,9 +1,9 @@
 package com.kimtaeyang.mobidic.quiz.controller;
 
-import com.kimtaeyang.mobidic.quiz.dto.QuizDto;
-import com.kimtaeyang.mobidic.quiz.dto.QuizStatisticDto;
 import com.kimtaeyang.mobidic.common.dto.ErrorResponse;
 import com.kimtaeyang.mobidic.common.dto.GeneralResponse;
+import com.kimtaeyang.mobidic.quiz.dto.QuizDto;
+import com.kimtaeyang.mobidic.quiz.dto.QuizStatisticDto;
 import com.kimtaeyang.mobidic.quiz.service.CryptoService;
 import com.kimtaeyang.mobidic.quiz.service.QuizService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -27,7 +27,7 @@ import static com.kimtaeyang.mobidic.common.code.GeneralResponseCode.OK;
 @RestController
 @RequiredArgsConstructor
 @Slf4j
-@RequestMapping("/api/quiz")
+@RequestMapping("/api/quizs")
 public class QuizController {
     private final QuizService quizService;
     private final CryptoService cryptoService;
@@ -48,12 +48,12 @@ public class QuizController {
             @ApiResponse(responseCode = "500", description = "서버 오류",
                     content = @Content(schema = @Schema(hidden = true)))
     })
-    @GetMapping("/generate/ox")
-    public ResponseEntity<GeneralResponse<List<QuizDto>>> getOxQuiz(
-            @RequestParam("vId") UUID vId
+    @GetMapping("/ox")
+    public ResponseEntity<GeneralResponse<List<QuizDto>>> getOxQuizzes(
+            @RequestParam UUID vocabularyId
     ) {
         return GeneralResponse.toResponseEntity(OK,
-                quizService.getOXQuizzes(vId));
+                quizService.getOXQuizzes(vocabularyId));
     }
 
     @Operation(
@@ -72,12 +72,12 @@ public class QuizController {
             @ApiResponse(responseCode = "500", description = "서버 오류",
                     content = @Content(schema = @Schema(hidden = true)))
     })
-    @GetMapping("/generate/blank")
-    public ResponseEntity<GeneralResponse<List<QuizDto>>> getBlankQuiz(
-            @RequestParam("vId") UUID vId
+    @GetMapping("/blank")
+    public ResponseEntity<GeneralResponse<List<QuizDto>>> getBlankQuizzes(
+            @RequestParam UUID vocabularyId
     ) {
         return GeneralResponse.toResponseEntity(OK,
-                quizService.getBlankQuizzes(vId));
+                quizService.getBlankQuizzes(vocabularyId));
     }
 
     @Operation(
@@ -102,9 +102,9 @@ public class QuizController {
     public ResponseEntity<GeneralResponse<QuizStatisticDto.Response>> rateOxQuiz(
             @RequestBody QuizStatisticDto.Request request
     ) {
-        UUID memberId = UUID.fromString(cryptoService.decrypt(request.getToken()).split(":")[1]);
+        UUID userId = UUID.fromString(cryptoService.decrypt(request.getToken()).split(":")[1]);
 
         return GeneralResponse.toResponseEntity(OK,
-                quizService.rateQuestion(memberId, request));
+                quizService.rateQuestion(userId, request));
     }
 }

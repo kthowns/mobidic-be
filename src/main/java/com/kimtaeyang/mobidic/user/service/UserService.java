@@ -4,7 +4,7 @@ import com.kimtaeyang.mobidic.auth.service.AuthService;
 import com.kimtaeyang.mobidic.common.code.AuthResponseCode;
 import com.kimtaeyang.mobidic.common.code.GeneralResponseCode;
 import com.kimtaeyang.mobidic.common.exception.ApiException;
-import com.kimtaeyang.mobidic.security.JwtBlacklistService;
+import com.kimtaeyang.mobidic.security.jwt.JwtBlacklistService;
 import com.kimtaeyang.mobidic.user.dto.UpdateNicknameRequestDto;
 import com.kimtaeyang.mobidic.user.dto.UpdatePasswordRequestDto;
 import com.kimtaeyang.mobidic.user.dto.UserDto;

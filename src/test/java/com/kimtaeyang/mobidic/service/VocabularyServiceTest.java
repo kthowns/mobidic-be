@@ -1,20 +1,19 @@
 package com.kimtaeyang.mobidic.service;
 
+import com.kimtaeyang.mobidic.config.ServiceTestConfig;
 import com.kimtaeyang.mobidic.dictionary.dto.AddVocabularyRequestDto;
 import com.kimtaeyang.mobidic.dictionary.dto.VocabularyDto;
 import com.kimtaeyang.mobidic.dictionary.entity.Vocabulary;
-import com.kimtaeyang.mobidic.user.entity.User;
-import com.kimtaeyang.mobidic.user.repository.UserRepository;
 import com.kimtaeyang.mobidic.dictionary.repository.VocabularyRepository;
 import com.kimtaeyang.mobidic.dictionary.service.VocabularyService;
+import com.kimtaeyang.mobidic.user.entity.User;
+import com.kimtaeyang.mobidic.user.repository.UserRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Bean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -30,7 +29,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {VocabularyService.class, VocabularyServiceTest.TestConfig.class})
+@ContextConfiguration(classes = {VocabularyService.class, ServiceTestConfig.class})
 @ActiveProfiles("dev")
 class VocabularyServiceTest {
     @Autowired
@@ -128,7 +127,7 @@ class VocabularyServiceTest {
                 .willReturn(Optional.of(defaultVocabulary));
 
         //when
-        VocabularyDto response = vocabularyService.getVocabById(vocabId);
+        VocabularyDto response = vocabularyService.getVocabularyById(vocabId);
 
         //then
         assertEquals(vocabId, response.getId());
@@ -138,7 +137,7 @@ class VocabularyServiceTest {
 
     @Test
     @DisplayName("[VocabService] Update vocab success")
-    void updateVocabSuccess() {
+    void updateVocabularySuccess() {
         resetMock();
 
         UUID vocabId = UUID.randomUUID();
@@ -174,7 +173,7 @@ class VocabularyServiceTest {
 
         //when
         VocabularyDto response =
-                vocabularyService.updateVocab(vocabId, request);
+                vocabularyService.updateVocabulary(vocabId, request);
 
         //then
         verify(vocabularyRepository, times(1))
@@ -182,19 +181,6 @@ class VocabularyServiceTest {
         assertEquals(vocabId, response.getId());
         assertEquals(request.getTitle(), response.getTitle());
         assertEquals(request.getDescription(), response.getDescription());
-    }
-
-    @TestConfiguration
-    static class TestConfig {
-        @Bean
-        public VocabularyRepository vocabRepository() {
-            return Mockito.mock(VocabularyRepository.class);
-        }
-
-        @Bean
-        public UserRepository memberRepository() {
-            return Mockito.mock(UserRepository.class);
-        }
     }
 
     private void resetMock() {

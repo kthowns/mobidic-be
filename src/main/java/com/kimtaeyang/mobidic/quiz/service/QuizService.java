@@ -39,12 +39,12 @@ public class QuizService {
     private final CryptoService cryptoService;
     private final DefinitionService definitionService;
 
-    @PreAuthorize("@vocabAccessHandler.ownershipCheck(#vocabularyId)")
+    @PreAuthorize("@vocabularyAccessHandler.ownershipCheck(#vocabularyId)")
     public List<QuizDto> getOXQuizzes(UUID vocabularyId) {
         return generateQuestions(vocabularyId, QuizType.OX);
     }
 
-    @PreAuthorize("@vocabAccessHandler.ownershipCheck(#vocabularyId)")
+    @PreAuthorize("@vocabularyAccessHandler.ownershipCheck(#vocabularyId)")
     public List<QuizDto> getBlankQuizzes(UUID vocabularyId) {
         return generateQuestions(vocabularyId, QuizType.BLANK);
     }
@@ -74,10 +74,10 @@ public class QuizService {
     }
 
     private List<QuizDto> generateQuestions(UUID vocabularyId, QuizType quizType) {
-        VocabularyDto vocabulary = vocabularyService.getVocabById(vocabularyId);
+        VocabularyDto vocabulary = vocabularyService.getVocabularyById(vocabularyId);
 
         List<WordWithDefinitions> wordsWithDefs = new ArrayList<>();
-        List<WordDto> wordDtos = wordService.getWordsByVocabId(vocabulary.getId());
+        List<WordDto> wordDtos = wordService.getWordsByVocabularyId(vocabulary.getId());
         if (wordDtos.isEmpty()) {
             return List.of();
         }
