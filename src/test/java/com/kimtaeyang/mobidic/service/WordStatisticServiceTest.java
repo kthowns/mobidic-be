@@ -12,23 +12,28 @@ import com.kimtaeyang.mobidic.statistic.service.StatisticService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {StatisticService.class, ServiceTestConfig.class})
-@ActiveProfiles("dev")
+@ActiveProfiles("test")
+@TestPropertySource(properties = {
+        "jwt.secret=f825308ac5df56907db5835775baf3e4594526f127cb8d9bca70b435d596d424",
+        "jwt.exp=3600000"
+})
 class WordStatisticServiceTest {
     @Autowired
     private WordStatisticRepository wordStatisticRepository;
@@ -103,7 +108,7 @@ class WordStatisticServiceTest {
 
         UUID wordId = UUID.randomUUID();
 
-        WordStatistic defaultRate = WordStatistic.builder()
+        WordStatistic defaultStatistic = WordStatistic.builder()
                 .wordId(wordId)
                 .word(Mockito.mock(Word.class))
                 .correctCount(3)
@@ -111,27 +116,22 @@ class WordStatisticServiceTest {
                 .incorrectCount(4)
                 .build();
 
-        ArgumentCaptor<WordStatistic> captor =
-                ArgumentCaptor.forClass(WordStatistic.class);
-
         //given
         given(wordRepository.findById(any(UUID.class)))
                 .willReturn(Optional.of(Mockito.mock(Word.class)));
         given(wordStatisticRepository.findById(any(UUID.class)))
-                .willReturn(Optional.of(defaultRate));
+                .willReturn(Optional.of(defaultStatistic));
         given(wordStatisticRepository.save(any(WordStatistic.class)))
                 .willReturn(Mockito.mock(WordStatistic.class));
 
         //when
         statisticService.toggleLearnedByWordId(wordId);
 
-        //then
-        verify(wordStatisticRepository, times(1))
-                .save(captor.capture());
-        WordStatistic savedRate = captor.getValue();
 
-        assertEquals(defaultRate.getWordId(), savedRate.getWordId());
-        assertEquals(true, savedRate.isLearned());
+        // then
+        assertFalse(defaultStatistic.isLearned());
+        verify(wordStatisticRepository, times(1)).findById(wordId);
+        verify(wordStatisticRepository, never()).save(any());
     }
 
     private void resetMock() {

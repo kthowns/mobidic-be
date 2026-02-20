@@ -1,11 +1,12 @@
 package com.kimtaeyang.mobidic.integration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.kimtaeyang.mobidic.auth.dto.LoginRequest;
 import com.kimtaeyang.mobidic.auth.dto.SignUpRequestDto;
+import com.kimtaeyang.mobidic.security.jwt.JwtProvider;
 import com.kimtaeyang.mobidic.user.dto.UpdateNicknameRequestDto;
 import com.kimtaeyang.mobidic.user.dto.UpdatePasswordRequestDto;
 import com.kimtaeyang.mobidic.user.repository.UserRepository;
-import com.kimtaeyang.mobidic.security.jwt.JwtProvider;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -266,7 +267,7 @@ public class UserIntegrationTest {
                 .password("testTest1")
                 .build();
 
-        LoginDto.Request loginRequest = LoginDto.Request.builder()
+        LoginRequest loginRequest = LoginRequest.builder()
                 .email(joinRequest.getEmail())
                 .password(joinRequest.getPassword())
                 .build();

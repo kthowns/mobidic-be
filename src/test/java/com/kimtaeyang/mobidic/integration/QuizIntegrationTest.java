@@ -3,14 +3,15 @@ package com.kimtaeyang.mobidic.integration;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.kimtaeyang.mobidic.auth.dto.LoginRequest;
 import com.kimtaeyang.mobidic.auth.dto.SignUpRequestDto;
+import com.kimtaeyang.mobidic.dictionary.dto.*;
 import com.kimtaeyang.mobidic.dictionary.model.WordWithDefinitions;
+import com.kimtaeyang.mobidic.dictionary.type.PartOfSpeech;
 import com.kimtaeyang.mobidic.quiz.dto.QuizDto;
 import com.kimtaeyang.mobidic.quiz.dto.QuizStatisticDto;
-import com.kimtaeyang.mobidic.user.repository.UserRepository;
 import com.kimtaeyang.mobidic.security.jwt.JwtProvider;
-import com.kimtaeyang.mobidic.dictionary.type.PartOfSpeech;
-import com.kimtaeyang.mobidic.dictionary.dto.*;
+import com.kimtaeyang.mobidic.user.repository.UserRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -324,7 +325,7 @@ public class QuizIntegrationTest {
                 .password("testTest1")
                 .build();
 
-        LoginDto.Request loginRequest = LoginDto.Request.builder()
+        LoginRequest loginRequest = LoginRequest.builder()
                 .email(joinRequest.getEmail())
                 .password(joinRequest.getPassword())
                 .build();

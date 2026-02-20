@@ -32,13 +32,13 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-@TestPropertySource(properties = {
-        "jwt.secret=qwerqwerqwerqwerqwerqwerqwerqwer",
-        "jwt.exp=3600"
-})
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {UserService.class, ServiceTestConfig.class})
-@ActiveProfiles("dev")
+@ActiveProfiles("test")
+@TestPropertySource(properties = {
+        "jwt.secret=f825308ac5df56907db5835775baf3e4594526f127cb8d9bca70b435d596d424",
+        "jwt.exp=3600000"
+})
 class UserServiceTest {
     @Autowired
     private UserService userService;

@@ -25,7 +25,7 @@ import java.util.UUID;
 public class PronunciationService {
     private final WordRepository wordRepository;
 
-    @Value("${app.whisper.flask-server-url}")
+    @Value("${whisper.flask-server-url}")
     private String flaskServerUrl;
 
     @PreAuthorize("@wordAccessHandler.ownershipCheck(#wordId)")

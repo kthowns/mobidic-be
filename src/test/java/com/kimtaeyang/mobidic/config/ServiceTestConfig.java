@@ -23,13 +23,8 @@ import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.test.context.TestPropertySource;
 
 @TestConfiguration
-@TestPropertySource(properties = {
-        "jwt.secret=qwerqwerqwerqwerqwerqwerqwerqwer",
-        "jwt.exp=3600"
-})
 public class ServiceTestConfig {
     @Bean
     public WordRepository wordRepository() {

@@ -16,6 +16,7 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.ArrayList;
@@ -30,7 +31,11 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {VocabularyService.class, ServiceTestConfig.class})
-@ActiveProfiles("dev")
+@ActiveProfiles("test")
+@TestPropertySource(properties = {
+        "jwt.secret=f825308ac5df56907db5835775baf3e4594526f127cb8d9bca70b435d596d424",
+        "jwt.exp=3600000"
+})
 class VocabularyServiceTest {
     @Autowired
     private VocabularyRepository vocabularyRepository;

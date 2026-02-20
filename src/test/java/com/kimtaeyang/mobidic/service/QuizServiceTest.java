@@ -22,6 +22,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.ArrayList;
@@ -35,7 +36,11 @@ import static org.mockito.BDDMockito.given;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {QuizService.class, ServiceTestConfig.class})
-@ActiveProfiles("dev")
+@ActiveProfiles("test")
+@TestPropertySource(properties = {
+        "jwt.secret=f825308ac5df56907db5835775baf3e4594526f127cb8d9bca70b435d596d424",
+        "jwt.exp=3600000"
+})
 public class QuizServiceTest {
     @Autowired
     private QuizService quizService;

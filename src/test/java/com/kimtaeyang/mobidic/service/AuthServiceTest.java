@@ -1,6 +1,6 @@
 package com.kimtaeyang.mobidic.service;
 
-import com.kimtaeyang.mobidic.auth.dto.LoginDto;
+import com.kimtaeyang.mobidic.auth.dto.LoginRequest;
 import com.kimtaeyang.mobidic.auth.dto.SignUpRequestDto;
 import com.kimtaeyang.mobidic.auth.service.AuthService;
 import com.kimtaeyang.mobidic.config.ServiceTestConfig;
@@ -32,7 +32,10 @@ import static org.mockito.ArgumentMatchers.anyString;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {AuthService.class, ServiceTestConfig.class})
-@ActiveProfiles("dev")
+@TestPropertySource(properties = {
+        "jwt.secret=f825308ac5df56907db5835775baf3e4594526f127cb8d9bca70b435d596d424",
+        "jwt.exp=3600000"
+})
 class AuthServiceTest {
 
     @Autowired
@@ -52,7 +55,7 @@ class AuthServiceTest {
 
     @Test
     @DisplayName("[AuthService] Join success")
-    void joinTestSuccess() {
+    void signUpTestSuccess() {
         // given
         String rawPassword = "test1234";
         String encodedPassword = passwordEncoder.encode(rawPassword);
@@ -78,7 +81,7 @@ class AuthServiceTest {
                 .thenReturn(userToReturn);
 
         // when
-        UserDto response = authService.join(request);
+        UserDto response = authService.signUp(request);
 
         // then
         assertEquals(request.getEmail(), response.getEmail());
@@ -91,7 +94,7 @@ class AuthServiceTest {
     void loginTestSuccess() {
         String rawPassword = "test1234";
 
-        LoginDto.Request request = LoginDto.Request.builder()
+        LoginRequest request = LoginRequest.builder()
                 .email("user@example.com")
                 .password(rawPassword)
                 .build();
@@ -110,7 +113,7 @@ class AuthServiceTest {
                 .thenReturn(principal);
 
         // when
-        String token = authService.login(request).getToken();
+        String token = authService.login(request).getAccessToken();
 
         // then
         assertEquals(principal.getId(), jwtProvider.getIdFromToken(token));
@@ -122,7 +125,7 @@ class AuthServiceTest {
     void loginTestFail() {
         String rawPassword = "test1234";
 
-        LoginDto.Request request = LoginDto.Request.builder()
+        LoginRequest request = LoginRequest.builder()
                 .email("user@example.com")
                 .password(rawPassword)
                 .build();

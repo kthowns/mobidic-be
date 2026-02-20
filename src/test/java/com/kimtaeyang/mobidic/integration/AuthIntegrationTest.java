@@ -118,7 +118,7 @@ public class AuthIntegrationTest {
                 .build();
 
         //Join
-        mockMvc.perform(post("/api/auth/join")
+        mockMvc.perform(post("/api/auth/")
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(joinRequest)))
                 .andExpect(status().isOk());

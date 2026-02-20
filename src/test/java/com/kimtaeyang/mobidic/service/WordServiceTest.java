@@ -4,24 +4,23 @@ import com.kimtaeyang.mobidic.config.ServiceTestConfig;
 import com.kimtaeyang.mobidic.dictionary.dto.AddWordRequestDto;
 import com.kimtaeyang.mobidic.dictionary.dto.WordDto;
 import com.kimtaeyang.mobidic.dictionary.entity.Vocabulary;
-import com.kimtaeyang.mobidic.statistic.entity.WordStatistic;
-import com.kimtaeyang.mobidic.user.entity.User;
 import com.kimtaeyang.mobidic.dictionary.entity.Word;
 import com.kimtaeyang.mobidic.dictionary.repository.DefinitionRepository;
-import com.kimtaeyang.mobidic.statistic.repository.WordStatisticRepository;
 import com.kimtaeyang.mobidic.dictionary.repository.VocabularyRepository;
 import com.kimtaeyang.mobidic.dictionary.repository.WordRepository;
 import com.kimtaeyang.mobidic.dictionary.service.WordService;
+import com.kimtaeyang.mobidic.statistic.entity.WordStatistic;
+import com.kimtaeyang.mobidic.statistic.repository.WordStatisticRepository;
+import com.kimtaeyang.mobidic.user.entity.User;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Bean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.ArrayList;
@@ -36,7 +35,11 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {WordService.class, ServiceTestConfig.class})
-@ActiveProfiles("dev")
+@ActiveProfiles("test")
+@TestPropertySource(properties = {
+        "jwt.secret=f825308ac5df56907db5835775baf3e4594526f127cb8d9bca70b435d596d424",
+        "jwt.exp=3600000"
+})
 class WordServiceTest {
     @Autowired
     private WordRepository wordRepository;
