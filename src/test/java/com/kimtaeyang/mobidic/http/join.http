@@ -1,5 +1,5 @@
 ### Send POST request with json body
-POST http://127.0.0.1:8080/api/auth/join
+POST http://127.0.0.1:8080/api/auth/signup
 Content-Type: application/json
 
 {

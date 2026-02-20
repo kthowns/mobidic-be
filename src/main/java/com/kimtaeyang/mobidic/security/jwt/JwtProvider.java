@@ -17,7 +17,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class JwtProvider {
     private final JwtProperties jwtProperties;
-    private final UserDetailsServiceImpl userDetailsService;
+    private final UserDetailsServiceImpl userDetailsServiceImpl;
 
     public String generateToken(UUID userId) {
         return Jwts.builder()
@@ -30,8 +30,8 @@ public class JwtProvider {
 
     public Authentication getAuthentication(String token) {
         Claims claims = getClaims(token);
-        String username = claims.getSubject();
-        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+        String userId = claims.getSubject();
+        UserDetails userDetails = userDetailsServiceImpl.loadUserByUserId(UUID.fromString(userId));
         return new UsernamePasswordAuthenticationToken(userDetails, token, userDetails.getAuthorities());
     }
 

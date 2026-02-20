@@ -70,9 +70,9 @@ public class AuthController {
             @ApiResponse(responseCode = "500", description = "서버 오류",
                     content = @Content(schema = @Schema(hidden = true)))
     })
-    @PostMapping("/join")
-    public ResponseEntity<GeneralResponse<UserDto>> join(@Valid @RequestBody SignUpRequestDto request) {
-        return GeneralResponse.toResponseEntity(AuthResponseCode.JOIN_OK, authService.signUp(request));
+    @PostMapping("/signup")
+    public ResponseEntity<GeneralResponse<UserDto>> signUp(@Valid @RequestBody SignUpRequestDto request) {
+        return GeneralResponse.toResponseEntity(AuthResponseCode.SIGN_UP_OK, authService.signUp(request));
     }
 
     @Operation(

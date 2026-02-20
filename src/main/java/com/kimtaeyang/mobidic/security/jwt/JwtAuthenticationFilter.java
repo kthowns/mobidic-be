@@ -32,8 +32,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         if (StringUtils.hasText(jwt)
                 && jwtProvider.validateToken(jwt)
-                && jwtBlacklistService.isTokenWithdrawn(jwt)
-                && jwtBlacklistService.isTokenLogout(jwt)
+                && !jwtBlacklistService.isTokenWithdrawn(jwt)
+                && !jwtBlacklistService.isTokenLogout(jwt)
         ) {
             Authentication authentication = jwtProvider.getAuthentication(jwt);
             SecurityContextHolder.getContext().setAuthentication(authentication);

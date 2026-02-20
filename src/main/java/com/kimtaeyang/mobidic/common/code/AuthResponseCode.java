@@ -11,7 +11,7 @@ public enum AuthResponseCode implements ApiResponseCode {
     NO_MEMBER(HttpStatus.NOT_FOUND, "No member found"),
     INVALID_USERNAME(HttpStatus.NOT_FOUND, "Invalid username"),
     INVALID_PASSWORD(HttpStatus.UNAUTHORIZED, "Invalid password"),
-    JOIN_OK(HttpStatus.OK, "Join success"),
+    SIGN_UP_OK(HttpStatus.OK, "Join success"),
     LOGOUT_OK(HttpStatus.OK, "Logout success"),
     LOGIN_FAILED(HttpStatus.UNAUTHORIZED, "Login failed"),
     LOGOUT_FAILED(HttpStatus.BAD_REQUEST, "Logout failed"),

@@ -45,7 +45,7 @@ public class SecurityConfig {
                     if (profiles.contains("dev")) {
                         auth.requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**", "/swagger-resources/**", "/webjars/**").permitAll();
                     }
-                    auth.requestMatchers("/api/auth/login", "/api/auth/join").permitAll()
+                    auth.requestMatchers("/api/auth/login", "/api/auth/signup").permitAll()
                             .requestMatchers("/error").permitAll()
                             .requestMatchers(
                                     "/", "/index.html",

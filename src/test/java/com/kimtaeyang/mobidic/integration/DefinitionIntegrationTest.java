@@ -380,7 +380,7 @@ public class DefinitionIntegrationTest {
                 .description("description")
                 .build();
 
-        MvcResult result = mockMvc.perform(post("/api/vocab/" + memberId)
+        MvcResult result = mockMvc.perform(post("/api/vocabulary/" + memberId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(addVocabRequest))
                         .header("Authorization", "Bearer " + token))
@@ -420,7 +420,7 @@ public class DefinitionIntegrationTest {
                 .password(joinRequest.getPassword())
                 .build();
 
-        mockMvc.perform(post("/api/auth/join")
+        mockMvc.perform(post("/api/auth/signup")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(joinRequest)))
                 .andExpect(status().isOk());
@@ -432,7 +432,7 @@ public class DefinitionIntegrationTest {
                 .andReturn();
 
         String json = loginResult.getResponse().getContentAsString();
-        return objectMapper.readTree(json).path("data").path("token").asText();
+        return objectMapper.readTree(json).path("data").path("accessToken").asText();
     }
 }
 // Resource api integration test convention

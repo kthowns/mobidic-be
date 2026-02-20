@@ -6,7 +6,9 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.ColumnDefault;
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -20,6 +22,7 @@ import java.util.UUID;
 @Builder
 @Entity
 @Table(name = "users")
+@EntityListeners(AuditingEntityListener.class)
 public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -32,7 +35,8 @@ public class User implements UserDetails {
     @Column(name = "password")
     @JsonIgnore
     private String password;
-    @Column(name = "is_active")
+    @Column(name = "is_active", nullable = false)
+    @Builder.Default
     private Boolean isActive = true;
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)

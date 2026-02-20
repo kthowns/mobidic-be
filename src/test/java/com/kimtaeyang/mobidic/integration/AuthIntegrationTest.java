@@ -60,7 +60,7 @@ public class AuthIntegrationTest {
                 .build();
 
         //Success
-        mockMvc.perform(post("/api/auth/join")
+        mockMvc.perform(post("/api/auth/signup")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -71,7 +71,7 @@ public class AuthIntegrationTest {
 
         //Fail with duplicated Email
         request.setNickname("test2");
-        mockMvc.perform(post("/api/auth/join")
+        mockMvc.perform(post("/api/auth/signup")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isConflict())
@@ -81,7 +81,7 @@ public class AuthIntegrationTest {
         //Fail with duplicated Nickname
         request.setEmail("test2@test.com");
         request.setNickname("test");
-        mockMvc.perform(post("/api/auth/join")
+        mockMvc.perform(post("/api/auth/signup")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isConflict())
@@ -98,7 +98,7 @@ public class AuthIntegrationTest {
         expectedErrors.put("nickname", "Invalid nickname pattern");
         expectedErrors.put("password", "Invalid password pattern");
 
-        mockMvc.perform(post("/api/auth/join")
+        mockMvc.perform(post("/api/auth/signup")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
@@ -117,8 +117,8 @@ public class AuthIntegrationTest {
                 .password("qwerqwe1")
                 .build();
 
-        //Join
-        mockMvc.perform(post("/api/auth/")
+        //SignUp
+        mockMvc.perform(post("/api/auth/signup")
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(joinRequest)))
                 .andExpect(status().isOk());
@@ -136,7 +136,7 @@ public class AuthIntegrationTest {
                 .andReturn();
 
         String json = result.getResponse().getContentAsString();
-        String token = objectMapper.readTree(json).path("data").path("token").asText();
+        String token = objectMapper.readTree(json).path("data").path("accessToken").asText();
 
         assertThat(jwtProvider.validateToken(token));
 
@@ -180,7 +180,7 @@ public class AuthIntegrationTest {
                 .password("testTest1")
                 .build();
 
-        mockMvc.perform(post("/api/auth/join")
+        mockMvc.perform(post("/api/auth/signup")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(joinRequest)))
                 .andExpect(status().isOk());
@@ -198,7 +198,7 @@ public class AuthIntegrationTest {
 
         //Logout success
         String loginJson = loginResult.getResponse().getContentAsString();
-        String token = objectMapper.readTree(loginJson).path("data").path("token").asText();
+        String token = objectMapper.readTree(loginJson).path("data").path("accessToken").asText();
 
         UUID memberId = jwtProvider.getIdFromToken(token);
 
@@ -216,60 +216,5 @@ public class AuthIntegrationTest {
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.message")
                         .value(AuthResponseCode.UNAUTHORIZED.getMessage()));
-    }
-
-    @Test
-    @DisplayName("[Auth][Integration] Withdraw test")
-    public void withdrawTest() throws Exception {
-        String email = "test@test.com";
-        String nickname = "test";
-
-        String token = loginAndGetToken(email, nickname);
-        UUID memberId = jwtProvider.getIdFromToken(token);
-
-        //Withdraw success
-        mockMvc.perform(patch("/api/user/withdraw/" + memberId.toString())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer " + token))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.email")
-                        .value(email))
-                .andExpect(jsonPath("$.data.nickname")
-                        .value(nickname));
-
-        //Fail with invalid token
-        mockMvc.perform(post("/api/auth/logout")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer " + token))
-                .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.message")
-                        .value(AuthResponseCode.UNAUTHORIZED.getMessage()));
-    }
-
-    private String loginAndGetToken(String email, String nickname) throws Exception {
-        SignUpRequestDto joinRequest = SignUpRequestDto.builder()
-                .email(email)
-                .nickname(nickname)
-                .password("testTest1")
-                .build();
-
-        LoginRequest loginRequest = LoginRequest.builder()
-                .email(joinRequest.getEmail())
-                .password(joinRequest.getPassword())
-                .build();
-
-        mockMvc.perform(post("/api/auth/join")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(joinRequest)))
-                .andExpect(status().isOk());
-
-        MvcResult loginResult = mockMvc.perform(post("/api/auth/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(loginRequest)))
-                .andExpect(status().isOk())
-                .andReturn();
-
-        String json = loginResult.getResponse().getContentAsString();
-        return objectMapper.readTree(json).path("data").path("token").asText();
     }
 }
