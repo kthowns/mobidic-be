@@ -5,6 +5,7 @@ import com.kimtaeyang.mobidic.common.dto.GeneralResponse;
 import com.kimtaeyang.mobidic.dictionary.dto.AddVocabularyRequestDto;
 import com.kimtaeyang.mobidic.dictionary.dto.VocabularyDto;
 import com.kimtaeyang.mobidic.dictionary.service.VocabularyService;
+import com.kimtaeyang.mobidic.user.entity.User;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -16,6 +17,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -49,13 +51,13 @@ public class VocabularyController {
             @ApiResponse(responseCode = "500", description = "서버 오류",
                     content = @Content(schema = @Schema(hidden = true)))
     })
-    @PostMapping("/{memberId}")
+    @PostMapping("/")
     public ResponseEntity<GeneralResponse<VocabularyDto>> addVocabulary(
-            @PathVariable String memberId,
-            @RequestBody @Valid AddVocabularyRequestDto request
+            @RequestBody @Valid AddVocabularyRequestDto request,
+            @AuthenticationPrincipal User user
     ) {
         return GeneralResponse.toResponseEntity(OK,
-                vocabularyService.addVocabulary(UUID.fromString(memberId), request));
+                vocabularyService.addVocabulary(user, request));
     }
 
     @Operation(
@@ -76,10 +78,10 @@ public class VocabularyController {
     })
     @GetMapping("/all")
     public ResponseEntity<GeneralResponse<List<VocabularyDto>>> getAllVocabulary(
-            @RequestParam String userId
+            @AuthenticationPrincipal User user
     ) {
         return GeneralResponse.toResponseEntity(OK,
-                vocabularyService.getVocabulariesByUserId(UUID.fromString(userId)));
+                vocabularyService.getVocabularies(user));
     }
 
     @Operation(

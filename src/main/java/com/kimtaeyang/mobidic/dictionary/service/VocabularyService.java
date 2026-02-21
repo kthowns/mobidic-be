@@ -1,14 +1,12 @@
 package com.kimtaeyang.mobidic.dictionary.service;
 
-import com.kimtaeyang.mobidic.common.code.AuthResponseCode;
 import com.kimtaeyang.mobidic.common.code.GeneralResponseCode;
+import com.kimtaeyang.mobidic.common.exception.ApiException;
 import com.kimtaeyang.mobidic.dictionary.dto.AddVocabularyRequestDto;
 import com.kimtaeyang.mobidic.dictionary.dto.VocabularyDto;
 import com.kimtaeyang.mobidic.dictionary.entity.Vocabulary;
-import com.kimtaeyang.mobidic.user.entity.User;
-import com.kimtaeyang.mobidic.common.exception.ApiException;
-import com.kimtaeyang.mobidic.user.repository.UserRepository;
 import com.kimtaeyang.mobidic.dictionary.repository.VocabularyRepository;
+import com.kimtaeyang.mobidic.user.entity.User;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,17 +23,12 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class VocabularyService {
     private final VocabularyRepository vocabularyRepository;
-    private final UserRepository userRepository;
 
     @Transactional
-    @PreAuthorize("@userAccessHandler.ownershipCheck(#userId)")
     public VocabularyDto addVocabulary(
-            UUID userId,
+            User user,
             @Valid AddVocabularyRequestDto request
     ) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ApiException(AuthResponseCode.NO_MEMBER));
-
         int count = vocabularyRepository.countByTitleAndUser(request.getTitle(), user);
 
         if (count > 0) {
@@ -53,19 +46,15 @@ public class VocabularyService {
     }
 
     @Transactional(readOnly = true)
-    @PreAuthorize("@userAccessHandler.ownershipCheck(#userId)")
-    public List<VocabularyDto> getVocabulariesByUserId(UUID userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ApiException(AuthResponseCode.NO_MEMBER));
-
+    public List<VocabularyDto> getVocabularies(User user) {
         return vocabularyRepository.findByUser(user)
                 .stream().map(VocabularyDto::fromEntity).collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
-    @PreAuthorize("@vocabularyAccessHandler.ownershipCheck(#vId)")
-    public VocabularyDto getVocabularyById(UUID vId) {
-        Vocabulary vocabulary = vocabularyRepository.findById(vId)
+    @PreAuthorize("@vocabularyAccessHandler.ownershipCheck(#vocabularyId)")
+    public VocabularyDto getVocabularyById(UUID vocabularyId) {
+        Vocabulary vocabulary = vocabularyRepository.findById(vocabularyId)
                 .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_VOCAB));
 
         return VocabularyDto.fromEntity(vocabulary);
