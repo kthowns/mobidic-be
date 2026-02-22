@@ -50,10 +50,10 @@ public class PronunciationController {
             @ApiResponse(responseCode = "500", description = "서버 오류",
                     content = @Content(schema = @Schema(hidden = true)))
     })
-    @PostMapping(value = "/rate", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<GeneralResponse<Double>> ratePronunciation(
-            @RequestParam("file") MultipartFile file,
-            @RequestParam("wordId") UUID wordId
+            @RequestParam MultipartFile file,
+            @RequestParam UUID wordId
     ) {
         return GeneralResponse.toResponseEntity(OK,
                 pronunciationService.ratePronunciation(wordId, file));
