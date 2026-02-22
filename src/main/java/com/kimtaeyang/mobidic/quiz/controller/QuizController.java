@@ -3,8 +3,8 @@ package com.kimtaeyang.mobidic.quiz.controller;
 import com.kimtaeyang.mobidic.common.dto.ErrorResponse;
 import com.kimtaeyang.mobidic.common.dto.GeneralResponse;
 import com.kimtaeyang.mobidic.quiz.dto.QuizDto;
-import com.kimtaeyang.mobidic.quiz.dto.QuizStatisticDto;
-import com.kimtaeyang.mobidic.quiz.service.CryptoService;
+import com.kimtaeyang.mobidic.quiz.dto.QuizRateRequest;
+import com.kimtaeyang.mobidic.quiz.dto.QuizRateResponse;
 import com.kimtaeyang.mobidic.quiz.service.QuizService;
 import com.kimtaeyang.mobidic.user.entity.User;
 import io.swagger.v3.oas.annotations.Operation;
@@ -32,7 +32,6 @@ import static com.kimtaeyang.mobidic.common.code.GeneralResponseCode.OK;
 @RequestMapping("/api/quizs")
 public class QuizController {
     private final QuizService quizService;
-    private final CryptoService cryptoService;
 
     @Operation(
             summary = "OX 퀴즈 생성",
@@ -103,11 +102,11 @@ public class QuizController {
                     content = @Content(schema = @Schema(hidden = true)))
     })
     @PostMapping("/rate")
-    public ResponseEntity<GeneralResponse<QuizStatisticDto.Response>> rateOxQuiz(
-            @RequestBody QuizStatisticDto.Request request,
+    public ResponseEntity<GeneralResponse<QuizRateResponse>> rateOxQuiz(
+            @RequestBody QuizRateRequest quizRateRequest,
             @AuthenticationPrincipal User user
     ) {
         return GeneralResponse.toResponseEntity(OK,
-                quizService.rateQuestion(user, request));
+                quizService.rateQuiz(user, quizRateRequest));
     }
 }
