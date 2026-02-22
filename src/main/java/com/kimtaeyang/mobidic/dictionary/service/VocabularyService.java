@@ -64,7 +64,7 @@ public class VocabularyService {
             UUID vocabularyId,
             AddVocabularyRequestDto request
     ) {
-        Vocabulary vocabulary = vocabularyRepository.findByIdAndUser_Id(user.getId(), vocabularyId)
+        Vocabulary vocabulary = vocabularyRepository.findByIdAndUser_Id(vocabularyId, user.getId())
                 .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_VOCAB));
 
         long count = vocabularyRepository.countByTitleAndUserAndIdNot(request.getTitle(), vocabulary.getUser(), vocabularyId);
@@ -85,7 +85,7 @@ public class VocabularyService {
             User user,
             UUID vocabularyId
     ) {
-        Vocabulary vocabulary = vocabularyRepository.findByIdAndUser_Id(user.getId(), vocabularyId)
+        Vocabulary vocabulary = vocabularyRepository.findByIdAndUser_Id(vocabularyId, user.getId())
                 .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_VOCAB));
 
         vocabularyRepository.delete(vocabulary);
