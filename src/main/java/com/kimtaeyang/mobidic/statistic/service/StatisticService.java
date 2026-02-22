@@ -20,7 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.UUID;
 
-import static com.kimtaeyang.mobidic.common.code.AuthResponseCode.NO_MEMBER;
+import static com.kimtaeyang.mobidic.common.code.AuthResponseCode.NO_USER;
 
 @Service
 @RequiredArgsConstructor
@@ -92,7 +92,7 @@ public class StatisticService {
     @PreAuthorize("@userAccessHandler.ownershipCheck(#uId)")
     public double getAvgAccuracyByMember(UUID uId) {
         User user = userRepository.findById(uId)
-                .orElseThrow(()-> new ApiException(NO_MEMBER));
+                .orElseThrow(()-> new ApiException(NO_USER));
 
         List<WordStatistic> wordStatistics = wordStatisticRepository.findByMember(user);
 

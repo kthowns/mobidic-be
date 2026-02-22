@@ -13,7 +13,6 @@ import com.kimtaeyang.mobidic.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,7 +33,7 @@ public class UserService {
     @PreAuthorize("@userAccessHandler.ownershipCheck(#userId)")
     public UserDto getUserDetailById(UUID userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ApiException(AuthResponseCode.NO_MEMBER));
+                .orElseThrow(() -> new ApiException(AuthResponseCode.NO_USER));
 
         return UserDto.fromEntity(user);
     }
@@ -45,7 +44,7 @@ public class UserService {
             UUID userId, UpdateNicknameRequestDto request
     ) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ApiException(AuthResponseCode.NO_MEMBER));
+                .orElseThrow(() -> new ApiException(AuthResponseCode.NO_USER));
 
         int count = userRepository.countByNicknameAndIdNot(request.getNickname(), userId);
 
@@ -65,7 +64,7 @@ public class UserService {
             UUID userId, UpdatePasswordRequestDto request, String token
     ) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ApiException(AuthResponseCode.NO_MEMBER));
+                .orElseThrow(() -> new ApiException(AuthResponseCode.NO_USER));
 
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         userRepository.save(user);
@@ -76,30 +75,9 @@ public class UserService {
     }
 
     @Transactional
-    @PreAuthorize("@userAccessHandler.ownershipCheck(#userId)")
-    public UserDto deactivateUser(String token, UUID userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ApiException(AuthResponseCode.NO_MEMBER));
-
+    public UserDto deactivateUser(User user) {
         user.setDeactivatedAt(LocalDateTime.now());
         user.setIsActive(false);
-        userRepository.save(user);
-
-        jwtBlacklistService.withdrawToken(token);
-        SecurityContextHolder.clearContext();
-
-        return UserDto.fromEntity(user);
-    }
-
-    @Transactional
-    @PreAuthorize("@userAccessHandler.ownershipCheck(#userId)")
-    public UserDto deleteUser(String token, UUID userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ApiException(AuthResponseCode.NO_MEMBER));
-        userRepository.deleteById(userId);
-
-        jwtBlacklistService.withdrawToken(token);
-        SecurityContextHolder.clearContext();
 
         return UserDto.fromEntity(user);
     }

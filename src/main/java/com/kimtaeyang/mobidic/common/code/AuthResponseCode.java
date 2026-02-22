@@ -8,7 +8,7 @@ import org.springframework.http.HttpStatus;
 @Getter
 public enum AuthResponseCode implements ApiResponseCode {
     CREATED(HttpStatus.CREATED, "Join complete"),
-    NO_MEMBER(HttpStatus.NOT_FOUND, "No member found"),
+    NO_USER(HttpStatus.NOT_FOUND, "User not found"),
     INVALID_USERNAME(HttpStatus.NOT_FOUND, "Invalid username"),
     INVALID_PASSWORD(HttpStatus.UNAUTHORIZED, "Invalid password"),
     SIGN_UP_OK(HttpStatus.OK, "Join success"),

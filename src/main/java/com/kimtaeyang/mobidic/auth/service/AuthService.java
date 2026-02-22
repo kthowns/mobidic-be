@@ -23,7 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
-import static com.kimtaeyang.mobidic.common.code.AuthResponseCode.NO_MEMBER;
+import static com.kimtaeyang.mobidic.common.code.AuthResponseCode.NO_USER;
 import static com.kimtaeyang.mobidic.common.code.GeneralResponseCode.DUPLICATED_EMAIL;
 import static com.kimtaeyang.mobidic.common.code.GeneralResponseCode.DUPLICATED_NICKNAME;
 
@@ -72,7 +72,7 @@ public class AuthService {
     @PreAuthorize("@userAccessHandler.ownershipCheck(#memberId)")
     public UserDto logout(UUID memberId, String token) {
         User user = userRepository.findById(memberId)
-                .orElseThrow(() -> new ApiException(NO_MEMBER));
+                .orElseThrow(() -> new ApiException(NO_USER));
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         auth.setAuthenticated(false); //인증 Context 초기화
 
