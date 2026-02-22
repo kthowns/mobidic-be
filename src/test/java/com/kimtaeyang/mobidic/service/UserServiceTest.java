@@ -55,32 +55,6 @@ class UserServiceTest {
     private static final String UID = "9f81b0d7-2f8e-4ad3-ae18-41c73dc71b39";
 
     @Test
-    @DisplayName("[MemberService] Get member detail success")
-    @WithMockUser(username = UID)
-    void getUserDetailByIdSuccess() {
-        resetMock();
-
-        User user = User.builder()
-                .id(UUID.fromString(UID))
-                .email("test@test.com")
-                .nickname("test")
-                .password(passwordEncoder.encode("test"))
-                .build();
-
-        //given
-        given(userRepository.findById(any(UUID.class)))
-                .willReturn(Optional.of(user));
-
-        //when
-        UserDto response = userService.getUserDetailById(UUID.fromString(UID));
-
-        //then
-        assertEquals(user.getNickname(), response.getNickname());
-        assertEquals(user.getEmail(), response.getEmail());
-        assertEquals(UUID.fromString(UID), response.getId());
-    }
-
-    @Test
     @DisplayName("[MemberService] Update member nickname success")
     @WithMockUser(username = UID)
     void updateUserNicknameSuccess() {
@@ -113,7 +87,7 @@ class UserServiceTest {
                 });
 
         //when
-        UserDto response = userService.updateUserNickname(UUID.fromString(UID), request);
+        UserDto response = userService.updateUserNickname(defaultUser, request);
 
         //then
         verify(userRepository, times(1))
@@ -146,7 +120,7 @@ class UserServiceTest {
         //given
         given(userRepository.findById(any(UUID.class)))
                 .willReturn(Optional.of(defaultUser));
-        given(authService.logout(any(UUID.class), anyString()))
+        given(authService.logout(any(User.class), anyString()))
                 .willReturn(Mockito.mock(UserDto.class));
         given(userRepository.save(any(User.class)))
                 .willAnswer(invocation -> {
@@ -157,7 +131,7 @@ class UserServiceTest {
                 });
 
         //when
-        userService.updateUserPassword(UUID.fromString(UID), request, UUID.randomUUID().toString());
+        userService.updateUserPassword(defaultUser, request, UUID.randomUUID().toString());
 
         //then
         verify(userRepository, times(1))

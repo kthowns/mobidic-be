@@ -26,8 +26,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.UUID;
-
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/auth")
@@ -97,8 +95,7 @@ public class AuthController {
             @AuthenticationPrincipal User user
     ) {
         String token = request.getHeader("Authorization").substring(7);
-        UUID userId = user.getId();
 
-        return GeneralResponse.toResponseEntity(AuthResponseCode.LOGOUT_OK, authService.logout(userId, token));
+        return GeneralResponse.toResponseEntity(AuthResponseCode.LOGOUT_OK, authService.logout(user, token));
     }
 }

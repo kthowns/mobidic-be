@@ -12,7 +12,6 @@ import com.kimtaeyang.mobidic.user.repository.UserRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -21,9 +20,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.UUID;
-
-import static com.kimtaeyang.mobidic.common.code.AuthResponseCode.NO_USER;
 import static com.kimtaeyang.mobidic.common.code.GeneralResponseCode.DUPLICATED_EMAIL;
 import static com.kimtaeyang.mobidic.common.code.GeneralResponseCode.DUPLICATED_NICKNAME;
 
@@ -69,10 +65,7 @@ public class AuthService {
         return UserDto.fromEntity(userRepository.save(user));
     }
 
-    @PreAuthorize("@userAccessHandler.ownershipCheck(#memberId)")
-    public UserDto logout(UUID memberId, String token) {
-        User user = userRepository.findById(memberId)
-                .orElseThrow(() -> new ApiException(NO_USER));
+    public UserDto logout(User user, String token) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         auth.setAuthenticated(false); //인증 Context 초기화
 

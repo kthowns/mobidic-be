@@ -22,8 +22,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.UUID;
-
 import static com.kimtaeyang.mobidic.common.code.GeneralResponseCode.OK;
 
 @RestController
@@ -52,10 +50,9 @@ public class UserController {
     })
     @GetMapping("/detail")
     public ResponseEntity<GeneralResponse<UserDto>> getUserDetail(
-            @RequestParam @Valid String uId
+            @AuthenticationPrincipal User user
     ) {
-        return GeneralResponse.toResponseEntity(OK,
-                userService.getUserDetailById(UUID.fromString(uId)));
+        return GeneralResponse.toResponseEntity(OK, UserDto.fromEntity(user));
     }
 
     @Operation(
@@ -76,13 +73,13 @@ public class UserController {
             @ApiResponse(responseCode = "500", description = "서버 오류",
                     content = @Content(schema = @Schema(hidden = true)))
     })
-    @PatchMapping("/{userId}/nickname")
+    @PatchMapping("/nickname")
     public ResponseEntity<GeneralResponse<UserDto>> updateUserNickname(
-            @PathVariable String userId,
-            @RequestBody @Valid UpdateNicknameRequestDto request
+            @RequestBody @Valid UpdateNicknameRequestDto request,
+            @AuthenticationPrincipal User user
     ) {
         return GeneralResponse.toResponseEntity(OK,
-                userService.updateUserNickname(UUID.fromString(userId), request));
+                userService.updateUserNickname(user, request));
     }
 
     @Operation(
@@ -101,16 +98,16 @@ public class UserController {
             @ApiResponse(responseCode = "500", description = "서버 오류",
                     content = @Content(schema = @Schema(hidden = true)))
     })
-    @PatchMapping("/{userId}/password")
+    @PatchMapping("/password")
     public ResponseEntity<GeneralResponse<UserDto>> updateUserPassword(
-            @PathVariable String userId,
             @RequestBody @Valid UpdatePasswordRequestDto request,
-            HttpServletRequest httpServletRequest
+            HttpServletRequest httpServletRequest,
+            @AuthenticationPrincipal User user
     ) {
         String token = httpServletRequest.getHeader("Authorization").substring(7);
 
         return GeneralResponse.toResponseEntity(OK,
-                userService.updateUserPassword(UUID.fromString(userId), request, token));
+                userService.updateUserPassword(user, request, token));
     }
 
     @Operation(
@@ -129,11 +126,14 @@ public class UserController {
             @ApiResponse(responseCode = "500", description = "서버 오류",
                     content = @Content(schema = @Schema(hidden = true)))
     })
-    @DeleteMapping("/")
+    @DeleteMapping
     public ResponseEntity<GeneralResponse<UserDto>> deactivateUser(
-            @AuthenticationPrincipal User user
+            @AuthenticationPrincipal User user,
+            HttpServletRequest httpServletRequest
     ) {
+        String token = httpServletRequest.getHeader("Authorization").substring(7);
+
         return GeneralResponse.toResponseEntity(OK,
-                userService.deactivateUser(user));
+                userService.deactivateUser(user, token));
     }
 }
