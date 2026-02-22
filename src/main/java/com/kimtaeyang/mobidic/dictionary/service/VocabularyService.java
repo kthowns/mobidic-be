@@ -52,7 +52,7 @@ public class VocabularyService {
 
     @Transactional(readOnly = true)
     public VocabularyDto getVocabularyById(User user, UUID vocabularyId) {
-        Vocabulary vocabulary = vocabularyRepository.findByIdAndUser_Id(user.getId(), vocabularyId)
+        Vocabulary vocabulary = vocabularyRepository.findByIdAndUser_Id(vocabularyId, user.getId())
                 .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_VOCAB));
 
         return VocabularyDto.fromEntity(vocabulary);
