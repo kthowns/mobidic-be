@@ -1,5 +1,7 @@
 package com.kimtaeyang.mobidic.security.jwt;
 
+import com.kimtaeyang.mobidic.common.code.AuthResponseCode;
+import com.kimtaeyang.mobidic.user.entity.User;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -9,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -34,12 +37,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String jwt = resolveToken(request);
 
         try {
-            if (StringUtils.hasText(jwt)
+            if (StringUtils.hasText(jwt) //Validating JWT Token
                     && jwtProvider.validateToken(jwt)
                     && !jwtBlacklistService.isTokenWithdrawn(jwt)
                     && !jwtBlacklistService.isTokenLogout(jwt)
             ) {
                 Authentication authentication = jwtProvider.getAuthentication(jwt);
+                User user = (User) authentication.getPrincipal();
+                if (!user.getIsActive()) { //Validating active User
+                    throw new UsernameNotFoundException(AuthResponseCode.NO_USER.getMessage());
+                }
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
         } catch (AuthenticationException e) {

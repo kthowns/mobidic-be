@@ -102,10 +102,11 @@ public class VocabularyController {
     })
     @GetMapping("/detail")
     public ResponseEntity<GeneralResponse<VocabularyDto>> getVocabularyDetail(
-            @RequestParam String vocabularyId
+            @RequestParam String vocabularyId,
+            @AuthenticationPrincipal User user
     ) {
         return GeneralResponse.toResponseEntity(OK,
-                vocabularyService.getVocabularyById(UUID.fromString(vocabularyId)));
+                vocabularyService.getVocabularyById(user, UUID.fromString(vocabularyId)));
     }
 
     @Operation(
@@ -129,10 +130,11 @@ public class VocabularyController {
     @PatchMapping("/{vocabularyId}")
     public ResponseEntity<GeneralResponse<VocabularyDto>> updateVocabulary(
             @PathVariable String vocabularyId,
-            @RequestBody @Valid AddVocabularyRequestDto request
+            @RequestBody @Valid AddVocabularyRequestDto request,
+            @AuthenticationPrincipal User user
     ) {
         return GeneralResponse.toResponseEntity(OK,
-                vocabularyService.updateVocabulary(UUID.fromString(vocabularyId), request));
+                vocabularyService.updateVocabulary(user, UUID.fromString(vocabularyId), request));
     }
 
     @Operation(
@@ -153,9 +155,10 @@ public class VocabularyController {
     })
     @DeleteMapping("/{vocabularyId}")
     public ResponseEntity<GeneralResponse<VocabularyDto>> deleteVocabulary(
-            @PathVariable String vocabularyId
+            @PathVariable String vocabularyId,
+            @AuthenticationPrincipal User user
     ) {
         return GeneralResponse.toResponseEntity(OK,
-                vocabularyService.deleteVocab(UUID.fromString(vocabularyId)));
+                vocabularyService.deleteVocab(user, UUID.fromString(vocabularyId)));
     }
 }

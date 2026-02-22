@@ -6,6 +6,7 @@ import com.kimtaeyang.mobidic.common.dto.GeneralResponse;
 import com.kimtaeyang.mobidic.dictionary.dto.AddDefinitionRequestDto;
 import com.kimtaeyang.mobidic.dictionary.dto.DefinitionDto;
 import com.kimtaeyang.mobidic.dictionary.service.DefinitionService;
+import com.kimtaeyang.mobidic.user.entity.User;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -17,6 +18,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -49,10 +51,11 @@ public class DefinitionController {
     @PostMapping("/{wordId}")
     public ResponseEntity<GeneralResponse<DefinitionDto>> addDefinition(
             @PathVariable String wordId,
-            @RequestBody @Valid AddDefinitionRequestDto request
+            @RequestBody @Valid AddDefinitionRequestDto request,
+            @AuthenticationPrincipal User user
     ) {
         return GeneralResponse.toResponseEntity(GeneralResponseCode.OK,
-                definitionService.addDefinition(UUID.fromString(wordId), request));
+                definitionService.addDefinition(user, UUID.fromString(wordId), request));
     }
 
     @Operation(
@@ -73,10 +76,11 @@ public class DefinitionController {
     })
     @GetMapping("/all")
     public ResponseEntity<GeneralResponse<List<DefinitionDto>>> getDefinitionsByWordId(
-            @RequestParam String wordId
+            @RequestParam String wordId,
+            @AuthenticationPrincipal User user
     ) {
         return GeneralResponse.toResponseEntity(GeneralResponseCode.OK,
-                definitionService.getDefinitionsByWordId(UUID.fromString(wordId)));
+                definitionService.getDefinitionsByWordId(user, UUID.fromString(wordId)));
     }
 
     @Operation(
@@ -100,10 +104,11 @@ public class DefinitionController {
     @PatchMapping("/{definitionId}")
     public ResponseEntity<GeneralResponse<DefinitionDto>> updateDefinition(
             @PathVariable String definitionId,
-            @RequestBody @Valid AddDefinitionRequestDto request
+            @RequestBody @Valid AddDefinitionRequestDto request,
+            @AuthenticationPrincipal User user
     ) {
         return GeneralResponse.toResponseEntity(GeneralResponseCode.OK,
-                definitionService.updateDefinition(UUID.fromString(definitionId), request));
+                definitionService.updateDefinition(user, UUID.fromString(definitionId), request));
     }
 
     @Operation(
@@ -124,9 +129,10 @@ public class DefinitionController {
     })
     @DeleteMapping("/{definitionId}")
     public ResponseEntity<GeneralResponse<DefinitionDto>> deleteDefinition(
-            @PathVariable String definitionId
+            @PathVariable String definitionId,
+            @AuthenticationPrincipal User user
     ) {
         return GeneralResponse.toResponseEntity(GeneralResponseCode.OK,
-                definitionService.deleteDefinition(UUID.fromString(definitionId)));
+                definitionService.deleteDefinition(user, UUID.fromString(definitionId)));
     }
 }

@@ -6,6 +6,7 @@ import com.kimtaeyang.mobidic.quiz.dto.QuizDto;
 import com.kimtaeyang.mobidic.quiz.dto.QuizStatisticDto;
 import com.kimtaeyang.mobidic.quiz.service.CryptoService;
 import com.kimtaeyang.mobidic.quiz.service.QuizService;
+import com.kimtaeyang.mobidic.user.entity.User;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -16,6 +17,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -50,10 +52,11 @@ public class QuizController {
     })
     @GetMapping("/ox")
     public ResponseEntity<GeneralResponse<List<QuizDto>>> getOxQuizzes(
-            @RequestParam UUID vocabularyId
+            @RequestParam UUID vocabularyId,
+            @AuthenticationPrincipal User user
     ) {
         return GeneralResponse.toResponseEntity(OK,
-                quizService.getOXQuizzes(vocabularyId));
+                quizService.getOXQuizzes(user, vocabularyId));
     }
 
     @Operation(
@@ -74,10 +77,11 @@ public class QuizController {
     })
     @GetMapping("/blank")
     public ResponseEntity<GeneralResponse<List<QuizDto>>> getBlankQuizzes(
-            @RequestParam UUID vocabularyId
+            @RequestParam UUID vocabularyId,
+            @AuthenticationPrincipal User user
     ) {
         return GeneralResponse.toResponseEntity(OK,
-                quizService.getBlankQuizzes(vocabularyId));
+                quizService.getBlankQuizzes(user, vocabularyId));
     }
 
     @Operation(
@@ -100,11 +104,10 @@ public class QuizController {
     })
     @PostMapping("/rate")
     public ResponseEntity<GeneralResponse<QuizStatisticDto.Response>> rateOxQuiz(
-            @RequestBody QuizStatisticDto.Request request
+            @RequestBody QuizStatisticDto.Request request,
+            @AuthenticationPrincipal User user
     ) {
-        UUID userId = UUID.fromString(cryptoService.decrypt(request.getToken()).split(":")[1]);
-
         return GeneralResponse.toResponseEntity(OK,
-                quizService.rateQuestion(userId, request));
+                quizService.rateQuestion(user, request));
     }
 }

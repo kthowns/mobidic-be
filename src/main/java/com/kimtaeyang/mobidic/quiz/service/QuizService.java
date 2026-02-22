@@ -15,10 +15,10 @@ import com.kimtaeyang.mobidic.quiz.type.QuizType;
 import com.kimtaeyang.mobidic.quiz.util.QuizGenerator;
 import com.kimtaeyang.mobidic.quiz.util.QuizGeneratorFactory;
 import com.kimtaeyang.mobidic.statistic.service.StatisticService;
+import com.kimtaeyang.mobidic.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
@@ -39,21 +39,32 @@ public class QuizService {
     private final CryptoService cryptoService;
     private final DefinitionService definitionService;
 
-    @PreAuthorize("@vocabularyAccessHandler.ownershipCheck(#vocabularyId)")
-    public List<QuizDto> getOXQuizzes(UUID vocabularyId) {
-        return generateQuestions(vocabularyId, QuizType.OX);
+    public List<QuizDto> getOXQuizzes(
+            User user,
+            UUID vocabularyId
+    ) {
+        return generateQuestions(user, vocabularyId, QuizType.OX);
     }
 
-    @PreAuthorize("@vocabularyAccessHandler.ownershipCheck(#vocabularyId)")
-    public List<QuizDto> getBlankQuizzes(UUID vocabularyId) {
-        return generateQuestions(vocabularyId, QuizType.BLANK);
+    public List<QuizDto> getBlankQuizzes(
+            User user,
+            UUID vocabularyId
+    ) {
+        return generateQuestions(user, vocabularyId, QuizType.BLANK);
     }
 
-    @PreAuthorize("@userAccessHandler.ownershipCheck(#userId)")
     public QuizStatisticDto.Response rateQuestion(
-            UUID userId,
+            User user,
             QuizStatisticDto.Request request
     ) {
+        /*
+            Request token validation 필요!!!
+         */
+        UUID userId = UUID.fromString(cryptoService.decrypt(request.getToken()).split(":")[1]);
+        if (!userId.equals(user.getId())) {
+            throw new ApiException(GeneralResponseCode.NO_QUIZ);
+        }
+
         String key = cryptoService.decrypt(request.getToken()); //복호화
         String correctAnswer = findCorrectAnswer(key);
         expireAnswer(key);
@@ -73,11 +84,15 @@ public class QuizService {
         return response;
     }
 
-    private List<QuizDto> generateQuestions(UUID vocabularyId, QuizType quizType) {
-        VocabularyDto vocabulary = vocabularyService.getVocabularyById(vocabularyId);
+    private List<QuizDto> generateQuestions(
+            User user,
+            UUID vocabularyId,
+            QuizType quizType
+    ) {
+        VocabularyDto vocabulary = vocabularyService.getVocabularyById(user, vocabularyId);
 
         List<WordWithDefinitions> wordsWithDefs = new ArrayList<>();
-        List<WordDto> wordDtos = wordService.getWordsByVocabularyId(vocabulary.getId());
+        List<WordDto> wordDtos = wordService.getWordsByVocabularyId(user, vocabularyId);
         if (wordDtos.isEmpty()) {
             return List.of();
         }
@@ -85,7 +100,7 @@ public class QuizService {
         for (WordDto wordDto : wordDtos) {
             WordWithDefinitions wordWithDefinitions = WordWithDefinitions.builder()
                     .wordDto(wordDto)
-                    .definitionDtos(definitionService.getDefinitionsByWordId(wordDto.getId()))
+                    .definitionDtos(definitionService.getDefinitionsByWordId(user, wordDto.getId()))
                     .build();
 
             wordsWithDefs.add(wordWithDefinitions);

@@ -101,7 +101,7 @@ public class UserController {
             @ApiResponse(responseCode = "500", description = "서버 오류",
                     content = @Content(schema = @Schema(hidden = true)))
     })
-    @PatchMapping("/{userId}/nickname")
+    @PatchMapping("/{userId}/password")
     public ResponseEntity<GeneralResponse<UserDto>> updateUserPassword(
             @PathVariable String userId,
             @RequestBody @Valid UpdatePasswordRequestDto request,

@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
@@ -15,4 +16,6 @@ public interface VocabularyRepository extends JpaRepository<Vocabulary, UUID> {
     int countByTitleAndUserAndIdNot(String title, User user, UUID id);
 
     int countByTitleAndUser(String title, User user);
+
+    Optional<Vocabulary> findByIdAndUser_Id(UUID id, UUID userId);
 }
