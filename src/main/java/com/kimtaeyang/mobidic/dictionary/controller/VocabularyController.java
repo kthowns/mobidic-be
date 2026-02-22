@@ -51,7 +51,7 @@ public class VocabularyController {
             @ApiResponse(responseCode = "500", description = "서버 오류",
                     content = @Content(schema = @Schema(hidden = true)))
     })
-    @PostMapping("/")
+    @PostMapping
     public ResponseEntity<GeneralResponse<VocabularyDto>> addVocabulary(
             @RequestBody @Valid AddVocabularyRequestDto request,
             @AuthenticationPrincipal User user
