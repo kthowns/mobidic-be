@@ -6,8 +6,8 @@ import com.kimtaeyang.mobidic.auth.dto.SignUpRequestDto;
 import com.kimtaeyang.mobidic.security.jwt.JwtProvider;
 import com.kimtaeyang.mobidic.user.dto.UpdateNicknameRequestDto;
 import com.kimtaeyang.mobidic.user.dto.UpdatePasswordRequestDto;
-import com.kimtaeyang.mobidic.user.repository.UserRepository;
-import org.junit.jupiter.api.AfterEach;
+import com.kimtaeyang.mobidic.util.DatabaseCleaner;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +29,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@ActiveProfiles("dev")
+@ActiveProfiles("test")
 public class UserIntegrationTest {
     @Autowired
     private MockMvc mockMvc;
@@ -38,32 +38,32 @@ public class UserIntegrationTest {
     private ObjectMapper objectMapper;
 
     @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
     private JwtProvider jwtProvider;
 
-    @AfterEach
+    @Autowired
+    private DatabaseCleaner databaseCleaner;
+
+    @BeforeEach
     void tearDown() {
-        userRepository.deleteAll();
+        databaseCleaner.execute();
     }
 
     @Test
-    @DisplayName("[Member][Integration] Get member detail")
-    void getMemberDetailTest() throws Exception {
+    @DisplayName("[User][Integration] Get user detail")
+    void getUserDetailTest() throws Exception {
         String email = "test@test.com";
         String nickname = "test";
         String token = loginAndGetToken(email, nickname);
-        UUID memberId = jwtProvider.getIdFromToken(token);
+        UUID userId = jwtProvider.getIdFromToken(token);
 
         //Success
         mockMvc.perform(get("/api/user/detail")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + token)
-                        .param("uId", memberId.toString()))
+                        .param("uId", userId.toString()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.id")
-                        .value(memberId.toString()))
+                        .value(userId.toString()))
                 .andExpect(jsonPath("$.data.email")
                         .value(email))
                 .andExpect(jsonPath("$.data.nickname")
@@ -72,7 +72,7 @@ public class UserIntegrationTest {
                         .isNotEmpty());
 
         //Fail without token
-        mockMvc.perform(get("/api/user/detail/" + memberId)
+        mockMvc.perform(get("/api/user/detail/" + userId)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.message")
@@ -82,7 +82,7 @@ public class UserIntegrationTest {
         mockMvc.perform(get("/api/user/detail")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + jwtProvider.generateToken(UUID.randomUUID()))
-                        .param("uId", memberId.toString()))
+                        .param("uId", userId.toString()))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.message")
                         .value(UNAUTHORIZED.getMessage()));
@@ -98,53 +98,53 @@ public class UserIntegrationTest {
     }
 
     @Test
-    @DisplayName("[Member][Integration] Update member nickname")
-    void updateMemberNicknameTest() throws Exception {
+    @DisplayName("[User][Integration] Update user nickname")
+    void updateUserNicknameTest() throws Exception {
         String email = "test@test.com";
         String nickname = "test";
         String token = loginAndGetToken(email, nickname);
-        UUID memberId = jwtProvider.getIdFromToken(token);
+        UUID userId = jwtProvider.getIdFromToken(token);
 
         String email2 = "test2@test.com";
         String nickname2 = "test2";
         String token2 = loginAndGetToken(email2, nickname2);
-        UUID memberId2 = jwtProvider.getIdFromToken(token2);
+        UUID userId2 = jwtProvider.getIdFromToken(token2);
 
         //Success
         UpdateNicknameRequestDto updateNicknameRequest = UpdateNicknameRequestDto.builder()
                 .nickname(nickname + "test")
                 .build();
 
-        mockMvc.perform(patch("/api/user/nckchn/" + memberId)
+        mockMvc.perform(patch("/api/user/nickname")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + token)
                         .content(objectMapper.writeValueAsString(updateNicknameRequest)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.id")
-                        .value(memberId.toString()))
+                        .value(userId.toString()))
                 .andExpect(jsonPath("$.data.nickname")
                         .value(updateNicknameRequest.getNickname()));
 
-        mockMvc.perform(patch("/api/user/nckchn/" + memberId)
+        mockMvc.perform(patch("/api/user/nickname")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + token)
                         .content(objectMapper.writeValueAsString(updateNicknameRequest)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.id")
-                        .value(memberId.toString()))
+                        .value(userId.toString()))
                 .andExpect(jsonPath("$.data.nickname")
                         .value(updateNicknameRequest.getNickname()));
 
         mockMvc.perform(get("/api/user/detail")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + token)
-                        .param("uId", memberId.toString()))
+                        .param("uId", userId.toString()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.nickname")
                         .value(updateNicknameRequest.getNickname()));
 
         //Fail with duplicated nickname
-        mockMvc.perform(patch("/api/user/nckchn/" + memberId2)
+        mockMvc.perform(patch("/api/user/nickname")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + token2)
                         .content(objectMapper.writeValueAsString(updateNicknameRequest)))
@@ -153,7 +153,7 @@ public class UserIntegrationTest {
                         .value(DUPLICATED_NICKNAME.getMessage()));
 
         //Fail without token
-        mockMvc.perform(patch("/api/user/nckchn/" + memberId)
+        mockMvc.perform(patch("/api/user/nickname")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updateNicknameRequest)))
                 .andExpect(status().isUnauthorized())
@@ -161,7 +161,7 @@ public class UserIntegrationTest {
                         .value(UNAUTHORIZED.getMessage()));
 
         //Fail with unauthorized token
-        mockMvc.perform(patch("/api/user/nckchn/" + memberId)
+        mockMvc.perform(patch("/api/user/nickname")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + jwtProvider.generateToken(UUID.randomUUID()))
                         .content(objectMapper.writeValueAsString(updateNicknameRequest)))
@@ -169,18 +169,9 @@ public class UserIntegrationTest {
                 .andExpect(jsonPath("$.message")
                         .value(UNAUTHORIZED.getMessage()));
 
-        //Fail with no resource
-        mockMvc.perform(patch("/api/user/nckchn/" + UUID.randomUUID())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer " + token)
-                        .content(objectMapper.writeValueAsString(updateNicknameRequest)))
-                .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.message")
-                        .value(UNAUTHORIZED.getMessage()));
-
         //Fail with invalid nickname pattern
         updateNicknameRequest.setNickname(nickname + "testqweqweqqq");
-        mockMvc.perform(patch("/api/user/nckchn/" + memberId)
+        mockMvc.perform(patch("/api/user/nickname")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + token)
                         .content(objectMapper.writeValueAsString(updateNicknameRequest)))
@@ -193,19 +184,19 @@ public class UserIntegrationTest {
     }
 
     @Test
-    @DisplayName("[Member][Integration] Update member password")
-    void updateMemberPasswordTest() throws Exception {
+    @DisplayName("[User][Integration] Update user password")
+    void updateUserPasswordTest() throws Exception {
         String email = "test@test.com";
         String nickname = "test";
         String token = loginAndGetToken(email, nickname);
-        UUID memberId = jwtProvider.getIdFromToken(token);
+        UUID userId = jwtProvider.getIdFromToken(token);
 
         UpdatePasswordRequestDto updatePasswordRequest = UpdatePasswordRequestDto.builder()
                 .password("testTest2")
                 .build();
 
         //Fail without token
-        mockMvc.perform(patch("/api/user/pschn/" + memberId)
+        mockMvc.perform(patch("/api/user/pschn/" + userId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updatePasswordRequest)))
                 .andExpect(status().isUnauthorized())
@@ -213,7 +204,7 @@ public class UserIntegrationTest {
                         .value(UNAUTHORIZED.getMessage()));
 
         //Fail with unauthorized token
-        mockMvc.perform(patch("/api/user/pschn/" + memberId)
+        mockMvc.perform(patch("/api/user/pschn/" + userId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + jwtProvider.generateToken(UUID.randomUUID()))
                         .content(objectMapper.writeValueAsString(updatePasswordRequest)))
@@ -221,18 +212,9 @@ public class UserIntegrationTest {
                 .andExpect(jsonPath("$.message")
                         .value(UNAUTHORIZED.getMessage()));
 
-        //Fail with no resource
-        mockMvc.perform(patch("/api/user/pschn/" + UUID.randomUUID())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer " + token)
-                        .content(objectMapper.writeValueAsString(updatePasswordRequest)))
-                .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.message")
-                        .value(UNAUTHORIZED.getMessage()));
-
         //Fail with invalid nickname pattern
         updatePasswordRequest.setPassword("test");
-        mockMvc.perform(patch("/api/user/pschn/" + memberId)
+        mockMvc.perform(patch("/api/user/password")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + token)
                         .content(objectMapper.writeValueAsString(updatePasswordRequest)))
@@ -245,7 +227,7 @@ public class UserIntegrationTest {
         updatePasswordRequest.setPassword("testTest2");
 
         //Success
-        mockMvc.perform(patch("/api/user/pschn/" + memberId)
+        mockMvc.perform(patch("/api/user/password")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + token)
                         .content(objectMapper.writeValueAsString(updatePasswordRequest)))
@@ -254,7 +236,7 @@ public class UserIntegrationTest {
         mockMvc.perform(get("/api/user/detail")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + token)
-                        .param("uId", memberId.toString()))
+                        .param("uId", userId.toString()))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.message")
                         .value(UNAUTHORIZED.getMessage()));

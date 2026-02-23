@@ -1,4 +1,4 @@
-PATCH http://127.0.0.1:8080/api/vocabulary/a2385897-aab3-4269-a650-17a0e01c83b6
+PATCH http://127.0.0.1:8080/api/vocabularies/a2385897-aab3-4269-a650-17a0e01c83b6
 Content-Type: application/json
 Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhMWYxMDhjNS1mMjY2LTQxYWEtOTJlNC1iODVhNDM2NmU1MDEiLCJpYXQiOjE3NDQwMDcyOTUsImV4cCI6MTc0NDA5MzY5NX0.82dvsOiszuxPpI55oqAQZsN5gRYSI8uvVrRtcPLyWnaAkZZ6Y6juCzCsr61dC8DcX0adK12of3fc9BnDnSFePg
 
