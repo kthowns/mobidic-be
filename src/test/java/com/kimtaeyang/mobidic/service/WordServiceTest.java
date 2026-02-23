@@ -55,6 +55,10 @@ class WordServiceTest {
     @Autowired
     private WordService wordService;
 
+    private final User testUser = User.builder()
+            .id(UUID.randomUUID())
+            .build();
+
     @Test
     @DisplayName("[WordService] Add vocab success")
     void addWordSuccess() {
@@ -70,7 +74,7 @@ class WordServiceTest {
                 ArgumentCaptor.forClass(Word.class);
 
         //given
-        given(vocabularyRepository.findById(any(UUID.class)))
+        given(vocabularyRepository.findByIdAndUser_Id(any(UUID.class), any(UUID.class)))
                 .willReturn(Optional.of(Mockito.mock(Vocabulary.class)));
         given(wordRepository.countByExpressionAndVocabulary(anyString(), any(Vocabulary.class)))
                 .willReturn(0);
@@ -82,7 +86,7 @@ class WordServiceTest {
                 });
 
         //when
-        WordDto response = wordService.addWord(UUID.randomUUID(), request);
+        WordDto response = wordService.addWord(testUser, UUID.randomUUID(), request);
 
         //then
         verify(wordRepository, times(1))
@@ -113,7 +117,7 @@ class WordServiceTest {
         words.add(defaultWord);
 
         //given
-        given(vocabularyRepository.findById(any(UUID.class)))
+        given(vocabularyRepository.findByIdAndUser_Id(any(UUID.class), any(UUID.class)))
                 .willReturn(Optional.of(Mockito.mock(Vocabulary.class)));
         given(wordRepository.findByVocabulary(any(Vocabulary.class)))
                 .willReturn(words);
@@ -121,7 +125,7 @@ class WordServiceTest {
                 .willReturn(Optional.of(defaultRate));
 
         //when
-        List<WordDto> response = wordService.getWordsByVocabularyId(UUID.randomUUID());
+        List<WordDto> response = wordService.getWordsByVocabularyId(testUser, UUID.randomUUID());
 
         //then
         assertEquals(words.getFirst().getVocabulary().getId(), response.getFirst().getVocabularyId());
@@ -150,7 +154,7 @@ class WordServiceTest {
                 ArgumentCaptor.forClass(Word.class);
 
         //given
-        given(wordRepository.findById(any(UUID.class)))
+        given(wordRepository.findByIdAndVocabulary_User_Id(any(UUID.class), any(UUID.class)))
                 .willReturn(Optional.of(defaultWord));
         given(vocabularyRepository.countByTitleAndUserAndIdNot(anyString(), any(User.class), any(UUID.class)))
                 .willReturn(0);
@@ -162,8 +166,7 @@ class WordServiceTest {
                 });
 
         //when
-        WordDto response =
-                wordService.updateWord(wordId, request);
+        WordDto response = wordService.updateWord(testUser, wordId, request);
 
         //then
         verify(wordRepository, times(1))
