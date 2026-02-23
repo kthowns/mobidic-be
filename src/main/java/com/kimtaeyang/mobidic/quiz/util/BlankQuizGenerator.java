@@ -1,7 +1,7 @@
 package com.kimtaeyang.mobidic.quiz.util;
 
-import com.kimtaeyang.mobidic.quiz.model.Quiz;
 import com.kimtaeyang.mobidic.dictionary.model.WordWithDefinitions;
+import com.kimtaeyang.mobidic.quiz.model.Quiz;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -43,7 +43,10 @@ public class BlankQuizGenerator extends QuizGenerator {
             Collections.sort(indices);
 
             char[] stem = wordWithDefinitions.getWordDto().getExpression().toCharArray();
+            StringBuilder correctAnswer = new StringBuilder();
+
             for (int idx : indices) {
+                correctAnswer.append(stem[idx]);
                 stem[idx] = '_';
             }
 
@@ -53,7 +56,7 @@ public class BlankQuizGenerator extends QuizGenerator {
                             .wordId(wordWithDefinitions.getWordDto().getId())
                             .userId(memberId)
                             .stem(new String(stem))
-                            .answer(wordWithDefinitions.getWordDto().getExpression())
+                            .answer(correctAnswer.toString())
                             .build()
             );
         }
