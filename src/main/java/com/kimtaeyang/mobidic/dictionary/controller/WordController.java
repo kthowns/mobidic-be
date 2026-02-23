@@ -107,7 +107,7 @@ public class WordController {
     })
     @DeleteMapping("/{wordId}")
     public ResponseEntity<GeneralResponse<WordDto>> deleteWord(
-            @PathVariable("wordId") String wordId,
+            @PathVariable String wordId,
             @AuthenticationPrincipal User user
     ) {
         return GeneralResponse.toResponseEntity(OK,

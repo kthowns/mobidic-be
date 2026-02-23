@@ -30,7 +30,9 @@ public class WordService {
 
     @Transactional
     public WordDto addWord(User user, UUID vocabId, AddWordRequestDto request) {
-        Vocabulary vocabulary = vocabularyRepository.findByIdAndUser_Id(vocabId, user.getId()).orElseThrow(() -> new ApiException(GeneralResponseCode.NO_VOCAB));
+        Vocabulary vocabulary = vocabularyRepository
+                .findByIdAndUser_Id(vocabId, user.getId())
+                .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_VOCAB));
 
         int count = wordRepository.countByExpressionAndVocabulary(request.getExpression(), vocabulary);
 
@@ -38,10 +40,18 @@ public class WordService {
             throw new ApiException(GeneralResponseCode.DUPLICATED_WORD);
         }
 
-        Word word = Word.builder().expression(request.getExpression()).vocabulary(vocabulary).build();
+        Word word = Word.builder()
+                .expression(request.getExpression())
+                .vocabulary(vocabulary)
+                .build();
         wordRepository.save(word);
 
-        WordStatistic rate = WordStatistic.builder().word(word).correctCount(0).incorrectCount(0).isLearned(true).build();
+        WordStatistic rate = WordStatistic.builder()
+                .word(word)
+                .correctCount(0)
+                .incorrectCount(0)
+                .isLearned(false)
+                .build();
         wordStatisticRepository.save(rate);
 
         return WordDto.fromEntity(word);
@@ -49,16 +59,23 @@ public class WordService {
 
     @Transactional(readOnly = true)
     public List<WordDto> getWordsByVocabularyId(User user, UUID vocabularyId) {
-        Vocabulary vocabulary = vocabularyRepository.findByIdAndUser_Id(vocabularyId, user.getId()).orElseThrow(() -> new ApiException(GeneralResponseCode.NO_VOCAB));
+        Vocabulary vocabulary = vocabularyRepository
+                .findByIdAndUser_Id(vocabularyId, user.getId())
+                .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_VOCAB));
 
-        return wordRepository.findByVocabulary(vocabulary).stream().map(WordDto::fromEntity).collect(Collectors.toList());
+        return wordRepository.findByVocabulary(vocabulary)
+                .stream().map(WordDto::fromEntity)
+                .collect(Collectors.toList());
     }
 
     @Transactional
     public WordDto updateWord(User user, UUID wordId, AddWordRequestDto request) {
-        Word word = wordRepository.findByIdAndVocabulary_User_Id(wordId, user.getId()).orElseThrow(() -> new ApiException(GeneralResponseCode.NO_WORD));
+        Word word = wordRepository
+                .findByIdAndVocabulary_User_Id(wordId, user.getId())
+                .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_WORD));
 
-        long count = wordRepository.countByExpressionAndVocabularyAndIdNot(request.getExpression(), word.getVocabulary(), wordId);
+        long count = wordRepository
+                .countByExpressionAndVocabularyAndIdNot(request.getExpression(), word.getVocabulary(), wordId);
 
         if (count > 0) {
             throw new ApiException(GeneralResponseCode.DUPLICATED_WORD);
@@ -72,10 +89,10 @@ public class WordService {
 
     @Transactional
     public WordDto deleteWord(User user, UUID wordId) {
-        Word word = wordRepository.findByIdAndVocabulary_User_Id(user.getId(), wordId).orElseThrow(() -> new ApiException(GeneralResponseCode.NO_WORD));
-
+        Word word = wordRepository
+                .findByIdAndVocabulary_User_Id(wordId, user.getId())
+                .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_WORD));
         wordRepository.delete(word);
-
         return WordDto.fromEntity(word);
     }
 }

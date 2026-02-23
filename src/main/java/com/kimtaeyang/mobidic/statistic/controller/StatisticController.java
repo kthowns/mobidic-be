@@ -92,7 +92,7 @@ public class StatisticController {
             @ApiResponse(responseCode = "500", description = "서버 오류",
                     content = @Content(schema = @Schema(hidden = true)))
     })
-    @PatchMapping("/{wordId}/learned")
+    @PatchMapping("/word/{wordId}/learned")
     public ResponseEntity<GeneralResponse<Void>> toggleLearnedByWordId(
             @PathVariable String wordId
     ) {
