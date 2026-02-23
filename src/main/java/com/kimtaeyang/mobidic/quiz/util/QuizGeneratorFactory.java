@@ -6,12 +6,10 @@ public final class QuizGeneratorFactory {
     private static final QuizGenerator BLANK = new BlankQuizGenerator();
     private static final QuizGenerator OX = new OXQuizGenerator();
 
-    private QuizGeneratorFactory() {}
-
     public static QuizGenerator get(QuizType type) {
         return switch (type) {
-            case BLANK -> BLANK;
-            case OX -> OX;
+            case QuizType.BLANK -> BLANK;
+            case QuizType.OX -> OX;
         };
     }
 }
