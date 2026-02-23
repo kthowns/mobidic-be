@@ -10,17 +10,13 @@ import com.kimtaeyang.mobidic.statistic.dto.StatisticDto;
 import com.kimtaeyang.mobidic.statistic.entity.WordStatistic;
 import com.kimtaeyang.mobidic.statistic.repository.WordStatisticRepository;
 import com.kimtaeyang.mobidic.user.entity.User;
-import com.kimtaeyang.mobidic.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
-
-import static com.kimtaeyang.mobidic.common.code.AuthResponseCode.NO_USER;
 
 @Service
 @RequiredArgsConstructor
@@ -28,86 +24,82 @@ import static com.kimtaeyang.mobidic.common.code.AuthResponseCode.NO_USER;
 public class StatisticService {
     private final WordRepository wordRepository;
     private final WordStatisticRepository wordStatisticRepository;
-    private final UserRepository userRepository;
     private final VocabularyRepository vocabularyRepository;
 
     @Transactional(readOnly = true)
-    @PreAuthorize("@statisticAccessHandler.ownershipCheck(#wordId)")
-    public StatisticDto getRateByWordId(UUID wordId) {
-        WordStatistic wordStatistic = wordStatisticRepository.findById(wordId)
+    public StatisticDto getRateByWordId(User user, UUID wordId) {
+        WordStatistic wordStatistic = wordStatisticRepository
+                .findByWordIdAndWord_Vocabulary_User_Id(wordId, user.getId())
                 .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_RATE));
 
         return StatisticDto.fromEntity(wordStatistic, calcDifficultyRatio(wordStatistic.getCorrectCount(), wordStatistic.getIncorrectCount()));
     }
 
-    @PreAuthorize("@vocabularyAccessHandler.ownershipCheck(#vocabId)")
     @Transactional(readOnly = true)
-    public Double getVocabLearningRate(UUID vocabId) {
-        Vocabulary vocabulary = vocabularyRepository.findById(vocabId)
+    public Double getVocabLearningRate(User user, UUID vocabId) {
+        Vocabulary vocabulary = vocabularyRepository
+                .findByIdAndUser_Id(vocabId, user.getId())
                 .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_VOCAB));
-        if(wordRepository.countByVocabulary(vocabulary) < 1){
+
+        if (wordRepository.countByVocabulary(vocabulary) < 1) {
             return 0.0;
         }
+
         return wordStatisticRepository.getVocabularyLearningRate(vocabulary)
                 .orElseThrow(() -> new ApiException(GeneralResponseCode.INTERNAL_SERVER_ERROR));
     }
 
     @Transactional
-    @PreAuthorize("@wordAccessHandler.ownershipCheck(#wordId)")
-    public void toggleLearnedByWordId(UUID wordId) {
-        WordStatistic wordStatistic = wordStatisticRepository.findById(wordId)
+    public void toggleLearnedByWordId(User user, UUID wordId) {
+        WordStatistic wordStatistic = wordStatisticRepository
+                .findByWordIdAndWord_Vocabulary_User_Id(wordId, user.getId())
                 .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_RATE));
 
         wordStatistic.setLearned(!wordStatistic.isLearned());
     }
 
     @Transactional
-    @PreAuthorize("@wordAccessHandler.ownershipCheck(#wordId)")
-    public void increaseCorrectCount(UUID wordId) {
-        Word word = wordRepository.findById(wordId)
-                        .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_WORD));
+    public void increaseCorrectCount(User user, UUID wordId) {
+        Word word = wordRepository
+                .findByIdAndVocabulary_User_Id(wordId, user.getId())
+                .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_WORD));
         wordStatisticRepository.increaseCorrectCount(word);
     }
 
     @Transactional
-    @PreAuthorize("@wordAccessHandler.ownershipCheck(#wordId)")
-    public void increaseIncorrectCount(UUID wordId) {
-        Word word = wordRepository.findById(wordId)
+    public void increaseIncorrectCount(User user, UUID wordId) {
+        Word word = wordRepository
+                .findByIdAndVocabulary_User_Id(wordId, user.getId())
                 .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_WORD));
         wordStatisticRepository.increaseIncorrectCount(word);
     }
 
-    @Transactional
-    @PreAuthorize("@vocabularyAccessHandler.ownershipCheck(#vId)")
-    public double getAvgAccuracyByVocab(UUID vId) {
-        Vocabulary vocabulary = vocabularyRepository.findById(vId)
-                .orElseThrow(()-> new ApiException(GeneralResponseCode.NO_VOCAB));
+    @Transactional(readOnly = true)
+    public double getAvgAccuracyByVocab(User user, UUID vocabularyId) {
+        vocabularyRepository.findByIdAndUser_Id(vocabularyId, user.getId())
+                .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_VOCAB));
 
-        List<WordStatistic> wordStatistics = wordStatisticRepository.findByVocab(vocabulary);
+        List<WordStatistic> wordStatistics = wordStatisticRepository.findByWord_Vocabulary_Id(vocabularyId);
 
         return calcAvgRate(wordStatistics);
     }
 
-    @Transactional
-    @PreAuthorize("@userAccessHandler.ownershipCheck(#uId)")
-    public double getAvgAccuracyByMember(UUID uId) {
-        User user = userRepository.findById(uId)
-                .orElseThrow(()-> new ApiException(NO_USER));
-
-        List<WordStatistic> wordStatistics = wordStatisticRepository.findByMember(user);
+    @Transactional(readOnly = true)
+    public double getTotalAvgAccuracy(User user) {
+        List<WordStatistic> wordStatistics = wordStatisticRepository.findByWord_Vocabulary_User_Id(user.getId());
 
         return calcAvgRate(wordStatistics);
     }
 
     private double calcAvgRate(List<WordStatistic> wordStatistics) {
-        if(wordStatistics == null || wordStatistics.isEmpty()){
+        if (wordStatistics == null || wordStatistics.isEmpty()) {
             return 0.0;
         }
 
         double sum = 0.0;
-        for(WordStatistic wordStatistic : wordStatistics){
-            if(wordStatistic.getIncorrectCount() == 0){
-                if(wordStatistic.getCorrectCount() > 0){
+        for (WordStatistic wordStatistic : wordStatistics) {
+            if (wordStatistic.getIncorrectCount() == 0) {
+                if (wordStatistic.getCorrectCount() > 0) {
                     sum += 1;
                 }
             } else {

@@ -80,9 +80,9 @@ public class QuizService {
                 .build();
 
         if (quizRateResponse.getIsCorrect()) {
-            statisticService.increaseCorrectCount(wordId);
+            statisticService.increaseCorrectCount(user, wordId);
         } else {
-            statisticService.increaseIncorrectCount(wordId);
+            statisticService.increaseIncorrectCount(user, wordId);
         }
 
         return quizRateResponse;
