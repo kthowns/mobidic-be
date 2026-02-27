@@ -1,10 +1,11 @@
 package com.kimtaeyang.mobidic.dictionary.controller;
 
-import com.kimtaeyang.mobidic.dictionary.dto.AddWordRequestDto;
-import com.kimtaeyang.mobidic.dictionary.dto.WordDto;
 import com.kimtaeyang.mobidic.common.dto.ErrorResponse;
 import com.kimtaeyang.mobidic.common.dto.GeneralResponse;
+import com.kimtaeyang.mobidic.dictionary.dto.AddWordRequestDto;
+import com.kimtaeyang.mobidic.dictionary.dto.WordDto;
 import com.kimtaeyang.mobidic.dictionary.service.WordService;
+import com.kimtaeyang.mobidic.user.entity.User;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -16,6 +17,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -52,10 +54,11 @@ public class WordController {
     @PostMapping("/{vocabularyId}")
     public ResponseEntity<GeneralResponse<WordDto>> addWord(
             @PathVariable("vocabularyId") String vocabularyId,
-            @RequestBody @Valid AddWordRequestDto request
+            @RequestBody @Valid AddWordRequestDto request,
+            @AuthenticationPrincipal User user
     ) {
         return GeneralResponse.toResponseEntity(OK,
-                wordService.addWord(UUID.fromString(vocabularyId), request));
+                wordService.addWord(user, UUID.fromString(vocabularyId), request));
     }
 
     @Operation(
@@ -79,10 +82,11 @@ public class WordController {
     @PatchMapping("/{wordId}")
     public ResponseEntity<GeneralResponse<WordDto>> updateWord(
             @PathVariable("wordId") String wordId,
-            @RequestBody @Valid AddWordRequestDto request
+            @RequestBody @Valid AddWordRequestDto request,
+            @AuthenticationPrincipal User user
     ) {
         return GeneralResponse.toResponseEntity(OK,
-                wordService.updateWord(UUID.fromString(wordId), request));
+                wordService.updateWord(user, UUID.fromString(wordId), request));
     }
 
     @Operation(
@@ -103,10 +107,11 @@ public class WordController {
     })
     @DeleteMapping("/{wordId}")
     public ResponseEntity<GeneralResponse<WordDto>> deleteWord(
-            @PathVariable("wordId") String wordId
+            @PathVariable String wordId,
+            @AuthenticationPrincipal User user
     ) {
         return GeneralResponse.toResponseEntity(OK,
-                wordService.deleteWord(UUID.fromString(wordId)));
+                wordService.deleteWord(user, UUID.fromString(wordId)));
     }
 
     @Operation(
@@ -127,9 +132,10 @@ public class WordController {
     })
     @GetMapping("/all")
     public ResponseEntity<GeneralResponse<List<WordDto>>> getWordsByVocabularyId(
-            @RequestParam String vocabularyId
+            @RequestParam String vocabularyId,
+            @AuthenticationPrincipal User user
     ) {
         return GeneralResponse.toResponseEntity(OK,
-                wordService.getWordsByVocabularyId(UUID.fromString(vocabularyId)));
+                wordService.getWordsByVocabularyId(user, UUID.fromString(vocabularyId)));
     }
 }

@@ -3,59 +3,56 @@ package com.kimtaeyang.mobidic.pronunciation.service;
 import com.kimtaeyang.mobidic.common.code.GeneralResponseCode;
 import com.kimtaeyang.mobidic.common.exception.ApiException;
 import com.kimtaeyang.mobidic.dictionary.entity.Word;
-import com.kimtaeyang.mobidic.dictionary.repository.WordRepository;
+import com.kimtaeyang.mobidic.dictionary.service.WordService;
+import com.kimtaeyang.mobidic.pronunciation.dto.SttResponse;
+import com.kimtaeyang.mobidic.user.entity.User;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.MultipartBodyBuilder;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.reactive.function.BodyInserters;
-import org.springframework.web.reactive.function.client.WebClient;
 
-import java.util.Map;
+import java.net.URI;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class PronunciationService {
-    private final WordRepository wordRepository;
+    private final WordService wordService;
+    private final RestClient restClient;
 
     @Value("${whisper.flask-server-url}")
-    private String flaskServerUrl;
+    private String flaskServerBaseUrl;
 
-    @PreAuthorize("@wordAccessHandler.ownershipCheck(#wordId)")
-    public double ratePronunciation(UUID wordId, MultipartFile record) {
-        if (record.getSize() > 1024 * 100) {
-            throw new ApiException(GeneralResponseCode.TOO_BIG_FILE_SIZE);
-        }
-        Word word = wordRepository.findById(wordId)
-                .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_WORD));
+    public Double ratePronunciation(User user, UUID wordId, MultipartFile multipartFile) {
+        Word word = wordService.getWordById(user, wordId);
 
-        WebClient webClient = WebClient.builder()
-                .baseUrl(flaskServerUrl)
-                .build();
         MultipartBodyBuilder builder = new MultipartBodyBuilder();
-        builder.part("file", record.getResource());
-        String result = webClient.post()
-                .uri("/transcribe")
-                .contentType(MediaType.MULTIPART_FORM_DATA)
-                .body(BodyInserters.fromMultipartData(builder.build()))
-                .retrieve()
-                .bodyToMono(Map.class)
-                .map((s) -> {
-                    String r = s.get("result").toString();
-                    r = r.toLowerCase().trim();
-                    r = r.substring(0, r.length() - 1);
-                    return r;
-                })
-                .block();
+        builder.part("file", multipartFile.getResource());
 
-        return findSimilarity(word.getExpression(), result);
+        SttResponse sttResponse;
+        try {
+            sttResponse = restClient.post()
+                    .uri(URI.create(flaskServerBaseUrl + "/transcribe"))
+                    .contentType(MediaType.MULTIPART_FORM_DATA)
+                    .body(builder.build())
+                    .retrieve()
+                    .body(SttResponse.class);
+        } catch (RestClientException e) {
+            throw new ApiException(GeneralResponseCode.INTERNAL_SERVER_ERROR);
+        }
+
+        if (sttResponse == null || sttResponse.getResult() == null) {
+            throw new ApiException(GeneralResponseCode.INTERNAL_SERVER_ERROR);
+        }
+
+        return findSimilarity(word.getExpression(), sttResponse.getResult());
     }
 
     private int getLevenshteinDistance(String X, String Y) {
@@ -112,14 +109,13 @@ public class PronunciationService {
         return dist[sourceLength][targetLength];
     }
 
-    private double findSimilarity(String x, String y) {
-        if (x == null || y == null) {
-            throw new IllegalArgumentException("Strings must not be null");
-        }
+    private double findSimilarity(String orgString, String compareString) {
+        compareString = compareString.toLowerCase().trim();
+        compareString = compareString.substring(0, compareString.length() - 1);
 
-        double maxLength = Double.max(x.length(), y.length());
+        double maxLength = Double.max(orgString.length(), compareString.length());
         if (maxLength > 0) {
-            return (maxLength - getDamerauLevenshteinDistance(x, y)) / maxLength;
+            return (maxLength - getDamerauLevenshteinDistance(orgString, compareString)) / maxLength;
         }
         return 1.0;
     }

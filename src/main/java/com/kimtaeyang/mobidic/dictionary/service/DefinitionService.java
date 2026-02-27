@@ -1,16 +1,16 @@
 package com.kimtaeyang.mobidic.dictionary.service;
 
 import com.kimtaeyang.mobidic.common.code.GeneralResponseCode;
+import com.kimtaeyang.mobidic.common.exception.ApiException;
 import com.kimtaeyang.mobidic.dictionary.dto.AddDefinitionRequestDto;
 import com.kimtaeyang.mobidic.dictionary.dto.DefinitionDto;
 import com.kimtaeyang.mobidic.dictionary.entity.Definition;
 import com.kimtaeyang.mobidic.dictionary.entity.Word;
-import com.kimtaeyang.mobidic.common.exception.ApiException;
 import com.kimtaeyang.mobidic.dictionary.repository.DefinitionRepository;
 import com.kimtaeyang.mobidic.dictionary.repository.WordRepository;
+import com.kimtaeyang.mobidic.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,9 +26,12 @@ public class DefinitionService {
     private final DefinitionRepository definitionRepository;
 
     @Transactional
-    @PreAuthorize("@wordAccessHandler.ownershipCheck(#wordId)")
-    public DefinitionDto addDefinition(UUID wordId, AddDefinitionRequestDto request) {
-        Word word = wordRepository.findById(wordId)
+    public DefinitionDto addDefinition(
+            User user,
+            UUID wordId,
+            AddDefinitionRequestDto request
+    ) {
+        Word word = wordRepository.findByIdAndVocabulary_User_Id(wordId, user.getId())
                 .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_WORD));
 
         int count = definitionRepository.countByDefinitionAndWord(request.getDefinition(), word);
@@ -47,10 +50,9 @@ public class DefinitionService {
         return DefinitionDto.fromEntity(definition);
     }
 
-    @PreAuthorize("@wordAccessHandler.ownershipCheck(#wordId)")
     @Transactional(readOnly = true)
-    public List<DefinitionDto> getDefinitionsByWordId(UUID wordId) {
-        Word word = wordRepository.findById(wordId)
+    public List<DefinitionDto> getDefinitionsByWordId(User user, UUID wordId) {
+        Word word = wordRepository.findByIdAndVocabulary_User_Id(wordId, user.getId())
                 .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_WORD));
 
         return definitionRepository.findByWord(word)
@@ -59,10 +61,14 @@ public class DefinitionService {
     }
 
     @Transactional
-    @PreAuthorize("@definitionAccessHandler.ownershipCheck(#defId)")
-    public DefinitionDto updateDefinition(UUID defId, AddDefinitionRequestDto request) {
-        Definition definition = definitionRepository.findById(defId)
-                .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_DEF));
+    public DefinitionDto updateDefinition(
+            User user,
+            UUID defId,
+            AddDefinitionRequestDto request
+    ) {
+        Definition definition = definitionRepository.findByIdAndWord_Vocabulary_User_Id(
+                defId, user.getId()
+        ).orElseThrow(() -> new ApiException(GeneralResponseCode.NO_DEF));
 
         int count = definitionRepository.countByDefinitionAndWordAndIdNot(request.getDefinition(), definition.getWord(), defId);
 
@@ -78,10 +84,13 @@ public class DefinitionService {
     }
 
     @Transactional
-    @PreAuthorize("@definitionAccessHandler.ownershipCheck(#defId)")
-    public DefinitionDto deleteDefinition(UUID defId) {
-        Definition definition = definitionRepository.findById(defId)
-                .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_DEF));
+    public DefinitionDto deleteDefinition(
+            User user,
+            UUID defId
+    ) {
+        Definition definition = definitionRepository.findByIdAndWord_Vocabulary_User_Id(
+                defId, user.getId()
+        ).orElseThrow(() -> new ApiException(GeneralResponseCode.NO_DEF));
 
         definitionRepository.delete(definition);
 

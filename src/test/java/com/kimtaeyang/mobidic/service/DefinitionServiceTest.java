@@ -9,6 +9,7 @@ import com.kimtaeyang.mobidic.dictionary.repository.DefinitionRepository;
 import com.kimtaeyang.mobidic.dictionary.repository.WordRepository;
 import com.kimtaeyang.mobidic.dictionary.service.DefinitionService;
 import com.kimtaeyang.mobidic.dictionary.type.PartOfSpeech;
+import com.kimtaeyang.mobidic.user.entity.User;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -46,6 +47,10 @@ class DefinitionServiceTest {
     @Autowired
     private DefinitionService definitionService;
 
+    private final User testUser = User.builder()
+            .id(UUID.randomUUID())
+            .build();
+
     @Test
     @DisplayName("[DefService] Add def success")
     void addDefinitionSuccess() {
@@ -62,7 +67,7 @@ class DefinitionServiceTest {
                 ArgumentCaptor.forClass(Definition.class);
 
         //given
-        given(wordRepository.findById(any(UUID.class)))
+        given(wordRepository.findByIdAndVocabulary_User_Id(any(UUID.class), any(UUID.class)))
                 .willReturn(Optional.of(Mockito.mock(Word.class)));
         given(definitionRepository.save(any(Definition.class)))
                 .willAnswer(invocation -> {
@@ -72,7 +77,7 @@ class DefinitionServiceTest {
                 });
 
         //when
-        DefinitionDto response = definitionService.addDefinition(UUID.randomUUID(), request);
+        DefinitionDto response = definitionService.addDefinition(testUser, UUID.randomUUID(), request);
 
         //then
         verify(definitionRepository, times(1))
@@ -98,13 +103,13 @@ class DefinitionServiceTest {
         definitions.add(defaultDefinition);
 
         //given
-        given(wordRepository.findById(any(UUID.class)))
+        given(wordRepository.findByIdAndVocabulary_User_Id(any(UUID.class), any(UUID.class)))
                 .willReturn(Optional.of(Mockito.mock(Word.class)));
         given(definitionRepository.findByWord(any(Word.class)))
                 .willReturn(definitions);
 
         //when
-        List<DefinitionDto> response = definitionService.getDefinitionsByWordId(UUID.randomUUID());
+        List<DefinitionDto> response = definitionService.getDefinitionsByWordId(testUser, UUID.randomUUID());
 
         //then
         assertEquals(definitions.getFirst().getWord().getId(), response.getFirst().getWordId());
@@ -136,7 +141,7 @@ class DefinitionServiceTest {
                 ArgumentCaptor.forClass(Definition.class);
 
         //given
-        given(definitionRepository.findById(any(UUID.class)))
+        given(definitionRepository.findByIdAndWord_Vocabulary_User_Id(any(UUID.class), any(UUID.class)))
                 .willReturn(Optional.of(defaultDefinition));
         given(definitionRepository.save(any(Definition.class)))
                 .willAnswer(invocation -> {
@@ -148,7 +153,7 @@ class DefinitionServiceTest {
 
         //when
         DefinitionDto response =
-                definitionService.updateDefinition(defId, request);
+                definitionService.updateDefinition(testUser, defId, request);
 
         //then
         verify(definitionRepository, times(1))

@@ -9,16 +9,17 @@ import com.kimtaeyang.mobidic.dictionary.service.DefinitionService;
 import com.kimtaeyang.mobidic.dictionary.service.VocabularyService;
 import com.kimtaeyang.mobidic.dictionary.service.WordService;
 import com.kimtaeyang.mobidic.quiz.dto.QuizDto;
-import com.kimtaeyang.mobidic.quiz.dto.QuizStatisticDto;
+import com.kimtaeyang.mobidic.quiz.dto.QuizRateRequest;
+import com.kimtaeyang.mobidic.quiz.dto.QuizRateResponse;
 import com.kimtaeyang.mobidic.quiz.model.Quiz;
 import com.kimtaeyang.mobidic.quiz.type.QuizType;
 import com.kimtaeyang.mobidic.quiz.util.QuizGenerator;
 import com.kimtaeyang.mobidic.quiz.util.QuizGeneratorFactory;
 import com.kimtaeyang.mobidic.statistic.service.StatisticService;
+import com.kimtaeyang.mobidic.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
@@ -31,53 +32,71 @@ import java.util.UUID;
 @Slf4j
 public class QuizService {
     private final WordService wordService;
-    private static final String QUESTION_PREFIX = "question";
+    private static final String QUIZ_PREFIX = "quiz";
     private final RedisTemplate<String, String> redisTemplate;
-    private static final Long expPerQuestion = 15000L;
+    private static final Long expPerQuiz = 15000L;
     private final VocabularyService vocabularyService;
     private final StatisticService statisticService;
     private final CryptoService cryptoService;
     private final DefinitionService definitionService;
 
-    @PreAuthorize("@vocabularyAccessHandler.ownershipCheck(#vocabularyId)")
-    public List<QuizDto> getOXQuizzes(UUID vocabularyId) {
-        return generateQuestions(vocabularyId, QuizType.OX);
-    }
-
-    @PreAuthorize("@vocabularyAccessHandler.ownershipCheck(#vocabularyId)")
-    public List<QuizDto> getBlankQuizzes(UUID vocabularyId) {
-        return generateQuestions(vocabularyId, QuizType.BLANK);
-    }
-
-    @PreAuthorize("@userAccessHandler.ownershipCheck(#userId)")
-    public QuizStatisticDto.Response rateQuestion(
-            UUID userId,
-            QuizStatisticDto.Request request
+    public List<QuizDto> getOXQuizzes(
+            User user,
+            UUID vocabularyId
     ) {
-        String key = cryptoService.decrypt(request.getToken()); //복호화
+        return generateQuizs(user, vocabularyId, QuizType.OX);
+    }
+
+    public List<QuizDto> getBlankQuizzes(
+            User user,
+            UUID vocabularyId
+    ) {
+        return generateQuizs(user, vocabularyId, QuizType.BLANK);
+    }
+
+    public QuizRateResponse rateQuiz(
+            User user,
+            QuizRateRequest quizRateRequest
+    ) {
+        /*
+            Request token validation 필요!!!
+         */
+        String plainToken = cryptoService.decrypt(quizRateRequest.getToken());
+        UUID userId = UUID.fromString(plainToken.split(":")[1]);
+
+        // quiz:{userId}:{wordId}:{quizId}
+        if (!userId.equals(user.getId())) {
+            throw new ApiException(GeneralResponseCode.NO_QUIZ);
+        }
+
+        String key = cryptoService.decrypt(quizRateRequest.getToken()); //복호화
         String correctAnswer = findCorrectAnswer(key);
         expireAnswer(key);
 
         UUID wordId = UUID.fromString(key.split(":")[2]);
-        QuizStatisticDto.Response response = QuizStatisticDto.Response.builder()
-                .isCorrect(request.getAnswer().equals(correctAnswer))
+        QuizRateResponse quizRateResponse = QuizRateResponse.builder()
+                .isCorrect(quizRateRequest.getAnswer().equals(correctAnswer))
                 .correctAnswer(correctAnswer)
                 .build();
 
-        if (response.getIsCorrect()) {
-            statisticService.increaseCorrectCount(wordId);
+        if (quizRateResponse.getIsCorrect()) {
+            statisticService.increaseCorrectCount(user, wordId);
         } else {
-            statisticService.increaseIncorrectCount(wordId);
+            statisticService.increaseIncorrectCount(user, wordId);
         }
 
-        return response;
+        return quizRateResponse;
     }
 
-    private List<QuizDto> generateQuestions(UUID vocabularyId, QuizType quizType) {
-        VocabularyDto vocabulary = vocabularyService.getVocabularyById(vocabularyId);
+    private List<QuizDto> generateQuizs(
+            User user,
+            UUID vocabularyId,
+            QuizType quizType
+    ) {
+        VocabularyDto vocabulary = vocabularyService.getVocabularyById(user, vocabularyId);
 
         List<WordWithDefinitions> wordsWithDefs = new ArrayList<>();
-        List<WordDto> wordDtos = wordService.getWordsByVocabularyId(vocabulary.getId());
+        List<WordDto> wordDtos = wordService.getWordsByVocabularyId(user, vocabularyId);
         if (wordDtos.isEmpty()) {
             return List.of();
         }
@@ -85,7 +104,7 @@ public class QuizService {
         for (WordDto wordDto : wordDtos) {
             WordWithDefinitions wordWithDefinitions = WordWithDefinitions.builder()
                     .wordDto(wordDto)
-                    .definitionDtos(definitionService.getDefinitionsByWordId(wordDto.getId()))
+                    .definitionDtos(definitionService.getDefinitionsByWordId(user, wordDto.getId()))
                     .build();
 
             wordsWithDefs.add(wordWithDefinitions);
@@ -97,8 +116,8 @@ public class QuizService {
         List<QuizDto> quizDtos = new ArrayList<>();
 
         for (Quiz quiz : quizzes) {
-            long expSec = expPerQuestion * quizzes.size();
-            String token = registerQuestion(quiz, expSec);
+            long expSec = expPerQuiz * quizzes.size();
+            String token = registerQuiz(quiz, expSec);
             quizDtos.add(QuizDto.builder()
                     .token(token)
                     .options(quiz.getOptions())
@@ -110,8 +129,9 @@ public class QuizService {
         return quizDtos;
     }
 
-    private String registerQuestion(Quiz quiz, long expSec) {
-        String key = QUESTION_PREFIX
+    private String registerQuiz(Quiz quiz, long expSec) {
+        // quiz:{userId}:{wordId}:{quizId}
+        String key = QUIZ_PREFIX
                 + ":" + quiz.getUserId()
                 + ":" + quiz.getWordId()
                 + ":" + quiz.getId();
@@ -126,7 +146,7 @@ public class QuizService {
     }
 
     private String findCorrectAnswer(String token) {
-        validateQuestion(token);
+        validateQuiz(token);
         String correctAnswer = redisTemplate.opsForValue().get(token);
         if (correctAnswer == null) {
             throw new ApiException(GeneralResponseCode.REQUEST_TIMEOUT);
@@ -139,8 +159,8 @@ public class QuizService {
         redisTemplate.delete(token);
     }
 
-    private void validateQuestion(String token) {
-        if (!token.split(":")[0].equals(QUESTION_PREFIX)) {
+    private void validateQuiz(String token) {
+        if (!token.split(":")[0].equals(QUIZ_PREFIX)) {
             throw new ApiException(GeneralResponseCode.INVALID_REQUEST);
         }
         if (!redisTemplate.hasKey(token)) {

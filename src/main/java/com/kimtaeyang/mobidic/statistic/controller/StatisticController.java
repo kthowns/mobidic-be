@@ -4,6 +4,7 @@ import com.kimtaeyang.mobidic.common.dto.ErrorResponse;
 import com.kimtaeyang.mobidic.common.dto.GeneralResponse;
 import com.kimtaeyang.mobidic.statistic.dto.StatisticDto;
 import com.kimtaeyang.mobidic.statistic.service.StatisticService;
+import com.kimtaeyang.mobidic.user.entity.User;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -14,6 +15,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -46,10 +48,11 @@ public class StatisticController {
     })
     @GetMapping("/word")
     public ResponseEntity<GeneralResponse<StatisticDto>> getRateByWordId(
-            @RequestParam String wordId
+            @RequestParam String wordId,
+            @AuthenticationPrincipal User user
     ) {
         return GeneralResponse.toResponseEntity(OK,
-                statisticService.getRateByWordId(UUID.fromString(wordId)));
+                statisticService.getRateByWordId(user, UUID.fromString(wordId)));
     }
 
     @Operation(
@@ -70,10 +73,11 @@ public class StatisticController {
     })
     @GetMapping("/vocabulary")
     public ResponseEntity<GeneralResponse<Double>> getVocabLearningRate(
-            @RequestParam String vocabularyId
+            @RequestParam String vocabularyId,
+            @AuthenticationPrincipal User user
     ) {
         return GeneralResponse.toResponseEntity(OK,
-                statisticService.getVocabLearningRate(UUID.fromString(vocabularyId)));
+                statisticService.getVocabLearningRate(user, UUID.fromString(vocabularyId)));
     }
 
     @Operation(
@@ -92,11 +96,12 @@ public class StatisticController {
             @ApiResponse(responseCode = "500", description = "서버 오류",
                     content = @Content(schema = @Schema(hidden = true)))
     })
-    @PatchMapping("/{wordId}/learned")
+    @PatchMapping("/word/{wordId}/learned")
     public ResponseEntity<GeneralResponse<Void>> toggleLearnedByWordId(
-            @PathVariable String wordId
+            @PathVariable String wordId,
+            @AuthenticationPrincipal User user
     ) {
-        statisticService.toggleLearnedByWordId(UUID.fromString(wordId));
+        statisticService.toggleLearnedByWordId(user, UUID.fromString(wordId));
 
         return GeneralResponse.toResponseEntity(OK, null);
     }
@@ -119,10 +124,11 @@ public class StatisticController {
     })
     @GetMapping("/accuracy")
     public ResponseEntity<GeneralResponse<Double>> getAvgAccuracyByVocab(
-            @RequestParam String vId
+            @RequestParam String vocabularyId,
+            @AuthenticationPrincipal User user
     ) {
         return GeneralResponse.toResponseEntity(OK,
-                statisticService.getAvgAccuracyByVocab(UUID.fromString(vId)));
+                statisticService.getAvgAccuracyByVocab(user, UUID.fromString(vocabularyId)));
     }
 
     @Operation(
@@ -143,9 +149,9 @@ public class StatisticController {
     })
     @GetMapping("/accuracy/all")
     public ResponseEntity<GeneralResponse<Double>> getAvgAccuracyOfAll(
-            @RequestParam String uId
+            @AuthenticationPrincipal User user
     ) {
         return GeneralResponse.toResponseEntity(OK,
-                statisticService.getAvgAccuracyByMember(UUID.fromString(uId)));
+                statisticService.getTotalAvgAccuracy(user));
     }
 }

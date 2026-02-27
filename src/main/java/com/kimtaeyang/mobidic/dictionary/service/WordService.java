@@ -1,18 +1,18 @@
 package com.kimtaeyang.mobidic.dictionary.service;
 
 import com.kimtaeyang.mobidic.common.code.GeneralResponseCode;
+import com.kimtaeyang.mobidic.common.exception.ApiException;
 import com.kimtaeyang.mobidic.dictionary.dto.AddWordRequestDto;
 import com.kimtaeyang.mobidic.dictionary.dto.WordDto;
 import com.kimtaeyang.mobidic.dictionary.entity.Vocabulary;
-import com.kimtaeyang.mobidic.statistic.entity.WordStatistic;
 import com.kimtaeyang.mobidic.dictionary.entity.Word;
-import com.kimtaeyang.mobidic.common.exception.ApiException;
-import com.kimtaeyang.mobidic.statistic.repository.WordStatisticRepository;
 import com.kimtaeyang.mobidic.dictionary.repository.VocabularyRepository;
 import com.kimtaeyang.mobidic.dictionary.repository.WordRepository;
+import com.kimtaeyang.mobidic.statistic.entity.WordStatistic;
+import com.kimtaeyang.mobidic.statistic.repository.WordStatisticRepository;
+import com.kimtaeyang.mobidic.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,9 +29,9 @@ public class WordService {
     private final WordStatisticRepository wordStatisticRepository;
 
     @Transactional
-    @PreAuthorize("@vocabularyAccessHandler.ownershipCheck(#vocabId)")
-    public WordDto addWord(UUID vocabId, AddWordRequestDto request) {
-        Vocabulary vocabulary = vocabularyRepository.findById(vocabId)
+    public WordDto addWord(User user, UUID vocabId, AddWordRequestDto request) {
+        Vocabulary vocabulary = vocabularyRepository
+                .findByIdAndUser_Id(vocabId, user.getId())
                 .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_VOCAB));
 
         int count = wordRepository.countByExpressionAndVocabulary(request.getExpression(), vocabulary);
@@ -50,7 +50,7 @@ public class WordService {
                 .word(word)
                 .correctCount(0)
                 .incorrectCount(0)
-                .isLearned(true)
+                .isLearned(false)
                 .build();
         wordStatisticRepository.save(rate);
 
@@ -58,22 +58,31 @@ public class WordService {
     }
 
     @Transactional(readOnly = true)
-    @PreAuthorize("@vocabularyAccessHandler.ownershipCheck(#vId)")
-    public List<WordDto> getWordsByVocabularyId(UUID vId) {
-        Vocabulary vocabulary = vocabularyRepository.findById(vId)
+    public Word getWordById(User user, UUID wordId) {
+        return wordRepository
+                .findByIdAndVocabulary_User_Id(wordId, user.getId())
+                .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_WORD));
+    }
+
+    @Transactional(readOnly = true)
+    public List<WordDto> getWordsByVocabularyId(User user, UUID vocabularyId) {
+        Vocabulary vocabulary = vocabularyRepository
+                .findByIdAndUser_Id(vocabularyId, user.getId())
                 .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_VOCAB));
 
         return wordRepository.findByVocabulary(vocabulary)
-                .stream().map(WordDto::fromEntity).collect(Collectors.toList());
+                .stream().map(WordDto::fromEntity)
+                .collect(Collectors.toList());
     }
 
     @Transactional
-    @PreAuthorize("@wordAccessHandler.ownershipCheck(#wordId)")
-    public WordDto updateWord(UUID wordId, AddWordRequestDto request) {
-        Word word = wordRepository.findById(wordId)
+    public WordDto updateWord(User user, UUID wordId, AddWordRequestDto request) {
+        Word word = wordRepository
+                .findByIdAndVocabulary_User_Id(wordId, user.getId())
                 .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_WORD));
 
-        long count = wordRepository.countByExpressionAndVocabularyAndIdNot(request.getExpression(), word.getVocabulary(), wordId);
+        long count = wordRepository
+                .countByExpressionAndVocabularyAndIdNot(request.getExpression(), word.getVocabulary(), wordId);
 
         if (count > 0) {
             throw new ApiException(GeneralResponseCode.DUPLICATED_WORD);
@@ -86,13 +95,11 @@ public class WordService {
     }
 
     @Transactional
-    @PreAuthorize("@wordAccessHandler.ownershipCheck(#wordId)")
-    public WordDto deleteWord(UUID wordId) {
-        Word word = wordRepository.findById(wordId)
+    public WordDto deleteWord(User user, UUID wordId) {
+        Word word = wordRepository
+                .findByIdAndVocabulary_User_Id(wordId, user.getId())
                 .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_WORD));
-
         wordRepository.delete(word);
-
         return WordDto.fromEntity(word);
     }
 }

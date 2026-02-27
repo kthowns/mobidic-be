@@ -46,6 +46,10 @@ class VocabularyServiceTest {
     @Autowired
     private VocabularyService vocabularyService;
 
+    private final User testUser = User.builder()
+            .id(UUID.randomUUID())
+            .build();
+
     @Test
     @DisplayName("[VocabService] Add vocab success")
     void addVocabularySuccess() {
@@ -61,8 +65,6 @@ class VocabularyServiceTest {
                 ArgumentCaptor.forClass(Vocabulary.class);
 
         //given
-        given(userRepository.findById(any(UUID.class)))
-                .willReturn(Optional.of(Mockito.mock(User.class)));
         given(vocabularyRepository.countByTitleAndUser(anyString(), any(User.class)))
                 .willReturn(0);
         given(vocabularyRepository.save(any(Vocabulary.class)))
@@ -73,7 +75,7 @@ class VocabularyServiceTest {
                 });
 
         //when
-        VocabularyDto response = vocabularyService.addVocabulary(UUID.randomUUID(), request);
+        VocabularyDto response = vocabularyService.addVocabulary(testUser, request);
 
         //then
         verify(vocabularyRepository, times(1))
@@ -86,11 +88,11 @@ class VocabularyServiceTest {
 
     @Test
     @DisplayName("[VocabService] Get vocabs by member id success")
-    void getVocabulariesByUserIdSuccess() {
+    void getVocabulariesSuccess() {
         resetMock();
 
         Vocabulary defaultVocabulary = Vocabulary.builder()
-                .user(Mockito.mock(User.class))
+                .user(testUser)
                 .title("title")
                 .description("description")
                 .build();
@@ -99,13 +101,11 @@ class VocabularyServiceTest {
         vocabularies.add(defaultVocabulary);
 
         //given
-        given(userRepository.findById(any(UUID.class)))
-                .willReturn(Optional.of(Mockito.mock(User.class)));
         given(vocabularyRepository.findByUser(any(User.class)))
                 .willReturn(vocabularies);
 
         //when
-        List<VocabularyDto> response = vocabularyService.getVocabulariesByUserId(UUID.randomUUID());
+        List<VocabularyDto> response = vocabularyService.getVocabularies(testUser);
 
         //then
         assertEquals(vocabularies.getFirst().getUser().getId(), response.getFirst().getUserId());
@@ -122,17 +122,17 @@ class VocabularyServiceTest {
 
         Vocabulary defaultVocabulary = Vocabulary.builder()
                 .id(vocabId)
-                .user(Mockito.mock(User.class))
+                .user(testUser)
                 .title("title")
                 .description("description")
                 .build();
 
         //given
-        given(vocabularyRepository.findById(any(UUID.class)))
+        given(vocabularyRepository.findByIdAndUser_Id(any(UUID.class), any(UUID.class)))
                 .willReturn(Optional.of(defaultVocabulary));
 
         //when
-        VocabularyDto response = vocabularyService.getVocabularyById(vocabId);
+        VocabularyDto response = vocabularyService.getVocabularyById(testUser, vocabId);
 
         //then
         assertEquals(vocabId, response.getId());
@@ -149,7 +149,7 @@ class VocabularyServiceTest {
 
         Vocabulary defaultVocabulary = Vocabulary.builder()
                 .id(vocabId)
-                .user(Mockito.mock(User.class))
+                .user(testUser)
                 .title("title")
                 .description("description")
                 .build();
@@ -164,7 +164,7 @@ class VocabularyServiceTest {
                 ArgumentCaptor.forClass(Vocabulary.class);
 
         //given
-        given(vocabularyRepository.findById(any(UUID.class)))
+        given(vocabularyRepository.findByIdAndUser_Id(any(UUID.class), any(UUID.class)))
                 .willReturn(Optional.of(defaultVocabulary));
         given(vocabularyRepository.countByTitleAndUserAndIdNot(anyString(), any(User.class), any(UUID.class)))
                 .willReturn(0);
@@ -178,7 +178,7 @@ class VocabularyServiceTest {
 
         //when
         VocabularyDto response =
-                vocabularyService.updateVocabulary(vocabId, request);
+                vocabularyService.updateVocabulary(testUser, vocabId, request);
 
         //then
         verify(vocabularyRepository, times(1))

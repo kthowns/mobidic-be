@@ -11,7 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
-import static com.kimtaeyang.mobidic.common.code.AuthResponseCode.NO_MEMBER;
+import static com.kimtaeyang.mobidic.common.code.AuthResponseCode.NO_USER;
 
 @Service
 @RequiredArgsConstructor
@@ -22,10 +22,10 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     @Transactional(readOnly = true)
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException(NO_MEMBER.getMessage()));
+                .orElseThrow(() -> new UsernameNotFoundException(NO_USER.getMessage()));
 
         if (!user.getIsActive()) {
-            throw new UsernameNotFoundException(NO_MEMBER.getMessage());
+            throw new UsernameNotFoundException(NO_USER.getMessage());
         }
 
         return user;
@@ -34,10 +34,10 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     @Transactional(readOnly = true)
     public UserDetails loadUserByUserId(UUID userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new UsernameNotFoundException(NO_MEMBER.getMessage()));
+                .orElseThrow(() -> new UsernameNotFoundException(NO_USER.getMessage()));
 
         if (!user.getIsActive()) {
-            throw new UsernameNotFoundException(NO_MEMBER.getMessage());
+            throw new UsernameNotFoundException(NO_USER.getMessage());
         }
 
         return user;

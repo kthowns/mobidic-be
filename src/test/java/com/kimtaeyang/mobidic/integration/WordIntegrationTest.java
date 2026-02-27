@@ -6,8 +6,8 @@ import com.kimtaeyang.mobidic.auth.dto.SignUpRequestDto;
 import com.kimtaeyang.mobidic.dictionary.dto.AddVocabularyRequestDto;
 import com.kimtaeyang.mobidic.dictionary.dto.AddWordRequestDto;
 import com.kimtaeyang.mobidic.security.jwt.JwtProvider;
-import com.kimtaeyang.mobidic.user.repository.UserRepository;
-import org.junit.jupiter.api.AfterEach;
+import com.kimtaeyang.mobidic.util.DatabaseCleaner;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,15 +21,14 @@ import org.springframework.test.web.servlet.MvcResult;
 import java.util.UUID;
 
 import static com.kimtaeyang.mobidic.common.code.AuthResponseCode.UNAUTHORIZED;
-import static com.kimtaeyang.mobidic.common.code.GeneralResponseCode.DUPLICATED_WORD;
-import static com.kimtaeyang.mobidic.common.code.GeneralResponseCode.INVALID_REQUEST_BODY;
+import static com.kimtaeyang.mobidic.common.code.GeneralResponseCode.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@ActiveProfiles("dev")
+@ActiveProfiles("test")
 public class WordIntegrationTest {
     @Autowired
     private MockMvc mockMvc;
@@ -38,14 +37,14 @@ public class WordIntegrationTest {
     private ObjectMapper objectMapper;
 
     @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
     private JwtProvider jwtProvider;
 
-    @AfterEach
+    @Autowired
+    private DatabaseCleaner databaseCleaner;
+
+    @BeforeEach
     void tearDown() {
-        userRepository.deleteAll();
+        databaseCleaner.execute();
     }
 
     @Test
@@ -54,15 +53,14 @@ public class WordIntegrationTest {
         String email = "test@test.com";
         String nickname = "test";
         String token = loginAndGetToken(email, nickname);
-        UUID memberId = jwtProvider.getIdFromToken(token);
-        UUID vocabId = addVocabAndGetVocabId(memberId, token);
+        UUID vocabularyId = addVocabAndGetVocabId(token);
 
         AddWordRequestDto addWordRequest = AddWordRequestDto.builder()
                 .expression("test")
                 .build();
 
         //Success
-        mockMvc.perform(post("/api/word/" + vocabId)
+        mockMvc.perform(post("/api/words/" + vocabularyId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + token)
                         .content(objectMapper.writeValueAsString(addWordRequest)))
@@ -73,7 +71,7 @@ public class WordIntegrationTest {
                         .value(addWordRequest.getExpression()));
 
         //Fail with duplicated word
-        mockMvc.perform(post("/api/word/" + vocabId)
+        mockMvc.perform(post("/api/words/" + vocabularyId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + token)
                         .content(objectMapper.writeValueAsString(addWordRequest)))
@@ -82,7 +80,7 @@ public class WordIntegrationTest {
                         .value(DUPLICATED_WORD.getMessage()));
 
         //Fail without token
-        mockMvc.perform(post("/api/word/" + vocabId)
+        mockMvc.perform(post("/api/words/" + vocabularyId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(addWordRequest)))
                 .andExpect(status().isUnauthorized())
@@ -90,7 +88,7 @@ public class WordIntegrationTest {
                         .value(UNAUTHORIZED.getMessage()));
 
         //Fail with unauthorized token
-        mockMvc.perform(post("/api/word/" + vocabId)
+        mockMvc.perform(post("/api/words/" + vocabularyId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + jwtProvider.generateToken(UUID.randomUUID()))
                         .content(objectMapper.writeValueAsString(addWordRequest)))
@@ -99,17 +97,17 @@ public class WordIntegrationTest {
                         .value(UNAUTHORIZED.getMessage()));
 
         //Fail with no resource
-        mockMvc.perform(post("/api/word/" + UUID.randomUUID())
+        mockMvc.perform(post("/api/words/" + UUID.randomUUID())
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + token)
                         .content(objectMapper.writeValueAsString(addWordRequest)))
-                .andExpect(status().isUnauthorized())
+                .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message")
-                        .value(UNAUTHORIZED.getMessage()));
+                        .value(NO_VOCAB.getMessage()));
 
         //Fail with invalid pattern
         addWordRequest.setExpression(UUID.randomUUID().toString() + UUID.randomUUID());
-        mockMvc.perform(post("/api/word/" + vocabId)
+        mockMvc.perform(post("/api/words/" + vocabularyId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + token)
                         .content(objectMapper.writeValueAsString(addWordRequest)))
@@ -128,57 +126,56 @@ public class WordIntegrationTest {
         String email = "test@test.com";
         String nickname = "test";
         String token = loginAndGetToken(email, nickname);
-        UUID memberId = jwtProvider.getIdFromToken(token);
-        UUID vocabId = addVocabAndGetVocabId(memberId, token);
+        UUID vocabularyId = addVocabAndGetVocabId(token);
 
         AddWordRequestDto addWordRequest = AddWordRequestDto.builder()
                 .expression("test")
                 .build();
 
-        mockMvc.perform(post("/api/word/" + vocabId)
+        mockMvc.perform(post("/api/words/" + vocabularyId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + token)
                         .content(objectMapper.writeValueAsString(addWordRequest)))
                 .andExpect(status().isOk());
 
         //Success
-        mockMvc.perform(get("/api/word/all")
+        mockMvc.perform(get("/api/words/all")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + token)
-                        .param("vId", vocabId.toString()))
+                        .param("vocabularyId", vocabularyId.toString()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data[0].expression")
                         .value(addWordRequest.getExpression()))
-                .andExpect(jsonPath("$.data[0].vocabId")
-                        .value(vocabId.toString()))
+                .andExpect(jsonPath("$.data[0].vocabularyId")
+                        .value(vocabularyId.toString()))
                 .andExpect(jsonPath("$.data[0].createdAt")
                         .isNotEmpty());
 
         //Fail without token
-        mockMvc.perform(get("/api/word/all")
+        mockMvc.perform(get("/api/words/all")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .param("vId", vocabId.toString()))
+                        .param("vocabularyId", vocabularyId.toString()))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.message")
                         .value(UNAUTHORIZED.getMessage()));
 
         //Fail with unauthorized token
-        mockMvc.perform(get("/api/word/all")
+        mockMvc.perform(get("/api/words/all")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .param("vId", vocabId.toString())
+                        .param("vocabularyId", vocabularyId.toString())
                         .header("Authorization", "Bearer " + jwtProvider.generateToken(UUID.randomUUID())))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.message")
                         .value(UNAUTHORIZED.getMessage()));
 
         //Fail with no resource
-        mockMvc.perform(get("/api/word/all")
+        mockMvc.perform(get("/api/words/all")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .param("vId", UUID.randomUUID().toString())
+                        .param("vocabularyId", UUID.randomUUID().toString())
                         .header("Authorization", "Bearer " + token))
-                .andExpect(status().isUnauthorized())
+                .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message")
-                        .value(UNAUTHORIZED.getMessage()));
+                        .value(NO_VOCAB.getMessage()));
     }
 
     @Test
@@ -187,8 +184,7 @@ public class WordIntegrationTest {
         String email = "test@test.com";
         String nickname = "test";
         String token = loginAndGetToken(email, nickname);
-        UUID memberId = jwtProvider.getIdFromToken(token);
-        UUID vocabId = addVocabAndGetVocabId(memberId, token);
+        UUID vocabularyId = addVocabAndGetVocabId(token);
 
         AddWordRequestDto addWordRequest = AddWordRequestDto.builder()
                 .expression("test")
@@ -197,13 +193,13 @@ public class WordIntegrationTest {
                 .expression("testtest")
                 .build();
 
-        MvcResult addWordResult = mockMvc.perform(post("/api/word/" + vocabId)
+        MvcResult addWordResult = mockMvc.perform(post("/api/words/" + vocabularyId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + token)
                         .content(objectMapper.writeValueAsString(addWordRequest)))
                 .andExpect(status().isOk())
                 .andReturn();
-        MvcResult addWordResult2 = mockMvc.perform(post("/api/word/" + vocabId)
+        MvcResult addWordResult2 = mockMvc.perform(post("/api/words/" + vocabularyId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + token)
                         .content(objectMapper.writeValueAsString(addWordRequest2)))
@@ -216,7 +212,7 @@ public class WordIntegrationTest {
         String wordId2 = objectMapper.readTree(json).path("data").path("id").asText();
 
         //Success
-        mockMvc.perform(patch("/api/word/" + wordId)
+        mockMvc.perform(patch("/api/words/" + wordId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + token)
                         .content(objectMapper.writeValueAsString(addWordRequest)))
@@ -227,7 +223,7 @@ public class WordIntegrationTest {
                         .value(addWordRequest.getExpression()));
 
         //Fail with duplicated word
-        mockMvc.perform(patch("/api/word/" + wordId2)
+        mockMvc.perform(patch("/api/words/" + wordId2)
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + token)
                         .content(objectMapper.writeValueAsString(addWordRequest)))
@@ -236,7 +232,7 @@ public class WordIntegrationTest {
                         .value(DUPLICATED_WORD.getMessage()));
 
         //Fail without token
-        mockMvc.perform(patch("/api/word/" + vocabId)
+        mockMvc.perform(patch("/api/words/" + vocabularyId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(addWordRequest)))
                 .andExpect(status().isUnauthorized())
@@ -244,7 +240,7 @@ public class WordIntegrationTest {
                         .value(UNAUTHORIZED.getMessage()));
 
         //Fail with unauthorized token
-        mockMvc.perform(patch("/api/word/" + vocabId)
+        mockMvc.perform(patch("/api/words/" + vocabularyId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + jwtProvider.generateToken(UUID.randomUUID()))
                         .content(objectMapper.writeValueAsString(addWordRequest)))
@@ -253,17 +249,17 @@ public class WordIntegrationTest {
                         .value(UNAUTHORIZED.getMessage()));
 
         //Fail with no resource
-        mockMvc.perform(patch("/api/word/" + UUID.randomUUID())
+        mockMvc.perform(patch("/api/words/" + UUID.randomUUID())
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + token)
                         .content(objectMapper.writeValueAsString(addWordRequest)))
-                .andExpect(status().isUnauthorized())
+                .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message")
-                        .value(UNAUTHORIZED.getMessage()));
+                        .value(NO_WORD.getMessage()));
 
         //Fail with invalid pattern
         addWordRequest.setExpression(UUID.randomUUID().toString() + UUID.randomUUID());
-        mockMvc.perform(patch("/api/word/" + vocabId)
+        mockMvc.perform(patch("/api/words/" + vocabularyId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + token)
                         .content(objectMapper.writeValueAsString(addWordRequest)))
@@ -282,14 +278,13 @@ public class WordIntegrationTest {
         String email = "test@test.com";
         String nickname = "test";
         String token = loginAndGetToken(email, nickname);
-        UUID memberId = jwtProvider.getIdFromToken(token);
-        UUID vocabId = addVocabAndGetVocabId(memberId, token);
+        UUID vocabularyId = addVocabAndGetVocabId(token);
 
         AddWordRequestDto addWordRequest = AddWordRequestDto.builder()
                 .expression("test")
                 .build();
 
-        MvcResult addWordResult = mockMvc.perform(post("/api/word/" + vocabId)
+        MvcResult addWordResult = mockMvc.perform(post("/api/words/" + vocabularyId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + token)
                         .content(objectMapper.writeValueAsString(addWordRequest)))
@@ -300,21 +295,21 @@ public class WordIntegrationTest {
         String wordId = objectMapper.readTree(json).path("data").path("id").asText();
 
         //Fail without token
-        mockMvc.perform(delete("/api/word/" + wordId)
+        mockMvc.perform(delete("/api/words/" + wordId)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.message")
                         .value(UNAUTHORIZED.getMessage()));
 
         //Fail with unauthorized token
-        mockMvc.perform(delete("/api/word/" + wordId)
+        mockMvc.perform(delete("/api/words/" + wordId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + jwtProvider.generateToken(UUID.randomUUID())))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.message")
                         .value(UNAUTHORIZED.getMessage()));
         //Success
-        mockMvc.perform(delete("/api/word/" + wordId)
+        mockMvc.perform(delete("/api/words/" + wordId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
@@ -322,35 +317,35 @@ public class WordIntegrationTest {
                         .value(wordId))
                 .andExpect(jsonPath("$.data.expression")
                         .value(addWordRequest.getExpression()))
-                .andExpect(jsonPath("$.data.vocabId")
-                        .value(vocabId.toString()));
+                .andExpect(jsonPath("$.data.vocabularyId")
+                        .value(vocabularyId.toString()));
 
         //Fail with no resource
-        mockMvc.perform(delete("/api/word/" + wordId)
+        mockMvc.perform(delete("/api/words/" + wordId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + token))
-                .andExpect(status().isUnauthorized())
+                .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message")
-                        .value(UNAUTHORIZED.getMessage()));
+                        .value(NO_WORD.getMessage()));
     }
 
-    private UUID addVocabAndGetVocabId(UUID memberId, String token) throws Exception {
+    private UUID addVocabAndGetVocabId(String token) throws Exception {
         AddVocabularyRequestDto addVocabRequest = AddVocabularyRequestDto.builder()
                 .title("title")
                 .description("description")
                 .build();
 
-        MvcResult result = mockMvc.perform(post("/api/vocabulary/" + memberId)
+        MvcResult result = mockMvc.perform(post("/api/vocabularies")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(addVocabRequest))
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
                 .andReturn();
 
-        String vocabId = objectMapper.readTree(result.getResponse().getContentAsString())
+        String vocabularyId = objectMapper.readTree(result.getResponse().getContentAsString())
                 .path("data").path("id").asText();
 
-        return UUID.fromString(vocabId);
+        return UUID.fromString(vocabularyId);
     }
 
     private String loginAndGetToken(String email, String nickname) throws Exception {

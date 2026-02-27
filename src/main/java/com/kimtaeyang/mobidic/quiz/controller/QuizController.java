@@ -3,9 +3,10 @@ package com.kimtaeyang.mobidic.quiz.controller;
 import com.kimtaeyang.mobidic.common.dto.ErrorResponse;
 import com.kimtaeyang.mobidic.common.dto.GeneralResponse;
 import com.kimtaeyang.mobidic.quiz.dto.QuizDto;
-import com.kimtaeyang.mobidic.quiz.dto.QuizStatisticDto;
-import com.kimtaeyang.mobidic.quiz.service.CryptoService;
+import com.kimtaeyang.mobidic.quiz.dto.QuizRateRequest;
+import com.kimtaeyang.mobidic.quiz.dto.QuizRateResponse;
 import com.kimtaeyang.mobidic.quiz.service.QuizService;
+import com.kimtaeyang.mobidic.user.entity.User;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -16,6 +17,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -30,7 +32,6 @@ import static com.kimtaeyang.mobidic.common.code.GeneralResponseCode.OK;
 @RequestMapping("/api/quizs")
 public class QuizController {
     private final QuizService quizService;
-    private final CryptoService cryptoService;
 
     @Operation(
             summary = "OX 퀴즈 생성",
@@ -50,10 +51,11 @@ public class QuizController {
     })
     @GetMapping("/ox")
     public ResponseEntity<GeneralResponse<List<QuizDto>>> getOxQuizzes(
-            @RequestParam UUID vocabularyId
+            @RequestParam UUID vocabularyId,
+            @AuthenticationPrincipal User user
     ) {
         return GeneralResponse.toResponseEntity(OK,
-                quizService.getOXQuizzes(vocabularyId));
+                quizService.getOXQuizzes(user, vocabularyId));
     }
 
     @Operation(
@@ -74,10 +76,11 @@ public class QuizController {
     })
     @GetMapping("/blank")
     public ResponseEntity<GeneralResponse<List<QuizDto>>> getBlankQuizzes(
-            @RequestParam UUID vocabularyId
+            @RequestParam UUID vocabularyId,
+            @AuthenticationPrincipal User user
     ) {
         return GeneralResponse.toResponseEntity(OK,
-                quizService.getBlankQuizzes(vocabularyId));
+                quizService.getBlankQuizzes(user, vocabularyId));
     }
 
     @Operation(
@@ -99,12 +102,11 @@ public class QuizController {
                     content = @Content(schema = @Schema(hidden = true)))
     })
     @PostMapping("/rate")
-    public ResponseEntity<GeneralResponse<QuizStatisticDto.Response>> rateOxQuiz(
-            @RequestBody QuizStatisticDto.Request request
+    public ResponseEntity<GeneralResponse<QuizRateResponse>> rateOxQuiz(
+            @RequestBody QuizRateRequest quizRateRequest,
+            @AuthenticationPrincipal User user
     ) {
-        UUID userId = UUID.fromString(cryptoService.decrypt(request.getToken()).split(":")[1]);
-
         return GeneralResponse.toResponseEntity(OK,
-                quizService.rateQuestion(userId, request));
+                quizService.rateQuiz(user, quizRateRequest));
     }
 }

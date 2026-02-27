@@ -1,10 +1,11 @@
 package com.kimtaeyang.mobidic.user.controller;
 
-import com.kimtaeyang.mobidic.user.dto.UserDto;
-import com.kimtaeyang.mobidic.user.dto.UpdateNicknameRequestDto;
-import com.kimtaeyang.mobidic.user.dto.UpdatePasswordRequestDto;
 import com.kimtaeyang.mobidic.common.dto.ErrorResponse;
 import com.kimtaeyang.mobidic.common.dto.GeneralResponse;
+import com.kimtaeyang.mobidic.user.dto.UpdateNicknameRequestDto;
+import com.kimtaeyang.mobidic.user.dto.UpdatePasswordRequestDto;
+import com.kimtaeyang.mobidic.user.dto.UserDto;
+import com.kimtaeyang.mobidic.user.entity.User;
 import com.kimtaeyang.mobidic.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -18,9 +19,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.UUID;
 
 import static com.kimtaeyang.mobidic.common.code.GeneralResponseCode.OK;
 
@@ -50,10 +50,9 @@ public class UserController {
     })
     @GetMapping("/detail")
     public ResponseEntity<GeneralResponse<UserDto>> getUserDetail(
-            @RequestParam @Valid String uId
+            @AuthenticationPrincipal User user
     ) {
-        return GeneralResponse.toResponseEntity(OK,
-                userService.getUserDetailById(UUID.fromString(uId)));
+        return GeneralResponse.toResponseEntity(OK, UserDto.fromEntity(user));
     }
 
     @Operation(
@@ -74,13 +73,13 @@ public class UserController {
             @ApiResponse(responseCode = "500", description = "서버 오류",
                     content = @Content(schema = @Schema(hidden = true)))
     })
-    @PatchMapping("/nckchn/{userId}")
+    @PatchMapping("/nickname")
     public ResponseEntity<GeneralResponse<UserDto>> updateUserNickname(
-            @PathVariable String userId,
-            @RequestBody @Valid UpdateNicknameRequestDto request
+            @RequestBody @Valid UpdateNicknameRequestDto request,
+            @AuthenticationPrincipal User user
     ) {
         return GeneralResponse.toResponseEntity(OK,
-                userService.updateUserNickname(UUID.fromString(userId), request));
+                userService.updateUserNickname(user, request));
     }
 
     @Operation(
@@ -99,16 +98,16 @@ public class UserController {
             @ApiResponse(responseCode = "500", description = "서버 오류",
                     content = @Content(schema = @Schema(hidden = true)))
     })
-    @PatchMapping("/pschn/{userId}")
+    @PatchMapping("/password")
     public ResponseEntity<GeneralResponse<UserDto>> updateUserPassword(
-            @PathVariable String userId,
             @RequestBody @Valid UpdatePasswordRequestDto request,
-            HttpServletRequest httpServletRequest
+            HttpServletRequest httpServletRequest,
+            @AuthenticationPrincipal User user
     ) {
         String token = httpServletRequest.getHeader("Authorization").substring(7);
 
         return GeneralResponse.toResponseEntity(OK,
-                userService.updateUserPassword(UUID.fromString(userId), request, token));
+                userService.updateUserPassword(user, request, token));
     }
 
     @Operation(
@@ -127,41 +126,14 @@ public class UserController {
             @ApiResponse(responseCode = "500", description = "서버 오류",
                     content = @Content(schema = @Schema(hidden = true)))
     })
-    @PatchMapping("/deactivate/{userId}")
+    @DeleteMapping
     public ResponseEntity<GeneralResponse<UserDto>> deactivateUser(
-            @PathVariable String userId,
-            HttpServletRequest request
+            @AuthenticationPrincipal User user,
+            HttpServletRequest httpServletRequest
     ) {
-        String token = request.getHeader("Authorization").substring(7);
+        String token = httpServletRequest.getHeader("Authorization").substring(7);
 
         return GeneralResponse.toResponseEntity(OK,
-                userService.deactivateUser(token, UUID.fromString(userId)));
-    }
-
-    @Operation(
-            summary = "회원 삭제",
-            description = "테스트 용으로 실 사용 X",
-            security = @SecurityRequirement(name = "bearerAuth")
-    )
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "성공"),
-            @ApiResponse(responseCode = "400", description = "잘못된 요청",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-            @ApiResponse(responseCode = "401", description = "인가되지 않은 요청",
-                    content = @Content(schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스",
-                    content = @Content(schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "500", description = "서버 오류",
-                    content = @Content(schema = @Schema(hidden = true)))
-    })
-    @DeleteMapping("/delete/{userId}")
-    public ResponseEntity<GeneralResponse<UserDto>> deleteUser(
-            @PathVariable String userId,
-            HttpServletRequest servletRequest
-    ) {
-        String token = servletRequest.getHeader("Authorization").substring(7);
-
-        return GeneralResponse.toResponseEntity(OK,
-                userService.deleteUser(token, UUID.fromString(userId)));
+                userService.deactivateUser(user, token));
     }
 }

@@ -9,6 +9,7 @@ import com.kimtaeyang.mobidic.statistic.dto.StatisticDto;
 import com.kimtaeyang.mobidic.statistic.entity.WordStatistic;
 import com.kimtaeyang.mobidic.statistic.repository.WordStatisticRepository;
 import com.kimtaeyang.mobidic.statistic.service.StatisticService;
+import com.kimtaeyang.mobidic.user.entity.User;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -47,6 +48,10 @@ class WordStatisticServiceTest {
     @Autowired
     private StatisticService statisticService;
 
+    private final User testUser = User.builder()
+            .id(UUID.randomUUID())
+            .build();
+
     @Test
     @DisplayName("[RateService] Get rate by word id success")
     void getRateByWordIdSuccess() {
@@ -63,13 +68,11 @@ class WordStatisticServiceTest {
                 .build();
 
         //given
-        given(wordRepository.findById(any(UUID.class)))
-                .willReturn(Optional.of(mock(Word.class)));
-        given(wordStatisticRepository.findById(any(UUID.class)))
+        given(wordStatisticRepository.findByWordIdAndWord_Vocabulary_User_Id(any(UUID.class), any(UUID.class)))
                 .willReturn(Optional.of(defaultWordStatistic));
 
         //when
-        StatisticDto response = statisticService.getRateByWordId(UUID.randomUUID());
+        StatisticDto response = statisticService.getRateByWordId(testUser, UUID.randomUUID());
 
         //then
         assertEquals(defaultWordStatistic.getWordId(), response.getWordId());
@@ -83,19 +86,19 @@ class WordStatisticServiceTest {
     public void getVocabLearningRateSuccess() {
         resetMock();
 
-        UUID vocabId = UUID.randomUUID();
+        UUID vocabularyId = UUID.randomUUID();
         Double learningRate = 0.8;
 
         //given
         given(wordStatisticRepository.getVocabularyLearningRate(any(Vocabulary.class)))
                 .willReturn(Optional.of(learningRate));
-        given(vocabularyRepository.findById(any(UUID.class)))
+        given(vocabularyRepository.findByIdAndUser_Id(any(UUID.class), any(UUID.class)))
                 .willReturn(Optional.of(Mockito.mock(Vocabulary.class)));
         given(wordRepository.countByVocabulary(any(Vocabulary.class)))
                 .willReturn(1L);
 
         //when
-        Double foundLearningRate = statisticService.getVocabLearningRate(vocabId);
+        Double foundLearningRate = statisticService.getVocabLearningRate(testUser, vocabularyId);
 
         //then
         assertEquals(learningRate, foundLearningRate);
@@ -119,18 +122,17 @@ class WordStatisticServiceTest {
         //given
         given(wordRepository.findById(any(UUID.class)))
                 .willReturn(Optional.of(Mockito.mock(Word.class)));
-        given(wordStatisticRepository.findById(any(UUID.class)))
+        given(wordStatisticRepository.findByWordIdAndWord_Vocabulary_User_Id(any(UUID.class), any(UUID.class)))
                 .willReturn(Optional.of(defaultStatistic));
         given(wordStatisticRepository.save(any(WordStatistic.class)))
                 .willReturn(Mockito.mock(WordStatistic.class));
 
         //when
-        statisticService.toggleLearnedByWordId(wordId);
-
+        statisticService.toggleLearnedByWordId(testUser, wordId);
 
         // then
         assertFalse(defaultStatistic.isLearned());
-        verify(wordStatisticRepository, times(1)).findById(wordId);
+        verify(wordStatisticRepository, times(1)).findByWordIdAndWord_Vocabulary_User_Id(wordId, testUser.getId());
         verify(wordStatisticRepository, never()).save(any());
     }
 

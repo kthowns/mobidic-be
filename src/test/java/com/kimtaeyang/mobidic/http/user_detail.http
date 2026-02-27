@@ -1,4 +1,4 @@
-### Send PATCH request with json body
+### Send PATCH quizRateRequest with json body
 GET http://127.0.0.1:8080/api/user/detail/a1f108c5-f266-41aa-92e4-b85a4366e501
 Content-Type: application/json
 Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhMWYxMDhjNS1mMjY2LTQxYWEtOTJlNC1iODVhNDM2NmU1MDEiLCJpYXQiOjE3NDM4NTEzOTEsImV4cCI6MTc0MzkzNzc5MX0.scFltAWfvELA1xIl2_0f8gJafvVDZ50Vmt07X8Wi_K7sDZ4-bA3cwF8K5fd65zG2qYRSSs3a3X-WVarYtr7PGg

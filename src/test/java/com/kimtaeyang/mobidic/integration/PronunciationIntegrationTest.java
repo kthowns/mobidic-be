@@ -6,8 +6,8 @@ import com.kimtaeyang.mobidic.auth.dto.SignUpRequestDto;
 import com.kimtaeyang.mobidic.dictionary.dto.AddVocabularyRequestDto;
 import com.kimtaeyang.mobidic.dictionary.dto.AddWordRequestDto;
 import com.kimtaeyang.mobidic.security.jwt.JwtProvider;
-import com.kimtaeyang.mobidic.user.repository.UserRepository;
-import org.junit.jupiter.api.AfterEach;
+import com.kimtaeyang.mobidic.util.DatabaseCleaner;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +16,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
@@ -33,7 +34,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@ActiveProfiles("dev")
+@ActiveProfiles("test")
 public class PronunciationIntegrationTest {
     @Autowired
     private MockMvc mockMvc;
@@ -42,22 +43,21 @@ public class PronunciationIntegrationTest {
     private ObjectMapper objectMapper;
 
     @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
     private JwtProvider jwtProvider;
 
-    @AfterEach
+    @Autowired
+    private DatabaseCleaner databaseCleaner;
+
+    @BeforeEach
     void tearDown() {
-        userRepository.deleteAll();
+        databaseCleaner.execute();
     }
 
     @Test
     @DisplayName("[Pronunciation][Integration] Rate pronunciation test")
     void ratePronunciationTest() throws Exception {
         String token = loginAndGetToken("test@test.com", "test");
-        UUID memberId = jwtProvider.getIdFromToken(token);
-        UUID vocabId = addVocabAndGetId(memberId, token);
+        UUID vocabId = addVocabAndGetId(token);
         UUID wordId = addWordAndGetId(vocabId, token, "hello");
 
         MockMultipartFile file = new MockMultipartFile(
@@ -75,11 +75,13 @@ public class PronunciationIntegrationTest {
         );
 
         //Success high rate
-        MvcResult result = mockMvc.perform(multipart("/api/pron/rate")
+        MvcResult result = mockMvc.perform(multipart("/api/pronunciation")
                         .file(file) // 파일 파라미터 추가
                         .header("Authorization", "Bearer " + token)
                         .param("wordId", wordId.toString())) // 문자열 파라미터 추가
                 .andExpect(status().isOk()) // 응답 상태 200
+                .andExpect(jsonPath("$.data")
+                        .isNotEmpty())
                 .andReturn();
 
         String json = result.getResponse().getContentAsString();
@@ -138,13 +140,13 @@ public class PronunciationIntegrationTest {
                         .value(UNAUTHORIZED.getMessage()));
     }
 
-    private UUID addVocabAndGetId(UUID memberId, String token) throws Exception {
+    private UUID addVocabAndGetId(String token) throws Exception {
         AddVocabularyRequestDto addVocabRequest = AddVocabularyRequestDto.builder()
                 .title("title")
                 .description("description")
                 .build();
 
-        MvcResult result = mockMvc.perform(post("/api/vocabulary/" + memberId)
+        MvcResult result = mockMvc.perform(post("/api/vocabularies")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(addVocabRequest))
                         .header("Authorization", "Bearer " + token))
@@ -162,7 +164,7 @@ public class PronunciationIntegrationTest {
                 .expression(exp)
                 .build();
 
-        MvcResult wordResult = mockMvc.perform(post("/api/word/" + vocabId)
+        MvcResult wordResult = mockMvc.perform(post("/api/words/" + vocabId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + token)
                         .content(objectMapper.writeValueAsString(addWordRequest)))

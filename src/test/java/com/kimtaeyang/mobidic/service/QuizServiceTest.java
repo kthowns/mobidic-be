@@ -10,10 +10,11 @@ import com.kimtaeyang.mobidic.dictionary.service.VocabularyService;
 import com.kimtaeyang.mobidic.dictionary.service.WordService;
 import com.kimtaeyang.mobidic.dictionary.type.PartOfSpeech;
 import com.kimtaeyang.mobidic.quiz.dto.QuizDto;
-import com.kimtaeyang.mobidic.quiz.dto.QuizStatisticDto;
+import com.kimtaeyang.mobidic.quiz.dto.QuizRateRequest;
+import com.kimtaeyang.mobidic.quiz.dto.QuizRateResponse;
 import com.kimtaeyang.mobidic.quiz.service.CryptoService;
 import com.kimtaeyang.mobidic.quiz.service.QuizService;
-import com.kimtaeyang.mobidic.statistic.service.StatisticService;
+import com.kimtaeyang.mobidic.user.entity.User;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -52,9 +53,6 @@ public class QuizServiceTest {
     private DefinitionService definitionService;
 
     @Autowired
-    private StatisticService statisticService;
-
-    @Autowired
     private CryptoService cryptoService;
 
     @Autowired
@@ -65,6 +63,10 @@ public class QuizServiceTest {
 
     @Autowired
     private RedisTemplate<String, Object> redisTemplate;
+
+    private final User testUser = User.builder()
+            .id(UUID.randomUUID())
+            .build();
 
     List<WordWithDefinitions> wordsWithDefs = List.of(
             WordWithDefinitions.builder()
@@ -125,25 +127,25 @@ public class QuizServiceTest {
     @Test
     @DisplayName("[QuizService] Generate OX quiz test")
     void generateOxQuizTest() {
-        UUID memberId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
 
         List<List<DefinitionDto>> defDtos = wordsWithDefs.stream().map(WordWithDefinitions::getDefinitionDtos).toList();
 
         //given
-        given(wordService.getWordsByVocabularyId(any(UUID.class)))
+        given(wordService.getWordsByVocabularyId(any(User.class), any(UUID.class)))
                 .willReturn(wordsWithDefs.stream().map(WordWithDefinitions::getWordDto).toList());
         given(redisTemplate.opsForValue())
                 .willReturn(valueOperations);
         for (WordWithDefinitions w : wordsWithDefs) {
-            given(definitionService.getDefinitionsByWordId(eq(w.getWordDto().getId())))
+            given(definitionService.getDefinitionsByWordId(any(User.class), eq(w.getWordDto().getId())))
                     .willReturn(w.getDefinitionDtos());
         }
 
-        given(vocabularyService.getVocabularyById(any(UUID.class)))
+        given(vocabularyService.getVocabularyById(any(User.class), any(UUID.class)))
                 .willReturn(
                         VocabularyDto.builder()
                                 .id(UUID.randomUUID())
-                                .userId(memberId)
+                                .userId(userId)
                                 .build()
                 );
 
@@ -152,7 +154,7 @@ public class QuizServiceTest {
 
         for (int i = 0; i < epoch; i++) {
             //when
-            List<QuizDto> result = quizService.getOXQuizzes(UUID.randomUUID());
+            List<QuizDto> result = quizService.getOXQuizzes(testUser, UUID.randomUUID());
 
             //then
             int matchCnt = 0;
@@ -178,26 +180,26 @@ public class QuizServiceTest {
     @DisplayName("[QuizService] Rate ox quiz test")
     void rateOxQuizTest() {
         //given
-        UUID memberId = UUID.randomUUID();
         List<String> tokens = new ArrayList<>();
-        for (int i = 0; i < wordsWithDefs.size(); i++) {
-            String token = "question"
-                    + ":" + wordsWithDefs.get(i).getWordDto().getId()
-                    + ":" + UUID.randomUUID();
+        // quiz:{userId}:{wordId}:{quizId}
+        for (WordWithDefinitions wordsWithDef : wordsWithDefs) {
+            String token = "quiz"
+                    + ":" + testUser.getId()
+                    + ":" + wordsWithDef.getWordDto().getId();
             tokens.add(cryptoService.encrypt(token));
         }
         List<String> correctAnswers = new ArrayList<>();
         for (WordWithDefinitions wordWithDefinitions : wordsWithDefs) {
             correctAnswers.add(wordWithDefinitions.getDefinitionDtos().getFirst().getDefinition());
         }
-        List<QuizStatisticDto.Request> requests = new ArrayList<>();
+        List<QuizRateRequest> quizRateRequests = new ArrayList<>();
         for (int i = 0; i < wordsWithDefs.size(); i++) {
-            QuizStatisticDto.Request request = QuizStatisticDto.Request.builder()
+            QuizRateRequest quizRateRequest = QuizRateRequest.builder()
                     .answer(correctAnswers.get(i))
                     .token(tokens.get(i))
                     .build();
 
-            requests.add(request);
+            quizRateRequests.add(quizRateRequest);
         }
 
         given(redisTemplate.opsForValue())
@@ -209,10 +211,10 @@ public class QuizServiceTest {
 
         for (int i = 0; i < wordsWithDefs.size(); i++) {
             //when
-            QuizStatisticDto.Response response = quizService.rateQuestion(memberId, requests.get(i));
+            QuizRateResponse quizRateResponse = quizService.rateQuiz(testUser, quizRateRequests.get(i));
 
             //then
-            assertTrue(response.getIsCorrect());
+            assertTrue(quizRateResponse.getIsCorrect());
         }
     }
 }

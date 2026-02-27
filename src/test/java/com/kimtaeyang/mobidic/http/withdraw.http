@@ -1,4 +1,4 @@
-### Send PATCH request with json body
+### Send PATCH quizRateRequest with json body
 PATCH http://127.0.0.1:8080/api/user/withdraw/a1f108c5-f266-41aa-92e4-b85a4366e501
 Content-Type: application/json
 Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhMWYxMDhjNS1mMjY2LTQxYWEtOTJlNC1iODVhNDM2NmU1MDEiLCJpYXQiOjE3NDM4NTEzNzYsImV4cCI6MTc0MzkzNzc3Nn0.SwiKfAsjIzOO1AChNWu_dsGSchmmtUe_P0k1EuiJ1sKvDoMXGEJu914L989bJuDI3TPWFvKlBd1m-eXGVbZ5YQ

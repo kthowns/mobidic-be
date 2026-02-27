@@ -6,6 +6,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.util.UUID;
 
@@ -14,7 +16,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @Builder
 @Entity
-@Table(name="word_statistics")
+@Table(name = "word_statistics")
 public class WordStatistic {
     @Id
     private UUID wordId;
@@ -22,6 +24,7 @@ public class WordStatistic {
     @MapsId
     @OneToOne
     @JoinColumn(name = "word_id")
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Word word;
 
     @Column(name = "correct_count")

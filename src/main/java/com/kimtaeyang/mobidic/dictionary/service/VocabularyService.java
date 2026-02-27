@@ -10,7 +10,6 @@ import com.kimtaeyang.mobidic.user.entity.User;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -52,22 +51,23 @@ public class VocabularyService {
     }
 
     @Transactional(readOnly = true)
-    @PreAuthorize("@vocabularyAccessHandler.ownershipCheck(#vocabularyId)")
-    public VocabularyDto getVocabularyById(UUID vocabularyId) {
-        Vocabulary vocabulary = vocabularyRepository.findById(vocabularyId)
+    public VocabularyDto getVocabularyById(User user, UUID vocabularyId) {
+        Vocabulary vocabulary = vocabularyRepository.findByIdAndUser_Id(vocabularyId, user.getId())
                 .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_VOCAB));
 
         return VocabularyDto.fromEntity(vocabulary);
     }
 
     @Transactional
-    @PreAuthorize("@vocabularyAccessHandler.ownershipCheck(#vocabId)")
     public VocabularyDto updateVocabulary(
-            UUID vocabId, AddVocabularyRequestDto request) {
-        Vocabulary vocabulary = vocabularyRepository.findById(vocabId)
+            User user,
+            UUID vocabularyId,
+            AddVocabularyRequestDto request
+    ) {
+        Vocabulary vocabulary = vocabularyRepository.findByIdAndUser_Id(vocabularyId, user.getId())
                 .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_VOCAB));
 
-        long count = vocabularyRepository.countByTitleAndUserAndIdNot(request.getTitle(), vocabulary.getUser(), vocabId);
+        long count = vocabularyRepository.countByTitleAndUserAndIdNot(request.getTitle(), vocabulary.getUser(), vocabularyId);
 
         if (count > 0) {
             throw new ApiException(GeneralResponseCode.DUPLICATED_TITLE);
@@ -81,9 +81,11 @@ public class VocabularyService {
     }
 
     @Transactional
-    @PreAuthorize("@vocabularyAccessHandler.ownershipCheck(#vocabId)")
-    public VocabularyDto deleteVocab(UUID vocabId) {
-        Vocabulary vocabulary = vocabularyRepository.findById(vocabId)
+    public VocabularyDto deleteVocab(
+            User user,
+            UUID vocabularyId
+    ) {
+        Vocabulary vocabulary = vocabularyRepository.findByIdAndUser_Id(vocabularyId, user.getId())
                 .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_VOCAB));
 
         vocabularyRepository.delete(vocabulary);
