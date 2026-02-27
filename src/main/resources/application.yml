@@ -1,8 +1,8 @@
 spring:
   application:
     name: mobidic
-  profiles:
-    active: dev
+#  profiles:
+#    active: dev
   jpa:
     show-sql: true
     properties:
@@ -35,6 +35,7 @@ jwt:
 
 whisper:
   flask-server-url: ${FLASK_HOST}
+
 jasypt:
   encryptor:
     password: ${JASYPT_SECRET}

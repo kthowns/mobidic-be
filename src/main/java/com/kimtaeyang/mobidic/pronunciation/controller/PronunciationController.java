@@ -1,8 +1,11 @@
 package com.kimtaeyang.mobidic.pronunciation.controller;
 
+import com.kimtaeyang.mobidic.common.code.GeneralResponseCode;
 import com.kimtaeyang.mobidic.common.dto.ErrorResponse;
 import com.kimtaeyang.mobidic.common.dto.GeneralResponse;
+import com.kimtaeyang.mobidic.common.exception.ApiException;
 import com.kimtaeyang.mobidic.pronunciation.service.PronunciationService;
+import com.kimtaeyang.mobidic.user.entity.User;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -14,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -53,9 +57,14 @@ public class PronunciationController {
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<GeneralResponse<Double>> ratePronunciation(
             @RequestParam MultipartFile file,
-            @RequestParam UUID wordId
+            @RequestParam UUID wordId,
+            @AuthenticationPrincipal User user
     ) {
+        if (file.getSize() > 5 * 1024 * 1024) { // Allow file size under 5MB
+            throw new ApiException(GeneralResponseCode.TOO_BIG_FILE_SIZE);
+        }
+
         return GeneralResponse.toResponseEntity(OK,
-                pronunciationService.ratePronunciation(wordId, file));
+                pronunciationService.ratePronunciation(user, wordId, file));
     }
 }

@@ -58,6 +58,13 @@ public class WordService {
     }
 
     @Transactional(readOnly = true)
+    public Word getWordById(User user, UUID wordId) {
+        return wordRepository
+                .findByIdAndVocabulary_User_Id(wordId, user.getId())
+                .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_WORD));
+    }
+
+    @Transactional(readOnly = true)
     public List<WordDto> getWordsByVocabularyId(User user, UUID vocabularyId) {
         Vocabulary vocabulary = vocabularyRepository
                 .findByIdAndUser_Id(vocabularyId, user.getId())
