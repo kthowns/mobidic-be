@@ -71,7 +71,7 @@ public class StatisticController {
             @ApiResponse(responseCode = "500", description = "서버 오류",
                     content = @Content(schema = @Schema(hidden = true)))
     })
-    @GetMapping("/vocabulary")
+    @GetMapping("/vocabulary/learning-rate")
     public ResponseEntity<GeneralResponse<Double>> getVocabLearningRate(
             @RequestParam String vocabularyId,
             @AuthenticationPrincipal User user
