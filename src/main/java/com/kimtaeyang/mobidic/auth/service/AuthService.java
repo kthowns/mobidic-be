@@ -6,7 +6,6 @@ import com.kimtaeyang.mobidic.auth.dto.SignUpRequestDto;
 import com.kimtaeyang.mobidic.common.exception.ApiException;
 import com.kimtaeyang.mobidic.security.jwt.JwtBlacklistService;
 import com.kimtaeyang.mobidic.security.jwt.JwtProvider;
-import com.kimtaeyang.mobidic.user.dto.UserDto;
 import com.kimtaeyang.mobidic.user.entity.User;
 import com.kimtaeyang.mobidic.user.repository.UserRepository;
 import jakarta.validation.Valid;
