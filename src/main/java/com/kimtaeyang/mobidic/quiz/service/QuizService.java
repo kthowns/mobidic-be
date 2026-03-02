@@ -112,7 +112,7 @@ public class QuizService {
 
         QuizGenerator quizGenerator = QuizGeneratorFactory.get(quizType);
 
-        List<Quiz> quizzes = quizGenerator.generate(vocabulary.getUserId(), wordsWithDefs);
+        List<Quiz> quizzes = quizGenerator.generate(user.getId(), wordsWithDefs);
         List<QuizDto> quizDtos = new ArrayList<>();
 
         for (Quiz quiz : quizzes) {
