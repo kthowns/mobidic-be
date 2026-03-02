@@ -3,6 +3,7 @@ package com.kimtaeyang.mobidic.dictionary.controller;
 import com.kimtaeyang.mobidic.common.dto.ErrorResponse;
 import com.kimtaeyang.mobidic.common.dto.GeneralResponse;
 import com.kimtaeyang.mobidic.dictionary.dto.AddVocabularyRequestDto;
+import com.kimtaeyang.mobidic.dictionary.dto.VocabularyDetail;
 import com.kimtaeyang.mobidic.dictionary.dto.VocabularyDto;
 import com.kimtaeyang.mobidic.dictionary.service.VocabularyService;
 import com.kimtaeyang.mobidic.user.entity.User;
@@ -77,11 +78,11 @@ public class VocabularyController {
                     content = @Content(schema = @Schema(hidden = true)))
     })
     @GetMapping("/all")
-    public ResponseEntity<GeneralResponse<List<VocabularyDto>>> getAllVocabulary(
+    public ResponseEntity<GeneralResponse<List<VocabularyDetail>>> getAllVocabulary(
             @AuthenticationPrincipal User user
     ) {
         return GeneralResponse.toResponseEntity(OK,
-                vocabularyService.getVocabularies(user));
+                vocabularyService.getVocabularyDetails(user));
     }
 
     @Operation(

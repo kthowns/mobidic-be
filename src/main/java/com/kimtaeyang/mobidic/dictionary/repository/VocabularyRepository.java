@@ -10,9 +10,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Repository
-public interface VocabularyRepository extends JpaRepository<Vocabulary, UUID> {
-    List<Vocabulary> findByUser(User user);
-
+public interface VocabularyRepository extends JpaRepository<Vocabulary, UUID>, VocabularyDetailRepositoryCustom {
     int countByTitleAndUserAndIdNot(String title, User user, UUID id);
 
     int countByTitleAndUser(String title, User user);

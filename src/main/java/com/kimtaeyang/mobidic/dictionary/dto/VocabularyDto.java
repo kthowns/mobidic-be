@@ -15,7 +15,6 @@ import java.util.UUID;
 @Builder
 public class VocabularyDto {
     private UUID id;
-    private UUID userId;
     private String title;
     private String description;
     private LocalDateTime createdAt;
@@ -23,7 +22,6 @@ public class VocabularyDto {
     public static VocabularyDto fromEntity(Vocabulary vocabulary) {
         return VocabularyDto.builder()
                 .title(vocabulary.getTitle())
-                .userId(vocabulary.getUser().getId())
                 .id(vocabulary.getId())
                 .description(vocabulary.getDescription())
                 .createdAt(vocabulary.getCreatedAt())

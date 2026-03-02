@@ -2,6 +2,7 @@ package com.kimtaeyang.mobidic.service;
 
 import com.kimtaeyang.mobidic.config.ServiceTestConfig;
 import com.kimtaeyang.mobidic.dictionary.dto.AddVocabularyRequestDto;
+import com.kimtaeyang.mobidic.dictionary.dto.VocabularyDetail;
 import com.kimtaeyang.mobidic.dictionary.dto.VocabularyDto;
 import com.kimtaeyang.mobidic.dictionary.entity.Vocabulary;
 import com.kimtaeyang.mobidic.dictionary.repository.VocabularyRepository;
@@ -87,8 +88,8 @@ class VocabularyServiceTest {
     }
 
     @Test
-    @DisplayName("[VocabService] Get vocabs by member id success")
-    void getVocabulariesSuccess() {
+    @DisplayName("[VocabService] Get vocabs success")
+    void getVocabularyDetailsSuccess() {
         resetMock();
 
         Vocabulary defaultVocabulary = Vocabulary.builder()
@@ -101,16 +102,16 @@ class VocabularyServiceTest {
         vocabularies.add(defaultVocabulary);
 
         //given
-        given(vocabularyRepository.findByUser(any(User.class)))
-                .willReturn(vocabularies);
+        given(vocabularyRepository.getVocabularyDetails(any(UUID.class)))
+                .willReturn(List.of(
+                        new VocabularyDetail(VocabularyDto.fromEntity(defaultVocabulary), 0.0, 0.0)));
 
         //when
-        List<VocabularyDto> response = vocabularyService.getVocabularies(testUser);
+        List<VocabularyDetail> response = vocabularyService.getVocabularyDetails(testUser);
 
         //then
-        assertEquals(vocabularies.getFirst().getUser().getId(), response.getFirst().getUserId());
-        assertEquals(vocabularies.getFirst().getTitle(), response.getFirst().getTitle());
-        assertEquals(vocabularies.getFirst().getDescription(), response.getFirst().getDescription());
+        assertEquals(vocabularies.getFirst().getTitle(), response.getFirst().vocabulary().getTitle());
+        assertEquals(vocabularies.getFirst().getDescription(), response.getFirst().vocabulary().getDescription());
     }
 
     @Test

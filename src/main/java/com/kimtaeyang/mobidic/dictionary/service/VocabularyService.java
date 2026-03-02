@@ -3,6 +3,7 @@ package com.kimtaeyang.mobidic.dictionary.service;
 import com.kimtaeyang.mobidic.common.code.GeneralResponseCode;
 import com.kimtaeyang.mobidic.common.exception.ApiException;
 import com.kimtaeyang.mobidic.dictionary.dto.AddVocabularyRequestDto;
+import com.kimtaeyang.mobidic.dictionary.dto.VocabularyDetail;
 import com.kimtaeyang.mobidic.dictionary.dto.VocabularyDto;
 import com.kimtaeyang.mobidic.dictionary.entity.Vocabulary;
 import com.kimtaeyang.mobidic.dictionary.repository.VocabularyRepository;
@@ -15,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -45,9 +45,8 @@ public class VocabularyService {
     }
 
     @Transactional(readOnly = true)
-    public List<VocabularyDto> getVocabularies(User user) {
-        return vocabularyRepository.findByUser(user)
-                .stream().map(VocabularyDto::fromEntity).collect(Collectors.toList());
+    public List<VocabularyDetail> getVocabularyDetails(User user) {
+        return vocabularyRepository.getVocabularyDetails(user.getId());
     }
 
     @Transactional(readOnly = true)
