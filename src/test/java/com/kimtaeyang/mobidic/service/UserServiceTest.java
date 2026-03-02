@@ -120,8 +120,6 @@ class UserServiceTest {
         //given
         given(userRepository.findById(any(UUID.class)))
                 .willReturn(Optional.of(defaultUser));
-        given(authService.logout(any(User.class), anyString()))
-                .willReturn(Mockito.mock(UserDto.class));
         given(userRepository.save(any(User.class)))
                 .willAnswer(invocation -> {
                     User userArg = invocation.getArgument(0);

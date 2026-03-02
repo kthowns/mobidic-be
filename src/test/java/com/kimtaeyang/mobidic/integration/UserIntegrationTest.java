@@ -57,10 +57,9 @@ public class UserIntegrationTest {
         UUID userId = jwtProvider.getIdFromToken(token);
 
         //Success
-        mockMvc.perform(get("/api/user/detail")
+        mockMvc.perform(get("/api/user/me")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer " + token)
-                        .param("uId", userId.toString()))
+                        .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.id")
                         .value(userId.toString()))
@@ -72,14 +71,14 @@ public class UserIntegrationTest {
                         .isNotEmpty());
 
         //Fail without token
-        mockMvc.perform(get("/api/user/detail/" + userId)
+        mockMvc.perform(get("/api/user/me")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.message")
                         .value(UNAUTHORIZED.getMessage()));
 
         //Fail with unauthorized token
-        mockMvc.perform(get("/api/user/detail")
+        mockMvc.perform(get("/api/user/me")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + jwtProvider.generateToken(UUID.randomUUID()))
                         .param("uId", userId.toString()))
@@ -88,7 +87,7 @@ public class UserIntegrationTest {
                         .value(UNAUTHORIZED.getMessage()));
 
         //Fail with no resource
-        mockMvc.perform(get("/api/user/detail")
+        mockMvc.perform(get("/api/user/me")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + jwtProvider.generateToken(UUID.randomUUID()))
                         .param("uId", UUID.randomUUID().toString()))
@@ -135,10 +134,9 @@ public class UserIntegrationTest {
                 .andExpect(jsonPath("$.data.nickname")
                         .value(updateNicknameRequest.getNickname()));
 
-        mockMvc.perform(get("/api/user/detail")
+        mockMvc.perform(get("/api/user/me")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer " + token)
-                        .param("uId", userId.toString()))
+                        .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.nickname")
                         .value(updateNicknameRequest.getNickname()));
@@ -233,7 +231,7 @@ public class UserIntegrationTest {
                         .content(objectMapper.writeValueAsString(updatePasswordRequest)))
                 .andExpect(status().isOk());
 
-        mockMvc.perform(get("/api/user/detail")
+        mockMvc.perform(get("/api/user/me")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + token)
                         .param("uId", userId.toString()))

@@ -145,7 +145,6 @@ public class QuizServiceTest {
                 .willReturn(
                         VocabularyDto.builder()
                                 .id(UUID.randomUUID())
-                                .userId(userId)
                                 .build()
                 );
 

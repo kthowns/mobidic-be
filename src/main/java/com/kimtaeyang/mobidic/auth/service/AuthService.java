@@ -6,7 +6,6 @@ import com.kimtaeyang.mobidic.auth.dto.SignUpRequestDto;
 import com.kimtaeyang.mobidic.common.exception.ApiException;
 import com.kimtaeyang.mobidic.security.jwt.JwtBlacklistService;
 import com.kimtaeyang.mobidic.security.jwt.JwtProvider;
-import com.kimtaeyang.mobidic.user.dto.UserDto;
 import com.kimtaeyang.mobidic.user.entity.User;
 import com.kimtaeyang.mobidic.user.repository.UserRepository;
 import jakarta.validation.Valid;
@@ -47,13 +46,13 @@ public class AuthService {
     }
 
     @Transactional
-    public UserDto signUp(@Valid SignUpRequestDto request) {
-        if (userRepository.countByNickname(request.getNickname()) > 0) {
-            throw new ApiException(DUPLICATED_NICKNAME);
-        }
-
+    public void signUp(@Valid SignUpRequestDto request) {
         if (userRepository.countByEmail(request.getEmail()) > 0) {
             throw new ApiException(DUPLICATED_EMAIL);
+        }
+
+        if (userRepository.countByNickname(request.getNickname()) > 0) {
+            throw new ApiException(DUPLICATED_NICKNAME);
         }
 
         User user = User.builder()
@@ -62,15 +61,13 @@ public class AuthService {
                 .password(passwordEncoder.encode(request.getPassword()))
                 .build();
 
-        return UserDto.fromEntity(userRepository.save(user));
+        userRepository.save(user);
     }
 
-    public UserDto logout(User user, String token) {
+    public void logout(String token) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         auth.setAuthenticated(false); //인증 Context 초기화
 
         jwtBlacklistService.logoutToken(token); //Redis 블랙리스트에 토큰 추가
-
-        return UserDto.fromEntity(user);
     }
 }

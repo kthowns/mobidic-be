@@ -33,8 +33,7 @@ public class UserController {
     private final UserService userService;
 
     @Operation(
-            summary = "사용자 정보 조회",
-            description = "식별자를 통한 사용자 정보 조희",
+            summary = "현재사용자 정보 조회",
             security = @SecurityRequirement(name = "bearerAuth")
     )
     @ApiResponses(value = {
@@ -48,8 +47,8 @@ public class UserController {
             @ApiResponse(responseCode = "500", description = "서버 오류",
                     content = @Content(schema = @Schema(hidden = true)))
     })
-    @GetMapping("/detail")
-    public ResponseEntity<GeneralResponse<UserDto>> getUserDetail(
+    @GetMapping("/me")
+    public ResponseEntity<GeneralResponse<UserDto>> getMe(
             @AuthenticationPrincipal User user
     ) {
         return GeneralResponse.toResponseEntity(OK, UserDto.fromEntity(user));

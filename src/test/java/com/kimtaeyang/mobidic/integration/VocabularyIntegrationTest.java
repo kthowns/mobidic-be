@@ -4,8 +4,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kimtaeyang.mobidic.auth.dto.LoginRequest;
 import com.kimtaeyang.mobidic.auth.dto.SignUpRequestDto;
 import com.kimtaeyang.mobidic.dictionary.dto.AddVocabularyRequestDto;
+import com.kimtaeyang.mobidic.dictionary.dto.AddWordRequestDto;
 import com.kimtaeyang.mobidic.dictionary.dto.VocabularyDto;
+import com.kimtaeyang.mobidic.dictionary.dto.WordDto;
+import com.kimtaeyang.mobidic.dictionary.service.WordService;
 import com.kimtaeyang.mobidic.security.jwt.JwtProvider;
+import com.kimtaeyang.mobidic.statistic.service.StatisticService;
+import com.kimtaeyang.mobidic.user.entity.User;
+import com.kimtaeyang.mobidic.user.repository.UserRepository;
 import com.kimtaeyang.mobidic.util.DatabaseCleaner;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -18,6 +24,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import static com.kimtaeyang.mobidic.common.code.AuthResponseCode.UNAUTHORIZED;
@@ -41,6 +49,14 @@ public class VocabularyIntegrationTest {
 
     @Autowired
     private DatabaseCleaner databaseCleaner;
+    @Autowired
+    private WordService wordService;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private StatisticService statisticService;
 
     @BeforeEach
     void tearDown() {
@@ -125,27 +141,57 @@ public class VocabularyIntegrationTest {
         String email = "test@test.com";
         String nickname = "test";
         String token = loginAndGetToken(email, nickname);
+        User user = userRepository.findByEmail(email).get();
 
         AddVocabularyRequestDto addVocabRequest = AddVocabularyRequestDto.builder()
                 .title("title")
                 .description("description")
                 .build();
 
-        mockMvc.perform(post("/api/vocabularies")
+        List<String> wordExpressions = List.of("apple", "banana", "kiwi");
+        List<AddWordRequestDto> addWordRequestDtos = new ArrayList<>();
+
+        for (String word : wordExpressions) {
+            addWordRequestDtos.add(new AddWordRequestDto(word));
+        }
+
+        MvcResult addResult = mockMvc.perform(post("/api/vocabularies")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(addVocabRequest))
                         .header("Authorization", "Bearer " + token))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andReturn();
+
+        String json = addResult.getResponse().getContentAsString();
+        VocabularyDto addVocabulary = objectMapper.convertValue(
+                objectMapper.readTree(json).path("data"), VocabularyDto.class
+        );
+
+        List<WordDto> wordList = new ArrayList<>();
+        for (AddWordRequestDto addWordRequestDto : addWordRequestDtos) {
+            wordList.add(
+                    wordService.addWord(user, addVocabulary.getId(), addWordRequestDto)
+            );
+        }
+
+        statisticService.toggleLearnedByWordId(user, wordList.get(0).getId());
+        statisticService.increaseCorrectCount(user, wordList.get(1).getId());
+        statisticService.increaseIncorrectCount(user, wordList.get(1).getId());
+        statisticService.increaseCorrectCount(user, wordList.get(2).getId());
 
         //Success
         mockMvc.perform(get("/api/vocabularies/all")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data[0].title")
+                .andExpect(jsonPath("$.data[0].vocabulary.title")
                         .value(addVocabRequest.getTitle()))
-                .andExpect(jsonPath("$.data[0].description")
-                        .value(addVocabRequest.getDescription()));
+                .andExpect(jsonPath("$.data[0].vocabulary.description")
+                        .value(addVocabRequest.getDescription()))
+                .andExpect(jsonPath("$.data[0].accuracy")
+                        .value(0.5))
+                .andExpect(jsonPath("$.data[0].learningRate")
+                        .value(0.33333));
 
         //Fail without token
         mockMvc.perform(get("/api/vocabularies/all")
@@ -196,8 +242,6 @@ public class VocabularyIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.id")
                         .value(addVocabResponse.getId().toString()))
-                .andExpect(jsonPath("$.data.userId")
-                        .value(userId.toString()))
                 .andExpect(jsonPath("$.data.title")
                         .value(addVocabRequest.getTitle()))
                 .andExpect(jsonPath("$.data.description")
@@ -409,8 +453,6 @@ public class VocabularyIntegrationTest {
                 .andExpect(jsonPath("$.data.description")
                         .value(addVocabRequest.getDescription()))
                 .andExpect(jsonPath("$.data.createdAt")
-                        .isNotEmpty())
-                .andExpect(jsonPath("$.data.userId")
                         .isNotEmpty());
 
         mockMvc.perform(get("/api/vocabularies/detail")

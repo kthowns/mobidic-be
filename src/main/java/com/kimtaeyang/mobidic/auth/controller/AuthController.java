@@ -7,8 +7,6 @@ import com.kimtaeyang.mobidic.auth.service.AuthService;
 import com.kimtaeyang.mobidic.common.code.AuthResponseCode;
 import com.kimtaeyang.mobidic.common.dto.ErrorResponse;
 import com.kimtaeyang.mobidic.common.dto.GeneralResponse;
-import com.kimtaeyang.mobidic.user.dto.UserDto;
-import com.kimtaeyang.mobidic.user.entity.User;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -20,7 +18,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -69,8 +66,10 @@ public class AuthController {
                     content = @Content(schema = @Schema(hidden = true)))
     })
     @PostMapping("/signup")
-    public ResponseEntity<GeneralResponse<UserDto>> signUp(@Valid @RequestBody SignUpRequestDto request) {
-        return GeneralResponse.toResponseEntity(AuthResponseCode.SIGN_UP_OK, authService.signUp(request));
+    public ResponseEntity<Void> signUp(@Valid @RequestBody SignUpRequestDto request) {
+        authService.signUp(request);
+
+        return ResponseEntity.ok().build();
     }
 
     @Operation(
@@ -90,12 +89,13 @@ public class AuthController {
                     content = @Content(schema = @Schema(hidden = true)))
     })
     @PostMapping("/logout")
-    public ResponseEntity<GeneralResponse<UserDto>> logout(
-            HttpServletRequest request,
-            @AuthenticationPrincipal User user
+    public ResponseEntity<Void> logout(
+            HttpServletRequest request
     ) {
         String token = request.getHeader("Authorization").substring(7);
 
-        return GeneralResponse.toResponseEntity(AuthResponseCode.LOGOUT_OK, authService.logout(user, token));
+        authService.logout(token);
+
+        return ResponseEntity.ok().build();
     }
 }

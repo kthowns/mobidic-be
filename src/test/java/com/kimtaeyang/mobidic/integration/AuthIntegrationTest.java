@@ -19,7 +19,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 import java.util.HashMap;
-import java.util.UUID;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -60,11 +59,7 @@ public class AuthIntegrationTest {
         mockMvc.perform(post("/api/auth/signup")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.email")
-                        .value("test@test.com"))
-                .andExpect(jsonPath("$.data.nickname")
-                        .value("test"));
+                .andExpect(status().isOk());
 
         //Fail with duplicated Email
         request.setNickname("test2");
@@ -197,14 +192,10 @@ public class AuthIntegrationTest {
         String loginJson = loginResult.getResponse().getContentAsString();
         String token = objectMapper.readTree(loginJson).path("data").path("accessToken").asText();
 
-        UUID memberId = jwtProvider.getIdFromToken(token);
-
         mockMvc.perform(post("/api/auth/logout")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + token))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.id")
-                        .value(memberId.toString()));
+                .andExpect(status().isOk());
 
         //Testing post method through invalid token
         mockMvc.perform(post("/api/auth/logout")

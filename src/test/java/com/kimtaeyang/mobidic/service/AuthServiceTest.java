@@ -5,7 +5,6 @@ import com.kimtaeyang.mobidic.auth.dto.SignUpRequestDto;
 import com.kimtaeyang.mobidic.auth.service.AuthService;
 import com.kimtaeyang.mobidic.config.ServiceTestConfig;
 import com.kimtaeyang.mobidic.security.jwt.JwtProvider;
-import com.kimtaeyang.mobidic.user.dto.UserDto;
 import com.kimtaeyang.mobidic.user.entity.User;
 import com.kimtaeyang.mobidic.user.repository.UserRepository;
 import org.junit.jupiter.api.DisplayName;
@@ -80,11 +79,9 @@ class AuthServiceTest {
                 .thenReturn(userToReturn);
 
         // when
-        UserDto response = authService.signUp(request);
+        authService.signUp(request);
 
         // then
-        assertEquals(request.getEmail(), response.getEmail());
-        assertEquals(request.getNickname(), response.getNickname());
         Mockito.verify(userRepository).save(Mockito.any(User.class));
     }
 
