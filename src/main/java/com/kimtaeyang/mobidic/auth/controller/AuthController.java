@@ -69,8 +69,10 @@ public class AuthController {
                     content = @Content(schema = @Schema(hidden = true)))
     })
     @PostMapping("/signup")
-    public ResponseEntity<GeneralResponse<UserDto>> signUp(@Valid @RequestBody SignUpRequestDto request) {
-        return GeneralResponse.toResponseEntity(AuthResponseCode.SIGN_UP_OK, authService.signUp(request));
+    public ResponseEntity<Void> signUp(@Valid @RequestBody SignUpRequestDto request) {
+        authService.signUp(request);
+
+        return ResponseEntity.ok().build();
     }
 
     @Operation(
