@@ -80,11 +80,9 @@ class AuthServiceTest {
                 .thenReturn(userToReturn);
 
         // when
-        UserDto response = authService.signUp(request);
+        authService.signUp(request);
 
         // then
-        assertEquals(request.getEmail(), response.getEmail());
-        assertEquals(request.getNickname(), response.getNickname());
         Mockito.verify(userRepository).save(Mockito.any(User.class));
     }
 

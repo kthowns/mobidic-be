@@ -47,7 +47,7 @@ public class AuthService {
     }
 
     @Transactional
-    public UserDto signUp(@Valid SignUpRequestDto request) {
+    public void signUp(@Valid SignUpRequestDto request) {
         if (userRepository.countByNickname(request.getNickname()) > 0) {
             throw new ApiException(DUPLICATED_NICKNAME);
         }
@@ -62,15 +62,13 @@ public class AuthService {
                 .password(passwordEncoder.encode(request.getPassword()))
                 .build();
 
-        return UserDto.fromEntity(userRepository.save(user));
+        userRepository.save(user);
     }
 
-    public UserDto logout(User user, String token) {
+    public void logout(String token) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         auth.setAuthenticated(false); //인증 Context 초기화
 
         jwtBlacklistService.logoutToken(token); //Redis 블랙리스트에 토큰 추가
-
-        return UserDto.fromEntity(user);
     }
 }

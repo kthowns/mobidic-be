@@ -45,7 +45,7 @@ public class UserService {
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         userRepository.save(user);
 
-        authService.logout(user, token);
+        authService.logout(token);
 
         return UserDto.fromEntity(user);
     }
