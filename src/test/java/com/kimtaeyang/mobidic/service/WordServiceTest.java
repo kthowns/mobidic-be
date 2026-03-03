@@ -2,6 +2,7 @@ package com.kimtaeyang.mobidic.service;
 
 import com.kimtaeyang.mobidic.config.ServiceTestConfig;
 import com.kimtaeyang.mobidic.dictionary.dto.AddWordRequestDto;
+import com.kimtaeyang.mobidic.dictionary.dto.WordDetail;
 import com.kimtaeyang.mobidic.dictionary.dto.WordDto;
 import com.kimtaeyang.mobidic.dictionary.entity.Vocabulary;
 import com.kimtaeyang.mobidic.dictionary.entity.Word;
@@ -9,7 +10,6 @@ import com.kimtaeyang.mobidic.dictionary.repository.DefinitionRepository;
 import com.kimtaeyang.mobidic.dictionary.repository.VocabularyRepository;
 import com.kimtaeyang.mobidic.dictionary.repository.WordRepository;
 import com.kimtaeyang.mobidic.dictionary.service.WordService;
-import com.kimtaeyang.mobidic.statistic.entity.WordStatistic;
 import com.kimtaeyang.mobidic.statistic.repository.WordStatisticRepository;
 import com.kimtaeyang.mobidic.user.entity.User;
 import org.junit.jupiter.api.DisplayName;
@@ -23,7 +23,6 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -98,38 +97,27 @@ class WordServiceTest {
 
     @Test
     @DisplayName("[WordService] Get words by vocab id success")
-    void getWordsByVocabularyIdSuccess() {
+    void getWordDetailsByVocabularyIdSuccess() {
         resetMock();
 
-        Word defaultWord = Word.builder()
-                .vocabulary(Mockito.mock(Vocabulary.class))
+        WordDetail defaultWordDetail = WordDetail.builder()
+                .id(UUID.randomUUID())
                 .expression("expression")
                 .build();
 
-        WordStatistic defaultRate = WordStatistic.builder()
-                .word(defaultWord)
-                .isLearned(true)
-                .incorrectCount(4)
-                .correctCount(3)
-                .build();
-
-        ArrayList<Word> words = new ArrayList<>();
-        words.add(defaultWord);
+        List<WordDetail> words = List.of(defaultWordDetail);
 
         //given
-        given(vocabularyRepository.findByIdAndUser_Id(any(UUID.class), any(UUID.class)))
-                .willReturn(Optional.of(Mockito.mock(Vocabulary.class)));
-        given(wordRepository.findByVocabulary(any(Vocabulary.class)))
+        given(vocabularyRepository.existsByIdAndUser_Id(any(UUID.class), any(UUID.class)))
+                .willReturn(true);
+        given(wordRepository.findWordDetailsByVocabularyId(any(UUID.class), any(UUID.class)))
                 .willReturn(words);
-        given(wordStatisticRepository.findById(any(UUID.class)))
-                .willReturn(Optional.of(defaultRate));
 
         //when
-        List<WordDto> response = wordService.getWordsByVocabularyId(testUser, UUID.randomUUID());
+        List<WordDetail> response = wordService.getWordDetailsByVocabularyId(testUser, UUID.randomUUID());
 
         //then
-        assertEquals(words.getFirst().getVocabulary().getId(), response.getFirst().getVocabularyId());
-        assertEquals(words.getFirst().getExpression(), response.getFirst().getExpression());
+        assertEquals(words.getFirst().expression(), response.getFirst().expression());
     }
 
     @Test

@@ -1,6 +1,6 @@
 package com.kimtaeyang.mobidic.quiz.util;
 
-import com.kimtaeyang.mobidic.dictionary.model.WordWithDefinitions;
+import com.kimtaeyang.mobidic.dictionary.dto.WordDetail;
 import com.kimtaeyang.mobidic.quiz.model.Quiz;
 
 import java.util.ArrayList;
@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.UUID;
 
 public abstract class QuizGenerator {
-    public abstract List<Quiz> generate(UUID memberId, List<WordWithDefinitions> wordsWithDefs);
+    public abstract List<Quiz> generate(UUID memberId, List<WordDetail> wordDetails);
 
     protected <T> void partialShuffle(int n, List<T> list) {
         List<Integer> nums = new ArrayList<>();

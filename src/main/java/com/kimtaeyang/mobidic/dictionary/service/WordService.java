@@ -3,6 +3,7 @@ package com.kimtaeyang.mobidic.dictionary.service;
 import com.kimtaeyang.mobidic.common.code.GeneralResponseCode;
 import com.kimtaeyang.mobidic.common.exception.ApiException;
 import com.kimtaeyang.mobidic.dictionary.dto.AddWordRequestDto;
+import com.kimtaeyang.mobidic.dictionary.dto.WordDetail;
 import com.kimtaeyang.mobidic.dictionary.dto.WordDto;
 import com.kimtaeyang.mobidic.dictionary.entity.Vocabulary;
 import com.kimtaeyang.mobidic.dictionary.entity.Word;
@@ -18,7 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -58,21 +58,21 @@ public class WordService {
     }
 
     @Transactional(readOnly = true)
-    public Word getWordById(User user, UUID wordId) {
-        return wordRepository
+    public WordDto getWordById(User user, UUID wordId) {
+        Word word = wordRepository
                 .findByIdAndVocabulary_User_Id(wordId, user.getId())
                 .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_WORD));
+
+        return WordDto.fromEntity(word);
     }
 
     @Transactional(readOnly = true)
-    public List<WordDto> getWordsByVocabularyId(User user, UUID vocabularyId) {
-        Vocabulary vocabulary = vocabularyRepository
-                .findByIdAndUser_Id(vocabularyId, user.getId())
-                .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_VOCAB));
+    public List<WordDetail> getWordDetailsByVocabularyId(User user, UUID vocabularyId) {
+        if (!vocabularyRepository.existsByIdAndUser_Id(vocabularyId, user.getId())) {
+            throw new ApiException(GeneralResponseCode.NO_VOCAB);
+        }
 
-        return wordRepository.findByVocabulary(vocabulary)
-                .stream().map(WordDto::fromEntity)
-                .collect(Collectors.toList());
+        return wordRepository.findWordDetailsByVocabularyId(user.getId(), vocabularyId);
     }
 
     @Transactional

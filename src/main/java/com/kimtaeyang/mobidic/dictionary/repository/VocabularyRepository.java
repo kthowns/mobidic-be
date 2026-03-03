@@ -15,4 +15,6 @@ public interface VocabularyRepository extends JpaRepository<Vocabulary, UUID>, V
     int countByTitleAndUser(String title, User user);
 
     Optional<Vocabulary> findByIdAndUser_Id(UUID id, UUID userId);
+
+    boolean existsByIdAndUser_Id(UUID id, UUID userId);
 }

@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-public interface WordRepository extends JpaRepository<Word, UUID> {
+public interface WordRepository extends JpaRepository<Word, UUID>, WordRepositoryCustom {
     List<Word> findByVocabulary(Vocabulary vocabulary);
 
     int countByExpressionAndVocabularyAndIdNot(String expression, Vocabulary vocabulary, UUID id);

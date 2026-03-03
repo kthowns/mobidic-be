@@ -2,9 +2,7 @@ package com.kimtaeyang.mobidic.quiz.service;
 
 import com.kimtaeyang.mobidic.common.code.GeneralResponseCode;
 import com.kimtaeyang.mobidic.common.exception.ApiException;
-import com.kimtaeyang.mobidic.dictionary.dto.VocabularyDto;
-import com.kimtaeyang.mobidic.dictionary.dto.WordDto;
-import com.kimtaeyang.mobidic.dictionary.model.WordWithDefinitions;
+import com.kimtaeyang.mobidic.dictionary.dto.WordDetail;
 import com.kimtaeyang.mobidic.dictionary.service.DefinitionService;
 import com.kimtaeyang.mobidic.dictionary.service.VocabularyService;
 import com.kimtaeyang.mobidic.dictionary.service.WordService;
@@ -44,14 +42,14 @@ public class QuizService {
             User user,
             UUID vocabularyId
     ) {
-        return generateQuizs(user, vocabularyId, QuizType.OX);
+        return generateQuizzes(user, vocabularyId, QuizType.OX);
     }
 
     public List<QuizDto> getBlankQuizzes(
             User user,
             UUID vocabularyId
     ) {
-        return generateQuizs(user, vocabularyId, QuizType.BLANK);
+        return generateQuizzes(user, vocabularyId, QuizType.BLANK);
     }
 
     public QuizRateResponse rateQuiz(
@@ -88,31 +86,20 @@ public class QuizService {
         return quizRateResponse;
     }
 
-    private List<QuizDto> generateQuizs(
+    private List<QuizDto> generateQuizzes(
             User user,
             UUID vocabularyId,
             QuizType quizType
     ) {
-        VocabularyDto vocabulary = vocabularyService.getVocabularyById(user, vocabularyId);
+        List<WordDetail> wordDetails = wordService.getWordDetailsByVocabularyId(user, vocabularyId);
 
-        List<WordWithDefinitions> wordsWithDefs = new ArrayList<>();
-        List<WordDto> wordDtos = wordService.getWordsByVocabularyId(user, vocabularyId);
-        if (wordDtos.isEmpty()) {
+        if (wordDetails.isEmpty()) {
             return List.of();
-        }
-
-        for (WordDto wordDto : wordDtos) {
-            WordWithDefinitions wordWithDefinitions = WordWithDefinitions.builder()
-                    .wordDto(wordDto)
-                    .definitionDtos(definitionService.getDefinitionsByWordId(user, wordDto.getId()))
-                    .build();
-
-            wordsWithDefs.add(wordWithDefinitions);
         }
 
         QuizGenerator quizGenerator = QuizGeneratorFactory.get(quizType);
 
-        List<Quiz> quizzes = quizGenerator.generate(user.getId(), wordsWithDefs);
+        List<Quiz> quizzes = quizGenerator.generate(user.getId(), wordDetails);
         List<QuizDto> quizDtos = new ArrayList<>();
 
         for (Quiz quiz : quizzes) {

@@ -18,14 +18,16 @@ public class StatisticDto {
     private int incorrectCount;
     private boolean isLearned;
     private double difficulty;
+    private double accuracy;
 
-    public static StatisticDto fromEntity(WordStatistic wordStatistic, double difficulty) {
+    public static StatisticDto fromEntity(WordStatistic wordStatistic) {
         return StatisticDto.builder()
                 .wordId(wordStatistic.getWordId())
                 .correctCount(wordStatistic.getCorrectCount())
                 .incorrectCount(wordStatistic.getIncorrectCount())
                 .isLearned(wordStatistic.isLearned())
-                .difficulty(difficulty)
+                .difficulty(wordStatistic.getDifficulty())
+                .accuracy(wordStatistic.getAccuracy())
                 .build();
     }
 }

@@ -1,6 +1,6 @@
 package com.kimtaeyang.mobidic.quiz.util;
 
-import com.kimtaeyang.mobidic.dictionary.model.WordWithDefinitions;
+import com.kimtaeyang.mobidic.dictionary.dto.WordDetail;
 import com.kimtaeyang.mobidic.quiz.model.Quiz;
 
 import java.util.ArrayList;
@@ -11,26 +11,26 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class BlankQuizGenerator extends QuizGenerator {
     @Override
-    public List<Quiz> generate(UUID memberId, List<WordWithDefinitions> orgWordsWithDefs) {
-        List<WordWithDefinitions> wordsWithDefs = new ArrayList<>(orgWordsWithDefs);
-        derange(wordsWithDefs);
+    public List<Quiz> generate(UUID memberId, List<WordDetail> orgWordDetails) {
+        List<WordDetail> wordDetails = new ArrayList<>(orgWordDetails);
+        derange(wordDetails);
 
         //option은 뜻
         ArrayList<String> options = new ArrayList<>();
-        ArrayList<Quiz> quizzes = new ArrayList<>(wordsWithDefs.size());
+        ArrayList<Quiz> quizzes = new ArrayList<>(wordDetails.size());
 
-        for (WordWithDefinitions wordWithDefinitions : wordsWithDefs) {
+        for (WordDetail wordDetail : wordDetails) {
             String option = "";
 
-            if (wordWithDefinitions.getDefinitionDtos() != null && !wordWithDefinitions.getDefinitionDtos().isEmpty()) {
-                int randIdx = ThreadLocalRandom.current().nextInt(wordWithDefinitions.getDefinitionDtos().size());
-                option = wordWithDefinitions.getDefinitionDtos().get(randIdx).getMeaning();
+            if (wordDetail.definitions() != null && !wordDetail.definitions().isEmpty()) {
+                int randIdx = ThreadLocalRandom.current().nextInt(wordDetail.definitions().size());
+                option = wordDetail.definitions().get(randIdx).getMeaning();
             }
 
             options.add(option);
 
             List<Integer> nums = new ArrayList<>();
-            for (int i = 0; i < wordWithDefinitions.getWordDto().getExpression().length(); i++) {
+            for (int i = 0; i < wordDetail.expression().length(); i++) {
                 nums.add(i);
             }
             int blankCount = nums.size() / 2 + 1;
@@ -42,7 +42,7 @@ public class BlankQuizGenerator extends QuizGenerator {
             }
             Collections.sort(indices);
 
-            char[] stem = wordWithDefinitions.getWordDto().getExpression().toCharArray();
+            char[] stem = wordDetail.expression().toCharArray();
             StringBuilder correctAnswer = new StringBuilder();
 
             for (int idx : indices) {
@@ -53,7 +53,7 @@ public class BlankQuizGenerator extends QuizGenerator {
             quizzes.add(
                     Quiz.builder()
                             .id(UUID.randomUUID())
-                            .wordId(wordWithDefinitions.getWordDto().getId())
+                            .wordId(wordDetail.id())
                             .userId(memberId)
                             .stem(new String(stem))
                             .answer(correctAnswer.toString())
@@ -61,7 +61,7 @@ public class BlankQuizGenerator extends QuizGenerator {
             );
         }
 
-        for (int i = 0; i < wordsWithDefs.size(); i++) {
+        for (int i = 0; i < wordDetails.size(); i++) {
             quizzes.get(i).setOptions(List.of(options.get(i)));
         }
 
