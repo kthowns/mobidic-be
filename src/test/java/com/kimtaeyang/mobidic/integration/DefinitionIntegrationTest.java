@@ -143,7 +143,7 @@ public class DefinitionIntegrationTest {
                 .andExpect(status().isOk());
 
         //Success
-        mockMvc.perform(get("/api/definitions/all")
+        mockMvc.perform(get("/api/definitions")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + token)
                         .param("wordId", wordId.toString()))
@@ -156,7 +156,7 @@ public class DefinitionIntegrationTest {
                         .value(addDefRequest.getPart().toString()));
 
         //Fail without token
-        mockMvc.perform(get("/api/definitions/all")
+        mockMvc.perform(get("/api/definitions")
                         .contentType(MediaType.APPLICATION_JSON)
                         .param("wordId", wordId.toString()))
                 .andExpect(status().isUnauthorized())
@@ -164,7 +164,7 @@ public class DefinitionIntegrationTest {
                         .value(UNAUTHORIZED.getMessage()));
 
         //Fail with unauthorized token
-        mockMvc.perform(get("/api/definitions/all")
+        mockMvc.perform(get("/api/definitions")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + jwtProvider.generateToken(UUID.randomUUID()))
                         .param("wordId", wordId.toString()))
@@ -173,7 +173,7 @@ public class DefinitionIntegrationTest {
                         .value(UNAUTHORIZED.getMessage()));
 
         //Fail with no resource
-        mockMvc.perform(get("/api/definitions/all")
+        mockMvc.perform(get("/api/definitions")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + token)
                         .param("wordId", UUID.randomUUID().toString()))

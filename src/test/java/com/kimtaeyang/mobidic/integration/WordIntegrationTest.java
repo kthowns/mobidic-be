@@ -156,7 +156,7 @@ public class WordIntegrationTest {
                 .andExpect(status().isOk());
 
         // Success
-        mockMvc.perform(get("/api/words/all")
+        mockMvc.perform(get("/api/words")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + token)
                         .param("vocabularyId", vocabularyId.toString()))
@@ -169,7 +169,7 @@ public class WordIntegrationTest {
                 .andExpect(jsonPath("$.data[0].createdAt").isNotEmpty());
 
         //Fail without token
-        mockMvc.perform(get("/api/words/all")
+        mockMvc.perform(get("/api/words")
                         .contentType(MediaType.APPLICATION_JSON)
                         .param("vocabularyId", vocabularyId.toString()))
                 .andExpect(status().isUnauthorized())
@@ -177,7 +177,7 @@ public class WordIntegrationTest {
                         .value(UNAUTHORIZED.getMessage()));
 
         //Fail with unauthorized token
-        mockMvc.perform(get("/api/words/all")
+        mockMvc.perform(get("/api/words")
                         .contentType(MediaType.APPLICATION_JSON)
                         .param("vocabularyId", vocabularyId.toString())
                         .header("Authorization", "Bearer " + jwtProvider.generateToken(UUID.randomUUID())))
@@ -186,7 +186,7 @@ public class WordIntegrationTest {
                         .value(UNAUTHORIZED.getMessage()));
 
         //Fail with no resource
-        mockMvc.perform(get("/api/words/all")
+        mockMvc.perform(get("/api/words")
                         .contentType(MediaType.APPLICATION_JSON)
                         .param("vocabularyId", UUID.randomUUID().toString())
                         .header("Authorization", "Bearer " + token))

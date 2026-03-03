@@ -253,7 +253,7 @@ public class QuizIntegrationTest {
             UUID defId = addDefAndGetId(wordId, token, sampleDefs[i], sampleParts[i]);
         }
 
-        MvcResult wordsResult = mockMvc.perform(get("/api/words/all")
+        MvcResult wordsResult = mockMvc.perform(get("/api/words")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + token)
                         .param("vocabularyId", vocabId.toString())

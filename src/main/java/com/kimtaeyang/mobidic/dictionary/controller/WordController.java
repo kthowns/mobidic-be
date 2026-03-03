@@ -131,7 +131,7 @@ public class WordController {
             @ApiResponse(responseCode = "500", description = "서버 오류",
                     content = @Content(schema = @Schema(hidden = true)))
     })
-    @GetMapping("/all")
+    @GetMapping
     public ResponseEntity<GeneralResponse<List<WordDetail>>> getWordsByVocabularyId(
             @RequestParam String vocabularyId,
             @AuthenticationPrincipal User user

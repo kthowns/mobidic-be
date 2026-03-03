@@ -3,7 +3,6 @@ package com.kimtaeyang.mobidic.pronunciation.service;
 import com.kimtaeyang.mobidic.common.code.GeneralResponseCode;
 import com.kimtaeyang.mobidic.common.exception.ApiException;
 import com.kimtaeyang.mobidic.dictionary.dto.WordDto;
-import com.kimtaeyang.mobidic.dictionary.entity.Word;
 import com.kimtaeyang.mobidic.dictionary.service.WordService;
 import com.kimtaeyang.mobidic.pronunciation.dto.SttResponse;
 import com.kimtaeyang.mobidic.user.entity.User;
