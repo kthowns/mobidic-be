@@ -47,12 +47,12 @@ public class StatisticController {
                     content = @Content(schema = @Schema(hidden = true)))
     })
     @GetMapping("/word")
-    public ResponseEntity<GeneralResponse<StatisticDto>> getRateByWordId(
+    public ResponseEntity<GeneralResponse<StatisticDto>> getWordStatisticById(
             @RequestParam String wordId,
             @AuthenticationPrincipal User user
     ) {
         return GeneralResponse.toResponseEntity(OK,
-                statisticService.getRateByWordId(user, UUID.fromString(wordId)));
+                statisticService.getWordStatisticById(user, UUID.fromString(wordId)));
     }
 
     @Operation(

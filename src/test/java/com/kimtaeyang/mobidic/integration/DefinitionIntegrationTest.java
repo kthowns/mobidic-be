@@ -70,7 +70,7 @@ public class DefinitionIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.id")
                         .isNotEmpty())
-                .andExpect(jsonPath("$.data.definition")
+                .andExpect(jsonPath("$.data.meaning")
                         .value(addDefRequest.getMeaning()))
                 .andExpect(jsonPath("$.data.part")
                         .value(addDefRequest.getPart().toString()));
@@ -119,8 +119,8 @@ public class DefinitionIntegrationTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message")
                         .value(INVALID_REQUEST_BODY.getMessage()))
-                .andExpect(jsonPath("$.errors.definition")
-                        .value("Invalid definition pattern"));
+                .andExpect(jsonPath("$.errors.meaning")
+                        .value("Invalid meaning pattern"));
     }
 
     @Test
@@ -150,12 +150,10 @@ public class DefinitionIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data[0].id")
                         .isNotEmpty())
-                .andExpect(jsonPath("$.data[0].definition")
+                .andExpect(jsonPath("$.data[0].meaning")
                         .value(addDefRequest.getMeaning()))
                 .andExpect(jsonPath("$.data[0].part")
-                        .value(addDefRequest.getPart().toString()))
-                .andExpect(jsonPath("$.data[0].wordId")
-                        .value(wordId.toString()));
+                        .value(addDefRequest.getPart().toString()));
 
         //Fail without token
         mockMvc.perform(get("/api/definitions/all")
@@ -228,7 +226,7 @@ public class DefinitionIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.id")
                         .isNotEmpty())
-                .andExpect(jsonPath("$.data.definition")
+                .andExpect(jsonPath("$.data.meaning")
                         .value(addDefRequest.getMeaning()))
                 .andExpect(jsonPath("$.data.part")
                         .value(addDefRequest.getPart().toString()));
@@ -241,7 +239,7 @@ public class DefinitionIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.id")
                         .isNotEmpty())
-                .andExpect(jsonPath("$.data.definition")
+                .andExpect(jsonPath("$.data.meaning")
                         .value(addDefRequest.getMeaning()))
                 .andExpect(jsonPath("$.data.part")
                         .value(addDefRequest.getPart().toString()));
@@ -290,8 +288,8 @@ public class DefinitionIntegrationTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message")
                         .value(INVALID_REQUEST_BODY.getMessage()))
-                .andExpect(jsonPath("$.errors.definition")
-                        .value("Invalid definition pattern"));
+                .andExpect(jsonPath("$.errors.meaning")
+                        .value("Invalid meaning pattern"));
 
         //Fail with invalid part pattern
         String wrongRequest = "{\"definition\":\"some def\","
@@ -352,12 +350,10 @@ public class DefinitionIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.id")
                         .value(defId))
-                .andExpect(jsonPath("$.data.definition")
+                .andExpect(jsonPath("$.data.meaning")
                         .value(addDefRequest.getMeaning()))
                 .andExpect(jsonPath("$.data.part")
-                        .value(addDefRequest.getPart().toString()))
-                .andExpect(jsonPath("$.data.wordId")
-                        .value(wordId.toString()));
+                        .value(addDefRequest.getPart().toString()));
 
         //Fail with no resource
         mockMvc.perform(delete("/api/definitions/" + defId)

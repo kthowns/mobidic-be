@@ -14,6 +14,7 @@ import com.kimtaeyang.mobidic.security.jwt.JwtProvider;
 import com.kimtaeyang.mobidic.security.service.UserDetailsServiceImpl;
 import com.kimtaeyang.mobidic.statistic.repository.WordStatisticRepository;
 import com.kimtaeyang.mobidic.statistic.service.StatisticService;
+import com.kimtaeyang.mobidic.statistic.util.DifficultyUtil;
 import com.kimtaeyang.mobidic.user.repository.UserRepository;
 import org.mockito.Mockito;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -26,6 +27,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 @TestConfiguration
 public class ServiceTestConfig {
+    @Bean
+    public DifficultyUtil difficultyUtil() {
+        return new DifficultyUtil();
+    }
+
     @Bean
     public WordRepository wordRepository() {
         return Mockito.mock(WordRepository.class);
