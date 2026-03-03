@@ -53,7 +53,7 @@ class WordStatisticServiceTest {
             .build();
 
     @Test
-    @DisplayName("[RateService] Get rate by word id success")
+    @DisplayName("[StatisticService] Get rate by word id success")
     void getRateByWordIdSuccess() {
         resetMock();
 
@@ -72,7 +72,7 @@ class WordStatisticServiceTest {
                 .willReturn(Optional.of(defaultWordStatistic));
 
         //when
-        StatisticDto response = statisticService.getRateByWordId(testUser, UUID.randomUUID());
+        StatisticDto response = statisticService.getWordStatisticById(testUser, UUID.randomUUID());
 
         //then
         assertEquals(defaultWordStatistic.getWordId(), response.getWordId());
@@ -82,7 +82,7 @@ class WordStatisticServiceTest {
     }
 
     @Test
-    @DisplayName("[RateService] Get vocab learning rate success")
+    @DisplayName("[StatisticService] Get vocab learning rate success")
     public void getVocabLearningRateSuccess() {
         resetMock();
 
@@ -105,7 +105,7 @@ class WordStatisticServiceTest {
     }
 
     @Test
-    @DisplayName("[RateService] toggle rate success")
+    @DisplayName("[StatisticService] toggle rate success")
     void toggleRateSuccess() {
         resetMock();
 
@@ -122,7 +122,7 @@ class WordStatisticServiceTest {
         //given
         given(wordRepository.findById(any(UUID.class)))
                 .willReturn(Optional.of(Mockito.mock(Word.class)));
-        given(wordStatisticRepository.findByWordIdAndWord_Vocabulary_User_Id(any(UUID.class), any(UUID.class)))
+        given(wordStatisticRepository.findForUpdate(any(UUID.class), any(UUID.class)))
                 .willReturn(Optional.of(defaultStatistic));
         given(wordStatisticRepository.save(any(WordStatistic.class)))
                 .willReturn(Mockito.mock(WordStatistic.class));
@@ -132,7 +132,7 @@ class WordStatisticServiceTest {
 
         // then
         assertFalse(defaultStatistic.isLearned());
-        verify(wordStatisticRepository, times(1)).findByWordIdAndWord_Vocabulary_User_Id(wordId, testUser.getId());
+        verify(wordStatisticRepository, times(1)).findForUpdate(wordId, testUser.getId());
         verify(wordStatisticRepository, never()).save(any());
     }
 

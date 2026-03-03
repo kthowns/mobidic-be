@@ -74,7 +74,7 @@ public class DefinitionController {
             @ApiResponse(responseCode = "500", description = "서버 오류",
                     content = @Content(schema = @Schema(hidden = true)))
     })
-    @GetMapping("/all")
+    @GetMapping
     public ResponseEntity<GeneralResponse<List<DefinitionDto>>> getDefinitionsByWordId(
             @RequestParam String wordId,
             @AuthenticationPrincipal User user

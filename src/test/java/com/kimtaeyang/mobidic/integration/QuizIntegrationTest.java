@@ -5,8 +5,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kimtaeyang.mobidic.auth.dto.LoginRequest;
 import com.kimtaeyang.mobidic.auth.dto.SignUpRequestDto;
-import com.kimtaeyang.mobidic.dictionary.dto.*;
-import com.kimtaeyang.mobidic.dictionary.model.WordWithDefinitions;
+import com.kimtaeyang.mobidic.dictionary.dto.AddDefinitionRequestDto;
+import com.kimtaeyang.mobidic.dictionary.dto.AddVocabularyRequestDto;
+import com.kimtaeyang.mobidic.dictionary.dto.AddWordRequestDto;
+import com.kimtaeyang.mobidic.dictionary.dto.WordDetail;
 import com.kimtaeyang.mobidic.dictionary.type.PartOfSpeech;
 import com.kimtaeyang.mobidic.quiz.dto.QuizDto;
 import com.kimtaeyang.mobidic.quiz.dto.QuizRateRequest;
@@ -23,7 +25,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -65,7 +66,7 @@ public class QuizIntegrationTest {
         PartOfSpeech[] sampleParts = {PartOfSpeech.INTERJECTION, PartOfSpeech.NOUN, PartOfSpeech.VERB,
                 PartOfSpeech.VERB, PartOfSpeech.ADJECTIVE};
 
-        List<WordWithDefinitions> savedWords = addWordsAndGetDetails(sampleWords, sampleDefs, sampleParts
+        List<WordDetail> savedWords = addWordsAndGetDetails(sampleWords, sampleDefs, sampleParts
                 , vocabId, token);
 
         MvcResult quizResult = mockMvc.perform(get("/api/quizs/ox")
@@ -92,7 +93,7 @@ public class QuizIntegrationTest {
         PartOfSpeech[] sampleParts = {PartOfSpeech.INTERJECTION, PartOfSpeech.NOUN, PartOfSpeech.VERB,
                 PartOfSpeech.VERB, PartOfSpeech.ADJECTIVE};
 
-        List<WordWithDefinitions> savedWords = addWordsAndGetDetails(
+        List<WordDetail> savedWords = addWordsAndGetDetails(
                 sampleWords,
                 sampleDefs,
                 sampleParts,
@@ -155,7 +156,7 @@ public class QuizIntegrationTest {
         PartOfSpeech[] sampleParts = {PartOfSpeech.INTERJECTION, PartOfSpeech.NOUN, PartOfSpeech.VERB,
                 PartOfSpeech.VERB, PartOfSpeech.ADJECTIVE};
 
-        List<WordWithDefinitions> savedWords = addWordsAndGetDetails(sampleWords, sampleDefs, sampleParts
+        List<WordDetail> savedWords = addWordsAndGetDetails(sampleWords, sampleDefs, sampleParts
                 , vocabId, token);
 
         MvcResult quizResult = mockMvc.perform(get("/api/quizs/blank")
@@ -191,7 +192,7 @@ public class QuizIntegrationTest {
         PartOfSpeech[] sampleParts = {PartOfSpeech.INTERJECTION, PartOfSpeech.NOUN, PartOfSpeech.VERB,
                 PartOfSpeech.VERB, PartOfSpeech.ADJECTIVE};
 
-        List<WordWithDefinitions> savedWords = addWordsAndGetDetails(sampleWords, sampleDefs, sampleParts
+        List<WordDetail> savedWords = addWordsAndGetDetails(sampleWords, sampleDefs, sampleParts
                 , vocabId, token);
 
         MvcResult quizResult = mockMvc.perform(get("/api/quizs/blank")
@@ -245,14 +246,14 @@ public class QuizIntegrationTest {
         }
     }
 
-    private List<WordWithDefinitions> addWordsAndGetDetails(String[] sampleWords, String[] sampleDefs,
-                                                            PartOfSpeech[] sampleParts, UUID vocabId, String token) throws Exception {
+    private List<WordDetail> addWordsAndGetDetails(String[] sampleWords, String[] sampleDefs,
+                                                   PartOfSpeech[] sampleParts, UUID vocabId, String token) throws Exception {
         for (int i = 0; i < sampleWords.length; i++) {
             UUID wordId = addWordAndGetId(vocabId, token, sampleWords[i]);
             UUID defId = addDefAndGetId(wordId, token, sampleDefs[i], sampleParts[i]);
         }
 
-        MvcResult wordsResult = mockMvc.perform(get("/api/words/all")
+        MvcResult wordsResult = mockMvc.perform(get("/api/words")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + token)
                         .param("vocabularyId", vocabId.toString())
@@ -260,25 +261,9 @@ public class QuizIntegrationTest {
                 .andReturn();
         String json = wordsResult.getResponse().getContentAsString();
         JsonNode data = objectMapper.readTree(json).path("data");
-        List<WordDto> wordDtos = objectMapper.readValue(data.toString(), new TypeReference<>() {
+
+        return objectMapper.readValue(data.toString(), new TypeReference<>() {
         });
-
-        List<WordWithDefinitions> wordWithDefs = new ArrayList<>();
-        for (WordDto wordDto : wordDtos) {
-            wordsResult = mockMvc.perform(get("/api/definitions/all")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .header("Authorization", "Bearer " + token)
-                            .param("wordId", wordDto.getId().toString())
-                    ).andExpect(status().isOk())
-                    .andReturn();
-            json = wordsResult.getResponse().getContentAsString();
-            data = objectMapper.readTree(json).path("data");
-            List<DefinitionDto> definitionDtos = objectMapper.readValue(data.toString(), new TypeReference<>() {
-            });
-            wordWithDefs.add(new WordWithDefinitions(wordDto, definitionDtos));
-        }
-
-        return wordWithDefs;
     }
 
     private UUID addVocabAndGetId(String token) throws Exception {
@@ -320,7 +305,7 @@ public class QuizIntegrationTest {
 
     private UUID addDefAndGetId(UUID wordId, String token, String def, PartOfSpeech part) throws Exception {
         AddDefinitionRequestDto addDefRequest = AddDefinitionRequestDto.builder()
-                .definition(def)
+                .meaning(def)
                 .part(part)
                 .build();
 

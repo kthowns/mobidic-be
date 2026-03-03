@@ -2,9 +2,7 @@ package com.kimtaeyang.mobidic.service;
 
 import com.kimtaeyang.mobidic.config.ServiceTestConfig;
 import com.kimtaeyang.mobidic.dictionary.dto.DefinitionDto;
-import com.kimtaeyang.mobidic.dictionary.dto.VocabularyDto;
-import com.kimtaeyang.mobidic.dictionary.dto.WordDto;
-import com.kimtaeyang.mobidic.dictionary.model.WordWithDefinitions;
+import com.kimtaeyang.mobidic.dictionary.dto.WordDetail;
 import com.kimtaeyang.mobidic.dictionary.service.DefinitionService;
 import com.kimtaeyang.mobidic.dictionary.service.VocabularyService;
 import com.kimtaeyang.mobidic.dictionary.service.WordService;
@@ -32,7 +30,8 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 
 @ExtendWith(SpringExtension.class)
@@ -68,85 +67,50 @@ public class QuizServiceTest {
             .id(UUID.randomUUID())
             .build();
 
-    List<WordWithDefinitions> wordsWithDefs = List.of(
-            WordWithDefinitions.builder()
-                    .wordDto(
-                            WordDto.builder()
-                                    .id(UUID.randomUUID())
-                                    .expression("Apple")
-                                    .build()
-                    )
-                    .definitionDtos(List.of(
-                                    new DefinitionDto(UUID.randomUUID(), UUID.randomUUID(), "사과", PartOfSpeech.NOUN)
+    List<WordDetail> wordDetails = List.of(
+            WordDetail.builder()
+                    .id(UUID.randomUUID())
+                    .expression("Apple")
+                    .definitions(List.of(
+                                    new DefinitionDto(UUID.randomUUID(), "사과", PartOfSpeech.NOUN)
                             )
                     ).build(),
-            WordWithDefinitions.builder()
-                    .wordDto(
-                            WordDto.builder()
-                                    .id(UUID.randomUUID())
-                                    .expression("Hello")
-                                    .build()
-                    )
-                    .definitionDtos(List.of(
-                                    new DefinitionDto(UUID.randomUUID(), UUID.randomUUID(), "안녕", PartOfSpeech.INTERJECTION)
+            WordDetail.builder()
+                    .id(UUID.randomUUID())
+                    .expression("Hello")
+                    .definitions(List.of(
+                                    new DefinitionDto(UUID.randomUUID(), "안녕", PartOfSpeech.INTERJECTION)
                             )
                     ).build(),
-            WordWithDefinitions.builder()
-                    .wordDto(
-                            WordDto.builder()
-                                    .id(UUID.randomUUID())
-                                    .expression("Run")
-                                    .build()
-                    )
-                    .definitionDtos(List.of(
-                                    new DefinitionDto(UUID.randomUUID(), UUID.randomUUID(), "뛰다", PartOfSpeech.VERB)
+            WordDetail.builder()
+                    .id(UUID.randomUUID())
+                    .expression("Run")
+                    .definitions(List.of(
+                                    new DefinitionDto(UUID.randomUUID(), "뛰다", PartOfSpeech.VERB)
                             )
                     ).build(),
-            WordWithDefinitions.builder()
-                    .wordDto(
-                            WordDto.builder()
-                                    .id(UUID.randomUUID())
-                                    .expression("Idiot")
-                                    .build()
-                    )
-                    .definitionDtos(List.of(
-                                    new DefinitionDto(UUID.randomUUID(), UUID.randomUUID(), "바보", PartOfSpeech.NOUN)
+            WordDetail.builder()
+                    .id(UUID.randomUUID())
+                    .expression("Idiot")
+                    .definitions(List.of(
+                                    new DefinitionDto(UUID.randomUUID(), "바보", PartOfSpeech.NOUN)
                             )
-                    ).build(), WordWithDefinitions.builder()
-                    .wordDto(
-                            WordDto.builder()
-                                    .id(UUID.randomUUID())
-                                    .expression("Media")
-                                    .build()
-                    )
-                    .definitionDtos(List.of(
-                                    new DefinitionDto(UUID.randomUUID(), UUID.randomUUID(), "매체", PartOfSpeech.NOUN)
+                    ).build(), WordDetail.builder()
+                    .id(UUID.randomUUID())
+                    .expression("Media")
+                    .definitions(List.of(
+                                    new DefinitionDto(UUID.randomUUID(), "매체", PartOfSpeech.NOUN)
                             )
                     ).build());
 
     @Test
     @DisplayName("[QuizService] Generate OX quiz test")
     void generateOxQuizTest() {
-        UUID userId = UUID.randomUUID();
-
-        List<List<DefinitionDto>> defDtos = wordsWithDefs.stream().map(WordWithDefinitions::getDefinitionDtos).toList();
-
         //given
-        given(wordService.getWordsByVocabularyId(any(User.class), any(UUID.class)))
-                .willReturn(wordsWithDefs.stream().map(WordWithDefinitions::getWordDto).toList());
+        given(wordService.getWordDetailsByVocabularyId(any(User.class), any(UUID.class)))
+                .willReturn(wordDetails);
         given(redisTemplate.opsForValue())
                 .willReturn(valueOperations);
-        for (WordWithDefinitions w : wordsWithDefs) {
-            given(definitionService.getDefinitionsByWordId(any(User.class), eq(w.getWordDto().getId())))
-                    .willReturn(w.getDefinitionDtos());
-        }
-
-        given(vocabularyService.getVocabularyById(any(User.class), any(UUID.class)))
-                .willReturn(
-                        VocabularyDto.builder()
-                                .id(UUID.randomUUID())
-                                .build()
-                );
 
         int epoch = 10;
         int assertCnt = 0;
@@ -158,16 +122,16 @@ public class QuizServiceTest {
             //then
             int matchCnt = 0;
             for (QuizDto question : result) {
-                for (WordWithDefinitions wordWithDefinitions : wordsWithDefs) {
-                    if (question.getStem().equals(wordWithDefinitions.getWordDto().getExpression())
-                            && question.getOptions().getFirst().equals(wordWithDefinitions.getDefinitionDtos().getFirst().getDefinition())) {
+                for (WordDetail wordDetails : wordDetails) {
+                    if (question.getStem().equals(wordDetails.expression())
+                            && question.getOptions().getFirst().equals(wordDetails.definitions().getFirst().getMeaning())) {
                         matchCnt++;
                         break;
                     }
                 }
             }
 
-            if (matchCnt < (wordsWithDefs.size() / 2) + 1) {
+            if (matchCnt < (wordDetails.size() / 2) + 1) {
                 assertCnt++;
             }
         }
@@ -181,18 +145,18 @@ public class QuizServiceTest {
         //given
         List<String> tokens = new ArrayList<>();
         // quiz:{userId}:{wordId}:{quizId}
-        for (WordWithDefinitions wordsWithDef : wordsWithDefs) {
+        for (WordDetail wordDetails : wordDetails) {
             String token = "quiz"
                     + ":" + testUser.getId()
-                    + ":" + wordsWithDef.getWordDto().getId();
+                    + ":" + wordDetails.id();
             tokens.add(cryptoService.encrypt(token));
         }
         List<String> correctAnswers = new ArrayList<>();
-        for (WordWithDefinitions wordWithDefinitions : wordsWithDefs) {
-            correctAnswers.add(wordWithDefinitions.getDefinitionDtos().getFirst().getDefinition());
+        for (WordDetail wordDetails : wordDetails) {
+            correctAnswers.add(wordDetails.definitions().getFirst().getMeaning());
         }
         List<QuizRateRequest> quizRateRequests = new ArrayList<>();
-        for (int i = 0; i < wordsWithDefs.size(); i++) {
+        for (int i = 0; i < wordDetails.size(); i++) {
             QuizRateRequest quizRateRequest = QuizRateRequest.builder()
                     .answer(correctAnswers.get(i))
                     .token(tokens.get(i))
@@ -208,7 +172,7 @@ public class QuizServiceTest {
         given(valueOperations.get(anyString()))
                 .willReturn(correctAnswers.get(0), correctAnswers.get(1), correctAnswers.get(2), correctAnswers.get(3), correctAnswers.get(4));
 
-        for (int i = 0; i < wordsWithDefs.size(); i++) {
+        for (int i = 0; i < wordDetails.size(); i++) {
             //when
             QuizRateResponse quizRateResponse = quizService.rateQuiz(testUser, quizRateRequests.get(i));
 

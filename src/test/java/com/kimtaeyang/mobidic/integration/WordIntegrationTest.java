@@ -3,8 +3,10 @@ package com.kimtaeyang.mobidic.integration;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kimtaeyang.mobidic.auth.dto.LoginRequest;
 import com.kimtaeyang.mobidic.auth.dto.SignUpRequestDto;
+import com.kimtaeyang.mobidic.dictionary.dto.AddDefinitionRequestDto;
 import com.kimtaeyang.mobidic.dictionary.dto.AddVocabularyRequestDto;
 import com.kimtaeyang.mobidic.dictionary.dto.AddWordRequestDto;
+import com.kimtaeyang.mobidic.dictionary.type.PartOfSpeech;
 import com.kimtaeyang.mobidic.security.jwt.JwtProvider;
 import com.kimtaeyang.mobidic.util.DatabaseCleaner;
 import org.junit.jupiter.api.BeforeEach;
@@ -129,30 +131,45 @@ public class WordIntegrationTest {
         UUID vocabularyId = addVocabAndGetVocabId(token);
 
         AddWordRequestDto addWordRequest = AddWordRequestDto.builder()
-                .expression("test")
+                .expression("apple")
                 .build();
 
-        mockMvc.perform(post("/api/words/" + vocabularyId)
+        MvcResult wordAddResult = mockMvc.perform(post("/api/words/" + vocabularyId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + token)
                         .content(objectMapper.writeValueAsString(addWordRequest)))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        String wordAddJson = wordAddResult.getResponse().getContentAsString();
+        UUID wordId = UUID.fromString(objectMapper.readTree(wordAddJson).path("data").path("id").asText());
+
+        AddDefinitionRequestDto addDefRequest = AddDefinitionRequestDto.builder()
+                .meaning("사과")
+                .part(PartOfSpeech.NOUN)
+                .build();
+
+        mockMvc.perform(post("/api/definitions/" + wordId) // 뜻 추가 API 경로 확인 필요
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Bearer " + token)
+                        .content(objectMapper.writeValueAsString(addDefRequest)))
                 .andExpect(status().isOk());
 
-        //Success
-        mockMvc.perform(get("/api/words/all")
+        // Success
+        mockMvc.perform(get("/api/words")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + token)
                         .param("vocabularyId", vocabularyId.toString()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data[0].expression")
-                        .value(addWordRequest.getExpression()))
-                .andExpect(jsonPath("$.data[0].vocabularyId")
-                        .value(vocabularyId.toString()))
-                .andExpect(jsonPath("$.data[0].createdAt")
-                        .isNotEmpty());
+                .andExpect(jsonPath("$.data[0].expression").value("apple"))
+                .andExpect(jsonPath("$.data[0].definitions[0].meaning").value("사과"))
+                .andExpect(jsonPath("$.data[0].definitions[0].part").value("NOUN"))
+                .andExpect(jsonPath("$.data[0].difficulty").value(0.5))
+                .andExpect(jsonPath("$.data[0].accuracy").value(0.0))
+                .andExpect(jsonPath("$.data[0].createdAt").isNotEmpty());
 
         //Fail without token
-        mockMvc.perform(get("/api/words/all")
+        mockMvc.perform(get("/api/words")
                         .contentType(MediaType.APPLICATION_JSON)
                         .param("vocabularyId", vocabularyId.toString()))
                 .andExpect(status().isUnauthorized())
@@ -160,7 +177,7 @@ public class WordIntegrationTest {
                         .value(UNAUTHORIZED.getMessage()));
 
         //Fail with unauthorized token
-        mockMvc.perform(get("/api/words/all")
+        mockMvc.perform(get("/api/words")
                         .contentType(MediaType.APPLICATION_JSON)
                         .param("vocabularyId", vocabularyId.toString())
                         .header("Authorization", "Bearer " + jwtProvider.generateToken(UUID.randomUUID())))
@@ -169,7 +186,7 @@ public class WordIntegrationTest {
                         .value(UNAUTHORIZED.getMessage()));
 
         //Fail with no resource
-        mockMvc.perform(get("/api/words/all")
+        mockMvc.perform(get("/api/words")
                         .contentType(MediaType.APPLICATION_JSON)
                         .param("vocabularyId", UUID.randomUUID().toString())
                         .header("Authorization", "Bearer " + token))

@@ -3,6 +3,7 @@ package com.kimtaeyang.mobidic.dictionary.controller;
 import com.kimtaeyang.mobidic.common.dto.ErrorResponse;
 import com.kimtaeyang.mobidic.common.dto.GeneralResponse;
 import com.kimtaeyang.mobidic.dictionary.dto.AddWordRequestDto;
+import com.kimtaeyang.mobidic.dictionary.dto.WordDetail;
 import com.kimtaeyang.mobidic.dictionary.dto.WordDto;
 import com.kimtaeyang.mobidic.dictionary.service.WordService;
 import com.kimtaeyang.mobidic.user.entity.User;
@@ -130,12 +131,12 @@ public class WordController {
             @ApiResponse(responseCode = "500", description = "서버 오류",
                     content = @Content(schema = @Schema(hidden = true)))
     })
-    @GetMapping("/all")
-    public ResponseEntity<GeneralResponse<List<WordDto>>> getWordsByVocabularyId(
+    @GetMapping
+    public ResponseEntity<GeneralResponse<List<WordDetail>>> getWordsByVocabularyId(
             @RequestParam String vocabularyId,
             @AuthenticationPrincipal User user
     ) {
         return GeneralResponse.toResponseEntity(OK,
-                wordService.getWordsByVocabularyId(user, UUID.fromString(vocabularyId)));
+                wordService.getWordDetailsByVocabularyId(user, UUID.fromString(vocabularyId)));
     }
 }

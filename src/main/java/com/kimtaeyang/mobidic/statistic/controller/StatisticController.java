@@ -47,12 +47,12 @@ public class StatisticController {
                     content = @Content(schema = @Schema(hidden = true)))
     })
     @GetMapping("/word")
-    public ResponseEntity<GeneralResponse<StatisticDto>> getRateByWordId(
+    public ResponseEntity<GeneralResponse<StatisticDto>> getWordStatisticById(
             @RequestParam String wordId,
             @AuthenticationPrincipal User user
     ) {
         return GeneralResponse.toResponseEntity(OK,
-                statisticService.getRateByWordId(user, UUID.fromString(wordId)));
+                statisticService.getWordStatisticById(user, UUID.fromString(wordId)));
     }
 
     @Operation(
@@ -71,9 +71,9 @@ public class StatisticController {
             @ApiResponse(responseCode = "500", description = "서버 오류",
                     content = @Content(schema = @Schema(hidden = true)))
     })
-    @GetMapping("/vocabulary")
+    @GetMapping("/vocabulary/{vocabularyId}/learning-rate")
     public ResponseEntity<GeneralResponse<Double>> getVocabLearningRate(
-            @RequestParam String vocabularyId,
+            @PathVariable String vocabularyId,
             @AuthenticationPrincipal User user
     ) {
         return GeneralResponse.toResponseEntity(OK,
@@ -122,9 +122,9 @@ public class StatisticController {
             @ApiResponse(responseCode = "500", description = "서버 오류",
                     content = @Content(schema = @Schema(hidden = true)))
     })
-    @GetMapping("/accuracy")
+    @GetMapping("/vocabulary/{vocabularyId}/accuracy")
     public ResponseEntity<GeneralResponse<Double>> getAvgAccuracyByVocab(
-            @RequestParam String vocabularyId,
+            @PathVariable String vocabularyId,
             @AuthenticationPrincipal User user
     ) {
         return GeneralResponse.toResponseEntity(OK,

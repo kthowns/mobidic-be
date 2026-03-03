@@ -15,8 +15,8 @@ import lombok.NoArgsConstructor;
 @Builder
 public class AddDefinitionRequestDto {
     @NotBlank
-    @Size(max = 32, message = "Invalid definition pattern")
-    private String definition;
+    @Size(max = 32, message = "Invalid meaning pattern")
+    private String meaning;
     @NotNull
     private PartOfSpeech part;
 }

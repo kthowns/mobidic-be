@@ -2,16 +2,13 @@ package com.kimtaeyang.mobidic.statistic.entity;
 
 import com.kimtaeyang.mobidic.dictionary.entity.Word;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 import java.util.UUID;
 
-@Data
+@Getter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
@@ -33,6 +30,27 @@ public class WordStatistic {
     @Column(name = "incorrect_count")
     private int incorrectCount;
 
+    @Setter
+    @Column(name = "difficulty")
+    @Builder.Default
+    private double difficulty = 0.5;
+
+    @Setter
+    @Column(name = "accuracy")
+    private double accuracy;
+
     @Column(name = "is_learned")
     private boolean isLearned;
+
+    public void increaseCorrectCount() {
+        correctCount++;
+    }
+
+    public void increaseIncorrectCount() {
+        incorrectCount++;
+    }
+
+    public void toggleIsLearned() {
+        isLearned = !isLearned;
+    }
 }

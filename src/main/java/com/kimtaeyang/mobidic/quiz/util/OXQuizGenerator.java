@@ -1,8 +1,8 @@
 package com.kimtaeyang.mobidic.quiz.util;
 
 import com.kimtaeyang.mobidic.dictionary.dto.DefinitionDto;
+import com.kimtaeyang.mobidic.dictionary.dto.WordDetail;
 import com.kimtaeyang.mobidic.quiz.model.Quiz;
-import com.kimtaeyang.mobidic.dictionary.model.WordWithDefinitions;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,30 +11,30 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class OXQuizGenerator extends QuizGenerator {
     @Override
-    public List<Quiz> generate(UUID memberId, List<WordWithDefinitions> orgWordsWithDefs) {
-        List<WordWithDefinitions> wordsWithDefs = new ArrayList<>(orgWordsWithDefs);
-        derange(wordsWithDefs);
+    public List<Quiz> generate(UUID memberId, List<WordDetail> orgWordDetails) {
+        List<WordDetail> wordDetails = new ArrayList<>(orgWordDetails);
+        derange(wordDetails);
 
         ArrayList<String> options = new ArrayList<>();
         ArrayList<Quiz> quizzes = new ArrayList<>();
 
-        for (WordWithDefinitions wordWithDefinitions : wordsWithDefs) {
+        for (WordDetail wordDetail : wordDetails) {
             String option = "";
 
-            if (wordWithDefinitions.getDefinitionDtos() != null && !wordWithDefinitions.getDefinitionDtos().isEmpty()) {
-                int randIdx = ThreadLocalRandom.current().nextInt(wordWithDefinitions.getDefinitionDtos().size());
-                option = wordWithDefinitions.getDefinitionDtos().get(randIdx).getDefinition();
+            if (wordDetail.definitions() != null && !wordDetail.definitions().isEmpty()) {
+                int randIdx = ThreadLocalRandom.current().nextInt(wordDetail.definitions().size());
+                option = wordDetail.definitions().get(randIdx).getMeaning();
             }
 
             options.add(option); //단어당 랜덤한 하나의 뜻 추출하여 options에 저장
         }
         partialShuffle((options.size() / 2) + 1, options);
 
-        for (int i = 0; i < wordsWithDefs.size(); i++) {
+        for (int i = 0; i < wordDetails.size(); i++) {
             String answer = "0";
 
-            List<String> defs = wordsWithDefs.get(i).getDefinitionDtos().stream()
-                    .map(DefinitionDto::getDefinition).toList();
+            List<String> defs = wordDetails.get(i).definitions().stream()
+                    .map(DefinitionDto::getMeaning).toList();
 
             if (defs.contains(options.get(i))) {
                 answer = "1";
@@ -43,9 +43,9 @@ public class OXQuizGenerator extends QuizGenerator {
             quizzes.add(
                     Quiz.builder()
                             .id(UUID.randomUUID())
-                            .wordId(wordsWithDefs.get(i).getWordDto().getId())
+                            .wordId(wordDetails.get(i).id())
                             .userId(memberId)
-                            .stem(wordsWithDefs.get(i).getWordDto().getExpression())
+                            .stem(wordDetails.get(i).expression())
                             .answer(answer)
                             .options(List.of(options.get(i)))
                             .build()

@@ -34,7 +34,7 @@ public class DefinitionService {
         Word word = wordRepository.findByIdAndVocabulary_User_Id(wordId, user.getId())
                 .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_WORD));
 
-        int count = definitionRepository.countByDefinitionAndWord(request.getDefinition(), word);
+        int count = definitionRepository.countByMeaningAndWord(request.getMeaning(), word);
 
         if (count > 0) {
             throw new ApiException(GeneralResponseCode.DUPLICATED_DEFINITION);
@@ -43,7 +43,7 @@ public class DefinitionService {
         Definition definition = Definition.builder()
                 .word(word)
                 .part(request.getPart())
-                .definition(request.getDefinition())
+                .meaning(request.getMeaning())
                 .build();
         definitionRepository.save(definition);
 
@@ -70,13 +70,13 @@ public class DefinitionService {
                 defId, user.getId()
         ).orElseThrow(() -> new ApiException(GeneralResponseCode.NO_DEF));
 
-        int count = definitionRepository.countByDefinitionAndWordAndIdNot(request.getDefinition(), definition.getWord(), defId);
+        int count = definitionRepository.countByMeaningAndWordAndIdNot(request.getMeaning(), definition.getWord(), defId);
 
         if (count > 0) {
             throw new ApiException(GeneralResponseCode.DUPLICATED_DEFINITION);
         }
 
-        definition.setDefinition(request.getDefinition());
+        definition.setMeaning(request.getMeaning());
         definition.setPart(request.getPart());
         definitionRepository.save(definition);
 

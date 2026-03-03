@@ -58,7 +58,7 @@ public class DefinitionIntegrationTest {
         UUID wordId = addWordAndGetId(token);
 
         AddDefinitionRequestDto addDefRequest = AddDefinitionRequestDto.builder()
-                .definition("definition")
+                .meaning("definition")
                 .part(PartOfSpeech.NOUN)
                 .build();
 
@@ -70,8 +70,8 @@ public class DefinitionIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.id")
                         .isNotEmpty())
-                .andExpect(jsonPath("$.data.definition")
-                        .value(addDefRequest.getDefinition()))
+                .andExpect(jsonPath("$.data.meaning")
+                        .value(addDefRequest.getMeaning()))
                 .andExpect(jsonPath("$.data.part")
                         .value(addDefRequest.getPart().toString()));
 
@@ -111,7 +111,7 @@ public class DefinitionIntegrationTest {
                         .value(NO_WORD.getMessage()));
 
         //Fail with invalid pattern
-        addDefRequest.setDefinition(UUID.randomUUID().toString());
+        addDefRequest.setMeaning(UUID.randomUUID().toString());
         mockMvc.perform(post("/api/definitions/" + wordId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + token)
@@ -119,8 +119,8 @@ public class DefinitionIntegrationTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message")
                         .value(INVALID_REQUEST_BODY.getMessage()))
-                .andExpect(jsonPath("$.errors.definition")
-                        .value("Invalid definition pattern"));
+                .andExpect(jsonPath("$.errors.meaning")
+                        .value("Invalid meaning pattern"));
     }
 
     @Test
@@ -132,7 +132,7 @@ public class DefinitionIntegrationTest {
         UUID wordId = addWordAndGetId(token);
 
         AddDefinitionRequestDto addDefRequest = AddDefinitionRequestDto.builder()
-                .definition("definition")
+                .meaning("definition")
                 .part(PartOfSpeech.NOUN)
                 .build();
 
@@ -143,22 +143,20 @@ public class DefinitionIntegrationTest {
                 .andExpect(status().isOk());
 
         //Success
-        mockMvc.perform(get("/api/definitions/all")
+        mockMvc.perform(get("/api/definitions")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + token)
                         .param("wordId", wordId.toString()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data[0].id")
                         .isNotEmpty())
-                .andExpect(jsonPath("$.data[0].definition")
-                        .value(addDefRequest.getDefinition()))
+                .andExpect(jsonPath("$.data[0].meaning")
+                        .value(addDefRequest.getMeaning()))
                 .andExpect(jsonPath("$.data[0].part")
-                        .value(addDefRequest.getPart().toString()))
-                .andExpect(jsonPath("$.data[0].wordId")
-                        .value(wordId.toString()));
+                        .value(addDefRequest.getPart().toString()));
 
         //Fail without token
-        mockMvc.perform(get("/api/definitions/all")
+        mockMvc.perform(get("/api/definitions")
                         .contentType(MediaType.APPLICATION_JSON)
                         .param("wordId", wordId.toString()))
                 .andExpect(status().isUnauthorized())
@@ -166,7 +164,7 @@ public class DefinitionIntegrationTest {
                         .value(UNAUTHORIZED.getMessage()));
 
         //Fail with unauthorized token
-        mockMvc.perform(get("/api/definitions/all")
+        mockMvc.perform(get("/api/definitions")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + jwtProvider.generateToken(UUID.randomUUID()))
                         .param("wordId", wordId.toString()))
@@ -175,7 +173,7 @@ public class DefinitionIntegrationTest {
                         .value(UNAUTHORIZED.getMessage()));
 
         //Fail with no resource
-        mockMvc.perform(get("/api/definitions/all")
+        mockMvc.perform(get("/api/definitions")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + token)
                         .param("wordId", UUID.randomUUID().toString()))
@@ -193,11 +191,11 @@ public class DefinitionIntegrationTest {
         UUID wordId = addWordAndGetId(token);
 
         AddDefinitionRequestDto addDefRequest = AddDefinitionRequestDto.builder()
-                .definition("definition")
+                .meaning("definition")
                 .part(PartOfSpeech.NOUN)
                 .build();
         AddDefinitionRequestDto addDefRequest2 = AddDefinitionRequestDto.builder()
-                .definition("definition2")
+                .meaning("definition2")
                 .part(PartOfSpeech.NOUN)
                 .build();
 
@@ -228,8 +226,8 @@ public class DefinitionIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.id")
                         .isNotEmpty())
-                .andExpect(jsonPath("$.data.definition")
-                        .value(addDefRequest.getDefinition()))
+                .andExpect(jsonPath("$.data.meaning")
+                        .value(addDefRequest.getMeaning()))
                 .andExpect(jsonPath("$.data.part")
                         .value(addDefRequest.getPart().toString()));
         addDefRequest.setPart(PartOfSpeech.VERB);
@@ -241,8 +239,8 @@ public class DefinitionIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.id")
                         .isNotEmpty())
-                .andExpect(jsonPath("$.data.definition")
-                        .value(addDefRequest.getDefinition()))
+                .andExpect(jsonPath("$.data.meaning")
+                        .value(addDefRequest.getMeaning()))
                 .andExpect(jsonPath("$.data.part")
                         .value(addDefRequest.getPart().toString()));
 
@@ -282,7 +280,7 @@ public class DefinitionIntegrationTest {
                         .value(NO_DEF.getMessage()));
 
         //Fail with invalid definition pattern
-        addDefRequest.setDefinition(UUID.randomUUID().toString());
+        addDefRequest.setMeaning(UUID.randomUUID().toString());
         mockMvc.perform(patch("/api/definitions/" + defId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + token)
@@ -290,8 +288,8 @@ public class DefinitionIntegrationTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message")
                         .value(INVALID_REQUEST_BODY.getMessage()))
-                .andExpect(jsonPath("$.errors.definition")
-                        .value("Invalid definition pattern"));
+                .andExpect(jsonPath("$.errors.meaning")
+                        .value("Invalid meaning pattern"));
 
         //Fail with invalid part pattern
         String wrongRequest = "{\"definition\":\"some def\","
@@ -315,7 +313,7 @@ public class DefinitionIntegrationTest {
         UUID wordId = addWordAndGetId(token);
 
         AddDefinitionRequestDto addDefRequest = AddDefinitionRequestDto.builder()
-                .definition("definition")
+                .meaning("definition")
                 .part(PartOfSpeech.NOUN)
                 .build();
 
@@ -352,12 +350,10 @@ public class DefinitionIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.id")
                         .value(defId))
-                .andExpect(jsonPath("$.data.definition")
-                        .value(addDefRequest.getDefinition()))
+                .andExpect(jsonPath("$.data.meaning")
+                        .value(addDefRequest.getMeaning()))
                 .andExpect(jsonPath("$.data.part")
-                        .value(addDefRequest.getPart().toString()))
-                .andExpect(jsonPath("$.data.wordId")
-                        .value(wordId.toString()));
+                        .value(addDefRequest.getPart().toString()));
 
         //Fail with no resource
         mockMvc.perform(delete("/api/definitions/" + defId)

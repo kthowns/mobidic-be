@@ -1,11 +1,11 @@
 package com.kimtaeyang.mobidic.statistic.repository;
 
 import com.kimtaeyang.mobidic.dictionary.entity.Vocabulary;
-import com.kimtaeyang.mobidic.dictionary.entity.Word;
 import com.kimtaeyang.mobidic.statistic.entity.WordStatistic;
 import io.lettuce.core.dynamic.annotation.Param;
+import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
@@ -20,21 +20,13 @@ public interface WordStatisticRepository extends JpaRepository<WordStatistic, UU
             " where ws.word.vocabulary = :vocabulary")
     Optional<Double> getVocabularyLearningRate(@Param("vocabulary") Vocabulary vocabulary);
 
-    @Modifying
-    @Query("update WordStatistic ws " +
-            " set ws.correctCount = ws.correctCount + 1" +
-            " where ws.word = :word")
-    void increaseCorrectCount(@Param("word") Word word);
-
-    @Modifying
-    @Query("update WordStatistic ws " +
-            " set ws.incorrectCount = ws.incorrectCount + 1" +
-            " where ws.word = :word")
-    void increaseIncorrectCount(@Param("word") Word word);
-
     List<WordStatistic> findByWord_Vocabulary_User_Id(UUID userId);
 
     List<WordStatistic> findByWord_Vocabulary_Id(UUID vocabularyId);
 
-    Optional<WordStatistic> findByWordIdAndWord_Vocabulary_User_Id(UUID id, UUID userId);
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("select ws from WordStatistic ws where ws.word.id = :wordId and ws.word.vocabulary.user.id = :userId")
+    Optional<WordStatistic> findForUpdate(@Param("wordId") UUID wordId, @Param("userId") UUID userId);
+
+    Optional<WordStatistic> findByWordIdAndWord_Vocabulary_User_Id(UUID wordId, UUID wordVocabularyUserId);
 }
