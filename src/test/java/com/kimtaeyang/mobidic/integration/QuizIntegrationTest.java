@@ -320,7 +320,7 @@ public class QuizIntegrationTest {
 
     private UUID addDefAndGetId(UUID wordId, String token, String def, PartOfSpeech part) throws Exception {
         AddDefinitionRequestDto addDefRequest = AddDefinitionRequestDto.builder()
-                .definition(def)
+                .meaning(def)
                 .part(part)
                 .build();
 

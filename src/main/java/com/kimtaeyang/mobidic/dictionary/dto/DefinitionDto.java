@@ -4,26 +4,24 @@ import com.kimtaeyang.mobidic.dictionary.entity.Definition;
 import com.kimtaeyang.mobidic.dictionary.type.PartOfSpeech;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.util.UUID;
 
-@Data
+@Getter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
 public class DefinitionDto {
     private UUID id;
-    private UUID wordId;
-    private String definition;
+    private String meaning;
     private PartOfSpeech part;
 
-    public static DefinitionDto fromEntity (Definition definition) {
+    public static DefinitionDto fromEntity(Definition definition) {
         return DefinitionDto.builder()
                 .id(definition.getId())
-                .definition(definition.getDefinition())
-                .wordId(definition.getWord().getId())
+                .meaning(definition.getMeaning())
                 .part(definition.getPart())
                 .build();
     }

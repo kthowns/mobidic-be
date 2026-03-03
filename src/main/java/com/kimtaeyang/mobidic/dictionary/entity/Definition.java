@@ -28,8 +28,9 @@ public class Definition {
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Word word;
 
-    @Column(name = "definition")
-    private String definition;
+    @Column(name = "meaning")
+    private String meaning;
+
     @Column(name = "part")
     @Enumerated(EnumType.STRING)
     private PartOfSpeech part;

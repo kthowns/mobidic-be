@@ -23,7 +23,7 @@ public class OXQuizGenerator extends QuizGenerator {
 
             if (wordWithDefinitions.getDefinitionDtos() != null && !wordWithDefinitions.getDefinitionDtos().isEmpty()) {
                 int randIdx = ThreadLocalRandom.current().nextInt(wordWithDefinitions.getDefinitionDtos().size());
-                option = wordWithDefinitions.getDefinitionDtos().get(randIdx).getDefinition();
+                option = wordWithDefinitions.getDefinitionDtos().get(randIdx).getMeaning();
             }
 
             options.add(option); //단어당 랜덤한 하나의 뜻 추출하여 options에 저장
@@ -34,7 +34,7 @@ public class OXQuizGenerator extends QuizGenerator {
             String answer = "0";
 
             List<String> defs = wordsWithDefs.get(i).getDefinitionDtos().stream()
-                    .map(DefinitionDto::getDefinition).toList();
+                    .map(DefinitionDto::getMeaning).toList();
 
             if (defs.contains(options.get(i))) {
                 answer = "1";

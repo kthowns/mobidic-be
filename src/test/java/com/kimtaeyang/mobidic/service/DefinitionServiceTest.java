@@ -59,7 +59,7 @@ class DefinitionServiceTest {
         UUID defId = UUID.randomUUID();
 
         AddDefinitionRequestDto request = AddDefinitionRequestDto.builder()
-                .definition("definition")
+                .meaning("definition")
                 .part(PartOfSpeech.NOUN)
                 .build();
 
@@ -83,7 +83,7 @@ class DefinitionServiceTest {
         verify(definitionRepository, times(1))
                 .save(captor.capture());
 
-        assertEquals(request.getDefinition(), response.getDefinition());
+        assertEquals(request.getMeaning(), response.getMeaning());
         assertEquals(request.getPart(), response.getPart());
         assertEquals(defId, response.getId());
     }
@@ -95,7 +95,7 @@ class DefinitionServiceTest {
 
         Definition defaultDefinition = Definition.builder()
                 .word(Mockito.mock(Word.class))
-                .definition("definition")
+                .meaning("definition")
                 .part(PartOfSpeech.NOUN)
                 .build();
 
@@ -112,8 +112,7 @@ class DefinitionServiceTest {
         List<DefinitionDto> response = definitionService.getDefinitionsByWordId(testUser, UUID.randomUUID());
 
         //then
-        assertEquals(definitions.getFirst().getWord().getId(), response.getFirst().getWordId());
-        assertEquals(definitions.getFirst().getDefinition(), response.getFirst().getDefinition());
+        assertEquals(definitions.getFirst().getMeaning(), response.getFirst().getMeaning());
         assertEquals(definitions.getFirst().getPart(), response.getFirst().getPart());
     }
 
@@ -127,13 +126,13 @@ class DefinitionServiceTest {
         Definition defaultDefinition = Definition.builder()
                 .id(defId)
                 .word(Mockito.mock(Word.class))
-                .definition("definition")
+                .meaning("definition")
                 .part(PartOfSpeech.NOUN)
                 .build();
 
         AddDefinitionRequestDto request =
                 AddDefinitionRequestDto.builder()
-                        .definition("definition2")
+                        .meaning("definition2")
                         .part(PartOfSpeech.VERB)
                         .build();
 
@@ -146,7 +145,7 @@ class DefinitionServiceTest {
         given(definitionRepository.save(any(Definition.class)))
                 .willAnswer(invocation -> {
                     Definition definitionArg = invocation.getArgument(0);
-                    definitionArg.setDefinition(request.getDefinition());
+                    definitionArg.setMeaning(request.getMeaning());
                     definitionArg.setPart(request.getPart());
                     return definitionArg;
                 });
@@ -159,7 +158,7 @@ class DefinitionServiceTest {
         verify(definitionRepository, times(1))
                 .save(captor.capture());
         assertEquals(defId, response.getId());
-        assertEquals(request.getDefinition(), response.getDefinition());
+        assertEquals(request.getMeaning(), response.getMeaning());
         assertEquals(request.getPart(), response.getPart());
     }
 

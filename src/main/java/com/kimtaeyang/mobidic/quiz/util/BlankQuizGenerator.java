@@ -24,7 +24,7 @@ public class BlankQuizGenerator extends QuizGenerator {
 
             if (wordWithDefinitions.getDefinitionDtos() != null && !wordWithDefinitions.getDefinitionDtos().isEmpty()) {
                 int randIdx = ThreadLocalRandom.current().nextInt(wordWithDefinitions.getDefinitionDtos().size());
-                option = wordWithDefinitions.getDefinitionDtos().get(randIdx).getDefinition();
+                option = wordWithDefinitions.getDefinitionDtos().get(randIdx).getMeaning();
             }
 
             options.add(option);

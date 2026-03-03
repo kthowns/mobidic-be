@@ -77,7 +77,7 @@ public class QuizServiceTest {
                                     .build()
                     )
                     .definitionDtos(List.of(
-                                    new DefinitionDto(UUID.randomUUID(), UUID.randomUUID(), "사과", PartOfSpeech.NOUN)
+                                    new DefinitionDto(UUID.randomUUID(), "사과", PartOfSpeech.NOUN)
                             )
                     ).build(),
             WordWithDefinitions.builder()
@@ -88,7 +88,7 @@ public class QuizServiceTest {
                                     .build()
                     )
                     .definitionDtos(List.of(
-                                    new DefinitionDto(UUID.randomUUID(), UUID.randomUUID(), "안녕", PartOfSpeech.INTERJECTION)
+                                    new DefinitionDto(UUID.randomUUID(), "안녕", PartOfSpeech.INTERJECTION)
                             )
                     ).build(),
             WordWithDefinitions.builder()
@@ -99,7 +99,7 @@ public class QuizServiceTest {
                                     .build()
                     )
                     .definitionDtos(List.of(
-                                    new DefinitionDto(UUID.randomUUID(), UUID.randomUUID(), "뛰다", PartOfSpeech.VERB)
+                                    new DefinitionDto(UUID.randomUUID(), "뛰다", PartOfSpeech.VERB)
                             )
                     ).build(),
             WordWithDefinitions.builder()
@@ -110,7 +110,7 @@ public class QuizServiceTest {
                                     .build()
                     )
                     .definitionDtos(List.of(
-                                    new DefinitionDto(UUID.randomUUID(), UUID.randomUUID(), "바보", PartOfSpeech.NOUN)
+                                    new DefinitionDto(UUID.randomUUID(), "바보", PartOfSpeech.NOUN)
                             )
                     ).build(), WordWithDefinitions.builder()
                     .wordDto(
@@ -120,7 +120,7 @@ public class QuizServiceTest {
                                     .build()
                     )
                     .definitionDtos(List.of(
-                                    new DefinitionDto(UUID.randomUUID(), UUID.randomUUID(), "매체", PartOfSpeech.NOUN)
+                                    new DefinitionDto(UUID.randomUUID(), "매체", PartOfSpeech.NOUN)
                             )
                     ).build());
 
@@ -160,7 +160,7 @@ public class QuizServiceTest {
             for (QuizDto question : result) {
                 for (WordWithDefinitions wordWithDefinitions : wordsWithDefs) {
                     if (question.getStem().equals(wordWithDefinitions.getWordDto().getExpression())
-                            && question.getOptions().getFirst().equals(wordWithDefinitions.getDefinitionDtos().getFirst().getDefinition())) {
+                            && question.getOptions().getFirst().equals(wordWithDefinitions.getDefinitionDtos().getFirst().getMeaning())) {
                         matchCnt++;
                         break;
                     }
@@ -189,7 +189,7 @@ public class QuizServiceTest {
         }
         List<String> correctAnswers = new ArrayList<>();
         for (WordWithDefinitions wordWithDefinitions : wordsWithDefs) {
-            correctAnswers.add(wordWithDefinitions.getDefinitionDtos().getFirst().getDefinition());
+            correctAnswers.add(wordWithDefinitions.getDefinitionDtos().getFirst().getMeaning());
         }
         List<QuizRateRequest> quizRateRequests = new ArrayList<>();
         for (int i = 0; i < wordsWithDefs.size(); i++) {

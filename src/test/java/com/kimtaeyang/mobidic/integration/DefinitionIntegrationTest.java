@@ -58,7 +58,7 @@ public class DefinitionIntegrationTest {
         UUID wordId = addWordAndGetId(token);
 
         AddDefinitionRequestDto addDefRequest = AddDefinitionRequestDto.builder()
-                .definition("definition")
+                .meaning("definition")
                 .part(PartOfSpeech.NOUN)
                 .build();
 
@@ -71,7 +71,7 @@ public class DefinitionIntegrationTest {
                 .andExpect(jsonPath("$.data.id")
                         .isNotEmpty())
                 .andExpect(jsonPath("$.data.definition")
-                        .value(addDefRequest.getDefinition()))
+                        .value(addDefRequest.getMeaning()))
                 .andExpect(jsonPath("$.data.part")
                         .value(addDefRequest.getPart().toString()));
 
@@ -111,7 +111,7 @@ public class DefinitionIntegrationTest {
                         .value(NO_WORD.getMessage()));
 
         //Fail with invalid pattern
-        addDefRequest.setDefinition(UUID.randomUUID().toString());
+        addDefRequest.setMeaning(UUID.randomUUID().toString());
         mockMvc.perform(post("/api/definitions/" + wordId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + token)
@@ -132,7 +132,7 @@ public class DefinitionIntegrationTest {
         UUID wordId = addWordAndGetId(token);
 
         AddDefinitionRequestDto addDefRequest = AddDefinitionRequestDto.builder()
-                .definition("definition")
+                .meaning("definition")
                 .part(PartOfSpeech.NOUN)
                 .build();
 
@@ -151,7 +151,7 @@ public class DefinitionIntegrationTest {
                 .andExpect(jsonPath("$.data[0].id")
                         .isNotEmpty())
                 .andExpect(jsonPath("$.data[0].definition")
-                        .value(addDefRequest.getDefinition()))
+                        .value(addDefRequest.getMeaning()))
                 .andExpect(jsonPath("$.data[0].part")
                         .value(addDefRequest.getPart().toString()))
                 .andExpect(jsonPath("$.data[0].wordId")
@@ -193,11 +193,11 @@ public class DefinitionIntegrationTest {
         UUID wordId = addWordAndGetId(token);
 
         AddDefinitionRequestDto addDefRequest = AddDefinitionRequestDto.builder()
-                .definition("definition")
+                .meaning("definition")
                 .part(PartOfSpeech.NOUN)
                 .build();
         AddDefinitionRequestDto addDefRequest2 = AddDefinitionRequestDto.builder()
-                .definition("definition2")
+                .meaning("definition2")
                 .part(PartOfSpeech.NOUN)
                 .build();
 
@@ -229,7 +229,7 @@ public class DefinitionIntegrationTest {
                 .andExpect(jsonPath("$.data.id")
                         .isNotEmpty())
                 .andExpect(jsonPath("$.data.definition")
-                        .value(addDefRequest.getDefinition()))
+                        .value(addDefRequest.getMeaning()))
                 .andExpect(jsonPath("$.data.part")
                         .value(addDefRequest.getPart().toString()));
         addDefRequest.setPart(PartOfSpeech.VERB);
@@ -242,7 +242,7 @@ public class DefinitionIntegrationTest {
                 .andExpect(jsonPath("$.data.id")
                         .isNotEmpty())
                 .andExpect(jsonPath("$.data.definition")
-                        .value(addDefRequest.getDefinition()))
+                        .value(addDefRequest.getMeaning()))
                 .andExpect(jsonPath("$.data.part")
                         .value(addDefRequest.getPart().toString()));
 
@@ -282,7 +282,7 @@ public class DefinitionIntegrationTest {
                         .value(NO_DEF.getMessage()));
 
         //Fail with invalid definition pattern
-        addDefRequest.setDefinition(UUID.randomUUID().toString());
+        addDefRequest.setMeaning(UUID.randomUUID().toString());
         mockMvc.perform(patch("/api/definitions/" + defId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + token)
@@ -315,7 +315,7 @@ public class DefinitionIntegrationTest {
         UUID wordId = addWordAndGetId(token);
 
         AddDefinitionRequestDto addDefRequest = AddDefinitionRequestDto.builder()
-                .definition("definition")
+                .meaning("definition")
                 .part(PartOfSpeech.NOUN)
                 .build();
 
@@ -353,7 +353,7 @@ public class DefinitionIntegrationTest {
                 .andExpect(jsonPath("$.data.id")
                         .value(defId))
                 .andExpect(jsonPath("$.data.definition")
-                        .value(addDefRequest.getDefinition()))
+                        .value(addDefRequest.getMeaning()))
                 .andExpect(jsonPath("$.data.part")
                         .value(addDefRequest.getPart().toString()))
                 .andExpect(jsonPath("$.data.wordId")
