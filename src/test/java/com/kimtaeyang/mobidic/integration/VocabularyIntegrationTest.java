@@ -3,10 +3,7 @@ package com.kimtaeyang.mobidic.integration;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kimtaeyang.mobidic.auth.dto.LoginRequest;
 import com.kimtaeyang.mobidic.auth.dto.SignUpRequestDto;
-import com.kimtaeyang.mobidic.dictionary.dto.AddVocabularyRequestDto;
-import com.kimtaeyang.mobidic.dictionary.dto.AddWordRequestDto;
-import com.kimtaeyang.mobidic.dictionary.dto.VocabularyDto;
-import com.kimtaeyang.mobidic.dictionary.dto.WordDto;
+import com.kimtaeyang.mobidic.dictionary.dto.*;
 import com.kimtaeyang.mobidic.dictionary.service.WordService;
 import com.kimtaeyang.mobidic.security.jwt.JwtProvider;
 import com.kimtaeyang.mobidic.statistic.service.StatisticService;
@@ -149,11 +146,12 @@ public class VocabularyIntegrationTest {
                 .build();
 
         List<String> wordExpressions = List.of("apple", "banana", "kiwi");
-        List<AddWordRequestDto> addWordRequestDtos = new ArrayList<>();
-
-        for (String word : wordExpressions) {
-            addWordRequestDtos.add(new AddWordRequestDto(word));
-        }
+        List<AddWordRequestDto> addWordRequestDtos = wordExpressions
+                .stream().map((exp) ->
+                        AddWordRequestDto.builder()
+                                .expression(exp)
+                                .build()
+                ).toList();
 
         MvcResult addResult = mockMvc.perform(post("/api/vocabularies")
                         .contentType(MediaType.APPLICATION_JSON)

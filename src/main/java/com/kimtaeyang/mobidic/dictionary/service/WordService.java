@@ -34,9 +34,8 @@ public class WordService {
                 .findByIdAndUser_Id(vocabId, user.getId())
                 .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_VOCAB));
 
-        int count = wordRepository.countByExpressionAndVocabulary(request.getExpression(), vocabulary);
-
-        if (count > 0) {
+        // 중복 체크
+        if (wordRepository.existsByExpressionAndVocabulary(request.getExpression(), vocabulary)) {
             throw new ApiException(GeneralResponseCode.DUPLICATED_WORD);
         }
 
@@ -44,7 +43,7 @@ public class WordService {
                 .expression(request.getExpression())
                 .vocabulary(vocabulary)
                 .build();
-        wordRepository.save(word);
+        word = wordRepository.save(word);
 
         WordStatistic rate = WordStatistic.builder()
                 .word(word)
