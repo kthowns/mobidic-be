@@ -44,15 +44,13 @@ public class VocabularyService {
 
     @Transactional(readOnly = true)
     public List<VocabularyDetail> getVocabularyDetails(User user) {
-        return vocabularyRepository.getVocabularyDetails(user.getId());
+        return vocabularyRepository.findVocabularyDetails(user.getId());
     }
 
     @Transactional(readOnly = true)
-    public VocabularyDto getVocabularyById(User user, UUID vocabularyId) {
-        Vocabulary vocabulary = vocabularyRepository.findByIdAndUser_Id(vocabularyId, user.getId())
+    public VocabularyDetail getVocabularyById(User user, UUID vocabularyId) {
+        return vocabularyRepository.findVocabularyDetail(vocabularyId, user.getId())
                 .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_VOCAB));
-
-        return VocabularyDto.fromEntity(vocabulary);
     }
 
     @Transactional

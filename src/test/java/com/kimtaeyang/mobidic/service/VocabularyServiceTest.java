@@ -103,7 +103,7 @@ class VocabularyServiceTest {
         vocabularies.add(defaultVocabulary);
 
         //given
-        given(vocabularyRepository.getVocabularyDetails(any(UUID.class)))
+        given(vocabularyRepository.findVocabularyDetails(any(UUID.class)))
                 .willReturn(List.of(
                         new VocabularyDetail(VocabularyDto.fromEntity(defaultVocabulary), 0.0, 0.0)));
 
@@ -122,24 +122,26 @@ class VocabularyServiceTest {
 
         UUID vocabId = UUID.randomUUID();
 
-        Vocabulary defaultVocabulary = Vocabulary.builder()
-                .id(vocabId)
-                .user(testUser)
-                .title("title")
-                .description("description")
-                .build();
+        VocabularyDetail defaultVocabulary =
+                VocabularyDetail.builder()
+                        .vocabulary(VocabularyDto.builder()
+                                .id(vocabId)
+                                .title("title")
+                                .description("description")
+                                .build())
+                        .build();
 
         //given
-        given(vocabularyRepository.findByIdAndUser_Id(any(UUID.class), any(UUID.class)))
+        given(vocabularyRepository.findVocabularyDetail(any(UUID.class), any(UUID.class)))
                 .willReturn(Optional.of(defaultVocabulary));
 
         //when
-        VocabularyDto response = vocabularyService.getVocabularyById(testUser, vocabId);
+        VocabularyDetail response = vocabularyService.getVocabularyById(testUser, vocabId);
 
         //then
-        assertEquals(vocabId, response.getId());
-        assertEquals(defaultVocabulary.getTitle(), response.getTitle());
-        assertEquals(defaultVocabulary.getDescription(), response.getDescription());
+        assertEquals(vocabId, response.vocabulary().getId());
+        assertEquals(defaultVocabulary.vocabulary().getTitle(), response.vocabulary().getTitle());
+        assertEquals(defaultVocabulary.vocabulary().getDescription(), response.vocabulary().getDescription());
     }
 
     @Test

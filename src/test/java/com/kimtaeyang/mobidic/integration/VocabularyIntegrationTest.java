@@ -3,7 +3,10 @@ package com.kimtaeyang.mobidic.integration;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kimtaeyang.mobidic.auth.dto.LoginRequest;
 import com.kimtaeyang.mobidic.auth.dto.SignUpRequestDto;
-import com.kimtaeyang.mobidic.dictionary.dto.*;
+import com.kimtaeyang.mobidic.dictionary.dto.AddVocabularyRequestDto;
+import com.kimtaeyang.mobidic.dictionary.dto.AddWordRequestDto;
+import com.kimtaeyang.mobidic.dictionary.dto.VocabularyDto;
+import com.kimtaeyang.mobidic.dictionary.dto.WordDto;
 import com.kimtaeyang.mobidic.dictionary.service.WordService;
 import com.kimtaeyang.mobidic.security.jwt.JwtProvider;
 import com.kimtaeyang.mobidic.statistic.service.StatisticService;
@@ -208,7 +211,7 @@ public class VocabularyIntegrationTest {
     }
 
     @Test
-    @DisplayName("[Vocab][Integration] Get vocabs test")
+    @DisplayName("[Vocab][Integration] Get vocab detail test")
     void getVocabsByIdTest() throws Exception {
         String email = "test@test.com";
         String nickname = "test";
@@ -233,42 +236,40 @@ public class VocabularyIntegrationTest {
         );
 
         //Success
-        mockMvc.perform(get("/api/vocabularies/detail")
+        mockMvc.perform(get("/api/vocabularies/" + addVocabResponse.getId() + "/detail")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer " + token)
-                        .param("vocabularyId", addVocabResponse.getId().toString()))
+                        .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.id")
+                .andExpect(jsonPath("$.data.vocabulary.id")
                         .value(addVocabResponse.getId().toString()))
-                .andExpect(jsonPath("$.data.title")
+                .andExpect(jsonPath("$.data.vocabulary.title")
                         .value(addVocabRequest.getTitle()))
-                .andExpect(jsonPath("$.data.description")
+                .andExpect(jsonPath("$.data.vocabulary.description")
                         .value(addVocabRequest.getDescription()))
-                .andExpect(jsonPath("$.data.createdAt")
+                .andExpect(jsonPath("$.data.vocabulary.wordCount")
+                        .value(0))
+                .andExpect(jsonPath("$.data.vocabulary.createdAt")
                         .isNotEmpty());
 
         //Fail without token
-        mockMvc.perform(get("/api/vocabularies/detail")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .param("vocabularyId", addVocabResponse.getId().toString()))
+        mockMvc.perform(get("/api/vocabularies/" + addVocabResponse.getId() + "/detail")
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.message")
                         .value(UNAUTHORIZED.getMessage()));
 
         //Fail with unauthorized token
-        mockMvc.perform(get("/api/vocabularies/detail")
+        mockMvc.perform(get("/api/vocabularies/" + addVocabResponse.getId() + "/detail")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer " + jwtProvider.generateToken(UUID.randomUUID()))
-                        .param("vocabularyId", addVocabResponse.getId().toString()))
+                        .header("Authorization", "Bearer " + jwtProvider.generateToken(UUID.randomUUID())))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.message")
                         .value(UNAUTHORIZED.getMessage()));
 
         //Fail with no resource
-        mockMvc.perform(get("/api/vocabularies/detail")
+        mockMvc.perform(get("/api/vocabularies/" + UUID.randomUUID() + "/detail")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer " + token)
-                        .param("vocabularyId", UUID.randomUUID().toString()))
+                        .header("Authorization", "Bearer " + token))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message")
                         .value(NO_VOCAB.getMessage()));
@@ -453,10 +454,9 @@ public class VocabularyIntegrationTest {
                 .andExpect(jsonPath("$.data.createdAt")
                         .isNotEmpty());
 
-        mockMvc.perform(get("/api/vocabularies/detail")
+        mockMvc.perform(get("/api/vocabularies/" + addVocabResponse.getId() + "/detail")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer " + token)
-                        .param("vocabularyId", addVocabResponse.getId().toString()))
+                        .header("Authorization", "Bearer " + token))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message")
                         .value(NO_VOCAB.getMessage()));
