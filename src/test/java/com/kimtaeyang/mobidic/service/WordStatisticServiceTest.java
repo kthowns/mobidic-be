@@ -62,8 +62,8 @@ class WordStatisticServiceTest {
         WordStatistic defaultWordStatistic = WordStatistic.builder()
                 .word(mock(Word.class))
                 .wordId(wordId)
-                .correctCount(3)
-                .incorrectCount(5)
+                .correctCount(3L)
+                .incorrectCount(5L)
                 .isLearned(true)
                 .build();
 
@@ -114,9 +114,9 @@ class WordStatisticServiceTest {
         WordStatistic defaultStatistic = WordStatistic.builder()
                 .wordId(wordId)
                 .word(Mockito.mock(Word.class))
-                .correctCount(3)
+                .correctCount(3L)
                 .isLearned(true)
-                .incorrectCount(4)
+                .incorrectCount(4L)
                 .build();
 
         //given

@@ -2,10 +2,7 @@ package com.kimtaeyang.mobidic.dictionary.entity;
 
 import com.kimtaeyang.mobidic.user.entity.User;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.springframework.data.annotation.CreatedDate;
@@ -14,7 +11,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Data
+@Getter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
@@ -27,16 +24,32 @@ public class Vocabulary {
     @Column(name = "id", columnDefinition = "BINARY(16)")
     private UUID id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", columnDefinition = "BINARY(16)")
     @OnDelete(action = OnDeleteAction.CASCADE)
     private User user;
 
-    @Column(name = "title")
+    @Setter
+    @Column(name = "title", nullable = false)
     private String title;
+
+    @Column(name = "word_count", nullable = false)
+    @Builder.Default
+    private Long wordCount = 0L;
+
+    @Setter
     @Column(name = "description")
     private String description;
-    @Column(name = "created_at")
+
+    @Column(name = "created_at", nullable = false, updatable = false)
     @CreatedDate
     private LocalDateTime createdAt;
+
+    public void addWordCount() {
+        wordCount++;
+    }
+
+    public void removeWordCount() {
+        wordCount--;
+    }
 }

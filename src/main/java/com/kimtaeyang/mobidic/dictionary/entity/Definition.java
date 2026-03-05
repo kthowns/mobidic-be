@@ -23,15 +23,15 @@ public class Definition {
     @Column(name = "id", columnDefinition = "BINARY(16)")
     private UUID id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "word_id")
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Word word;
 
-    @Column(name = "meaning")
+    @Column(name = "meaning", nullable = false)
     private String meaning;
 
-    @Column(name = "part")
+    @Column(name = "part", nullable = false)
     @Enumerated(EnumType.STRING)
     private PartOfSpeech part;
 }

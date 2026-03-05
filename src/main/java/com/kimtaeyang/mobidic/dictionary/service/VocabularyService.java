@@ -28,9 +28,7 @@ public class VocabularyService {
             User user,
             @Valid AddVocabularyRequestDto request
     ) {
-        int count = vocabularyRepository.countByTitleAndUser(request.getTitle(), user);
-
-        if (count > 0) {
+        if (vocabularyRepository.existsByTitleAndUser(request.getTitle(), user)) {
             throw new ApiException(GeneralResponseCode.DUPLICATED_TITLE);
         }
 
@@ -63,12 +61,10 @@ public class VocabularyService {
             UUID vocabularyId,
             AddVocabularyRequestDto request
     ) {
-        Vocabulary vocabulary = vocabularyRepository.findByIdAndUser_Id(vocabularyId, user.getId())
+        Vocabulary vocabulary = vocabularyRepository.findForUpdate(vocabularyId, user.getId())
                 .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_VOCAB));
 
-        long count = vocabularyRepository.countByTitleAndUserAndIdNot(request.getTitle(), vocabulary.getUser(), vocabularyId);
-
-        if (count > 0) {
+        if (vocabularyRepository.existsByTitleAndUserAndIdNot(request.getTitle(), vocabulary.getUser(), vocabularyId)) {
             throw new ApiException(GeneralResponseCode.DUPLICATED_TITLE);
         }
 

@@ -17,6 +17,7 @@ public class VocabularyDto {
     private UUID id;
     private String title;
     private String description;
+    private Long wordCount;
     private LocalDateTime createdAt;
 
     public static VocabularyDto fromEntity(Vocabulary vocabulary) {
@@ -24,6 +25,7 @@ public class VocabularyDto {
                 .title(vocabulary.getTitle())
                 .id(vocabulary.getId())
                 .description(vocabulary.getDescription())
+                .wordCount(vocabulary.getWordCount())
                 .createdAt(vocabulary.getCreatedAt())
                 .build();
     }

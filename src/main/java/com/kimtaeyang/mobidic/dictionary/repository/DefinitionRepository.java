@@ -11,9 +11,9 @@ import java.util.UUID;
 public interface DefinitionRepository extends JpaRepository<Definition, UUID> {
     List<Definition> findByWord(Word word);
 
-    int countByMeaningAndWord(String definition, Word word);
+    boolean existsByMeaningAndWord(String definition, Word word);
 
-    int countByMeaningAndWordAndIdNot(String definition, Word word, UUID id);
+    boolean existsByMeaningAndWordAndIdNot(String definition, Word word, UUID id);
 
     Optional<Definition> findByIdAndWord_Vocabulary_User_Id(UUID id, UUID wordVocabularyUserId);
 }
