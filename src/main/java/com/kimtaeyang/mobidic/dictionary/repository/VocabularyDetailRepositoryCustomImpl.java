@@ -25,6 +25,7 @@ public class VocabularyDetailRepositoryCustomImpl implements VocabularyDetailRep
                                 vocabulary.id,
                                 vocabulary.title,
                                 vocabulary.description,
+                                vocabulary.wordCount,
                                 vocabulary.createdAt
                         ),
                         // 데이터가 없을 때를 대비해 coalesce(0.0) 추가
@@ -48,7 +49,7 @@ public class VocabularyDetailRepositoryCustomImpl implements VocabularyDetailRep
                 .from(vocabulary) // 시작점을 vocabulary로 변경
                 .leftJoin(wordStatistic).on(wordStatistic.word.vocabulary.id.eq(vocabulary.id)) // Left Join
                 .where(vocabulary.user.id.eq(userId))
-                .groupBy(vocabulary.id, vocabulary.title, vocabulary.description, vocabulary.createdAt)
+                .groupBy(vocabulary.id, vocabulary.title, vocabulary.description, vocabulary.createdAt, vocabulary.wordCount)
                 .fetch();
     }
 }

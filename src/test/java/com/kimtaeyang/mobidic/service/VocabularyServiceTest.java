@@ -62,18 +62,19 @@ class VocabularyServiceTest {
                 .title("title")
                 .description("description")
                 .build();
+        Vocabulary savedVocabulary = Vocabulary.builder()
+                .id(vocabId)
+                .title(request.getTitle())
+                .description(request.getDescription())
+                .build();
         ArgumentCaptor<Vocabulary> captor =
                 ArgumentCaptor.forClass(Vocabulary.class);
 
         //given
-        given(vocabularyRepository.countByTitleAndUser(anyString(), any(User.class)))
-                .willReturn(0);
+        given(vocabularyRepository.existsByTitleAndUser(anyString(), any(User.class)))
+                .willReturn(false);
         given(vocabularyRepository.save(any(Vocabulary.class)))
-                .willAnswer(invocation -> {
-                    Vocabulary vocabularyArg = invocation.getArgument(0);
-                    vocabularyArg.setId(vocabId);
-                    return vocabularyArg;
-                });
+                .willReturn(savedVocabulary);
 
         //when
         VocabularyDto response = vocabularyService.addVocabulary(testUser, request);
@@ -165,10 +166,10 @@ class VocabularyServiceTest {
                 ArgumentCaptor.forClass(Vocabulary.class);
 
         //given
-        given(vocabularyRepository.findByIdAndUser_Id(any(UUID.class), any(UUID.class)))
+        given(vocabularyRepository.findForUpdate(any(UUID.class), any(UUID.class)))
                 .willReturn(Optional.of(defaultVocabulary));
-        given(vocabularyRepository.countByTitleAndUserAndIdNot(anyString(), any(User.class), any(UUID.class)))
-                .willReturn(0);
+        given(vocabularyRepository.existsByTitleAndUserAndIdNot(anyString(), any(User.class), any(UUID.class)))
+                .willReturn(false);
         given(vocabularyRepository.save(any(Vocabulary.class)))
                 .willAnswer(invocation -> {
                     Vocabulary vocabularyArg = invocation.getArgument(0);

@@ -73,10 +73,10 @@ class WordServiceTest {
                 ArgumentCaptor.forClass(Word.class);
 
         //given
-        given(vocabularyRepository.findByIdAndUser_Id(any(UUID.class), any(UUID.class)))
+        given(vocabularyRepository.findForUpdate(any(UUID.class), any(UUID.class)))
                 .willReturn(Optional.of(Mockito.mock(Vocabulary.class)));
-        given(wordRepository.countByExpressionAndVocabulary(anyString(), any(Vocabulary.class)))
-                .willReturn(0);
+        given(wordRepository.existsByExpressionAndVocabulary(anyString(), any(Vocabulary.class)))
+                .willReturn(false);
         given(wordRepository.save(any(Word.class)))
                 .willAnswer(invocation -> {
                     Word wordArg = invocation.getArgument(0);
@@ -144,8 +144,8 @@ class WordServiceTest {
         //given
         given(wordRepository.findByIdAndVocabulary_User_Id(any(UUID.class), any(UUID.class)))
                 .willReturn(Optional.of(defaultWord));
-        given(vocabularyRepository.countByTitleAndUserAndIdNot(anyString(), any(User.class), any(UUID.class)))
-                .willReturn(0);
+        given(vocabularyRepository.existsByTitleAndUserAndIdNot(anyString(), any(User.class), any(UUID.class)))
+                .willReturn(false);
         given(wordRepository.save(any(Word.class)))
                 .willAnswer(invocation -> {
                     Word wordArg = invocation.getArgument(0);

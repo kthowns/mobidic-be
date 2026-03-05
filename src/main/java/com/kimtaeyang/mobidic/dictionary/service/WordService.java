@@ -31,7 +31,7 @@ public class WordService {
     @Transactional
     public WordDto addWord(User user, UUID vocabId, AddWordRequestDto request) {
         Vocabulary vocabulary = vocabularyRepository
-                .findByIdAndUser_Id(vocabId, user.getId())
+                .findForUpdate(vocabId, user.getId())
                 .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_VOCAB));
 
         // 중복 체크
@@ -47,11 +47,11 @@ public class WordService {
 
         WordStatistic rate = WordStatistic.builder()
                 .word(word)
-                .correctCount(0)
-                .incorrectCount(0)
                 .isLearned(false)
                 .build();
         wordStatisticRepository.save(rate);
+
+        vocabulary.addWordCount();
 
         return WordDto.fromEntity(word);
     }
@@ -80,10 +80,8 @@ public class WordService {
                 .findByIdAndVocabulary_User_Id(wordId, user.getId())
                 .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_WORD));
 
-        long count = wordRepository
-                .countByExpressionAndVocabularyAndIdNot(request.getExpression(), word.getVocabulary(), wordId);
-
-        if (count > 0) {
+        if (wordRepository
+                .existsByExpressionAndVocabularyAndIdNot(request.getExpression(), word.getVocabulary(), wordId)) {
             throw new ApiException(GeneralResponseCode.DUPLICATED_WORD);
         }
 
@@ -98,7 +96,13 @@ public class WordService {
         Word word = wordRepository
                 .findByIdAndVocabulary_User_Id(wordId, user.getId())
                 .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_WORD));
+
+        Vocabulary vocabulary = vocabularyRepository.findForUpdate(word.getVocabulary().getId(), user.getId())
+                .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_VOCAB));
+
         wordRepository.delete(word);
+
+        vocabulary.removeWordCount();
         return WordDto.fromEntity(word);
     }
 }
