@@ -2,10 +2,7 @@ package com.kimtaeyang.mobidic.user.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.security.core.GrantedAuthority;
@@ -15,7 +12,7 @@ import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.UUID;
 
-@Data
+@Getter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
@@ -27,30 +24,44 @@ public class User implements UserDetails {
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id", columnDefinition = "BINARY(16)")
     private UUID id;
-    @Column(name = "email")
+
+    @Column(name = "email", nullable = false, unique = true)
     private String email;
-    @Column(name = "nickname")
+
+    @Setter
+    @Column(name = "nickname", nullable = false)
     private String nickname;
-    @Column(name = "password")
+
+    @Setter
+    @Column(name = "password", nullable = false)
     @JsonIgnore
     private String password;
+
+    @Setter
     @Column(name = "is_active", nullable = false)
     @Builder.Default
     private Boolean isActive = true;
+
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
+    @Setter
     @Column(name = "deactivated_at")
     private LocalDateTime deactivatedAt;
 
     @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return null;
+    public String getUsername() {
+        return email; // 이메일을 아이디로 사용
     }
 
     @Override
-    public String getUsername() {
-        return email; // 이메일을 아이디로 사용
+    public boolean isEnabled() {
+        return isActive;
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return null;
     }
 
     @Override
@@ -68,8 +79,4 @@ public class User implements UserDetails {
         return true;
     }
 
-    @Override
-    public boolean isEnabled() {
-        return true;
-    }
 }
