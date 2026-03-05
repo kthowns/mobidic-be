@@ -14,8 +14,8 @@ import java.util.UUID;
 @Builder
 public class StatisticDto {
     private UUID wordId;
-    private int correctCount;
-    private int incorrectCount;
+    private Long correctCount;
+    private Long incorrectCount;
     private boolean isLearned;
     private double difficulty;
     private double accuracy;
