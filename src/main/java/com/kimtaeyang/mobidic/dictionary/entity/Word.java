@@ -26,14 +26,15 @@ public class Word {
     @Column(name = "id", columnDefinition = "BINARY(16)")
     private UUID id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "vocabulary_id")
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Vocabulary vocabulary;
 
-    @Column(name = "expression")
+    @Column(name = "expression", nullable = false)
     private String expression;
+
     @CreatedDate
-    @Column(name = "created_at")
+    @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 }

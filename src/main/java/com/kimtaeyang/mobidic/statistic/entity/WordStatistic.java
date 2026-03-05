@@ -19,28 +19,32 @@ public class WordStatistic {
     private UUID wordId;
 
     @MapsId
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "word_id")
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Word word;
 
-    @Column(name = "correct_count")
-    private int correctCount;
+    @Column(name = "correct_count", nullable = false)
+    @Builder.Default
+    private Long correctCount = 0L;
 
-    @Column(name = "incorrect_count")
-    private int incorrectCount;
+    @Column(name = "incorrect_count", nullable = false)
+    @Builder.Default
+    private Long incorrectCount = 0L;
 
     @Setter
-    @Column(name = "difficulty")
+    @Column(name = "difficulty", nullable = false)
     @Builder.Default
     private double difficulty = 0.5;
 
     @Setter
-    @Column(name = "accuracy")
-    private double accuracy;
+    @Column(name = "accuracy", nullable = false)
+    @Builder.Default
+    private double accuracy = 0.0;
 
-    @Column(name = "is_learned")
-    private boolean isLearned;
+    @Column(name = "is_learned", nullable = false)
+    @Builder.Default
+    private boolean isLearned = false;
 
     public void increaseCorrectCount() {
         correctCount++;
