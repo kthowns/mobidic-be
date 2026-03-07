@@ -69,7 +69,7 @@ public class QuizIntegrationTest {
         List<WordDetail> savedWords = addWordsAndGetDetails(sampleWords, sampleDefs, sampleParts
                 , vocabId, token);
 
-        MvcResult quizResult = mockMvc.perform(get("/api/quizs/ox")
+        MvcResult quizResult = mockMvc.perform(get("/api/quizzes/ox")
                         .header("Authorization", "Bearer " + token)
                         .param("vocabularyId", vocabId.toString()))
                 .andExpect(status().isOk())
@@ -101,26 +101,26 @@ public class QuizIntegrationTest {
                 token
         );
 
-        MvcResult quizResult = mockMvc.perform(get("/api/quizs/ox")
+        MvcResult quizResult = mockMvc.perform(get("/api/quizzes/ox")
                         .header("Authorization", "Bearer " + token)
                         .param("vocabularyId", vocabId.toString()))
                 .andExpect(status().isOk())
                 .andReturn();
 
         JsonNode data = objectMapper.readTree(quizResult.getResponse().getContentAsString()).path("data");
-        List<QuizDto> quizsResponse = objectMapper.readValue(data.toString(), new TypeReference<>() {
+        List<QuizDto> quizzesResponse = objectMapper.readValue(data.toString(), new TypeReference<>() {
         });
 
         for (int i = 0; i < savedWords.size(); i++) {
-            String correctAnswer = findCorrectAnswer(quizsResponse.get(i), sampleWords, sampleDefs);
-            boolean answer = correctAnswer.equals(quizsResponse.get(i).getOptions().getFirst());
+            String correctAnswer = findCorrectAnswer(quizzesResponse.get(i), sampleWords, sampleDefs);
+            boolean answer = correctAnswer.equals(quizzesResponse.get(i).getOptions().getFirst());
 
             QuizRateRequest quizRateRequest = QuizRateRequest.builder()
-                    .token(quizsResponse.get(i).getToken())
+                    .token(quizzesResponse.get(i).getToken())
                     .answer(answer ? "1" : "0")
                     .build();
 
-            mockMvc.perform(post("/api/quizs/rate")
+            mockMvc.perform(post("/api/quizzes/rate")
                             .header("Authorization", "Bearer " + token)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(quizRateRequest)))
@@ -159,7 +159,7 @@ public class QuizIntegrationTest {
         List<WordDetail> savedWords = addWordsAndGetDetails(sampleWords, sampleDefs, sampleParts
                 , vocabId, token);
 
-        MvcResult quizResult = mockMvc.perform(get("/api/quizs/blank")
+        MvcResult quizResult = mockMvc.perform(get("/api/quizzes/blank")
                         .header("Authorization", "Bearer " + token)
                         .param("vocabularyId", vocabId.toString()))
                 .andExpect(status().isOk())
@@ -195,17 +195,17 @@ public class QuizIntegrationTest {
         List<WordDetail> savedWords = addWordsAndGetDetails(sampleWords, sampleDefs, sampleParts
                 , vocabId, token);
 
-        MvcResult quizResult = mockMvc.perform(get("/api/quizs/blank")
+        MvcResult quizResult = mockMvc.perform(get("/api/quizzes/blank")
                         .header("Authorization", "Bearer " + token)
                         .param("vocabularyId", vocabId.toString()))
                 .andExpect(status().isOk())
                 .andReturn();
         JsonNode data = objectMapper.readTree(quizResult.getResponse().getContentAsString()).path("data");
-        List<QuizDto> quizs = objectMapper.readValue(data.toString(), new TypeReference<>() {
+        List<QuizDto> quizzes = objectMapper.readValue(data.toString(), new TypeReference<>() {
         });
 
         for (int i = 0; i < savedWords.size(); i++) {
-            String stem = quizs.get(i).getStem();
+            String stem = quizzes.get(i).getStem();
             String fullAnswer = "";
             for (String sample : sampleWords) {
                 boolean isSame = true;
@@ -231,11 +231,11 @@ public class QuizIntegrationTest {
             }
 
             QuizRateRequest rateQuizRateRequest = QuizRateRequest.builder()
-                    .token(quizs.get(i).getToken())
+                    .token(quizzes.get(i).getToken())
                     .answer(realAnswer.toString())
                     .build();
 
-            MvcResult rateResult = mockMvc.perform(post("/api/quizs/rate")
+            MvcResult rateResult = mockMvc.perform(post("/api/quizzes/rate")
                             .header("Authorization", "Bearer " + token)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(rateQuizRateRequest)))
@@ -253,11 +253,10 @@ public class QuizIntegrationTest {
             UUID defId = addDefAndGetId(wordId, token, sampleDefs[i], sampleParts[i]);
         }
 
-        MvcResult wordsResult = mockMvc.perform(get("/api/words")
+        MvcResult wordsResult = mockMvc.perform(get("/api/vocabularies/" + vocabId + "/words")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer " + token)
-                        .param("vocabularyId", vocabId.toString())
-                ).andExpect(status().isOk())
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
                 .andReturn();
         String json = wordsResult.getResponse().getContentAsString();
         JsonNode data = objectMapper.readTree(json).path("data");
@@ -290,7 +289,7 @@ public class QuizIntegrationTest {
                 .expression(exp)
                 .build();
 
-        MvcResult wordResult = mockMvc.perform(post("/api/words/" + vocabId)
+        MvcResult wordResult = mockMvc.perform(post("/api/vocabularies/" + vocabId + "/word")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + token)
                         .content(objectMapper.writeValueAsString(addWordRequest)))
@@ -309,7 +308,7 @@ public class QuizIntegrationTest {
                 .part(part)
                 .build();
 
-        MvcResult defResult = mockMvc.perform(post("/api/definitions/" + wordId)
+        MvcResult defResult = mockMvc.perform(post("/api/words/" + wordId + "/definition")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + token)
                         .content(objectMapper.writeValueAsString(addDefRequest)))

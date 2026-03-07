@@ -47,11 +47,11 @@ public class AuthService {
 
     @Transactional
     public void signUp(@Valid SignUpRequestDto request) {
-        if (userRepository.countByEmail(request.getEmail()) > 0) {
+        if (userRepository.existsByEmail(request.getEmail())) {
             throw new ApiException(DUPLICATED_EMAIL);
         }
 
-        if (userRepository.countByNickname(request.getNickname()) > 0) {
+        if (userRepository.existsByNickname(request.getNickname())) {
             throw new ApiException(DUPLICATED_NICKNAME);
         }
 

@@ -77,7 +77,7 @@ public class VocabularyController {
             @ApiResponse(responseCode = "500", description = "서버 오류",
                     content = @Content(schema = @Schema(hidden = true)))
     })
-    @GetMapping("/all")
+    @GetMapping
     public ResponseEntity<GeneralResponse<List<VocabularyDetail>>> getAllVocabulary(
             @AuthenticationPrincipal User user
     ) {
@@ -101,7 +101,7 @@ public class VocabularyController {
             @ApiResponse(responseCode = "500", description = "서버 오류",
                     content = @Content(schema = @Schema(hidden = true)))
     })
-    @GetMapping("/{vocabularyId}/detail")
+    @GetMapping("/{vocabularyId}")
     public ResponseEntity<GeneralResponse<VocabularyDetail>> getVocabularyDetail(
             @PathVariable String vocabularyId,
             @AuthenticationPrincipal User user

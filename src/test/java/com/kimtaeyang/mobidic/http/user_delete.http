@@ -1,4 +1,4 @@
-DELETE http://127.0.0.1:8080/api/user/delete/9c857422-3e6d-4f66-a33e-5a16bdd3b8b8
+DELETE http://127.0.0.1:8080/api/users/delete/9c857422-3e6d-4f66-a33e-5a16bdd3b8b8
 Content-Type: application/json
 Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiI5Yzg1NzQyMi0zZTZkLTRmNjYtYTMzZS01YTE2YmRkM2I4YjgiLCJpYXQiOjE3NDM4NTI2MDgsImV4cCI6MTc0MzkzOTAwOH0.UvMBcRv5s6spd4HxBUICAxchH2S6ZoRuuEF1kPkXaGQ45n4ylaLqGAr2yQyHs7Z1ZAPhjA5qyETefU6kii2WbA
 

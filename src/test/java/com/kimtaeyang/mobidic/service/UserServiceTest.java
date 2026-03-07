@@ -2,8 +2,7 @@ package com.kimtaeyang.mobidic.service;
 
 import com.kimtaeyang.mobidic.auth.service.AuthService;
 import com.kimtaeyang.mobidic.config.ServiceTestConfig;
-import com.kimtaeyang.mobidic.user.dto.UpdateNicknameRequestDto;
-import com.kimtaeyang.mobidic.user.dto.UpdatePasswordRequestDto;
+import com.kimtaeyang.mobidic.user.dto.UpdateUserRequestDto;
 import com.kimtaeyang.mobidic.user.dto.UserDto;
 import com.kimtaeyang.mobidic.user.entity.User;
 import com.kimtaeyang.mobidic.user.repository.UserRepository;
@@ -55,7 +54,7 @@ class UserServiceTest {
     private static final String UID = "9f81b0d7-2f8e-4ad3-ae18-41c73dc71b39";
 
     @Test
-    @DisplayName("[MemberService] Update member nickname success")
+    @DisplayName("[UserService] Update user nickname success")
     @WithMockUser(username = UID)
     void updateUserNicknameSuccess() {
         resetMock();
@@ -67,18 +66,18 @@ class UserServiceTest {
                 .password(passwordEncoder.encode("testTest1"))
                 .build();
 
-        UpdateNicknameRequestDto request = UpdateNicknameRequestDto.builder()
+        UpdateUserRequestDto request = UpdateUserRequestDto.builder()
                 .nickname("test2")
                 .build();
 
-        ArgumentCaptor<User> memberCaptor =
+        ArgumentCaptor<User> userCaptor =
                 ArgumentCaptor.forClass(User.class);
 
         //given
+        given(userRepository.existsByNicknameAndIdNot(anyString(), any(UUID.class)))
+                .willReturn(false);
         given(userRepository.findById(any(UUID.class)))
                 .willReturn(Optional.of(defaultUser));
-        given(userRepository.countByNicknameAndIdNot(anyString(), any(UUID.class)))
-                .willReturn(0);
         given(userRepository.save(any(User.class)))
                 .willAnswer(invocation -> {
                     User userArg = invocation.getArgument(0);
@@ -87,18 +86,19 @@ class UserServiceTest {
                 });
 
         //when
-        UserDto response = userService.updateUserNickname(defaultUser, request);
+        UserDto response = userService.updateUser(defaultUser, request, UUID.randomUUID().toString());
 
         //then
         verify(userRepository, times(1))
-                .save(memberCaptor.capture());
+                .save(userCaptor.capture());
 
-        assertEquals(request.getNickname(), response.getNickname());
         assertEquals(UUID.fromString(UID), response.getId());
+        User savedUser = userCaptor.getValue();
+        assertEquals(request.getNickname(), response.getNickname());
     }
 
     @Test
-    @DisplayName("[MemberService] Update member password success")
+    @DisplayName("[UserService] Update user password success")
     @WithMockUser(username = UID)
     void updateUserPasswordSuccess() {
         resetMock();
@@ -110,11 +110,11 @@ class UserServiceTest {
                 .password(passwordEncoder.encode("testTest1"))
                 .build();
 
-        UpdatePasswordRequestDto request = UpdatePasswordRequestDto.builder()
-                .password("testTest2")
+        UpdateUserRequestDto request = UpdateUserRequestDto.builder()
+                .password("SomePassword")
                 .build();
 
-        ArgumentCaptor<User> memberCaptor =
+        ArgumentCaptor<User> userCaptor =
                 ArgumentCaptor.forClass(User.class);
 
         //given
@@ -129,14 +129,10 @@ class UserServiceTest {
                 });
 
         //when
-        userService.updateUserPassword(defaultUser, request, UUID.randomUUID().toString());
+        UserDto response = userService.updateUser(defaultUser, request, UUID.randomUUID().toString());
 
         //then
-        verify(userRepository, times(1))
-                .save(memberCaptor.capture());
-        User savedUser = memberCaptor.getValue();
-
-        assertThat(passwordEncoder.matches(request.getPassword(), savedUser.getPassword()));
+        assertThat(passwordEncoder.matches(request.getPassword(), "SomePassword"));
     }
 
     private void resetMock() {

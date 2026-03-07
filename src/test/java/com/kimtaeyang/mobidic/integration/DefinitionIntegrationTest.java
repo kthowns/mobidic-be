@@ -63,7 +63,7 @@ public class DefinitionIntegrationTest {
                 .build();
 
         //Success
-        mockMvc.perform(post("/api/definitions/" + wordId)
+        mockMvc.perform(post("/api/words/" + wordId + "/definition")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + token)
                         .content(objectMapper.writeValueAsString(addDefRequest)))
@@ -76,7 +76,7 @@ public class DefinitionIntegrationTest {
                         .value(addDefRequest.getPart().toString()));
 
         //Fail with duplicated definition
-        mockMvc.perform(post("/api/definitions/" + wordId)
+        mockMvc.perform(post("/api/words/" + wordId + "/definition")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + token)
                         .content(objectMapper.writeValueAsString(addDefRequest)))
@@ -85,7 +85,7 @@ public class DefinitionIntegrationTest {
                         .value(DUPLICATED_DEFINITION.getMessage()));
 
         //Fail without token
-        mockMvc.perform(post("/api/definitions/" + wordId)
+        mockMvc.perform(post("/api/words/" + wordId + "/definition")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(addDefRequest)))
                 .andExpect(status().isUnauthorized())
@@ -93,7 +93,7 @@ public class DefinitionIntegrationTest {
                         .value(UNAUTHORIZED.getMessage()));
 
         //Fail with unauthorized token
-        mockMvc.perform(post("/api/definitions/" + wordId)
+        mockMvc.perform(post("/api/words/" + wordId + "/definition")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + jwtProvider.generateToken(UUID.randomUUID()))
                         .content(objectMapper.writeValueAsString(addDefRequest)))
@@ -102,7 +102,7 @@ public class DefinitionIntegrationTest {
                         .value(UNAUTHORIZED.getMessage()));
 
         //Fail with no resource
-        mockMvc.perform(post("/api/definitions/" + UUID.randomUUID())
+        mockMvc.perform(post("/api/words/" + UUID.randomUUID() + "/definition")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + token)
                         .content(objectMapper.writeValueAsString(addDefRequest)))
@@ -112,7 +112,7 @@ public class DefinitionIntegrationTest {
 
         //Fail with invalid pattern
         addDefRequest.setMeaning(UUID.randomUUID().toString());
-        mockMvc.perform(post("/api/definitions/" + wordId)
+        mockMvc.perform(post("/api/words/" + wordId + "/definition")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + token)
                         .content(objectMapper.writeValueAsString(addDefRequest)))
@@ -136,17 +136,16 @@ public class DefinitionIntegrationTest {
                 .part(PartOfSpeech.NOUN)
                 .build();
 
-        mockMvc.perform(post("/api/definitions/" + wordId)
+        mockMvc.perform(post("/api/words/" + wordId + "/definition")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + token)
                         .content(objectMapper.writeValueAsString(addDefRequest)))
                 .andExpect(status().isOk());
 
         //Success
-        mockMvc.perform(get("/api/definitions")
+        mockMvc.perform(get("/api/words/" + wordId + "/definitions")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer " + token)
-                        .param("wordId", wordId.toString()))
+                        .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data[0].id")
                         .isNotEmpty())
@@ -156,27 +155,24 @@ public class DefinitionIntegrationTest {
                         .value(addDefRequest.getPart().toString()));
 
         //Fail without token
-        mockMvc.perform(get("/api/definitions")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .param("wordId", wordId.toString()))
+        mockMvc.perform(get("/api/words/" + wordId + "/definitions")
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.message")
                         .value(UNAUTHORIZED.getMessage()));
 
         //Fail with unauthorized token
-        mockMvc.perform(get("/api/definitions")
+        mockMvc.perform(get("/api/words/" + wordId + "/definitions")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer " + jwtProvider.generateToken(UUID.randomUUID()))
-                        .param("wordId", wordId.toString()))
+                        .header("Authorization", "Bearer " + jwtProvider.generateToken(UUID.randomUUID())))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.message")
                         .value(UNAUTHORIZED.getMessage()));
 
         //Fail with no resource
-        mockMvc.perform(get("/api/definitions")
+        mockMvc.perform(get("/api/words/" + UUID.randomUUID() + "/definitions")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer " + token)
-                        .param("wordId", UUID.randomUUID().toString()))
+                        .header("Authorization", "Bearer " + token))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message")
                         .value(NO_WORD.getMessage()));
@@ -199,13 +195,13 @@ public class DefinitionIntegrationTest {
                 .part(PartOfSpeech.NOUN)
                 .build();
 
-        MvcResult result = mockMvc.perform(post("/api/definitions/" + wordId)
+        MvcResult result = mockMvc.perform(post("/api/words/" + wordId + "/definition")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + token)
                         .content(objectMapper.writeValueAsString(addDefRequest)))
                 .andExpect(status().isOk())
                 .andReturn();
-        MvcResult result2 = mockMvc.perform(post("/api/definitions/" + wordId)
+        MvcResult result2 = mockMvc.perform(post("/api/words/" + wordId + "/definition")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + token)
                         .content(objectMapper.writeValueAsString(addDefRequest2)))
@@ -317,7 +313,7 @@ public class DefinitionIntegrationTest {
                 .part(PartOfSpeech.NOUN)
                 .build();
 
-        MvcResult result = mockMvc.perform(post("/api/definitions/" + wordId)
+        MvcResult result = mockMvc.perform(post("/api/words/" + wordId + "/definition")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + token)
                         .content(objectMapper.writeValueAsString(addDefRequest)))
@@ -384,7 +380,7 @@ public class DefinitionIntegrationTest {
                 .expression("expression")
                 .build();
 
-        MvcResult wordResult = mockMvc.perform(post("/api/words/" + vocabId)
+        MvcResult wordResult = mockMvc.perform(post("/api/vocabularies/" + vocabId + "/word")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + token)
                         .content(objectMapper.writeValueAsString(addWordRequest)))

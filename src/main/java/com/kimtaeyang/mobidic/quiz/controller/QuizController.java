@@ -29,7 +29,7 @@ import static com.kimtaeyang.mobidic.common.code.GeneralResponseCode.OK;
 @RestController
 @RequiredArgsConstructor
 @Slf4j
-@RequestMapping("/api/quizs")
+@RequestMapping("/api")
 public class QuizController {
     private final QuizService quizService;
 
@@ -49,7 +49,7 @@ public class QuizController {
             @ApiResponse(responseCode = "500", description = "서버 오류",
                     content = @Content(schema = @Schema(hidden = true)))
     })
-    @GetMapping("/ox")
+    @GetMapping("/quizzes/ox")
     public ResponseEntity<GeneralResponse<List<QuizDto>>> getOxQuizzes(
             @RequestParam UUID vocabularyId,
             @AuthenticationPrincipal User user
@@ -74,7 +74,7 @@ public class QuizController {
             @ApiResponse(responseCode = "500", description = "서버 오류",
                     content = @Content(schema = @Schema(hidden = true)))
     })
-    @GetMapping("/blank")
+    @GetMapping("/quizzes/blank")
     public ResponseEntity<GeneralResponse<List<QuizDto>>> getBlankQuizzes(
             @RequestParam UUID vocabularyId,
             @AuthenticationPrincipal User user
@@ -101,7 +101,7 @@ public class QuizController {
             @ApiResponse(responseCode = "500", description = "서버 오류",
                     content = @Content(schema = @Schema(hidden = true)))
     })
-    @PostMapping("/rate")
+    @PostMapping("/quizzes/rate")
     public ResponseEntity<GeneralResponse<QuizRateResponse>> rateOxQuiz(
             @RequestBody QuizRateRequest quizRateRequest,
             @AuthenticationPrincipal User user
