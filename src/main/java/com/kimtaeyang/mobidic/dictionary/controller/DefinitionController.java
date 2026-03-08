@@ -27,36 +27,10 @@ import java.util.UUID;
 @RestController
 @Slf4j
 @RequiredArgsConstructor
-@RequestMapping("/api/definitions")
+@RequestMapping("/api")
 @Tag(name = "뜻 관련 서비스", description = "단어 별 뜻 불러오기, 추가, 수정 등")
 public class DefinitionController {
     private final DefinitionService definitionService;
-
-    @Operation(
-            summary = "뜻 추가",
-            description = "단어 식별자를 통한 뜻 추가",
-            security = @SecurityRequirement(name = "bearerAuth")
-    )
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "성공"),
-            @ApiResponse(responseCode = "400", description = "잘못된 요청",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-            @ApiResponse(responseCode = "401", description = "인가되지 않은 요청",
-                    content = @Content(schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "409", description = "중복된 요청",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-            @ApiResponse(responseCode = "500", description = "서버 오류",
-                    content = @Content(schema = @Schema(hidden = true)))
-    })
-    @PostMapping("/{wordId}")
-    public ResponseEntity<GeneralResponse<DefinitionDto>> addDefinition(
-            @PathVariable String wordId,
-            @RequestBody @Valid AddDefinitionRequestDto request,
-            @AuthenticationPrincipal User user
-    ) {
-        return GeneralResponse.toResponseEntity(GeneralResponseCode.OK,
-                definitionService.addDefinition(user, UUID.fromString(wordId), request));
-    }
 
     @Operation(
             summary = "뜻 조회",
@@ -74,13 +48,39 @@ public class DefinitionController {
             @ApiResponse(responseCode = "500", description = "서버 오류",
                     content = @Content(schema = @Schema(hidden = true)))
     })
-    @GetMapping
+    @GetMapping("/words/{wordId}/definitions")
     public ResponseEntity<GeneralResponse<List<DefinitionDto>>> getDefinitionsByWordId(
-            @RequestParam String wordId,
+            @PathVariable String wordId,
             @AuthenticationPrincipal User user
     ) {
         return GeneralResponse.toResponseEntity(GeneralResponseCode.OK,
                 definitionService.getDefinitionsByWordId(user, UUID.fromString(wordId)));
+    }
+
+    @Operation(
+            summary = "뜻 추가",
+            description = "단어 식별자를 통한 뜻 추가",
+            security = @SecurityRequirement(name = "bearerAuth")
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "성공"),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "401", description = "인가되지 않은 요청",
+                    content = @Content(schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "409", description = "중복된 요청",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "500", description = "서버 오류",
+                    content = @Content(schema = @Schema(hidden = true)))
+    })
+    @PostMapping("/words/{wordId}/definition")
+    public ResponseEntity<GeneralResponse<DefinitionDto>> addDefinition(
+            @PathVariable String wordId,
+            @RequestBody @Valid AddDefinitionRequestDto request,
+            @AuthenticationPrincipal User user
+    ) {
+        return GeneralResponse.toResponseEntity(GeneralResponseCode.OK,
+                definitionService.addDefinition(user, UUID.fromString(wordId), request));
     }
 
     @Operation(
@@ -101,7 +101,7 @@ public class DefinitionController {
             @ApiResponse(responseCode = "500", description = "서버 오류",
                     content = @Content(schema = @Schema(hidden = true)))
     })
-    @PatchMapping("/{definitionId}")
+    @PatchMapping("/definitions/{definitionId}")
     public ResponseEntity<GeneralResponse<DefinitionDto>> updateDefinition(
             @PathVariable String definitionId,
             @RequestBody @Valid AddDefinitionRequestDto request,
@@ -113,7 +113,6 @@ public class DefinitionController {
 
     @Operation(
             summary = "뜻 삭제",
-            description = "",
             security = @SecurityRequirement(name = "bearerAuth")
     )
     @ApiResponses(value = {
@@ -127,7 +126,7 @@ public class DefinitionController {
             @ApiResponse(responseCode = "500", description = "서버 오류",
                     content = @Content(schema = @Schema(hidden = true)))
     })
-    @DeleteMapping("/{definitionId}")
+    @DeleteMapping("/definitions/{definitionId}")
     public ResponseEntity<GeneralResponse<DefinitionDto>> deleteDefinition(
             @PathVariable String definitionId,
             @AuthenticationPrincipal User user

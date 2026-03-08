@@ -224,7 +224,7 @@ public class WordStatisticIntegrationTest {
                 .expression("expression")
                 .build();
 
-        MvcResult wordResult = mockMvc.perform(post("/api/words/" + vocabId)
+        MvcResult wordResult = mockMvc.perform(post("/api/vocabularies/" + vocabId + "/word")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + token)
                         .content(objectMapper.writeValueAsString(addWordRequest)))

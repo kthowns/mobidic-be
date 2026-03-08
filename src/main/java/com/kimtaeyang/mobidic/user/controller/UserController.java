@@ -2,8 +2,7 @@ package com.kimtaeyang.mobidic.user.controller;
 
 import com.kimtaeyang.mobidic.common.dto.ErrorResponse;
 import com.kimtaeyang.mobidic.common.dto.GeneralResponse;
-import com.kimtaeyang.mobidic.user.dto.UpdateNicknameRequestDto;
-import com.kimtaeyang.mobidic.user.dto.UpdatePasswordRequestDto;
+import com.kimtaeyang.mobidic.user.dto.UpdateUserRequestDto;
 import com.kimtaeyang.mobidic.user.dto.UserDto;
 import com.kimtaeyang.mobidic.user.entity.User;
 import com.kimtaeyang.mobidic.user.service.UserService;
@@ -27,7 +26,7 @@ import static com.kimtaeyang.mobidic.common.code.GeneralResponseCode.OK;
 @RestController
 @RequiredArgsConstructor
 @Slf4j
-@RequestMapping("/api/user")
+@RequestMapping("/api/users")
 @Tag(name = "사용자 관련 서비스", description = "닉네임 및 패스워드 변경, 회원탈퇴 등")
 public class UserController {
     private final UserService userService;
@@ -55,8 +54,8 @@ public class UserController {
     }
 
     @Operation(
-            summary = "닉네임 변경",
-            description = "닉네임 변경, 중복체크 있음",
+            summary = "사용자 정보 변경",
+            description = "정보 변경, 닉네임 중복체크 있음",
             security = @SecurityRequirement(name = "bearerAuth")
     )
     @ApiResponses(value = {
@@ -72,41 +71,16 @@ public class UserController {
             @ApiResponse(responseCode = "500", description = "서버 오류",
                     content = @Content(schema = @Schema(hidden = true)))
     })
-    @PatchMapping("/nickname")
-    public ResponseEntity<GeneralResponse<UserDto>> updateUserNickname(
-            @RequestBody @Valid UpdateNicknameRequestDto request,
-            @AuthenticationPrincipal User user
-    ) {
-        return GeneralResponse.toResponseEntity(OK,
-                userService.updateUserNickname(user, request));
-    }
-
-    @Operation(
-            summary = "비밀번호 변경",
-            description = "비밀번호 변경, 8자 이상/알파벳+숫자",
-            security = @SecurityRequirement(name = "bearerAuth")
-    )
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "성공"),
-            @ApiResponse(responseCode = "400", description = "잘못된 요청",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-            @ApiResponse(responseCode = "401", description = "인가되지 않은 요청",
-                    content = @Content(schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스",
-                    content = @Content(schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "500", description = "서버 오류",
-                    content = @Content(schema = @Schema(hidden = true)))
-    })
-    @PatchMapping("/password")
-    public ResponseEntity<GeneralResponse<UserDto>> updateUserPassword(
-            @RequestBody @Valid UpdatePasswordRequestDto request,
-            HttpServletRequest httpServletRequest,
-            @AuthenticationPrincipal User user
+    @PatchMapping("/me")
+    public ResponseEntity<GeneralResponse<UserDto>> updateMe(
+            @RequestBody @Valid UpdateUserRequestDto request,
+            @AuthenticationPrincipal User user,
+            HttpServletRequest httpServletRequest
     ) {
         String token = httpServletRequest.getHeader("Authorization").substring(7);
 
         return GeneralResponse.toResponseEntity(OK,
-                userService.updateUserPassword(user, request, token));
+                userService.updateUser(user, request, token));
     }
 
     @Operation(
@@ -125,7 +99,7 @@ public class UserController {
             @ApiResponse(responseCode = "500", description = "서버 오류",
                     content = @Content(schema = @Schema(hidden = true)))
     })
-    @DeleteMapping
+    @DeleteMapping("/me")
     public ResponseEntity<GeneralResponse<UserDto>> deactivateUser(
             @AuthenticationPrincipal User user,
             HttpServletRequest httpServletRequest

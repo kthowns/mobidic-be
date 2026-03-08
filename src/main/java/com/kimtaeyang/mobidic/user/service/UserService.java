@@ -4,8 +4,7 @@ import com.kimtaeyang.mobidic.auth.service.AuthService;
 import com.kimtaeyang.mobidic.common.code.GeneralResponseCode;
 import com.kimtaeyang.mobidic.common.exception.ApiException;
 import com.kimtaeyang.mobidic.security.jwt.JwtBlacklistService;
-import com.kimtaeyang.mobidic.user.dto.UpdateNicknameRequestDto;
-import com.kimtaeyang.mobidic.user.dto.UpdatePasswordRequestDto;
+import com.kimtaeyang.mobidic.user.dto.UpdateUserRequestDto;
 import com.kimtaeyang.mobidic.user.dto.UserDto;
 import com.kimtaeyang.mobidic.user.entity.User;
 import com.kimtaeyang.mobidic.user.repository.UserRepository;
@@ -17,6 +16,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
+import static com.kimtaeyang.mobidic.common.code.AuthResponseCode.NO_USER;
+
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -27,27 +28,24 @@ public class UserService {
     private final AuthService authService;
 
     @Transactional
-    public UserDto updateUserNickname(User user, UpdateNicknameRequestDto request) {
-        int count = userRepository.countByNicknameAndIdNot(request.getNickname(), user.getId());
+    public UserDto updateUser(User user, UpdateUserRequestDto request, String token) {
+        User updateUser = userRepository.findById(user.getId())
+                .orElseThrow(() -> new ApiException(NO_USER));
 
-        if (count > 0) {
-            throw new ApiException(GeneralResponseCode.DUPLICATED_NICKNAME);
+        if (request.getNickname() != null) {
+            if (userRepository.existsByNicknameAndIdNot(request.getNickname(), user.getId())) {
+                throw new ApiException(GeneralResponseCode.DUPLICATED_NICKNAME);
+            }
+            updateUser.setNickname(request.getNickname());
         }
 
-        user.setNickname(request.getNickname());
-        user = userRepository.save(user);
+        if (request.getPassword() != null) {
+            updateUser.setPassword(passwordEncoder.encode(request.getPassword()));
+            authService.logout(token);
+        }
+        updateUser = userRepository.save(updateUser);
 
-        return UserDto.fromEntity(user);
-    }
-
-    @Transactional
-    public UserDto updateUserPassword(User user, UpdatePasswordRequestDto request, String token) {
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
-        userRepository.save(user);
-
-        authService.logout(token);
-
-        return UserDto.fromEntity(user);
+        return UserDto.fromEntity(updateUser);
     }
 
     @Transactional

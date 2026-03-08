@@ -29,10 +29,35 @@ import static com.kimtaeyang.mobidic.common.code.GeneralResponseCode.OK;
 @RestController
 @Slf4j
 @RequiredArgsConstructor
-@RequestMapping("/api/words")
+@RequestMapping("/api")
 @Tag(name = "단어 관련 서비스", description = "단어장 별 단어 불러오기, 추가 등")
 public class WordController {
     private final WordService wordService;
+
+    @Operation(
+            summary = "단어 전체 조회",
+            description = "단어장 식별자를 통한 단어 전체 조회",
+            security = @SecurityRequirement(name = "bearerAuth")
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "성공"),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "401", description = "인가되지 않은 요청",
+                    content = @Content(schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스",
+                    content = @Content(schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "500", description = "서버 오류",
+                    content = @Content(schema = @Schema(hidden = true)))
+    })
+    @GetMapping("/vocabularies/{vocabularyId}/words")
+    public ResponseEntity<GeneralResponse<List<WordDetail>>> getWordsByVocabularyId(
+            @PathVariable String vocabularyId,
+            @AuthenticationPrincipal User user
+    ) {
+        return GeneralResponse.toResponseEntity(OK,
+                wordService.getWordDetailsByVocabularyId(user, UUID.fromString(vocabularyId)));
+    }
 
     @Operation(
             summary = "단어 추가",
@@ -52,7 +77,7 @@ public class WordController {
             @ApiResponse(responseCode = "500", description = "서버 오류",
                     content = @Content(schema = @Schema(hidden = true)))
     })
-    @PostMapping("/{vocabularyId}")
+    @PostMapping("/vocabularies/{vocabularyId}/word")
     public ResponseEntity<GeneralResponse<WordDto>> addWord(
             @PathVariable("vocabularyId") String vocabularyId,
             @RequestBody @Valid AddWordRequestDto request,
@@ -80,7 +105,7 @@ public class WordController {
             @ApiResponse(responseCode = "500", description = "서버 오류",
                     content = @Content(schema = @Schema(hidden = true)))
     })
-    @PatchMapping("/{wordId}")
+    @PatchMapping("/words/{wordId}")
     public ResponseEntity<GeneralResponse<WordDto>> updateWord(
             @PathVariable("wordId") String wordId,
             @RequestBody @Valid AddWordRequestDto request,
@@ -106,37 +131,12 @@ public class WordController {
             @ApiResponse(responseCode = "500", description = "서버 오류",
                     content = @Content(schema = @Schema(hidden = true)))
     })
-    @DeleteMapping("/{wordId}")
+    @DeleteMapping("/words/{wordId}")
     public ResponseEntity<GeneralResponse<WordDto>> deleteWord(
             @PathVariable String wordId,
             @AuthenticationPrincipal User user
     ) {
         return GeneralResponse.toResponseEntity(OK,
                 wordService.deleteWord(user, UUID.fromString(wordId)));
-    }
-
-    @Operation(
-            summary = "단어 전체 조회",
-            description = "단어장 식별자를 통한 단어 전체 조회",
-            security = @SecurityRequirement(name = "bearerAuth")
-    )
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "성공"),
-            @ApiResponse(responseCode = "400", description = "잘못된 요청",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-            @ApiResponse(responseCode = "401", description = "인가되지 않은 요청",
-                    content = @Content(schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스",
-                    content = @Content(schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "500", description = "서버 오류",
-                    content = @Content(schema = @Schema(hidden = true)))
-    })
-    @GetMapping
-    public ResponseEntity<GeneralResponse<List<WordDetail>>> getWordsByVocabularyId(
-            @RequestParam String vocabularyId,
-            @AuthenticationPrincipal User user
-    ) {
-        return GeneralResponse.toResponseEntity(OK,
-                wordService.getWordDetailsByVocabularyId(user, UUID.fromString(vocabularyId)));
     }
 }
