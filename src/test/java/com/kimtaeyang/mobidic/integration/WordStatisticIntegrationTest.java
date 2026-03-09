@@ -21,7 +21,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import java.util.UUID;
 
 import static com.kimtaeyang.mobidic.common.code.AuthResponseCode.UNAUTHORIZED;
-import static com.kimtaeyang.mobidic.common.code.GeneralResponseCode.NO_RATE;
+import static com.kimtaeyang.mobidic.common.code.GeneralResponseCode.NO_STAT;
 import static com.kimtaeyang.mobidic.common.code.GeneralResponseCode.NO_VOCAB;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -93,7 +93,7 @@ public class WordStatisticIntegrationTest {
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message")
-                        .value(NO_RATE.getMessage()));
+                        .value(NO_STAT.getMessage()));
     }
 
     @Test
@@ -194,7 +194,7 @@ public class WordStatisticIntegrationTest {
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message")
-                        .value(NO_RATE.getMessage()));
+                        .value(NO_STAT.getMessage()));
     }
 
     private UUID addVocabAndGetId(String token) throws Exception {

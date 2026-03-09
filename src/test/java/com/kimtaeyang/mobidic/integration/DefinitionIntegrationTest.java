@@ -120,7 +120,7 @@ public class DefinitionIntegrationTest {
                 .andExpect(jsonPath("$.message")
                         .value(INVALID_REQUEST_BODY.getMessage()))
                 .andExpect(jsonPath("$.errors.meaning")
-                        .value("Invalid meaning pattern"));
+                        .value("32자 미만이어야 합니다."));
     }
 
     @Test
@@ -285,7 +285,7 @@ public class DefinitionIntegrationTest {
                 .andExpect(jsonPath("$.message")
                         .value(INVALID_REQUEST_BODY.getMessage()))
                 .andExpect(jsonPath("$.errors.meaning")
-                        .value("Invalid meaning pattern"));
+                        .value("32자 미만이어야 합니다."));
 
         //Fail with invalid part pattern
         String wrongRequest = "{\"definition\":\"some def\","

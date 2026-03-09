@@ -13,8 +13,8 @@ import lombok.NoArgsConstructor;
 @Builder
 public class AddVocabularyRequestDto {
     @NotBlank
-    @Size(min = 1, max = 32, message = "Invalid title pattern")
+    @Size(min = 1, max = 32, message = "제목은 32자 미만이어야 합니다.")
     private String title;
-    @Size(max = 32, message = "Invalid description pattern")
+    @Size(max = 32, message = "설명은 32자 미만이어야 합니다.")
     private String description;
 }
