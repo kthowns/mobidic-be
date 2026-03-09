@@ -219,19 +219,13 @@ public class QuizIntegrationTest {
                     break;
                 }
             }
-            StringBuilder realAnswer = new StringBuilder();
-            for (int j = 0; j < stem.length(); j++) {
-                if (stem.charAt(j) == '_') {
-                    realAnswer.append(fullAnswer.charAt(j));
-                }
-            }
 
             QuizRateRequest rateQuizRateRequest = QuizRateRequest.builder()
                     .token(quizzes.get(i).getToken())
-                    .answer(realAnswer.toString())
+                    .answer(fullAnswer)
                     .build();
 
-            MvcResult rateResult = mockMvc.perform(post("/api/quizzes/rate")
+            mockMvc.perform(post("/api/quizzes/rate")
                             .header("Authorization", "Bearer " + token)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(rateQuizRateRequest)))

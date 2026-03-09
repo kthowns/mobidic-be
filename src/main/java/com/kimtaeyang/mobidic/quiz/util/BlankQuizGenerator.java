@@ -43,10 +43,8 @@ public class BlankQuizGenerator extends QuizGenerator {
             Collections.sort(indices);
 
             char[] stem = wordDetail.expression().toCharArray();
-            StringBuilder correctAnswer = new StringBuilder();
 
             for (int idx : indices) {
-                correctAnswer.append(stem[idx]);
                 stem[idx] = '_';
             }
 
@@ -56,7 +54,7 @@ public class BlankQuizGenerator extends QuizGenerator {
                             .wordId(wordDetail.id())
                             .userId(memberId)
                             .stem(new String(stem))
-                            .answer(correctAnswer.toString())
+                            .answer(wordDetail.expression())
                             .build()
             );
         }
