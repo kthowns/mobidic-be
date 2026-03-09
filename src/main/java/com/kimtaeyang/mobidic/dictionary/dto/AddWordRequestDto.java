@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class AddWordRequestDto {
     @NotBlank
-    @Size(min = 1, max = 45, message = "Invalid expression pattern")
-    @Pattern(regexp = "^[a-zA-Z][a-zA-Z ]*$", message = "Invalid expression pattern")
+    @Size(min = 1, max = 45, message = "단어는 45자 미만이어야 합니다.")
+    @Pattern(regexp = "^[a-zA-Z][a-zA-Z ]*$", message = "단어는 영문자여야 합니다.")
     private String expression;
 }

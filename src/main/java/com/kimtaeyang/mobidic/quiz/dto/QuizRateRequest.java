@@ -11,8 +11,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class QuizRateRequest {
-    @NotBlank(message = "token is empty")
+    @NotBlank(message = "토큰은 필수 입력값 입니다.")
     private String token;
-    @NotBlank(message = "answer is empty")
+    @NotBlank(message = "답안은 필수 입력값 입니다.")
     private String answer;
 }

@@ -15,8 +15,8 @@ import lombok.NoArgsConstructor;
 @Builder
 public class AddDefinitionRequestDto {
     @NotBlank
-    @Size(max = 32, message = "Invalid meaning pattern")
+    @Size(max = 32, message = "32자 미만이어야 합니다.")
     private String meaning;
-    @NotNull
+    @NotNull(message = "품사는 필수 입력값 입니다.")
     private PartOfSpeech part;
 }

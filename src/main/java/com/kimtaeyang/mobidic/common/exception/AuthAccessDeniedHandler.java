@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
-import static com.kimtaeyang.mobidic.common.code.GeneralResponseCode.FORBIDDEN;
+import static com.kimtaeyang.mobidic.common.code.AuthResponseCode.FORBIDDEN;
 
 @RequiredArgsConstructor
 @Component
@@ -27,7 +27,7 @@ public class AuthAccessDeniedHandler implements AccessDeniedHandler {
                        HttpServletResponse response,
                        AccessDeniedException accessDeniedException) throws IOException {
         log.error("errorCode : {}, uri : {}, message : {}",
-                accessDeniedException, request.getRequestURI(), accessDeniedException   .getMessage());
+                accessDeniedException, request.getRequestURI(), accessDeniedException.getMessage());
 
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .errors(null)
