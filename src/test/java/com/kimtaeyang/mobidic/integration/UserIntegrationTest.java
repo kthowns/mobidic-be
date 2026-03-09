@@ -176,7 +176,7 @@ public class UserIntegrationTest {
                 .andExpect(jsonPath("$.message")
                         .value(INVALID_REQUEST_BODY.getMessage()))
                 .andExpect(jsonPath("$.errors.nickname")
-                        .value("Invalid nickname pattern"));
+                        .value("유효하지 않은 닉네임 형식 입니다."));
 
     }
 
@@ -219,7 +219,7 @@ public class UserIntegrationTest {
                 .andExpect(jsonPath("$.message")
                         .value(INVALID_REQUEST_BODY.getMessage()))
                 .andExpect(jsonPath("$.errors.password")
-                        .value("Invalid password pattern"));
+                        .value("비밀번호는 8자 이상, 영문자와 숫자를 포함해야 합니다."));
 
         updatePasswordRequest.setPassword("testTest2");
 

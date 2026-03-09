@@ -160,7 +160,7 @@ public class AuthIntegrationTest {
                 .andExpect(jsonPath("$.message")
                         .value(GeneralResponseCode.INVALID_REQUEST_BODY.getMessage()))
                 .andExpect(jsonPath("$.errors.email")
-                        .value("Invalid email pattern"));
+                        .value("유효하지 않은 이메일 형식입니다."));
     }
 
     @DisplayName("[Auth][Integration] Logout test")

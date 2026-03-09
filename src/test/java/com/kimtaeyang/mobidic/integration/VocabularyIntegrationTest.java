@@ -129,10 +129,10 @@ public class VocabularyIntegrationTest {
                                 .value(INVALID_REQUEST_BODY.getMessage()))
                 .andExpect(
                         jsonPath("$.errors.title")
-                                .value("Invalid title pattern"))
+                                .value("제목은 32자 미만이어야 합니다."))
                 .andExpect(
                         jsonPath("$.errors.description")
-                                .value("Invalid description pattern"));
+                                .value("설명은 32자 미만이어야 합니다."));
     }
 
     @Test
@@ -385,9 +385,9 @@ public class VocabularyIntegrationTest {
                 .andExpect(jsonPath("$.message")
                         .value(INVALID_REQUEST_BODY.getMessage()))
                 .andExpect(jsonPath("$.errors.title")
-                        .value("Invalid title pattern"))
+                        .value("제목은 32자 미만이어야 합니다."))
                 .andExpect(jsonPath("$.errors.description")
-                        .value("Invalid description pattern"));
+                        .value("설명은 32자 미만이어야 합니다."));
     }
 
     @Test
