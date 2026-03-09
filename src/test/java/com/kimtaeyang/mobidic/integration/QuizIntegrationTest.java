@@ -69,9 +69,8 @@ public class QuizIntegrationTest {
         List<WordDetail> savedWords = addWordsAndGetDetails(sampleWords, sampleDefs, sampleParts
                 , vocabId, token);
 
-        MvcResult quizResult = mockMvc.perform(get("/api/quizzes/ox")
-                        .header("Authorization", "Bearer " + token)
-                        .param("vocabularyId", vocabId.toString()))
+        MvcResult quizResult = mockMvc.perform(get("/api/vocabularies/" + vocabId + "/quizzes/ox")
+                        .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
                 .andReturn();
         JsonNode data = objectMapper.readTree(quizResult.getResponse().getContentAsString()).path("data");
@@ -101,9 +100,8 @@ public class QuizIntegrationTest {
                 token
         );
 
-        MvcResult quizResult = mockMvc.perform(get("/api/quizzes/ox")
-                        .header("Authorization", "Bearer " + token)
-                        .param("vocabularyId", vocabId.toString()))
+        MvcResult quizResult = mockMvc.perform(get("/api/vocabularies/" + vocabId + "/quizzes/ox")
+                        .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
                 .andReturn();
 
@@ -159,9 +157,8 @@ public class QuizIntegrationTest {
         List<WordDetail> savedWords = addWordsAndGetDetails(sampleWords, sampleDefs, sampleParts
                 , vocabId, token);
 
-        MvcResult quizResult = mockMvc.perform(get("/api/quizzes/blank")
-                        .header("Authorization", "Bearer " + token)
-                        .param("vocabularyId", vocabId.toString()))
+        MvcResult quizResult = mockMvc.perform(get("/api/vocabularies/" + vocabId + "/quizzes/blank")
+                        .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
                 .andReturn();
         JsonNode data = objectMapper.readTree(quizResult.getResponse().getContentAsString()).path("data");
@@ -195,9 +192,8 @@ public class QuizIntegrationTest {
         List<WordDetail> savedWords = addWordsAndGetDetails(sampleWords, sampleDefs, sampleParts
                 , vocabId, token);
 
-        MvcResult quizResult = mockMvc.perform(get("/api/quizzes/blank")
-                        .header("Authorization", "Bearer " + token)
-                        .param("vocabularyId", vocabId.toString()))
+        MvcResult quizResult = mockMvc.perform(get("/api/vocabularies/" + vocabId + "/quizzes/blank")
+                        .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
                 .andReturn();
         JsonNode data = objectMapper.readTree(quizResult.getResponse().getContentAsString()).path("data");
@@ -223,19 +219,13 @@ public class QuizIntegrationTest {
                     break;
                 }
             }
-            StringBuilder realAnswer = new StringBuilder();
-            for (int j = 0; j < stem.length(); j++) {
-                if (stem.charAt(j) == '_') {
-                    realAnswer.append(fullAnswer.charAt(j));
-                }
-            }
 
             QuizRateRequest rateQuizRateRequest = QuizRateRequest.builder()
                     .token(quizzes.get(i).getToken())
-                    .answer(realAnswer.toString())
+                    .answer(fullAnswer)
                     .build();
 
-            MvcResult rateResult = mockMvc.perform(post("/api/quizzes/rate")
+            mockMvc.perform(post("/api/quizzes/rate")
                             .header("Authorization", "Bearer " + token)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(rateQuizRateRequest)))

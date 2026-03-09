@@ -285,8 +285,8 @@ public class WordIntegrationTest {
                         .value(NO_WORD.getMessage()));
 
         //Fail with invalid pattern
-        addWordRequest.setExpression(UUID.randomUUID().toString() + UUID.randomUUID());
-        mockMvc.perform(patch("/api/words/" + vocabularyId)
+        addWordRequest.setExpression("ASDasdASDasdASDasdASDasdASDasdASdasdASDasdASDasdASDasdASDasd");
+        mockMvc.perform(patch("/api/words/" + wordId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + token)
                         .content(objectMapper.writeValueAsString(addWordRequest)))
@@ -297,6 +297,20 @@ public class WordIntegrationTest {
                 .andExpect(
                         jsonPath("$.errors.expression")
                                 .value("단어는 45자 미만이어야 합니다."));
+
+        //Fail with invalid pattern
+        addWordRequest.setExpression("ASDasdASDa-1ㅎㅁ");
+        mockMvc.perform(patch("/api/words/" + wordId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Bearer " + token)
+                        .content(objectMapper.writeValueAsString(addWordRequest)))
+                .andExpect(status().isBadRequest())
+                .andExpect(
+                        jsonPath("$.message")
+                                .value(INVALID_REQUEST_BODY.getMessage()))
+                .andExpect(
+                        jsonPath("$.errors.expression")
+                                .value("단어는 영문자여야 합니다."));
     }
 
     @Test

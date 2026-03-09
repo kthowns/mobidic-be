@@ -49,9 +49,9 @@ public class QuizController {
             @ApiResponse(responseCode = "500", description = "서버 오류",
                     content = @Content(schema = @Schema(hidden = true)))
     })
-    @GetMapping("/quizzes/ox")
+    @GetMapping("/vocabularies/{vocabularyId}/quizzes/ox")
     public ResponseEntity<GeneralResponse<List<QuizDto>>> getOxQuizzes(
-            @RequestParam UUID vocabularyId,
+            @PathVariable UUID vocabularyId,
             @AuthenticationPrincipal User user
     ) {
         return GeneralResponse.toResponseEntity(OK,
@@ -74,9 +74,9 @@ public class QuizController {
             @ApiResponse(responseCode = "500", description = "서버 오류",
                     content = @Content(schema = @Schema(hidden = true)))
     })
-    @GetMapping("/quizzes/blank")
+    @GetMapping("/vocabularies/{vocabularyId}/quizzes/blank")
     public ResponseEntity<GeneralResponse<List<QuizDto>>> getBlankQuizzes(
-            @RequestParam UUID vocabularyId,
+            @PathVariable UUID vocabularyId,
             @AuthenticationPrincipal User user
     ) {
         return GeneralResponse.toResponseEntity(OK,
