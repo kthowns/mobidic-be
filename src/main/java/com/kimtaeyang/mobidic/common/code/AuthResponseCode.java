@@ -7,17 +7,13 @@ import org.springframework.http.HttpStatus;
 @AllArgsConstructor
 @Getter
 public enum AuthResponseCode implements ApiResponseCode {
-    CREATED(HttpStatus.CREATED, "Join complete"),
-    NO_USER(HttpStatus.NOT_FOUND, "User not found"),
-    INVALID_USERNAME(HttpStatus.NOT_FOUND, "Invalid username"),
-    INVALID_PASSWORD(HttpStatus.UNAUTHORIZED, "Invalid password"),
-    SIGN_UP_OK(HttpStatus.OK, "Join success"),
-    LOGOUT_OK(HttpStatus.OK, "Logout success"),
-    LOGIN_FAILED(HttpStatus.UNAUTHORIZED, "Login failed"),
-    LOGOUT_FAILED(HttpStatus.BAD_REQUEST, "Logout failed"),
-    INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "Invalid token"),
-    UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "Unauthorized"),
-    LOGIN_OK(HttpStatus.OK, "Login success");
+    NO_USER(HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다."),
+    LOGIN_FAILED(HttpStatus.UNAUTHORIZED, "로그인에 실패했습니다."),
+    INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "유효하지 않은 토큰 입니다."),
+    FORBIDDEN(HttpStatus.FORBIDDEN, "인가되지 않은 요청 입니다."),
+    UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "인증되지 않은 요청 입니다."),
+    
+    LOGIN_OK(HttpStatus.OK, "로그인에 성공했습니다.");
 
     private final HttpStatus status;
     private final String message;

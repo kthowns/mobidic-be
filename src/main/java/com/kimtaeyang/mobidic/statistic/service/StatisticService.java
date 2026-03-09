@@ -31,7 +31,7 @@ public class StatisticService {
     public StatisticDto getWordStatisticById(User user, UUID wordId) {
         WordStatistic wordStatistic = wordStatisticRepository
                 .findByWordIdAndWord_Vocabulary_User_Id(wordId, user.getId())
-                .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_RATE));
+                .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_STAT));
 
         return StatisticDto.fromEntity(wordStatistic);
     }
@@ -54,7 +54,7 @@ public class StatisticService {
     public void toggleLearnedByWordId(User user, UUID wordId) {
         WordStatistic wordStatistic = wordStatisticRepository
                 .findForUpdate(wordId, user.getId())
-                .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_RATE));
+                .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_STAT));
 
         wordStatistic.toggleIsLearned();
     }
@@ -63,7 +63,7 @@ public class StatisticService {
     public void increaseCorrectCount(User user, UUID wordId) {
         WordStatistic wordStatistic = wordStatisticRepository
                 .findForUpdate(wordId, user.getId())
-                .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_RATE));
+                .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_STAT));
 
         wordStatistic.increaseCorrectCount();
         setDifficultyAndAccuracy(wordStatistic);
@@ -73,7 +73,7 @@ public class StatisticService {
     public void increaseIncorrectCount(User user, UUID wordId) {
         WordStatistic wordStatistic = wordStatisticRepository
                 .findForUpdate(wordId, user.getId())
-                .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_RATE));
+                .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_STAT));
 
         wordStatistic.increaseIncorrectCount();
         setDifficultyAndAccuracy(wordStatistic);
