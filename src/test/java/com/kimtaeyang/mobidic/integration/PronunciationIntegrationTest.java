@@ -16,7 +16,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
@@ -25,6 +24,7 @@ import java.nio.file.Paths;
 import java.util.UUID;
 
 import static com.kimtaeyang.mobidic.common.code.AuthResponseCode.UNAUTHORIZED;
+import static com.kimtaeyang.mobidic.common.code.GeneralResponseCode.NO_WORD;
 import static com.kimtaeyang.mobidic.common.code.GeneralResponseCode.TOO_BIG_FILE_SIZE;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
@@ -75,10 +75,9 @@ public class PronunciationIntegrationTest {
         );
 
         //Success high rate
-        MvcResult result = mockMvc.perform(multipart("/api/pronunciation")
+        MvcResult result = mockMvc.perform(multipart("/api/words/" + wordId + "/pronunciation")
                         .file(file) // 파일 파라미터 추가
-                        .header("Authorization", "Bearer " + token)
-                        .param("wordId", wordId.toString())) // 문자열 파라미터 추가
+                        .header("Authorization", "Bearer " + token)) // 문자열 파라미터 추가
                 .andExpect(status().isOk()) // 응답 상태 200
                 .andExpect(jsonPath("$.data")
                         .isNotEmpty())
@@ -92,10 +91,9 @@ public class PronunciationIntegrationTest {
         //Success low rate
         UUID wordId2 = addWordAndGetId(vocabId, token, "yellow");
 
-        result = mockMvc.perform(multipart("/api/pron/rate")
+        result = mockMvc.perform(multipart("/api/words/" + wordId2 + "/pronunciation")
                         .file(file)
-                        .header("Authorization", "Bearer " + token)
-                        .param("wordId", wordId2.toString()))
+                        .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
                 .andReturn();
 
@@ -105,39 +103,35 @@ public class PronunciationIntegrationTest {
         assertTrue(rate < 0.8);
 
         //Fail with too big file
-        mockMvc.perform(multipart("/api/pron/rate")
+        mockMvc.perform(multipart("/api/words/" + wordId + "/pronunciation")
                         .file(largeFile)
-                        .header("Authorization", "Bearer " + token)
-                        .param("wordId", wordId.toString()))
+                        .header("Authorization", "Bearer " + token))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message")
                         .value(TOO_BIG_FILE_SIZE.getMessage()));
 
         //Fail without token
-        mockMvc.perform(multipart("/api/pron/rate")
-                        .file(largeFile)
-                        .param("wordId", wordId.toString()))
+        mockMvc.perform(multipart("/api/words/" + wordId + "/pronunciation")
+                        .file(largeFile))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.message")
                         .value(UNAUTHORIZED.getMessage()));
 
         //Fail with unauthorized token
-        mockMvc.perform(multipart("/api/pron/rate")
+        mockMvc.perform(multipart("/api/words/" + wordId + "/pronunciation")
                         .file(largeFile)
-                        .header("Authorization", "Bearer " + jwtProvider.generateToken(UUID.randomUUID()))
-                        .param("wordId", wordId.toString()))
+                        .header("Authorization", "Bearer " + jwtProvider.generateToken(UUID.randomUUID())))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.message")
                         .value(UNAUTHORIZED.getMessage()));
 
         //Fail with no resource
-        mockMvc.perform(multipart("/api/pron/rate")
-                        .file(largeFile)
-                        .header("Authorization", "Bearer " + token)
-                        .param("wordId", UUID.randomUUID().toString()))
-                .andExpect(status().isUnauthorized())
+        mockMvc.perform(multipart("/api/words/" + UUID.randomUUID() + "/pronunciation")
+                        .file(file)
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message")
-                        .value(UNAUTHORIZED.getMessage()));
+                        .value(NO_WORD.getMessage()));
     }
 
     private UUID addVocabAndGetId(String token) throws Exception {
@@ -164,7 +158,7 @@ public class PronunciationIntegrationTest {
                 .expression(exp)
                 .build();
 
-        MvcResult wordResult = mockMvc.perform(post("/api/words/" + vocabId)
+        MvcResult wordResult = mockMvc.perform(post("/api/vocabularies/" + vocabId + "/word")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + token)
                         .content(objectMapper.writeValueAsString(addWordRequest)))

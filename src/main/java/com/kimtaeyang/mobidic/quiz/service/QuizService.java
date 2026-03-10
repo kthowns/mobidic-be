@@ -3,8 +3,6 @@ package com.kimtaeyang.mobidic.quiz.service;
 import com.kimtaeyang.mobidic.common.code.GeneralResponseCode;
 import com.kimtaeyang.mobidic.common.exception.ApiException;
 import com.kimtaeyang.mobidic.dictionary.dto.WordDetail;
-import com.kimtaeyang.mobidic.dictionary.service.DefinitionService;
-import com.kimtaeyang.mobidic.dictionary.service.VocabularyService;
 import com.kimtaeyang.mobidic.dictionary.service.WordService;
 import com.kimtaeyang.mobidic.quiz.dto.QuizDto;
 import com.kimtaeyang.mobidic.quiz.dto.QuizRateRequest;
@@ -33,10 +31,8 @@ public class QuizService {
     private static final String QUIZ_PREFIX = "quiz";
     private final RedisTemplate<String, String> redisTemplate;
     private static final Long expPerQuiz = 15000L;
-    private final VocabularyService vocabularyService;
     private final StatisticService statisticService;
     private final CryptoService cryptoService;
-    private final DefinitionService definitionService;
 
     public List<QuizDto> getOXQuizzes(
             User user,
@@ -73,7 +69,7 @@ public class QuizService {
 
         UUID wordId = UUID.fromString(key.split(":")[2]);
         QuizRateResponse quizRateResponse = QuizRateResponse.builder()
-                .isCorrect(quizRateRequest.getAnswer().equals(correctAnswer))
+                .isCorrect(quizRateRequest.getAnswer().equalsIgnoreCase(correctAnswer))
                 .correctAnswer(correctAnswer)
                 .build();
 
