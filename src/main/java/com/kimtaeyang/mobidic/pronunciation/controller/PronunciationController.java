@@ -18,10 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.UUID;
@@ -31,7 +28,7 @@ import static com.kimtaeyang.mobidic.common.code.GeneralResponseCode.OK;
 @RestController
 @RequiredArgsConstructor
 @Slf4j
-@RequestMapping("/api/pronunciation")
+@RequestMapping("/api")
 @Tag(name = "발음 체크 관련 서비스", description = "발음 점수 체크 등")
 public class PronunciationController {
     private final PronunciationService pronunciationService;
@@ -54,13 +51,13 @@ public class PronunciationController {
             @ApiResponse(responseCode = "500", description = "서버 오류",
                     content = @Content(schema = @Schema(hidden = true)))
     })
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/words/{wordId}/pronunciation", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<GeneralResponse<Double>> ratePronunciation(
             @RequestParam MultipartFile file,
-            @RequestParam UUID wordId,
+            @PathVariable UUID wordId,
             @AuthenticationPrincipal User user
     ) {
-        if (file.getSize() > 5 * 1024 * 1024) { // Allow file size under 5MB
+        if (file.getSize() > 500 * 1024) { // Allow file size under 500KB
             throw new ApiException(GeneralResponseCode.TOO_BIG_FILE_SIZE);
         }
 

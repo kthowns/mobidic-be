@@ -48,7 +48,7 @@ public class PronunciationService {
             throw new ApiException(GeneralResponseCode.INTERNAL_SERVER_ERROR);
         }
 
-        if (sttResponse == null || sttResponse.getResult() == null) {
+        if (sttResponse == null) {
             throw new ApiException(GeneralResponseCode.INTERNAL_SERVER_ERROR);
         }
 
@@ -110,14 +110,13 @@ public class PronunciationService {
     }
 
     private double findSimilarity(String orgString, String compareString) {
+        double maxLength = Double.max(orgString.length(), compareString.length());
+
+        if (compareString.isEmpty() || orgString.isEmpty() || maxLength < 1) {
+            return 0.0;
+        }
         compareString = compareString.toLowerCase().trim();
         compareString = compareString.substring(0, compareString.length() - 1);
-
-        double maxLength = Double.max(orgString.length(), compareString.length());
-        if (maxLength > 0) {
-            return (maxLength - getDamerauLevenshteinDistance(orgString, compareString)) / maxLength;
-        }
-        return 1.0;
+        return (maxLength - getDamerauLevenshteinDistance(orgString, compareString)) / maxLength;
     }
-
 }
