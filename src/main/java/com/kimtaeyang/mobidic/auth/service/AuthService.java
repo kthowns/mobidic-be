@@ -2,34 +2,24 @@ package com.kimtaeyang.mobidic.auth.service;
 
 import com.kimtaeyang.mobidic.auth.dto.LoginRequest;
 import com.kimtaeyang.mobidic.auth.dto.LoginResponse;
-import com.kimtaeyang.mobidic.auth.dto.SignUpRequestDto;
-import com.kimtaeyang.mobidic.common.exception.ApiException;
 import com.kimtaeyang.mobidic.security.jwt.JwtBlacklistService;
 import com.kimtaeyang.mobidic.security.jwt.JwtProvider;
 import com.kimtaeyang.mobidic.user.entity.User;
-import com.kimtaeyang.mobidic.user.repository.UserRepository;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import static com.kimtaeyang.mobidic.common.code.GeneralResponseCode.DUPLICATED_EMAIL;
-import static com.kimtaeyang.mobidic.common.code.GeneralResponseCode.DUPLICATED_NICKNAME;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class AuthService {
     private final AuthenticationManager authenticationManager;
-    private final UserRepository userRepository;
     private final JwtProvider jwtProvider;
-    private final PasswordEncoder passwordEncoder;
     private final JwtBlacklistService jwtBlacklistService;
 
     @Transactional(readOnly = true)
@@ -43,25 +33,6 @@ public class AuthService {
         return LoginResponse.builder()
                 .accessToken(jwtProvider.generateToken(user.getId()))
                 .build();
-    }
-
-    @Transactional
-    public void signUp(@Valid SignUpRequestDto request) {
-        if (userRepository.existsByEmail(request.getEmail())) {
-            throw new ApiException(DUPLICATED_EMAIL);
-        }
-
-        if (userRepository.existsByNickname(request.getNickname())) {
-            throw new ApiException(DUPLICATED_NICKNAME);
-        }
-
-        User user = User.builder()
-                .email(request.getEmail())
-                .nickname(request.getNickname())
-                .password(passwordEncoder.encode(request.getPassword()))
-                .build();
-
-        userRepository.save(user);
     }
 
     public void logout(String token) {

@@ -45,14 +45,18 @@ public class SecurityConfig {
                     if (profiles.contains("dev")) {
                         auth.requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**", "/swagger-resources/**", "/webjars/**").permitAll();
                     }
-                    auth.requestMatchers("/api/auth/login", "/api/auth/signup").permitAll()
+                    auth
+                            .requestMatchers("/api/auth/**", "/api/users/signup").permitAll()
                             .requestMatchers("/error").permitAll()
+                            .requestMatchers("/api/auth/logout").authenticated()
+                            /* Flutter Web 서빙 시
                             .requestMatchers(
                                     "/", "/index.html",
                                     "/main.dart.js", "/flutter.js", "/flutter_bootstrap.js",
                                     "/favicon.png", "/manifest.json",
                                     "/assets/**", "/icons/**", "/flutter_service_worker.js*"
                             ).permitAll()
+                            */
                             .anyRequest().authenticated();
                 })
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)

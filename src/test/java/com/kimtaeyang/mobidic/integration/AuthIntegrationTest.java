@@ -56,14 +56,14 @@ public class AuthIntegrationTest {
                 .build();
 
         //Success
-        mockMvc.perform(post("/api/auth/signup")
+        mockMvc.perform(post("/api/users/signup")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk());
 
         //Fail with duplicated Email
         request.setNickname("test2");
-        mockMvc.perform(post("/api/auth/signup")
+        mockMvc.perform(post("/api/users/signup")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isConflict())
@@ -73,7 +73,7 @@ public class AuthIntegrationTest {
         //Fail with duplicated Nickname
         request.setEmail("test2@test.com");
         request.setNickname("test");
-        mockMvc.perform(post("/api/auth/signup")
+        mockMvc.perform(post("/api/users/signup")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isConflict())
@@ -90,7 +90,7 @@ public class AuthIntegrationTest {
         expectedErrors.put("nickname", "Invalid nickname pattern");
         expectedErrors.put("password", "Invalid password pattern");
 
-        mockMvc.perform(post("/api/auth/signup")
+        mockMvc.perform(post("/api/users/signup")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
@@ -110,7 +110,7 @@ public class AuthIntegrationTest {
                 .build();
 
         //SignUp
-        mockMvc.perform(post("/api/auth/signup")
+        mockMvc.perform(post("/api/users/signup")
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(joinRequest)))
                 .andExpect(status().isOk());
@@ -172,7 +172,7 @@ public class AuthIntegrationTest {
                 .password("testTest1")
                 .build();
 
-        mockMvc.perform(post("/api/auth/signup")
+        mockMvc.perform(post("/api/users/signup")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(joinRequest)))
                 .andExpect(status().isOk());
@@ -203,6 +203,6 @@ public class AuthIntegrationTest {
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.message")
-                        .value(AuthResponseCode.UNAUTHORIZED.getMessage()));
+                        .value(AuthResponseCode.INVALID_TOKEN.getMessage()));
     }
 }

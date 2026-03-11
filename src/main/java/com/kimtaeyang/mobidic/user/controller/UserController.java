@@ -1,5 +1,6 @@
 package com.kimtaeyang.mobidic.user.controller;
 
+import com.kimtaeyang.mobidic.auth.dto.SignUpRequestDto;
 import com.kimtaeyang.mobidic.common.dto.ErrorResponse;
 import com.kimtaeyang.mobidic.common.dto.GeneralResponse;
 import com.kimtaeyang.mobidic.user.dto.UpdateUserRequestDto;
@@ -108,5 +109,29 @@ public class UserController {
 
         return GeneralResponse.toResponseEntity(OK,
                 userService.deactivateUser(user, token));
+    }
+
+    @Operation(
+            summary = "회원가입",
+            description = "회원가입"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "성공"),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "401", description = "인가되지 않은 요청",
+                    content = @Content(schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스",
+                    content = @Content(schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "409", description = "중복된 요청",
+                    content = @Content(schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "500", description = "서버 오류",
+                    content = @Content(schema = @Schema(hidden = true)))
+    })
+    @PostMapping("/signup")
+    public ResponseEntity<Void> signUp(@Valid @RequestBody SignUpRequestDto request) {
+        userService.signUp(request);
+
+        return ResponseEntity.ok().build();
     }
 }
