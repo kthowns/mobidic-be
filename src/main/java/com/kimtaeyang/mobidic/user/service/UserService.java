@@ -88,8 +88,8 @@ public class UserService {
                 .orElseGet(() -> userRepository.save(
                                 User.builder()
                                         .kakaoId(kakaoUserInfo.getId())
-                                        .email(UUID.randomUUID().toString())
-                                        .nickname(kakaoUserInfo.getProperties().get("nickname"))
+                                        .email(kakaoUserInfo.getKakaoAccount().getEmail())
+                                        .nickname(kakaoUserInfo.getKakaoAccount().getProfile().getNickname())
                                         .password(passwordEncoder.encode(UUID.randomUUID().toString()))
                                         .build()
                         )

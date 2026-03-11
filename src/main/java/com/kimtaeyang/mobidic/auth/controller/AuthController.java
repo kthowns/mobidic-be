@@ -1,10 +1,12 @@
 package com.kimtaeyang.mobidic.auth.controller;
 
+import com.kimtaeyang.mobidic.auth.dto.KakaoLoginUrlResponse;
 import com.kimtaeyang.mobidic.auth.dto.LoginRequest;
 import com.kimtaeyang.mobidic.auth.dto.LoginResponse;
-import com.kimtaeyang.mobidic.auth.dto.SignUpRequestDto;
 import com.kimtaeyang.mobidic.auth.service.AuthService;
+import com.kimtaeyang.mobidic.auth.service.KakaoAuthService;
 import com.kimtaeyang.mobidic.common.code.AuthResponseCode;
+import com.kimtaeyang.mobidic.common.code.GeneralResponseCode;
 import com.kimtaeyang.mobidic.common.dto.ErrorResponse;
 import com.kimtaeyang.mobidic.common.dto.GeneralResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -17,11 +19,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -29,6 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "인증 관련 서비스", description = "로그인, 회원가입 등")
 public class AuthController {
     private final AuthService authService;
+    private final KakaoAuthService kakaoAuthService;
 
     @Operation(
             summary = "로그인",
@@ -48,29 +49,6 @@ public class AuthController {
         return GeneralResponse.toResponseEntity(AuthResponseCode.LOGIN_OK, authService.login(request));
     }
 
-    @Operation(
-            summary = "회원가입",
-            description = "회원가입"
-    )
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "성공"),
-            @ApiResponse(responseCode = "400", description = "잘못된 요청",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-            @ApiResponse(responseCode = "401", description = "인가되지 않은 요청",
-                    content = @Content(schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "404", description = "존재하지 않는 리소스",
-                    content = @Content(schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "409", description = "중복된 요청",
-                    content = @Content(schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "500", description = "서버 오류",
-                    content = @Content(schema = @Schema(hidden = true)))
-    })
-    @PostMapping("/signup")
-    public ResponseEntity<Void> signUp(@Valid @RequestBody SignUpRequestDto request) {
-        authService.signUp(request);
-
-        return ResponseEntity.ok().build();
-    }
 
     @Operation(
             summary = "로그아웃",
@@ -97,5 +75,32 @@ public class AuthController {
         authService.logout(token);
 
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/login-url/kakao")
+    public ResponseEntity<GeneralResponse<KakaoLoginUrlResponse>> getKakaoLoginUrl() {
+        return GeneralResponse.toResponseEntity(GeneralResponseCode.OK, kakaoAuthService.getKakaoLoginUrl(false));
+    }
+
+    @GetMapping("/v1/oauth2/kakao")
+    public ResponseEntity<GeneralResponse<LoginResponse>> kakaoLogin(
+            @RequestParam String code
+    ) {
+        return GeneralResponse.toResponseEntity(GeneralResponseCode.OK, kakaoAuthService.kakaoLogin(code, false));
+    }
+
+    @Profile("dev")
+    @GetMapping("/dev/login-url/kakao")
+    public ResponseEntity<GeneralResponse<KakaoLoginUrlResponse>> getDevKakaoLoginUrl() {
+        return GeneralResponse.toResponseEntity(GeneralResponseCode.OK, kakaoAuthService.getKakaoLoginUrl(true));
+    }
+
+
+    @Profile("dev")
+    @GetMapping("/dev/v1/oauth2/kakao")
+    public ResponseEntity<GeneralResponse<LoginResponse>> kakaoDevLogin(
+            @RequestParam String code
+    ) {
+        return GeneralResponse.toResponseEntity(GeneralResponseCode.OK, kakaoAuthService.kakaoLogin(code, true));
     }
 }

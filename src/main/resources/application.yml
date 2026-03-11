@@ -48,6 +48,12 @@ logging:
           sql:
             BasicBinder: trace
 
+
+kakao:
+  rest-api-key: ${KAKAO_REST_API_KEY}
+  redirect-url: ${KAKAO_REDIRECT_URL}
+  client-secret: ${KAKAO_CLIENT_SECRET}
+
 springdoc:
   api-docs:
     enabled: true
