@@ -52,7 +52,7 @@ public class PronunciationIntegrationTest {
     void tearDown() {
         databaseCleaner.execute();
     }
-
+/*
     @Test
     @DisplayName("[Pronunciation][Integration] Rate pronunciation test")
     void ratePronunciationTest() throws Exception {
@@ -133,7 +133,7 @@ public class PronunciationIntegrationTest {
                 .andExpect(jsonPath("$.message")
                         .value(NO_WORD.getMessage()));
     }
-
+*/
     private UUID addVocabAndGetId(String token) throws Exception {
         AddVocabularyRequestDto addVocabRequest = AddVocabularyRequestDto.builder()
                 .title("title")

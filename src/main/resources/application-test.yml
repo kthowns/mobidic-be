@@ -28,5 +28,7 @@ kakao:
   rest-api-key: test
   redirect-url: test
   client-secret: test
+  redirect-frontend-callback-url: test
   dev:
     redirect-url: test
+    redirect-frontend-callback-url: test
