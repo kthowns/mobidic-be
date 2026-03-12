@@ -251,7 +251,7 @@ public class UserIntegrationTest {
                 .password(joinRequest.getPassword())
                 .build();
 
-        mockMvc.perform(post("/api/auth/signup")
+        mockMvc.perform(post("/api/users/signup")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(joinRequest)))
                 .andExpect(status().isOk());

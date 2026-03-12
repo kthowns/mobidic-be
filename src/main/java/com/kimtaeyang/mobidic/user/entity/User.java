@@ -25,6 +25,9 @@ public class User implements UserDetails {
     @Column(name = "id", columnDefinition = "BINARY(16)")
     private UUID id;
 
+    @Column(name = "kakaoId", unique = true)
+    private Long kakaoId;
+
     @Column(name = "email", nullable = false, unique = true)
     private String email;
 

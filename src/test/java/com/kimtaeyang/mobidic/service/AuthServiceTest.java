@@ -1,7 +1,6 @@
 package com.kimtaeyang.mobidic.service;
 
 import com.kimtaeyang.mobidic.auth.dto.LoginRequest;
-import com.kimtaeyang.mobidic.auth.dto.SignUpRequestDto;
 import com.kimtaeyang.mobidic.auth.service.AuthService;
 import com.kimtaeyang.mobidic.config.ServiceTestConfig;
 import com.kimtaeyang.mobidic.security.jwt.JwtProvider;
@@ -26,7 +25,6 @@ import java.util.UUID;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.anyString;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {AuthService.class, ServiceTestConfig.class})
@@ -50,40 +48,6 @@ class AuthServiceTest {
 
     @Autowired
     private AuthenticationManager authenticationManager;
-
-    @Test
-    @DisplayName("[AuthService] Join success")
-    void signUpTestSuccess() {
-        // given
-        String rawPassword = "test1234";
-        String encodedPassword = passwordEncoder.encode(rawPassword);
-
-        SignUpRequestDto request = SignUpRequestDto.builder()
-                .email("user@example.com")
-                .nickname("tester")
-                .password(rawPassword)
-                .build();
-
-        User userToReturn = User.builder()
-                .email(request.getEmail())
-                .nickname(request.getNickname())
-                .password(encodedPassword)
-                .build();
-
-        // mocking
-        Mockito.when(userRepository.existsByNickname(anyString()))
-                .thenReturn(false);
-        Mockito.when(userRepository.existsByEmail(anyString()))
-                .thenReturn(false);
-        Mockito.when(userRepository.save(Mockito.any(User.class)))
-                .thenReturn(userToReturn);
-
-        // when
-        authService.signUp(request);
-
-        // then
-        Mockito.verify(userRepository).save(Mockito.any(User.class));
-    }
 
     @Test
     @DisplayName("[AuthService] Login success")

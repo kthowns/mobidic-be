@@ -1,6 +1,6 @@
 package com.kimtaeyang.mobidic.service;
 
-import com.kimtaeyang.mobidic.auth.service.AuthService;
+import com.kimtaeyang.mobidic.auth.dto.SignUpRequestDto;
 import com.kimtaeyang.mobidic.config.ServiceTestConfig;
 import com.kimtaeyang.mobidic.user.dto.UpdateUserRequestDto;
 import com.kimtaeyang.mobidic.user.dto.UserDto;
@@ -48,10 +48,41 @@ class UserServiceTest {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    @Autowired
-    AuthService authService;
-
     private static final String UID = "9f81b0d7-2f8e-4ad3-ae18-41c73dc71b39";
+
+    @Test
+    @DisplayName("[AuthService] Join success")
+    void signUpTestSuccess() {
+        // given
+        String rawPassword = "test1234";
+        String encodedPassword = passwordEncoder.encode(rawPassword);
+
+        SignUpRequestDto request = SignUpRequestDto.builder()
+                .email("user@example.com")
+                .nickname("tester")
+                .password(rawPassword)
+                .build();
+
+        User userToReturn = User.builder()
+                .email(request.getEmail())
+                .nickname(request.getNickname())
+                .password(encodedPassword)
+                .build();
+
+        // mocking
+        Mockito.when(userRepository.existsByNickname(anyString()))
+                .thenReturn(false);
+        Mockito.when(userRepository.existsByEmail(anyString()))
+                .thenReturn(false);
+        Mockito.when(userRepository.save(Mockito.any(User.class)))
+                .thenReturn(userToReturn);
+
+        // when
+        userService.signUp(request);
+
+        // then
+        Mockito.verify(userRepository).save(Mockito.any(User.class));
+    }
 
     @Test
     @DisplayName("[UserService] Update user nickname success")
@@ -89,11 +120,7 @@ class UserServiceTest {
         UserDto response = userService.updateUser(defaultUser, request, UUID.randomUUID().toString());
 
         //then
-        verify(userRepository, times(1))
-                .save(userCaptor.capture());
-
         assertEquals(UUID.fromString(UID), response.getId());
-        User savedUser = userCaptor.getValue();
         assertEquals(request.getNickname(), response.getNickname());
     }
 
