@@ -13,6 +13,11 @@ public class KakaoProperties {
     private String redirectUrl;
     @Value("${kakao.client-secret}")
     private String clientSecret;
+    @Value("${kakao.redirect-frontend-callback-url}")
+    private String redirectFrontendCallbackUrl;
+
+    @Value("${kakao.dev.redirect-frontend-callback-url}")
+    private String devRedirectFrontendCallbackUrl;
     @Value("${kakao.dev.redirect-url}")
     private String devRedirectUrl;
 }

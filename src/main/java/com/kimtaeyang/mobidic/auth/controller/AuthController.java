@@ -5,6 +5,7 @@ import com.kimtaeyang.mobidic.auth.dto.LoginRequest;
 import com.kimtaeyang.mobidic.auth.dto.LoginResponse;
 import com.kimtaeyang.mobidic.auth.service.AuthService;
 import com.kimtaeyang.mobidic.auth.service.KakaoAuthService;
+import com.kimtaeyang.mobidic.auth.util.KakaoProperties;
 import com.kimtaeyang.mobidic.common.code.AuthResponseCode;
 import com.kimtaeyang.mobidic.common.code.GeneralResponseCode;
 import com.kimtaeyang.mobidic.common.dto.ErrorResponse;
@@ -19,9 +20,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.annotation.Profile;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.view.RedirectView;
 
 @RestController
 @RequiredArgsConstructor
@@ -30,6 +31,7 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
     private final AuthService authService;
     private final KakaoAuthService kakaoAuthService;
+    private final KakaoProperties kakaoProperties;
 
     @Operation(
             summary = "로그인",
@@ -78,29 +80,20 @@ public class AuthController {
     }
 
     @GetMapping("/login-url/kakao")
-    public ResponseEntity<GeneralResponse<KakaoLoginUrlResponse>> getKakaoLoginUrl() {
-        return GeneralResponse.toResponseEntity(GeneralResponseCode.OK, kakaoAuthService.getKakaoLoginUrl(false));
+    public ResponseEntity<GeneralResponse<KakaoLoginUrlResponse>> getKakaoLoginUrl(
+            @RequestParam(value = "isDev", defaultValue = "false") boolean isDev) {
+        return GeneralResponse.toResponseEntity(GeneralResponseCode.OK, kakaoAuthService.getKakaoLoginUrl(isDev));
     }
 
     @GetMapping("/v1/oauth2/kakao")
-    public ResponseEntity<GeneralResponse<LoginResponse>> kakaoLogin(
-            @RequestParam String code
+    public RedirectView kakaoLogin(
+            @RequestParam String code,
+            @RequestParam(value = "isDev", defaultValue = "false") boolean isDev
     ) {
-        return GeneralResponse.toResponseEntity(GeneralResponseCode.OK, kakaoAuthService.kakaoLogin(code, false));
-    }
+        String baseUrl = isDev ? kakaoProperties.getDevRedirectFrontendCallbackUrl()
+                : kakaoProperties.getRedirectFrontendCallbackUrl();
 
-    @Profile("dev")
-    @GetMapping("/dev/login-url/kakao")
-    public ResponseEntity<GeneralResponse<KakaoLoginUrlResponse>> getDevKakaoLoginUrl() {
-        return GeneralResponse.toResponseEntity(GeneralResponseCode.OK, kakaoAuthService.getKakaoLoginUrl(true));
-    }
-
-
-    @Profile("dev")
-    @GetMapping("/dev/v1/oauth2/kakao")
-    public ResponseEntity<GeneralResponse<LoginResponse>> kakaoDevLogin(
-            @RequestParam String code
-    ) {
-        return GeneralResponse.toResponseEntity(GeneralResponseCode.OK, kakaoAuthService.kakaoLogin(code, true));
+        final LoginResponse loginResponse = kakaoAuthService.kakaoLogin(code, isDev);
+        return new RedirectView(baseUrl + "?accessToken="+loginResponse.getAccessToken());
     }
 }
