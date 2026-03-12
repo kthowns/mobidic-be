@@ -76,6 +76,8 @@ jobs:
             echo "KAKAO_FRONTEND_CALLBACK_URL=${{ secrets.KAKAO_FRONTEND_CALLBACK_URL }}" >> .env
             echo "KAKAO_DEV_FRONTEND_CALLBACK_URL=${{ secrets.KAKAO_DEV_FRONTEND_CALLBACK_URL }}" >> .env
             echo "KAKAO_DEV_REDIRECT_URL=${{ secrets.KAKAO_DEV_REDIRECT_URL }}" >> .env
-    
+            echo "FLASK_HOST=${{ secrets.FLASK_HOST }}" >> .env
+            echo "JASYPT_SECRET=${{ secrets.JASYPT_SECRET }}" >> .env
+
             sudo docker compose pull
             sudo docker compose up -d
