@@ -68,9 +68,6 @@ jobs:
             echo "JWT_ACCESS_EXP=${{ secrets.JWT_EXPIRATION_SECONDS }}" >> .env
             echo "IMAGE_NAME=${{ secrets.IMAGE_NAME }}" >> .env
             echo "DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }}" >> .env
-            echo "REST_API_KEY=${{ secrets.REST_API_KEY }}" >> .env
-            echo "REDIRECT_URI=${{ secrets.REDIRECT_URI }}" >> .env
-            echo "CLIENT_SECRET=${{ secrets.CLIENT_SECRET }}" >> .env
             echo "REDIS_PORT=${{ secrets.REDIS_PORT }}" >> .env
             echo "REDIS_HOST=${{ secrets.REDIS_HOST }}" >> .env
             echo "KAKAO_REST_API_KEY=${{ secrets.KAKAO_REST_API_KEY }}" >> .env
