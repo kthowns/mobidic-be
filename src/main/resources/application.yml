@@ -53,6 +53,10 @@ kakao:
   rest-api-key: ${KAKAO_REST_API_KEY}
   redirect-url: ${KAKAO_REDIRECT_URL}
   client-secret: ${KAKAO_CLIENT_SECRET}
+  redirect-frontend-callback-url: ${KAKAO_FRONTEND_CALL_BACK_URL}
+  dev:
+    redirect-url: ${KAKAO_DEV_REDIRECT_URL}
+    redirect-frontend-callback-url: ${KAKAO_DEV_FRONTEND_CALL_BACK_URL}
 
 springdoc:
   api-docs:
