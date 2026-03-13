@@ -2,6 +2,7 @@ package com.kimtaeyang.mobidic.security.jwt;
 
 import com.kimtaeyang.mobidic.security.service.UserDetailsServiceImpl;
 import io.jsonwebtoken.*;
+import io.jsonwebtoken.security.SignatureException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -42,7 +43,7 @@ public class JwtProvider {
                     .build()
                     .parseSignedClaims(token);
             return true;
-        } catch (SecurityException | MalformedJwtException e) {
+        } catch (SecurityException | MalformedJwtException | SignatureException e) {
             log.info("Invalid JWT signature.");
             log.trace("Invalid JWT signature trace: {}", e.getMessage());
         } catch (ExpiredJwtException e) {

@@ -15,7 +15,6 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.security.SignatureException;
 
 
 @Component
@@ -47,12 +46,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             SecurityContextHolder.clearContext();
             authenticationEntryPoint.commence(request, response, e);
             return;
-        } catch (SignatureException e) {
-            SecurityContextHolder.clearContext();
-            authenticationEntryPoint.commence(request, response, e.getMessage().toString());
-            return;
         }
-
         filterChain.doFilter(request, response);
     }
 
