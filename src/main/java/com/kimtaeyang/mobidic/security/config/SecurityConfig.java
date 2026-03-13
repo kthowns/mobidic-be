@@ -1,7 +1,7 @@
 package com.kimtaeyang.mobidic.security.config;
 
-import com.kimtaeyang.mobidic.common.exception.AuthAccessDeniedHandler;
-import com.kimtaeyang.mobidic.common.exception.AuthAuthenticationEntryPoint;
+import com.kimtaeyang.mobidic.security.exception.AuthAccessDeniedHandler;
+import com.kimtaeyang.mobidic.security.exception.AuthAuthenticationEntryPoint;
 import com.kimtaeyang.mobidic.security.jwt.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;

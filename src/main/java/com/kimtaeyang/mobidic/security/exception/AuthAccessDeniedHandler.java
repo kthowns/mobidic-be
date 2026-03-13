@@ -1,4 +1,4 @@
-package com.kimtaeyang.mobidic.common.exception;
+package com.kimtaeyang.mobidic.security.exception;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kimtaeyang.mobidic.common.dto.ErrorResponse;

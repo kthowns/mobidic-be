@@ -7,6 +7,9 @@ import com.kimtaeyang.mobidic.dictionary.repository.WordRepository;
 import com.kimtaeyang.mobidic.dictionary.service.DefinitionService;
 import com.kimtaeyang.mobidic.dictionary.service.VocabularyService;
 import com.kimtaeyang.mobidic.dictionary.service.WordService;
+import com.kimtaeyang.mobidic.preset.repository.PresetVocabularyRepository;
+import com.kimtaeyang.mobidic.preset.repository.PresetWordRepository;
+import com.kimtaeyang.mobidic.preset.service.PresetVocabularyService;
 import com.kimtaeyang.mobidic.quiz.service.CryptoService;
 import com.kimtaeyang.mobidic.security.jwt.JwtBlacklistService;
 import com.kimtaeyang.mobidic.security.jwt.JwtProperties;
@@ -30,6 +33,16 @@ public class ServiceTestConfig {
     @Bean
     public DifficultyUtil difficultyUtil() {
         return new DifficultyUtil();
+    }
+
+    @Bean
+    public PresetVocabularyRepository presetVocabularyRepository() {
+        return Mockito.mock(PresetVocabularyRepository.class);
+    }
+
+    @Bean
+    public PresetWordRepository presetWordRepository() {
+        return Mockito.mock(PresetWordRepository.class);
     }
 
     @Bean
@@ -70,6 +83,11 @@ public class ServiceTestConfig {
     @Bean
     public WordService wordService() {
         return Mockito.mock(WordService.class);
+    }
+
+    @Bean
+    public PresetVocabularyService presetVocabularyService() {
+        return Mockito.mock(PresetVocabularyService.class);
     }
 
     @Bean
