@@ -3,7 +3,6 @@ package com.kimtaeyang.mobidic.auth.service;
 import com.kimtaeyang.mobidic.auth.dto.KakaoLoginUrlResponse;
 import com.kimtaeyang.mobidic.auth.dto.KakaoTokenResponse;
 import com.kimtaeyang.mobidic.auth.dto.KakaoUserInfo;
-import com.kimtaeyang.mobidic.auth.dto.LoginResponse;
 import com.kimtaeyang.mobidic.auth.util.KakaoProperties;
 import com.kimtaeyang.mobidic.common.code.GeneralResponseCode;
 import com.kimtaeyang.mobidic.common.code.KakaoApiUrl;
@@ -16,6 +15,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -34,14 +35,14 @@ public class KakaoAuthService {
     private final KakaoProperties kakaoProperties;
     private final UserService userService;
 
-    public LoginResponse kakaoLogin(String authCode, boolean isDev) {
+    public String kakaoLogin(String authCode, boolean isDev) {
         String accessToken = getKakaoAccessToken(authCode, isDev);
         KakaoUserInfo kakaoUserInfo = getKakaoUserInfo(accessToken);
         User user = userService.getUserOrCreate(kakaoUserInfo);
+        SecurityContextHolder.getContext().setAuthentication(
+                new UsernamePasswordAuthenticationToken(user, null));
 
-        return LoginResponse.builder()
-                .accessToken(jwtProvider.generateToken(user.getId()))
-                .build();
+        return jwtProvider.generateToken(user.getId());
     }
 
     public KakaoLoginUrlResponse getKakaoLoginUrl(boolean isDev) {
