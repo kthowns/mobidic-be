@@ -6,6 +6,7 @@ import com.kimtaeyang.mobidic.common.dto.GeneralResponse;
 import com.kimtaeyang.mobidic.user.dto.UpdateUserRequestDto;
 import com.kimtaeyang.mobidic.user.dto.UserDto;
 import com.kimtaeyang.mobidic.user.entity.User;
+import com.kimtaeyang.mobidic.user.facade.UserFacade;
 import com.kimtaeyang.mobidic.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -31,6 +32,7 @@ import static com.kimtaeyang.mobidic.common.code.GeneralResponseCode.OK;
 @Tag(name = "사용자 관련 서비스", description = "닉네임 및 패스워드 변경, 회원탈퇴 등")
 public class UserController {
     private final UserService userService;
+    private final UserFacade userFacade;
 
     @Operation(
             summary = "현재사용자 정보 조회",
@@ -130,7 +132,7 @@ public class UserController {
     })
     @PostMapping("/signup")
     public ResponseEntity<Void> signUp(@Valid @RequestBody SignUpRequestDto request) {
-        userService.signUp(request);
+        userFacade.signUp(request);
 
         return ResponseEntity.ok().build();
     }

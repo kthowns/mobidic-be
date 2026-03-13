@@ -10,6 +10,7 @@ import com.kimtaeyang.mobidic.common.code.AuthResponseCode;
 import com.kimtaeyang.mobidic.common.code.GeneralResponseCode;
 import com.kimtaeyang.mobidic.common.dto.ErrorResponse;
 import com.kimtaeyang.mobidic.common.dto.GeneralResponse;
+import com.kimtaeyang.mobidic.user.facade.UserFacade;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -32,6 +33,7 @@ public class AuthController {
     private final AuthService authService;
     private final KakaoAuthService kakaoAuthService;
     private final KakaoProperties kakaoProperties;
+    private final UserFacade userFacade;
 
     @Operation(
             summary = "로그인",
@@ -93,7 +95,7 @@ public class AuthController {
         String baseUrl = isDev ? kakaoProperties.getDevRedirectFrontendCallbackUrl()
                 : kakaoProperties.getRedirectFrontendCallbackUrl();
 
-        final LoginResponse loginResponse = kakaoAuthService.kakaoLogin(code, isDev);
-        return new RedirectView(baseUrl + "?accessToken="+loginResponse.getAccessToken());
+        final LoginResponse loginResponse = userFacade.kakaoLogin(code, isDev);
+        return new RedirectView(baseUrl + "?accessToken=" + loginResponse.getAccessToken());
     }
 }

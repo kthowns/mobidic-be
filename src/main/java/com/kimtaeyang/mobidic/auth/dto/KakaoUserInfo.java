@@ -5,12 +5,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
 
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-@ToString
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class KakaoUserInfo {
     private Long id;
@@ -20,7 +18,6 @@ public class KakaoUserInfo {
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
-    @ToString
     @JsonIgnoreProperties
     public static class KakaoAccount {
         private String email;
@@ -31,7 +28,6 @@ public class KakaoUserInfo {
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
-    @ToString
     @JsonIgnoreProperties
     public static class Profile {
         private String nickname;

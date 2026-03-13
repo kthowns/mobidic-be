@@ -47,7 +47,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             authenticationEntryPoint.commence(request, response, e);
             return;
         }
-
         filterChain.doFilter(request, response);
     }
 

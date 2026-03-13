@@ -25,4 +25,6 @@ public interface VocabularyRepository extends JpaRepository<Vocabulary, UUID>, V
     Optional<Vocabulary> findForUpdate(@Param("id") UUID id, @Param("userId") UUID userId);
 
     boolean existsByIdAndUser_Id(UUID id, UUID userId);
+
+    boolean existsByUser(User user);
 }
