@@ -14,8 +14,7 @@ import org.springframework.context.annotation.Profile;
 
 @OpenAPIDefinition(
         servers = {
-                @Server(url = "http://www.mobidic.shop", description = "임시 개발 서버"),
-                @Server(url = "https://www.mobidic.shop", description = "개발 서버"),
+                @Server(url = "https://mobidic.kthowns.cloud", description = "배포 서버"),
                 @Server(url = "http://localhost:8080", description = "로컬 서버")
         })
 @Configuration

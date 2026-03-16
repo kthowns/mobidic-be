@@ -48,6 +48,7 @@ public class SecurityConfig {
                     auth
                             .requestMatchers("/api/auth/**", "/api/users/signup").permitAll()
                             .requestMatchers("/error").permitAll()
+                            .requestMatchers("/api/api-spec", "/api/api-spec/swagger-config", "/api/my-docs", "/api/swagger-ui/**").permitAll()
                             .requestMatchers("/api/auth/logout").authenticated()
                             /* Flutter Web 서빙 시
                             .requestMatchers(
