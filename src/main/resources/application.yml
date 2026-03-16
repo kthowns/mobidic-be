@@ -61,8 +61,10 @@ kakao:
 
 springdoc:
   api-docs:
+    path: /api/api-spec
     enabled: true
   swagger-ui:
+    path: /api/my-docs
     enabled: true
   override-with-generic-response: false
   use-fqn: true
