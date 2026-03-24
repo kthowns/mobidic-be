@@ -6,7 +6,7 @@
 ---
 
 ## 🛠 Tech Stack
-- **Backend:** Java 21, Spring Boot 3.4.3, Spring Data JPA, Spring Security, QueryDSL
+- **Backend:** Java 21, [Spring Boot](https://github.com/kthowns/mobidic-be) 3.4.3, Spring Data JPA, Spring Security, QueryDSL
 - **Frontend:** [Flutter](https://github.com/kthowns/mobidic-fe) (Cross-Platform), [Android](https://github.com/kthowns/custom-voca) (Native Legacy)
 - **Database & Cache:** MySQL, Redis
 - **Model Serving:** Python (Flask, Gunicorn), Whisper STT
