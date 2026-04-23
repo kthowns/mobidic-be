@@ -2,7 +2,7 @@ package com.kimtaeyang.mobidic.integration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kimtaeyang.mobidic.auth.dto.LoginRequest;
-import com.kimtaeyang.mobidic.auth.dto.SignUpRequestDto;
+import com.kimtaeyang.mobidic.user.dto.SignUpRequestDto;
 import com.kimtaeyang.mobidic.dictionary.dto.AddVocabularyRequestDto;
 import com.kimtaeyang.mobidic.dictionary.dto.AddWordRequestDto;
 import com.kimtaeyang.mobidic.dictionary.dto.VocabularyDto;

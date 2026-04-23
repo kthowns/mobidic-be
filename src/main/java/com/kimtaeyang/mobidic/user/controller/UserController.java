@@ -1,6 +1,6 @@
 package com.kimtaeyang.mobidic.user.controller;
 
-import com.kimtaeyang.mobidic.auth.dto.SignUpRequestDto;
+import com.kimtaeyang.mobidic.user.dto.SignUpRequestDto;
 import com.kimtaeyang.mobidic.common.dto.ErrorResponse;
 import com.kimtaeyang.mobidic.common.dto.GeneralResponse;
 import com.kimtaeyang.mobidic.user.dto.UpdateUserRequestDto;
