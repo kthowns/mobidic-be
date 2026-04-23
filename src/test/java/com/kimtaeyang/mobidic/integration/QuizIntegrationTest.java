@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kimtaeyang.mobidic.auth.dto.LoginRequest;
-import com.kimtaeyang.mobidic.auth.dto.SignUpRequestDto;
+import com.kimtaeyang.mobidic.user.dto.SignUpRequestDto;
 import com.kimtaeyang.mobidic.dictionary.dto.AddDefinitionRequestDto;
 import com.kimtaeyang.mobidic.dictionary.dto.AddVocabularyRequestDto;
 import com.kimtaeyang.mobidic.dictionary.dto.AddWordRequestDto;

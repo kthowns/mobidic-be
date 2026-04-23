@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${term.type.name()}">이용약관</title>
+    <script th:src="@{/js/marked.min.js}"></script>
+    <style>
+        .term-container { max-width: 800px; margin: 40px auto; padding: 0 20px; color: #333; line-height: 1.6; }
+        .term-header { border-bottom: 2px solid #333; padding-bottom: 10px; margin-bottom: 20px; }
+        .term-meta { color: #666; font-size: 0.9em; text-align: right; margin-top: 5px; }
+        /* 마크다운 렌더링을 위해 white-space: pre-wrap 제거 */
+        .term-content { background-color: #f9f9f9; padding: 20px; border: 1px solid #ddd; word-break: break-all; }
+        .term-content h2 { margin-top: 20px; border-bottom: 1px solid #eee; padding-bottom: 5px; }
+        .required-tag { color: #e74c3c; font-size: 0.8em; vertical-align: middle; }
+        .app-info { font-weight: bold; color: #444; }
+    </style>
+</head>
+<body>
+<div class="term-container">
+    <header class="term-header">
+        <h2>
+            <span th:text="${term.type.name}">SERVICE</span>
+            <span th:if="${term.required}" class="required-tag">(필수)</span>
+            <span th:unless="${term.required}" class="required-tag" style="color: #666;">(선택)</span>
+        </h2>
+        <div class="term-meta">
+            <div class="app-info">
+                <span>mobidic</span> | <span>운영자: kthowns</span>
+            </div>
+            <span>버전: <span th:text="${term.version}">1.0</span></span> |
+            <span>시행일: <span th:text="${#temporals.format(term.createdAt, 'yyyy-MM-dd')}">2026-04-22</span></span>
+        </div>
+    </header>
+
+    <main id="content" class="term-content" style="display:none;" th:text="${term.content}">
+        약관 본문 내용(Markdown)
+    </main>
+    <main id="rendered-content" class="term-content"></main>
+</div>
+
+<script>
+    // 페이지 로드 시 마크다운 변환
+    document.addEventListener("DOMContentLoaded", function() {
+        const rawContent = document.getElementById('content').textContent;
+        document.getElementById('rendered-content').innerHTML = marked.parse(rawContent);
+    });
+</script>
+</body>
+</html>

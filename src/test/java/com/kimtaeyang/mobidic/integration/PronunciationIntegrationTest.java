@@ -2,34 +2,23 @@ package com.kimtaeyang.mobidic.integration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kimtaeyang.mobidic.auth.dto.LoginRequest;
-import com.kimtaeyang.mobidic.auth.dto.SignUpRequestDto;
 import com.kimtaeyang.mobidic.dictionary.dto.AddVocabularyRequestDto;
 import com.kimtaeyang.mobidic.dictionary.dto.AddWordRequestDto;
 import com.kimtaeyang.mobidic.security.jwt.JwtProvider;
+import com.kimtaeyang.mobidic.user.dto.SignUpRequestDto;
 import com.kimtaeyang.mobidic.util.DatabaseCleaner;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
-import java.io.FileInputStream;
-import java.nio.file.Paths;
 import java.util.UUID;
 
-import static com.kimtaeyang.mobidic.common.code.AuthResponseCode.UNAUTHORIZED;
-import static com.kimtaeyang.mobidic.common.code.GeneralResponseCode.NO_WORD;
-import static com.kimtaeyang.mobidic.common.code.GeneralResponseCode.TOO_BIG_FILE_SIZE;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -52,88 +41,89 @@ public class PronunciationIntegrationTest {
     void tearDown() {
         databaseCleaner.execute();
     }
-/*
-    @Test
-    @DisplayName("[Pronunciation][Integration] Rate pronunciation test")
-    void ratePronunciationTest() throws Exception {
-        String token = loginAndGetToken("test@test.com", "test");
-        UUID vocabId = addVocabAndGetId(token);
-        UUID wordId = addWordAndGetId(vocabId, token, "hello");
 
-        MockMultipartFile file = new MockMultipartFile(
-                "file", // 파일 파라미터 이름
-                "hello.m4a", // 파일 이름
-                "audio/m4a", // 파일 MIME 타입
-                new FileInputStream(Paths.get("src/test/resources/hello.m4a").toFile()) // 상대 경로
-        );
+    /*
+        @Test
+        @DisplayName("[Pronunciation][Integration] Rate pronunciation test")
+        void ratePronunciationTest() throws Exception {
+            String token = loginAndGetToken("test@test.com", "test");
+            UUID vocabId = addVocabAndGetId(token);
+            UUID wordId = addWordAndGetId(vocabId, token, "hello");
 
-        MockMultipartFile largeFile = new MockMultipartFile(
-                "file", // 파일 파라미터 이름
-                "napal.mp3", // 파일 이름
-                "audio/mp3", // 파일 MIME 타입
-                new FileInputStream(Paths.get("src/test/resources/napal.mp3").toFile()) // 상대 경로
-        );
+            MockMultipartFile file = new MockMultipartFile(
+                    "file", // 파일 파라미터 이름
+                    "hello.m4a", // 파일 이름
+                    "audio/m4a", // 파일 MIME 타입
+                    new FileInputStream(Paths.get("src/test/resources/hello.m4a").toFile()) // 상대 경로
+            );
 
-        //Success high rate
-        MvcResult result = mockMvc.perform(multipart("/api/words/" + wordId + "/pronunciation")
-                        .file(file) // 파일 파라미터 추가
-                        .header("Authorization", "Bearer " + token)) // 문자열 파라미터 추가
-                .andExpect(status().isOk()) // 응답 상태 200
-                .andExpect(jsonPath("$.data")
-                        .isNotEmpty())
-                .andReturn();
+            MockMultipartFile largeFile = new MockMultipartFile(
+                    "file", // 파일 파라미터 이름
+                    "napal.mp3", // 파일 이름
+                    "audio/mp3", // 파일 MIME 타입
+                    new FileInputStream(Paths.get("src/test/resources/napal.mp3").toFile()) // 상대 경로
+            );
 
-        String json = result.getResponse().getContentAsString();
-        double rate = Double.parseDouble(objectMapper.readTree(json).path("data").asText());
+            //Success high rate
+            MvcResult result = mockMvc.perform(multipart("/api/words/" + wordId + "/pronunciation")
+                            .file(file) // 파일 파라미터 추가
+                            .header("Authorization", "Bearer " + token)) // 문자열 파라미터 추가
+                    .andExpect(status().isOk()) // 응답 상태 200
+                    .andExpect(jsonPath("$.data")
+                            .isNotEmpty())
+                    .andReturn();
 
-        assertTrue(rate > 0.8);
+            String json = result.getResponse().getContentAsString();
+            double rate = Double.parseDouble(objectMapper.readTree(json).path("data").asText());
 
-        //Success low rate
-        UUID wordId2 = addWordAndGetId(vocabId, token, "yellow");
+            assertTrue(rate > 0.8);
 
-        result = mockMvc.perform(multipart("/api/words/" + wordId2 + "/pronunciation")
-                        .file(file)
-                        .header("Authorization", "Bearer " + token))
-                .andExpect(status().isOk())
-                .andReturn();
+            //Success low rate
+            UUID wordId2 = addWordAndGetId(vocabId, token, "yellow");
 
-        json = result.getResponse().getContentAsString();
-        rate = Double.parseDouble(objectMapper.readTree(json).path("data").asText());
+            result = mockMvc.perform(multipart("/api/words/" + wordId2 + "/pronunciation")
+                            .file(file)
+                            .header("Authorization", "Bearer " + token))
+                    .andExpect(status().isOk())
+                    .andReturn();
 
-        assertTrue(rate < 0.8);
+            json = result.getResponse().getContentAsString();
+            rate = Double.parseDouble(objectMapper.readTree(json).path("data").asText());
 
-        //Fail with too big file
-        mockMvc.perform(multipart("/api/words/" + wordId + "/pronunciation")
-                        .file(largeFile)
-                        .header("Authorization", "Bearer " + token))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message")
-                        .value(TOO_BIG_FILE_SIZE.getMessage()));
+            assertTrue(rate < 0.8);
 
-        //Fail without token
-        mockMvc.perform(multipart("/api/words/" + wordId + "/pronunciation")
-                        .file(largeFile))
-                .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.message")
-                        .value(UNAUTHORIZED.getMessage()));
+            //Fail with too big file
+            mockMvc.perform(multipart("/api/words/" + wordId + "/pronunciation")
+                            .file(largeFile)
+                            .header("Authorization", "Bearer " + token))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.message")
+                            .value(TOO_BIG_FILE_SIZE.getMessage()));
 
-        //Fail with unauthorized token
-        mockMvc.perform(multipart("/api/words/" + wordId + "/pronunciation")
-                        .file(largeFile)
-                        .header("Authorization", "Bearer " + jwtProvider.generateToken(UUID.randomUUID())))
-                .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.message")
-                        .value(UNAUTHORIZED.getMessage()));
+            //Fail without token
+            mockMvc.perform(multipart("/api/words/" + wordId + "/pronunciation")
+                            .file(largeFile))
+                    .andExpect(status().isUnauthorized())
+                    .andExpect(jsonPath("$.message")
+                            .value(UNAUTHORIZED.getMessage()));
 
-        //Fail with no resource
-        mockMvc.perform(multipart("/api/words/" + UUID.randomUUID() + "/pronunciation")
-                        .file(file)
-                        .header("Authorization", "Bearer " + token))
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.message")
-                        .value(NO_WORD.getMessage()));
-    }
-*/
+            //Fail with unauthorized token
+            mockMvc.perform(multipart("/api/words/" + wordId + "/pronunciation")
+                            .file(largeFile)
+                            .header("Authorization", "Bearer " + jwtProvider.generateToken(UUID.randomUUID())))
+                    .andExpect(status().isUnauthorized())
+                    .andExpect(jsonPath("$.message")
+                            .value(UNAUTHORIZED.getMessage()));
+
+            //Fail with no resource
+            mockMvc.perform(multipart("/api/words/" + UUID.randomUUID() + "/pronunciation")
+                            .file(file)
+                            .header("Authorization", "Bearer " + token))
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.message")
+                            .value(NO_WORD.getMessage()));
+        }
+    */
     private UUID addVocabAndGetId(String token) throws Exception {
         AddVocabularyRequestDto addVocabRequest = AddVocabularyRequestDto.builder()
                 .title("title")

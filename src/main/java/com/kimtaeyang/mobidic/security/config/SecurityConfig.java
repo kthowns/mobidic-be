@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -42,13 +43,17 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> {
+                    /*
                     if (profiles.contains("dev")) {
                         auth.requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**", "/swagger-resources/**", "/webjars/**").permitAll();
                     }
+                    */
                     auth
                             .requestMatchers("/api/auth/**", "/api/users/signup").permitAll()
                             .requestMatchers("/error").permitAll()
-                            .requestMatchers("/api/api-spec", "/api/api-spec/swagger-config", "/api/my-docs", "/api/swagger-ui/**").permitAll()
+                            .requestMatchers(HttpMethod.GET, "/terms/**", "/api/terms", "/js/marked.min.js").permitAll()
+                            .requestMatchers(HttpMethod.POST, "/api/terms").hasRole("ADMIN")
+                            .requestMatchers(HttpMethod.GET, "/api/api-spec", "/api/api-spec/swagger-config", "/api/my-docs", "/api/swagger-ui/**").permitAll()
                             .requestMatchers("/api/auth/logout").authenticated()
                             /* Flutter Web 서빙 시
                             .requestMatchers(

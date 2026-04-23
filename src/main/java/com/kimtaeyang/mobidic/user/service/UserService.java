@@ -1,11 +1,11 @@
 package com.kimtaeyang.mobidic.user.service;
 
 import com.kimtaeyang.mobidic.auth.dto.KakaoUserInfo;
-import com.kimtaeyang.mobidic.auth.dto.SignUpRequestDto;
 import com.kimtaeyang.mobidic.auth.service.AuthService;
 import com.kimtaeyang.mobidic.common.code.GeneralResponseCode;
 import com.kimtaeyang.mobidic.common.exception.ApiException;
 import com.kimtaeyang.mobidic.security.jwt.JwtBlacklistService;
+import com.kimtaeyang.mobidic.user.dto.SignUpRequestDto;
 import com.kimtaeyang.mobidic.user.dto.UpdateUserRequestDto;
 import com.kimtaeyang.mobidic.user.dto.UserDto;
 import com.kimtaeyang.mobidic.user.entity.User;
@@ -13,8 +13,6 @@ import com.kimtaeyang.mobidic.user.repository.UserRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,7 +34,7 @@ public class UserService {
     private final AuthService authService;
 
     @Transactional
-    public void signUp(@Valid SignUpRequestDto request) {
+    public User signUp(@Valid SignUpRequestDto request) {
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new ApiException(DUPLICATED_EMAIL);
         }
@@ -51,10 +49,7 @@ public class UserService {
                 .password(passwordEncoder.encode(request.getPassword()))
                 .build();
 
-        user = userRepository.save(user);
-
-        SecurityContextHolder.getContext().setAuthentication(
-                new UsernamePasswordAuthenticationToken(user, null));
+        return userRepository.save(user);
     }
 
     @Transactional
