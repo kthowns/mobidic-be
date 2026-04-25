@@ -41,13 +41,39 @@ jobs:
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.IMAGE_NAME }}:latest
 
-      - name: Copy docker-compose.yml to SERVER
+      - name: Create .env file
+        run: |
+          echo "DB_HOST=${{ secrets.DB_HOST }}" >> .env
+          echo "DB_ROOT_PASSWORD=${{ secrets.DB_ROOT_PASSWORD }}" >> .env
+          echo "DB_USER=${{ secrets.DB_USER }}" >> .env
+          echo "DB_PORT=${{ secrets.DB_PORT }}" >> .env
+          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
+          echo "DB_NAME=${{ secrets.DB_NAME }}" >> .env
+          echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env
+          echo "JWT_ACCESS_EXP=${{ secrets.JWT_ACCESS_EXP }}" >> .env
+          echo "IMAGE_NAME=${{ secrets.IMAGE_NAME }}" >> .env
+          echo "DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }}" >> .env
+          echo "REDIS_PORT=${{ secrets.REDIS_PORT }}" >> .env
+          echo "REDIS_HOST=${{ secrets.REDIS_HOST }}" >> .env
+          echo "KAKAO_REST_API_KEY=${{ secrets.KAKAO_REST_API_KEY }}" >> .env
+          echo "KAKAO_REDIRECT_URL=${{ secrets.KAKAO_REDIRECT_URL }}" >> .env
+          echo "KAKAO_ANDROID_REDIRECT_URL=${{ secrets.KAKAO_ANDROID_REDIRECT_URL }}" >> .env
+          echo "KAKAO_CLIENT_SECRET=${{ secrets.KAKAO_CLIENT_SECRET }}" >> .env
+          echo "KAKAO_FRONTEND_CALLBACK_URL=${{ secrets.KAKAO_FRONTEND_CALLBACK_URL }}" >> .env
+          echo "KAKAO_APP_SCHEME_CALLBACK_URL=${{ secrets.KAKAO_APP_SCHEME_CALLBACK_URL }}" >> .env
+          echo "KAKAO_DEV_FRONTEND_CALLBACK_URL=${{ secrets.KAKAO_DEV_FRONTEND_CALLBACK_URL }}" >> .env
+          echo "KAKAO_DEV_REDIRECT_URL=${{ secrets.KAKAO_DEV_REDIRECT_URL }}" >> .env
+          echo "KAKAO_DEV_ANDROID_REDIRECT_URL=${{ secrets.KAKAO_DEV_ANDROID_REDIRECT_URL }}" >> .env
+          echo "FLASK_HOST=${{ secrets.FLASK_HOST }}" >> .env
+          echo "JASYPT_SECRET=${{ secrets.JASYPT_SECRET }}" >> .env
+
+      - name: Copy docker-compose.yml and .env to SERVER
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USERNAME }}
           key: ${{ secrets.SERVER_SSH_KEY }}
-          source: "docker-compose.yml"
+          source: "docker-compose.yml, .env" # 두 파일 모두 전송
           target: "${{ secrets.WORK_DIRECTORY }}"
 
       - name: Deploy to SERVER
@@ -56,31 +82,7 @@ jobs:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USERNAME }}
           key: ${{ secrets.SERVER_SSH_KEY }}
-          script: | # Windows 환경으로 수정, Linux 환경일 경우 드라이브 명시나 sudo 관련 수정 필요
+          script: |
             cd /d ${{ secrets.WORK_DIRECTORY }}
-            echo "DB_HOST=${{ secrets.DB_HOST }}" > .env
-            echo "DB_ROOT_PASSWORD=${{ secrets.DB_ROOT_PASSWORD }}" >> .env
-            echo "DB_USER=${{ secrets.DB_USER }}" >> .env
-            echo "DB_PORT=${{ secrets.DB_PORT }}" >> .env
-            echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
-            echo "DB_NAME=${{ secrets.DB_NAME }}" >> .env
-            echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env
-            echo "JWT_ACCESS_EXP=${{ secrets.JWT_ACCESS_EXP }}" >> .env
-            echo "IMAGE_NAME=${{ secrets.IMAGE_NAME }}" >> .env
-            echo "DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }}" >> .env
-            echo "REDIS_PORT=${{ secrets.REDIS_PORT }}" >> .env
-            echo "REDIS_HOST=${{ secrets.REDIS_HOST }}" >> .env
-            echo "KAKAO_REST_API_KEY=${{ secrets.KAKAO_REST_API_KEY }}" >> .env
-            echo "KAKAO_REDIRECT_URL=${{ secrets.KAKAO_REDIRECT_URL }}" >> .env
-            echo "KAKAO_ANDROID_REDIRECT_URL=${{ secrets.KAKAO_ANDROID_REDIRECT_URL }}" >> .env
-            echo "KAKAO_CLIENT_SECRET=${{ secrets.KAKAO_CLIENT_SECRET }}" >> .env
-            echo "KAKAO_FRONTEND_CALLBACK_URL=${{ secrets.KAKAO_FRONTEND_CALLBACK_URL }}" >> .env
-            echo "KAKAO_APP_SCHEME_CALLBACK_URL=${{ secrets.KAKAO_APP_SCHEME_CALLBACK_URL }}" >> .env
-            echo "KAKAO_DEV_FRONTEND_CALLBACK_URL=${{ secrets.KAKAO_DEV_FRONTEND_CALLBACK_URL }}" >> .env
-            echo "KAKAO_DEV_REDIRECT_URL=${{ secrets.KAKAO_DEV_REDIRECT_URL }}" >> .env
-            echo "KAKAO_DEV_ANDROID_REDIRECT_URL=${{ secrets.KAKAO_DEV_ANDROID_REDIRECT_URL }}" >> .env
-            echo "FLASK_HOST=${{ secrets.FLASK_HOST }}" >> .env
-            echo "JASYPT_SECRET=${{ secrets.JASYPT_SECRET }}" >> .env
-
             docker compose pull
             docker compose up -d
