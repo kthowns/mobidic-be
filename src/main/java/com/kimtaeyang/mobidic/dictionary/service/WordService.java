@@ -71,7 +71,16 @@ public class WordService {
             throw new ApiException(GeneralResponseCode.NO_VOCAB);
         }
 
-        return wordRepository.findWordDetailsByVocabularyId(user.getId(), vocabularyId);
+        return wordRepository.findWordDetailsByVocabularyId(user.getId(), vocabularyId, false);
+    }
+
+    @Transactional(readOnly = true)
+    public List<WordDetail> getWordDetailsNotLearnedByVocabularyId(User user, UUID vocabularyId) {
+        if (!vocabularyRepository.existsByIdAndUser_Id(vocabularyId, user.getId())) {
+            throw new ApiException(GeneralResponseCode.NO_VOCAB);
+        }
+
+        return wordRepository.findWordDetailsByVocabularyId(user.getId(), vocabularyId, true);
     }
 
     @Transactional

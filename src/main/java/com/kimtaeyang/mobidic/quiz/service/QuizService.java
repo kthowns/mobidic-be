@@ -17,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -34,6 +35,7 @@ public class QuizService {
     private final StatisticService statisticService;
     private final CryptoService cryptoService;
 
+    @Transactional(readOnly = true)
     public List<QuizDto> getOXQuizzes(
             User user,
             UUID vocabularyId
@@ -41,6 +43,7 @@ public class QuizService {
         return generateQuizzes(user, vocabularyId, QuizType.OX);
     }
 
+    @Transactional(readOnly = true)
     public List<QuizDto> getBlankQuizzes(
             User user,
             UUID vocabularyId
@@ -48,6 +51,7 @@ public class QuizService {
         return generateQuizzes(user, vocabularyId, QuizType.BLANK);
     }
 
+    @Transactional
     public QuizRateResponse rateQuiz(
             User user,
             QuizRateRequest quizRateRequest
@@ -87,7 +91,7 @@ public class QuizService {
             UUID vocabularyId,
             QuizType quizType
     ) {
-        List<WordDetail> wordDetails = wordService.getWordDetailsByVocabularyId(user, vocabularyId);
+        List<WordDetail> wordDetails = wordService.getWordDetailsNotLearnedByVocabularyId(user, vocabularyId);
 
         if (wordDetails.isEmpty()) {
             return List.of();

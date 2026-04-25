@@ -4,6 +4,7 @@ import com.kimtaeyang.mobidic.dictionary.dto.DefinitionDto;
 import com.kimtaeyang.mobidic.dictionary.dto.WordDetail;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +21,7 @@ public class WordRepositoryCustomImpl implements WordRepositoryCustom {
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public List<WordDetail> findWordDetailsByVocabularyId(UUID userId, UUID vocabularyId) {
+    public List<WordDetail> findWordDetailsByVocabularyId(UUID userId, UUID vocabularyId, boolean notLearned) {
         List<WordDetail> wordDetails = queryFactory
                 .select(Projections.constructor(WordDetail.class,
                         word.id,
@@ -33,8 +34,11 @@ public class WordRepositoryCustomImpl implements WordRepositoryCustom {
                 ))
                 .from(word)
                 .leftJoin(wordStatistic).on(wordStatistic.word.id.eq(word.id))
-                .where(word.vocabulary.id.eq(vocabularyId))
-                .where(word.vocabulary.user.id.eq(userId))
+                .where(
+                        word.vocabulary.id.eq(vocabularyId),
+                        word.vocabulary.user.id.eq(userId),
+                        isNotLearned(notLearned)
+                )
                 .fetch();
 
         List<UUID> wordIds = wordDetails.stream()
@@ -74,5 +78,10 @@ public class WordRepositoryCustomImpl implements WordRepositoryCustom {
                         wd.createdAt()
                 ))
                 .collect(Collectors.toList());
+    }
+
+    private BooleanExpression isNotLearned(boolean notLearned) {
+        // true일 때만 '학습하지 않음' 조건 반환, false면 조건 없음(null)
+        return notLearned ? wordStatistic.isLearned.isFalse() : null;
     }
 }

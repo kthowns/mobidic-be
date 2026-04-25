@@ -110,7 +110,7 @@ class WordServiceTest {
         //given
         given(vocabularyRepository.existsByIdAndUser_Id(any(UUID.class), any(UUID.class)))
                 .willReturn(true);
-        given(wordRepository.findWordDetailsByVocabularyId(any(UUID.class), any(UUID.class)))
+        given(wordRepository.findWordDetailsByVocabularyId(any(UUID.class), any(UUID.class), any(boolean.class)))
                 .willReturn(words);
 
         //when

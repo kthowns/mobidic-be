@@ -6,5 +6,5 @@ import java.util.List;
 import java.util.UUID;
 
 public interface WordRepositoryCustom {
-    List<WordDetail> findWordDetailsByVocabularyId(UUID userId, UUID vocabularyId);
+    List<WordDetail> findWordDetailsByVocabularyId(UUID userId, UUID vocabularyId, boolean notLearned);
 }
