@@ -13,6 +13,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import java.util.List;
+
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -25,8 +27,8 @@ public class UserFacade {
 
     public LoginResponse kakaoLogin(String authCode, boolean isDev) {
         String accessToken = kakaoAuthService.kakaoLogin(authCode, isDev);
-        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         presetVocabularyService.copyAllPresetToUser(user);
 
         return LoginResponse.builder()
@@ -35,7 +37,9 @@ public class UserFacade {
     }
 
     public void signUp(SignUpRequestDto requestDto) {
-        termService.validateSignUpAgreement(requestDto.getAgreeTermIds());
+        List<Long> agreeTermIds = requestDto.getAgreeTermIds() != null ? requestDto.getAgreeTermIds() : List.of();
+
+        termService.validateSignUpAgreement(agreeTermIds);
         User savedUser = transactionTemplate.execute((status) -> {
             User user = userService.signUp(requestDto);
             termService.addUserAgreement(user, requestDto.getAgreeTermIds());

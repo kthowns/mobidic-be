@@ -21,7 +21,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -55,8 +54,6 @@ public class TermService {
         }
 
         termRepository.deactivateAllByType(addTermRequest.getType());
-
-        log.info(addTermRequest.toString());
 
         Term term = Term.builder()
                 .type(addTermRequest.getType())
