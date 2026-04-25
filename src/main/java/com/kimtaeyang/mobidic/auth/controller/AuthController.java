@@ -23,7 +23,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.view.RedirectView;
 
 @RestController
 @RequiredArgsConstructor
@@ -31,10 +30,6 @@ import org.springframework.web.servlet.view.RedirectView;
 @Tag(name = "인증 관련 서비스", description = "로그인, 회원가입 등")
 public class AuthController {
     private final AuthService authService;
-    private final KakaoAuthService kakaoAuthService;
-    private final KakaoProperties kakaoProperties;
-    private final UserFacade userFacade;
-
     @Operation(
             summary = "로그인",
             description = "이메일과 비밀번호로 로그인"
@@ -52,7 +47,6 @@ public class AuthController {
     public ResponseEntity<GeneralResponse<LoginResponse>> login(@Valid @RequestBody LoginRequest request) {
         return GeneralResponse.toResponseEntity(AuthResponseCode.LOGIN_OK, authService.login(request));
     }
-
 
     @Operation(
             summary = "로그아웃",
@@ -79,23 +73,5 @@ public class AuthController {
         authService.logout(token);
 
         return ResponseEntity.ok().build();
-    }
-
-    @GetMapping("/login-url/kakao")
-    public ResponseEntity<GeneralResponse<KakaoLoginUrlResponse>> getKakaoLoginUrl(
-            @RequestParam(value = "isDev", defaultValue = "false") boolean isDev) {
-        return GeneralResponse.toResponseEntity(GeneralResponseCode.OK, kakaoAuthService.getKakaoLoginUrl(isDev));
-    }
-
-    @GetMapping("/v1/oauth2/kakao")
-    public RedirectView kakaoLogin(
-            @RequestParam String code,
-            @RequestParam(value = "isDev", defaultValue = "false") boolean isDev
-    ) {
-        String baseUrl = isDev ? kakaoProperties.getDevRedirectFrontendCallbackUrl()
-                : kakaoProperties.getRedirectFrontendCallbackUrl();
-
-        final LoginResponse loginResponse = userFacade.kakaoLogin(code, isDev);
-        return new RedirectView(baseUrl + "?accessToken=" + loginResponse.getAccessToken());
     }
 }

@@ -25,8 +25,8 @@ public class UserFacade {
     private final TermService termService;
     private final TransactionTemplate transactionTemplate;
 
-    public LoginResponse kakaoLogin(String authCode, boolean isDev) {
-        String accessToken = kakaoAuthService.kakaoLogin(authCode, isDev);
+    public LoginResponse kakaoLogin(String authCode, boolean isDev, String platform) {
+        String accessToken = kakaoAuthService.kakaoLogin(authCode, isDev, platform);
 
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         presetVocabularyService.copyAllPresetToUser(user);

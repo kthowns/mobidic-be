@@ -27,8 +27,11 @@ jasypt:
 kakao:
   rest-api-key: test
   redirect-url: test
+  android-redirect-url: test
   client-secret: test
   redirect-frontend-callback-url: test
+  app-scheme-callback-url: test
   dev:
     redirect-url: test
+    android-redirect-url: test
     redirect-frontend-callback-url: test

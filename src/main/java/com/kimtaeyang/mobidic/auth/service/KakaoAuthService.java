@@ -35,8 +35,8 @@ public class KakaoAuthService {
     private final KakaoProperties kakaoProperties;
     private final UserService userService;
 
-    public String kakaoLogin(String authCode, boolean isDev) {
-        String accessToken = getKakaoAccessToken(authCode, isDev);
+    public String kakaoLogin(String authCode, boolean isDev, String platform) {
+        String accessToken = getKakaoAccessToken(authCode, isDev, platform);
         KakaoUserInfo kakaoUserInfo = getKakaoUserInfo(accessToken);
         User user = userService.getUserOrCreate(kakaoUserInfo);
         SecurityContextHolder.getContext().setAuthentication(
@@ -45,12 +45,14 @@ public class KakaoAuthService {
         return jwtProvider.generateToken(user.getId());
     }
 
-    public KakaoLoginUrlResponse getKakaoLoginUrl(boolean isDev) {
+    public KakaoLoginUrlResponse getKakaoLoginUrl(boolean isDev, String platform) {
+        String redirectUri = getRedirectUri(isDev, platform);
+
         String resultUrl = UriComponentsBuilder
                 .fromUriString(KakaoApiUrl.CODE.getUrl())
                 .queryParam("response_type", "code")
                 .queryParam("client_id", kakaoProperties.getClientId())
-                .queryParam("redirect_uri", isDev ? kakaoProperties.getDevRedirectUrl() : kakaoProperties.getRedirectUrl())
+                .queryParam("redirect_uri", redirectUri)
                 .encode()
                 .toUriString();
 
@@ -77,11 +79,13 @@ public class KakaoAuthService {
         return userInfo;
     }
 
-    private String getKakaoAccessToken(String code, boolean isDev) {
+    private String getKakaoAccessToken(String code, boolean isDev, String platform) {
+        String redirectUri = getRedirectUri(isDev, platform);
+
         MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
         formData.add("grant_type", "authorization_code");
         formData.add("client_id", kakaoProperties.getClientId());
-        formData.add("redirect_uri", isDev ? kakaoProperties.getDevRedirectUrl() : kakaoProperties.getRedirectUrl());
+        formData.add("redirect_uri", redirectUri);
         formData.add("code", code);
         formData.add("client_secret", kakaoProperties.getClientSecret());
 
@@ -102,5 +106,16 @@ public class KakaoAuthService {
         log.info("kakao access token : {}", tokenResponse.getAccessToken());
 
         return Objects.requireNonNull(tokenResponse).getAccessToken();
+    }
+
+    private String getRedirectUri(boolean isDev, String platform) {
+        String redirectUri = "";
+        if (platform.equals("android")) {
+            redirectUri = isDev ? kakaoProperties.getDevAndroidRedirectUrl() : kakaoProperties.getAndroidRedirectUrl();
+        } else {
+            redirectUri = isDev ? kakaoProperties.getDevRedirectUrl() : kakaoProperties.getRedirectUrl();
+        }
+
+        return redirectUri;
     }
 }
