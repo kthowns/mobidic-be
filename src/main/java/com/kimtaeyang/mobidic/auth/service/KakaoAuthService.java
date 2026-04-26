@@ -109,13 +109,9 @@ public class KakaoAuthService {
     }
 
     private String getRedirectUri(boolean isDev, String platform) {
-        String redirectUri = "";
         if (platform.equals("android")) {
-            redirectUri = isDev ? kakaoProperties.getDevAndroidRedirectUrl() : kakaoProperties.getAndroidRedirectUrl();
-        } else {
-            redirectUri = isDev ? kakaoProperties.getDevRedirectUrl() : kakaoProperties.getRedirectUrl();
+            return kakaoProperties.getAndroidRedirectUrl();
         }
-
-        return redirectUri;
+        return isDev ? kakaoProperties.getDevRedirectUrl() : kakaoProperties.getRedirectUrl();
     }
 }

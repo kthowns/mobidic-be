@@ -22,8 +22,6 @@ public class KakaoProperties {
 
     @Value("${kakao.dev.redirect-frontend-callback-url}")
     private String devRedirectFrontendCallbackUrl;
-    @Value("${kakao.dev.android-redirect-url}")
-    private String devAndroidRedirectUrl;
     @Value("${kakao.dev.redirect-url}")
     private String devRedirectUrl;
 }
