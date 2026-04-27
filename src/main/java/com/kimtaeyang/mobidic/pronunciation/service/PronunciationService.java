@@ -79,7 +79,7 @@ public class PronunciationService {
         return T[m][n];
     }
 
-    public static int getDamerauLevenshteinDistance(
+    private static int getDamerauLevenshteinDistance(
             @NonNull CharSequence source,
             @NonNull CharSequence target
     ) {

@@ -10,7 +10,6 @@ import com.kimtaeyang.mobidic.user.dto.UpdateUserRequestDto;
 import com.kimtaeyang.mobidic.user.dto.UserDto;
 import com.kimtaeyang.mobidic.user.entity.User;
 import com.kimtaeyang.mobidic.user.repository.UserRepository;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -22,7 +21,6 @@ import java.util.UUID;
 
 import static com.kimtaeyang.mobidic.common.code.AuthResponseCode.NO_USER;
 import static com.kimtaeyang.mobidic.common.code.GeneralResponseCode.DUPLICATED_EMAIL;
-import static com.kimtaeyang.mobidic.common.code.GeneralResponseCode.DUPLICATED_NICKNAME;
 
 @Service
 @Slf4j
@@ -34,22 +32,29 @@ public class UserService {
     private final AuthService authService;
 
     @Transactional
-    public User signUp(@Valid SignUpRequestDto request) {
+    public User registerUser(SignUpRequestDto request) {
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new ApiException(DUPLICATED_EMAIL);
         }
 
-        if (userRepository.existsByNickname(request.getNickname())) {
-            throw new ApiException(DUPLICATED_NICKNAME);
-        }
+        return userRepository.save(
+                User.builder()
+                        .email(request.getEmail())
+                        .nickname(request.getNickname())
+                        .password(passwordEncoder.encode(request.getPassword()))
+                        .build()
+        );
+    }
 
-        User user = User.builder()
-                .email(request.getEmail())
-                .nickname(request.getNickname())
-                .password(passwordEncoder.encode(request.getPassword()))
-                .build();
-
-        return userRepository.save(user);
+    @Transactional
+    public User registerKakaoUser(KakaoUserInfo kakaoUserInfo) {
+        return userRepository.save(
+                User.builder()
+                        .kakaoId(kakaoUserInfo.getId())
+                        .email(kakaoUserInfo.getKakaoAccount().getEmail())
+                        .nickname(kakaoUserInfo.getKakaoAccount().getProfile().getNickname())
+                        .password(passwordEncoder.encode(UUID.randomUUID().toString()))
+                        .build());
     }
 
     @Transactional
@@ -80,19 +85,5 @@ public class UserService {
         jwtBlacklistService.withdrawToken(token);
 
         return UserDto.fromEntity(user);
-    }
-
-    @Transactional
-    public User getUserOrCreate(KakaoUserInfo kakaoUserInfo) {
-        return userRepository.findByKakaoId(kakaoUserInfo.getId())
-                .orElseGet(() -> userRepository.save(
-                                User.builder()
-                                        .kakaoId(kakaoUserInfo.getId())
-                                        .email(kakaoUserInfo.getKakaoAccount().getEmail())
-                                        .nickname(kakaoUserInfo.getKakaoAccount().getProfile().getNickname())
-                                        .password(passwordEncoder.encode(UUID.randomUUID().toString()))
-                                        .build()
-                        )
-                );
     }
 }

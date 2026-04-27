@@ -1,16 +1,12 @@
 package com.kimtaeyang.mobidic.auth.controller;
 
-import com.kimtaeyang.mobidic.auth.dto.KakaoLoginUrlResponse;
 import com.kimtaeyang.mobidic.auth.dto.LoginRequest;
 import com.kimtaeyang.mobidic.auth.dto.LoginResponse;
 import com.kimtaeyang.mobidic.auth.service.AuthService;
-import com.kimtaeyang.mobidic.auth.service.KakaoAuthService;
-import com.kimtaeyang.mobidic.auth.util.KakaoProperties;
 import com.kimtaeyang.mobidic.common.code.AuthResponseCode;
-import com.kimtaeyang.mobidic.common.code.GeneralResponseCode;
 import com.kimtaeyang.mobidic.common.dto.ErrorResponse;
 import com.kimtaeyang.mobidic.common.dto.GeneralResponse;
-import com.kimtaeyang.mobidic.user.facade.UserFacade;
+import com.kimtaeyang.mobidic.user.entity.User;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -22,7 +18,11 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
@@ -30,6 +30,7 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "인증 관련 서비스", description = "로그인, 회원가입 등")
 public class AuthController {
     private final AuthService authService;
+
     @Operation(
             summary = "로그인",
             description = "이메일과 비밀번호로 로그인"
@@ -66,7 +67,8 @@ public class AuthController {
     })
     @PostMapping("/logout")
     public ResponseEntity<Void> logout(
-            HttpServletRequest request
+            HttpServletRequest request,
+            @AuthenticationPrincipal User user
     ) {
         String token = request.getHeader("Authorization").substring(7);
 

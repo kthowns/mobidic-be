@@ -1,6 +1,7 @@
 package com.kimtaeyang.mobidic.user.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.*;
 
@@ -22,7 +23,7 @@ public class SignUpRequestDto {
     @NotBlank(message = "닉네임을 입력해주세요.")
     @Pattern(
             regexp = "^[ㄱ-ㅎ가-힣a-z0-9-_]{2,16}$",
-            message = "닉네임은 2~16자의 한글, 영문 소문자, 숫자, -, _ 만 사용할 수 있습니다. "
+            message = "닉네임은 2~16자의 한글, 영문 소문자, 숫자, -, _ 만 사용할 수 있습니다."
     )
     private String nickname;
 
@@ -34,5 +35,6 @@ public class SignUpRequestDto {
     //최소 8자, 숫자와 알파벳
     private String password;
 
+    @NotNull(message = "이용 약관 동의 항목은 필수입니다.")
     private List<Long> agreeTermIds;
 }

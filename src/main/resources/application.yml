@@ -52,15 +52,13 @@ logging:
 
 kakao:
   rest-api-key: ${KAKAO_REST_API_KEY}
-  redirect-url: ${KAKAO_REDIRECT_URL}
-  android-redirect-url: ${KAKAO_ANDROID_REDIRECT_URL}
   client-secret: ${KAKAO_CLIENT_SECRET}
-  redirect-frontend-callback-url: ${KAKAO_FRONTEND_CALLBACK_URL}
-  app-scheme-callback-url: ${KAKAO_APP_SCHEME_CALLBACK_URL}
+  backend-callback-url: ${KAKAO_BACKEND_CALLBACK_URL}
+  frontend-callback-url: ${KAKAO_FRONTEND_CALLBACK_URL}
+  android-callback-url: ${KAKAO_ANDROID_CALLBACK_URL}
   dev:
-    redirect-url: ${KAKAO_DEV_REDIRECT_URL}
-    android-redirect-url: ${KAKAO_DEV_ANDROID_REDIRECT_URL}
-    redirect-frontend-callback-url: ${KAKAO_DEV_FRONTEND_CALLBACK_URL}
+    backend-callback-url: ${KAKAO_DEV_BACKEND_CALLBACK_URL}
+    frontend-callback-url: ${KAKAO_DEV_FRONTEND_CALLBACK_URL}
 
 springdoc:
   api-docs:

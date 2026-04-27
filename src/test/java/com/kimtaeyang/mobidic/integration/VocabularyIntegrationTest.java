@@ -467,7 +467,8 @@ public class VocabularyIntegrationTest {
         SignUpRequestDto joinRequest = SignUpRequestDto.builder()
                 .email(email)
                 .nickname(nickname)
-                .password("testTest1")
+                .password("testTest1!")
+                .agreeTermIds(List.of())
                 .build();
 
         LoginRequest loginRequest = LoginRequest.builder()

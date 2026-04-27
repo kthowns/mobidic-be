@@ -20,6 +20,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
+import java.util.List;
 import java.util.UUID;
 
 import static com.kimtaeyang.mobidic.common.code.AuthResponseCode.UNAUTHORIZED;
@@ -393,7 +394,8 @@ public class WordIntegrationTest {
         SignUpRequestDto joinRequest = SignUpRequestDto.builder()
                 .email(email)
                 .nickname(nickname)
-                .password("testTest1")
+                .password("testTest1!")
+                .agreeTermIds(List.of())
                 .build();
 
         LoginRequest loginRequest = LoginRequest.builder()

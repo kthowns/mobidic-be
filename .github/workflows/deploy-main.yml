@@ -56,14 +56,12 @@ jobs:
           echo "REDIS_PORT=${{ secrets.REDIS_PORT }}" >> .env
           echo "REDIS_HOST=${{ secrets.REDIS_HOST }}" >> .env
           echo "KAKAO_REST_API_KEY=${{ secrets.KAKAO_REST_API_KEY }}" >> .env
-          echo "KAKAO_REDIRECT_URL=${{ secrets.KAKAO_REDIRECT_URL }}" >> .env
-          echo "KAKAO_ANDROID_REDIRECT_URL=${{ secrets.KAKAO_ANDROID_REDIRECT_URL }}" >> .env
           echo "KAKAO_CLIENT_SECRET=${{ secrets.KAKAO_CLIENT_SECRET }}" >> .env
+          echo "KAKAO_BACKEND_CALLBACK_URL=${{ secrets.KAKAO_BACKEND_CALLBACK_URL }}" >> .env
           echo "KAKAO_FRONTEND_CALLBACK_URL=${{ secrets.KAKAO_FRONTEND_CALLBACK_URL }}" >> .env
-          echo "KAKAO_APP_SCHEME_CALLBACK_URL=${{ secrets.KAKAO_APP_SCHEME_CALLBACK_URL }}" >> .env
+          echo "KAKAO_ANDROID_CALLBACK_URL=${{ secrets.KAKAO_ANDROID_CALLBACK_URL }}" >> .env
+          echo "KAKAO_DEV_BACKEND_CALLBACK_URL=${{ secrets.KAKAO_DEV_BACKEND_CALLBACK_URL }}" >> .env
           echo "KAKAO_DEV_FRONTEND_CALLBACK_URL=${{ secrets.KAKAO_DEV_FRONTEND_CALLBACK_URL }}" >> .env
-          echo "KAKAO_DEV_REDIRECT_URL=${{ secrets.KAKAO_DEV_REDIRECT_URL }}" >> .env
-          echo "KAKAO_DEV_ANDROID_REDIRECT_URL=${{ secrets.KAKAO_DEV_ANDROID_REDIRECT_URL }}" >> .env
           echo "FLASK_HOST=${{ secrets.FLASK_HOST }}" >> .env
           echo "JASYPT_SECRET=${{ secrets.JASYPT_SECRET }}" >> .env
 

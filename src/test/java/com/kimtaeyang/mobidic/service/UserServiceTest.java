@@ -50,7 +50,7 @@ class UserServiceTest {
 
     @Test
     @DisplayName("[AuthService] Join success")
-    void signUpTestSuccess() {
+    void registerUserTestSuccess() {
         // given
         String rawPassword = "test1234";
         String encodedPassword = passwordEncoder.encode(rawPassword);
@@ -76,7 +76,7 @@ class UserServiceTest {
                 .thenReturn(userToReturn);
 
         // when
-        userService.signUp(request);
+        userService.registerUser(request);
 
         // then
         Mockito.verify(userRepository).save(Mockito.any(User.class));
