@@ -81,6 +81,6 @@ jobs:
           username: ${{ secrets.SERVER_USERNAME }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
-            cd /d ${{ secrets.WORK_DIRECTORY }}
-            docker compose pull
-            docker compose up -d
+            cd ${{ secrets.WORK_DIRECTORY }}
+            sudo docker compose pull
+            sudo docker compose up -d

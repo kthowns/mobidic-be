@@ -32,7 +32,9 @@ public class KakaoProperties {
             builder.queryParam("platform", "android");
         }
 
-        builder.queryParam("isDev", isDev);
+        if (isDev) {
+            builder.queryParam("isDev", true);
+        }
 
         return builder.toUriString();
     }
