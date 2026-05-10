@@ -46,10 +46,6 @@ public class KakaoProperties {
             UriComponentsBuilder builder = UriComponentsBuilder
                     .fromUriString(isDev ? devFrontendCallbackUrl : frontendCallbackUrl);
 
-            if (isDev) {
-                builder.queryParam("isDev", true);
-            }
-
             return builder.toUriString();
         }
     }
