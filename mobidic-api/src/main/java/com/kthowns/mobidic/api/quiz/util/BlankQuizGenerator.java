@@ -1,6 +1,6 @@
 package com.kthowns.mobidic.api.quiz.util;
 
-import com.kthowns.mobidic.api.dictionary.dto.WordDetail;
+import com.kthowns.mobidic.api.dto.common.dictionary.WordDetail;
 import com.kthowns.mobidic.api.quiz.model.Quiz;
 
 import java.util.ArrayList;

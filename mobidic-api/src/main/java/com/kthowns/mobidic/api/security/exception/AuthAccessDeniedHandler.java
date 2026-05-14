@@ -1,7 +1,7 @@
 package com.kthowns.mobidic.api.security.exception;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.kthowns.mobidic.api.common.dto.ErrorResponse;
+import com.kthowns.mobidic.common.dto.ErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
-import static com.kthowns.mobidic.api.common.code.AuthResponseCode.FORBIDDEN;
+import static com.kthowns.mobidic.common.code.AuthResponseCode.FORBIDDEN;
 
 @RequiredArgsConstructor
 @Component

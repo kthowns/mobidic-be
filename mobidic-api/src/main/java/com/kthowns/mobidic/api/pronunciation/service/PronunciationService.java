@@ -1,10 +1,10 @@
 package com.kthowns.mobidic.api.pronunciation.service;
 
-import com.kthowns.mobidic.api.common.code.GeneralResponseCode;
-import com.kthowns.mobidic.api.common.exception.ApiException;
-import com.kthowns.mobidic.api.dictionary.dto.WordDto;
+import com.kthowns.mobidic.common.code.GeneralResponseCode;
+import com.kthowns.mobidic.common.exception.ApiException;
+import com.kthowns.mobidic.api.dto.common.dictionary.WordDto;
 import com.kthowns.mobidic.api.dictionary.service.WordService;
-import com.kthowns.mobidic.api.pronunciation.dto.SttResponse;
+import com.kthowns.mobidic.api.dto.response.pronunciation.SttResponse;
 import com.kthowns.mobidic.api.user.entity.User;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;

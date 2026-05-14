@@ -1,9 +1,9 @@
 package com.kthowns.mobidic.api.service;
 
 import com.kthowns.mobidic.api.config.ServiceTestConfig;
-import com.kthowns.mobidic.api.user.dto.SignUpRequestDto;
-import com.kthowns.mobidic.api.user.dto.UpdateUserRequestDto;
-import com.kthowns.mobidic.api.user.dto.UserDto;
+import com.kthowns.mobidic.api.dto.request.user.SignUpRequestDto;
+import com.kthowns.mobidic.api.dto.request.user.UpdateUserRequestDto;
+import com.kthowns.mobidic.api.dto.common.user.UserDto;
 import com.kthowns.mobidic.api.user.entity.User;
 import com.kthowns.mobidic.api.user.repository.UserRepository;
 import com.kthowns.mobidic.api.user.service.UserService;

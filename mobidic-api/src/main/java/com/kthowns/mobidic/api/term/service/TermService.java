@@ -1,10 +1,10 @@
 package com.kthowns.mobidic.api.term.service;
 
-import com.kthowns.mobidic.api.common.code.GeneralResponseCode;
-import com.kthowns.mobidic.api.common.exception.ApiException;
-import com.kthowns.mobidic.api.term.dto.AddTermRequest;
-import com.kthowns.mobidic.api.term.dto.TermDto;
-import com.kthowns.mobidic.api.term.dto.TermSimpleDto;
+import com.kthowns.mobidic.common.code.GeneralResponseCode;
+import com.kthowns.mobidic.common.exception.ApiException;
+import com.kthowns.mobidic.api.dto.request.term.AddTermRequest;
+import com.kthowns.mobidic.api.dto.common.term.TermDto;
+import com.kthowns.mobidic.api.dto.common.term.TermSimpleDto;
 import com.kthowns.mobidic.api.term.entity.Term;
 import com.kthowns.mobidic.api.term.entity.UserAgreement;
 import com.kthowns.mobidic.api.term.repository.TermRepository;
@@ -12,7 +12,6 @@ import com.kthowns.mobidic.api.term.repository.UserAgreementRepository;
 import com.kthowns.mobidic.api.term.type.TermType;
 import com.kthowns.mobidic.api.user.entity.User;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

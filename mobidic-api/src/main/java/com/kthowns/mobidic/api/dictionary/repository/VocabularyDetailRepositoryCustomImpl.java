@@ -1,7 +1,7 @@
 package com.kthowns.mobidic.api.dictionary.repository;
 
-import com.kthowns.mobidic.api.dictionary.dto.VocabularyDetail;
-import com.kthowns.mobidic.api.dictionary.dto.VocabularyDto;
+import com.kthowns.mobidic.api.dto.common.dictionary.VocabularyDetail;
+import com.kthowns.mobidic.api.dto.common.dictionary.VocabularyDto;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;

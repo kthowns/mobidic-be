@@ -1,13 +1,13 @@
 package com.kthowns.mobidic.api.user.service;
 
-import com.kthowns.mobidic.api.auth.dto.KakaoUserInfo;
+import com.kthowns.mobidic.api.dto.common.auth.KakaoUserInfo;
 import com.kthowns.mobidic.api.auth.service.AuthService;
-import com.kthowns.mobidic.api.common.code.GeneralResponseCode;
-import com.kthowns.mobidic.api.common.exception.ApiException;
+import com.kthowns.mobidic.common.code.GeneralResponseCode;
+import com.kthowns.mobidic.common.exception.ApiException;
 import com.kthowns.mobidic.api.security.jwt.JwtBlacklistService;
-import com.kthowns.mobidic.api.user.dto.SignUpRequestDto;
-import com.kthowns.mobidic.api.user.dto.UpdateUserRequestDto;
-import com.kthowns.mobidic.api.user.dto.UserDto;
+import com.kthowns.mobidic.api.dto.request.user.SignUpRequestDto;
+import com.kthowns.mobidic.api.dto.request.user.UpdateUserRequestDto;
+import com.kthowns.mobidic.api.dto.common.user.UserDto;
 import com.kthowns.mobidic.api.user.entity.User;
 import com.kthowns.mobidic.api.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -19,8 +19,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-import static com.kthowns.mobidic.api.common.code.AuthResponseCode.NO_USER;
-import static com.kthowns.mobidic.api.common.code.GeneralResponseCode.DUPLICATED_EMAIL;
+import static com.kthowns.mobidic.common.code.AuthResponseCode.NO_USER;
+import static com.kthowns.mobidic.common.code.GeneralResponseCode.DUPLICATED_EMAIL;
 
 @Service
 @Slf4j

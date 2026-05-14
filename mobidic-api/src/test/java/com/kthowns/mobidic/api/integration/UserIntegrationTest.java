@@ -1,10 +1,10 @@
 package com.kthowns.mobidic.api.integration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.kthowns.mobidic.api.auth.dto.LoginRequest;
-import com.kthowns.mobidic.api.user.dto.SignUpRequestDto;
+import com.kthowns.mobidic.api.dto.request.auth.LoginRequest;
+import com.kthowns.mobidic.api.dto.request.user.SignUpRequestDto;
 import com.kthowns.mobidic.api.security.jwt.JwtProvider;
-import com.kthowns.mobidic.api.user.dto.UpdateUserRequestDto;
+import com.kthowns.mobidic.api.dto.request.user.UpdateUserRequestDto;
 import com.kthowns.mobidic.api.util.DatabaseCleaner;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -20,9 +20,9 @@ import org.springframework.test.web.servlet.MvcResult;
 import java.util.List;
 import java.util.UUID;
 
-import static com.kthowns.mobidic.api.common.code.AuthResponseCode.UNAUTHORIZED;
-import static com.kthowns.mobidic.api.common.code.GeneralResponseCode.DUPLICATED_NICKNAME;
-import static com.kthowns.mobidic.api.common.code.GeneralResponseCode.INVALID_REQUEST_BODY;
+import static com.kthowns.mobidic.common.code.AuthResponseCode.UNAUTHORIZED;
+import static com.kthowns.mobidic.common.code.GeneralResponseCode.DUPLICATED_NICKNAME;
+import static com.kthowns.mobidic.common.code.GeneralResponseCode.INVALID_REQUEST_BODY;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;

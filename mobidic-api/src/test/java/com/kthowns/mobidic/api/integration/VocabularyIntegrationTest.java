@@ -1,12 +1,12 @@
 package com.kthowns.mobidic.api.integration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.kthowns.mobidic.api.auth.dto.LoginRequest;
-import com.kthowns.mobidic.api.user.dto.SignUpRequestDto;
-import com.kthowns.mobidic.api.dictionary.dto.AddVocabularyRequestDto;
-import com.kthowns.mobidic.api.dictionary.dto.AddWordRequestDto;
-import com.kthowns.mobidic.api.dictionary.dto.VocabularyDto;
-import com.kthowns.mobidic.api.dictionary.dto.WordDto;
+import com.kthowns.mobidic.api.dto.request.auth.LoginRequest;
+import com.kthowns.mobidic.api.dto.request.user.SignUpRequestDto;
+import com.kthowns.mobidic.api.dto.request.dictionary.AddVocabularyRequestDto;
+import com.kthowns.mobidic.api.dto.request.dictionary.AddWordRequestDto;
+import com.kthowns.mobidic.api.dto.common.dictionary.VocabularyDto;
+import com.kthowns.mobidic.api.dto.common.dictionary.WordDto;
 import com.kthowns.mobidic.api.dictionary.service.WordService;
 import com.kthowns.mobidic.api.security.jwt.JwtProvider;
 import com.kthowns.mobidic.api.statistic.service.StatisticService;
@@ -28,9 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import static com.kthowns.mobidic.api.common.code.AuthResponseCode.UNAUTHORIZED;
-import static com.kthowns.mobidic.api.common.code.GeneralResponseCode.*;
-import static com.kthowns.mobidic.api.common.code.ApiResponseCode.*;
+import static com.kthowns.mobidic.common.code.AuthResponseCode.UNAUTHORIZED;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;

@@ -1,6 +1,6 @@
 package com.kthowns.mobidic.api.dictionary.repository;
 
-import com.kthowns.mobidic.api.dictionary.dto.WordDetail;
+import com.kthowns.mobidic.api.dto.common.dictionary.WordDetail;
 
 import java.util.List;
 import java.util.UUID;

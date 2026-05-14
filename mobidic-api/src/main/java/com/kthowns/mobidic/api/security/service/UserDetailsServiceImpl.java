@@ -11,7 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
-import static com.kthowns.mobidic.api.common.code.AuthResponseCode.NO_USER;
+import static com.kthowns.mobidic.common.code.AuthResponseCode.NO_USER;
 
 @Service
 @RequiredArgsConstructor

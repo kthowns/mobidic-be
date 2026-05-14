@@ -1,12 +1,12 @@
 package com.kthowns.mobidic.api.quiz.service;
 
-import com.kthowns.mobidic.api.common.code.GeneralResponseCode;
-import com.kthowns.mobidic.api.common.exception.ApiException;
-import com.kthowns.mobidic.api.dictionary.dto.WordDetail;
+import com.kthowns.mobidic.common.code.GeneralResponseCode;
+import com.kthowns.mobidic.common.exception.ApiException;
+import com.kthowns.mobidic.api.dto.common.dictionary.WordDetail;
 import com.kthowns.mobidic.api.dictionary.service.WordService;
-import com.kthowns.mobidic.api.quiz.dto.QuizDto;
-import com.kthowns.mobidic.api.quiz.dto.QuizRateRequest;
-import com.kthowns.mobidic.api.quiz.dto.QuizRateResponse;
+import com.kthowns.mobidic.api.dto.common.quiz.QuizDto;
+import com.kthowns.mobidic.api.dto.request.quiz.QuizRateRequest;
+import com.kthowns.mobidic.api.dto.response.quiz.QuizRateResponse;
 import com.kthowns.mobidic.api.quiz.model.Quiz;
 import com.kthowns.mobidic.api.quiz.type.QuizType;
 import com.kthowns.mobidic.api.quiz.util.QuizGenerator;

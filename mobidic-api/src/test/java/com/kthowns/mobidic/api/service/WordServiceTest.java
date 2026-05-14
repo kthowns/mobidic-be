@@ -1,9 +1,9 @@
 package com.kthowns.mobidic.api.service;
 
 import com.kthowns.mobidic.api.config.ServiceTestConfig;
-import com.kthowns.mobidic.api.dictionary.dto.AddWordRequestDto;
-import com.kthowns.mobidic.api.dictionary.dto.WordDetail;
-import com.kthowns.mobidic.api.dictionary.dto.WordDto;
+import com.kthowns.mobidic.api.dto.request.dictionary.AddWordRequestDto;
+import com.kthowns.mobidic.api.dto.common.dictionary.WordDetail;
+import com.kthowns.mobidic.api.dto.common.dictionary.WordDto;
 import com.kthowns.mobidic.api.dictionary.entity.Vocabulary;
 import com.kthowns.mobidic.api.dictionary.entity.Word;
 import com.kthowns.mobidic.api.dictionary.repository.DefinitionRepository;

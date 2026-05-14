@@ -1,8 +1,8 @@
 package com.kthowns.mobidic.api.term.exception;
 
-import com.kthowns.mobidic.api.common.code.GeneralResponseCode;
-import com.kthowns.mobidic.api.common.exception.ApiException;
-import com.kthowns.mobidic.api.term.controller.TermViewController;
+import com.kthowns.mobidic.common.code.GeneralResponseCode;
+import com.kthowns.mobidic.common.exception.ApiException;
+import com.kthowns.mobidic.api.controller.term.TermViewController;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ControllerAdvice;

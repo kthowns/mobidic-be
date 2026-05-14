@@ -1,8 +1,8 @@
 package com.kthowns.mobidic.api.service;
 
 import com.kthowns.mobidic.api.config.ServiceTestConfig;
-import com.kthowns.mobidic.api.dictionary.dto.AddDefinitionRequestDto;
-import com.kthowns.mobidic.api.dictionary.dto.DefinitionDto;
+import com.kthowns.mobidic.api.dto.request.dictionary.AddDefinitionRequestDto;
+import com.kthowns.mobidic.api.dto.common.dictionary.DefinitionDto;
 import com.kthowns.mobidic.api.dictionary.entity.Definition;
 import com.kthowns.mobidic.api.dictionary.entity.Word;
 import com.kthowns.mobidic.api.dictionary.repository.DefinitionRepository;

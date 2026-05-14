@@ -1,7 +1,7 @@
 package com.kthowns.mobidic.api.auth.facade;
 
-import com.kthowns.mobidic.api.auth.dto.KakaoUserInfo;
-import com.kthowns.mobidic.api.auth.dto.LoginResponse;
+import com.kthowns.mobidic.api.dto.common.auth.KakaoUserInfo;
+import com.kthowns.mobidic.api.dto.response.auth.LoginResponse;
 import com.kthowns.mobidic.api.auth.service.KakaoAuthService;
 import com.kthowns.mobidic.api.preset.service.PresetVocabularyService;
 import com.kthowns.mobidic.api.security.jwt.JwtProvider;

@@ -1,6 +1,6 @@
 package com.kthowns.mobidic.api.security.jwt;
 
-import com.kthowns.mobidic.api.common.exception.ApiException;
+import com.kthowns.mobidic.common.exception.ApiException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 
-import static com.kthowns.mobidic.api.common.code.AuthResponseCode.INVALID_TOKEN;
+import static com.kthowns.mobidic.common.code.AuthResponseCode.INVALID_TOKEN;
 
 @Service
 @RequiredArgsConstructor

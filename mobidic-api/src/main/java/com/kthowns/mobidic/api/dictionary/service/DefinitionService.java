@@ -1,9 +1,9 @@
 package com.kthowns.mobidic.api.dictionary.service;
 
-import com.kthowns.mobidic.api.common.code.GeneralResponseCode;
-import com.kthowns.mobidic.api.common.exception.ApiException;
-import com.kthowns.mobidic.api.dictionary.dto.AddDefinitionRequestDto;
-import com.kthowns.mobidic.api.dictionary.dto.DefinitionDto;
+import com.kthowns.mobidic.common.code.GeneralResponseCode;
+import com.kthowns.mobidic.common.exception.ApiException;
+import com.kthowns.mobidic.api.dto.request.dictionary.AddDefinitionRequestDto;
+import com.kthowns.mobidic.api.dto.common.dictionary.DefinitionDto;
 import com.kthowns.mobidic.api.dictionary.entity.Definition;
 import com.kthowns.mobidic.api.dictionary.entity.Word;
 import com.kthowns.mobidic.api.dictionary.repository.DefinitionRepository;

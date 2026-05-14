@@ -1,14 +1,16 @@
 package com.kthowns.mobidic.api.integration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.kthowns.mobidic.api.auth.dto.LoginRequest;
-import com.kthowns.mobidic.api.user.dto.SignUpRequestDto;
-import com.kthowns.mobidic.api.dictionary.dto.AddDefinitionRequestDto;
-import com.kthowns.mobidic.api.dictionary.dto.AddVocabularyRequestDto;
-import com.kthowns.mobidic.api.dictionary.dto.AddWordRequestDto;
+import com.kthowns.mobidic.api.dto.request.auth.LoginRequest;
+import com.kthowns.mobidic.api.dto.request.user.SignUpRequestDto;
+import com.kthowns.mobidic.api.dto.request.dictionary.AddDefinitionRequestDto;
+import com.kthowns.mobidic.api.dto.request.dictionary.AddVocabularyRequestDto;
+import com.kthowns.mobidic.api.dto.request.dictionary.AddWordRequestDto;
 import com.kthowns.mobidic.api.dictionary.type.PartOfSpeech;
 import com.kthowns.mobidic.api.security.jwt.JwtProvider;
 import com.kthowns.mobidic.api.util.DatabaseCleaner;
+import com.kthowns.mobidic.common.code.AuthResponseCode;
+import com.kthowns.mobidic.common.code.GeneralResponseCode;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -23,9 +25,6 @@ import org.springframework.test.web.servlet.MvcResult;
 import java.util.List;
 import java.util.UUID;
 
-import static com.kthowns.mobidic.api.common.code.AuthResponseCode.UNAUTHORIZED;
-import static com.kthowns.mobidic.api.common.code.GeneralResponseCode.*;
-import static com.kthowns.mobidic.api.common.code.ApiResponseCode.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -84,7 +83,7 @@ public class DefinitionIntegrationTest {
                         .content(objectMapper.writeValueAsString(addDefRequest)))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.message")
-                        .value(DUPLICATED_DEFINITION.getMessage()));
+                        .value(GeneralResponseCode.DUPLICATED_DEFINITION.getMessage()));
 
         //Fail without token
         mockMvc.perform(post("/api/words/" + wordId + "/definition")
@@ -92,7 +91,7 @@ public class DefinitionIntegrationTest {
                         .content(objectMapper.writeValueAsString(addDefRequest)))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.message")
-                        .value(UNAUTHORIZED.getMessage()));
+                        .value(AuthResponseCode.UNAUTHORIZED.getMessage()));
 
         //Fail with unauthorized token
         mockMvc.perform(post("/api/words/" + wordId + "/definition")
@@ -101,7 +100,7 @@ public class DefinitionIntegrationTest {
                         .content(objectMapper.writeValueAsString(addDefRequest)))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.message")
-                        .value(UNAUTHORIZED.getMessage()));
+                        .value(AuthResponseCode.UNAUTHORIZED.getMessage()));
 
         //Fail with no resource
         mockMvc.perform(post("/api/words/" + UUID.randomUUID() + "/definition")
@@ -110,7 +109,7 @@ public class DefinitionIntegrationTest {
                         .content(objectMapper.writeValueAsString(addDefRequest)))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message")
-                        .value(NO_WORD.getMessage()));
+                        .value(GeneralResponseCode.NO_WORD.getMessage()));
 
         //Fail with invalid pattern
         addDefRequest.setMeaning(UUID.randomUUID().toString());
@@ -120,7 +119,7 @@ public class DefinitionIntegrationTest {
                         .content(objectMapper.writeValueAsString(addDefRequest)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message")
-                        .value(INVALID_REQUEST_BODY.getMessage()))
+                        .value(GeneralResponseCode.INVALID_REQUEST_BODY.getMessage()))
                 .andExpect(jsonPath("$.errors.meaning")
                         .value("32자 미만이어야 합니다."));
     }
@@ -161,7 +160,7 @@ public class DefinitionIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.message")
-                        .value(UNAUTHORIZED.getMessage()));
+                        .value(AuthResponseCode.UNAUTHORIZED.getMessage()));
 
         //Fail with unauthorized token
         mockMvc.perform(get("/api/words/" + wordId + "/definitions")
@@ -169,7 +168,7 @@ public class DefinitionIntegrationTest {
                         .header("Authorization", "Bearer " + jwtProvider.generateToken(UUID.randomUUID())))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.message")
-                        .value(UNAUTHORIZED.getMessage()));
+                        .value(AuthResponseCode.UNAUTHORIZED.getMessage()));
 
         //Fail with no resource
         mockMvc.perform(get("/api/words/" + UUID.randomUUID() + "/definitions")
@@ -177,7 +176,7 @@ public class DefinitionIntegrationTest {
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message")
-                        .value(NO_WORD.getMessage()));
+                        .value(GeneralResponseCode.NO_WORD.getMessage()));
     }
 
     @Test
@@ -249,7 +248,7 @@ public class DefinitionIntegrationTest {
                         .content(objectMapper.writeValueAsString(addDefRequest)))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.message")
-                        .value(DUPLICATED_DEFINITION.getMessage()));
+                        .value(GeneralResponseCode.DUPLICATED_DEFINITION.getMessage()));
 
         //Fail without token
         mockMvc.perform(patch("/api/definitions/" + defId)
@@ -257,7 +256,7 @@ public class DefinitionIntegrationTest {
                         .content(objectMapper.writeValueAsString(addDefRequest)))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.message")
-                        .value(UNAUTHORIZED.getMessage()));
+                        .value(AuthResponseCode.UNAUTHORIZED.getMessage()));
 
         //Fail with unauthorized token
         mockMvc.perform(patch("/api/definitions/" + defId)
@@ -266,7 +265,7 @@ public class DefinitionIntegrationTest {
                         .content(objectMapper.writeValueAsString(addDefRequest)))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.message")
-                        .value(UNAUTHORIZED.getMessage()));
+                        .value(AuthResponseCode.UNAUTHORIZED.getMessage()));
 
         //Fail with no resource
         mockMvc.perform(patch("/api/definitions/" + UUID.randomUUID())
@@ -275,7 +274,7 @@ public class DefinitionIntegrationTest {
                         .content(objectMapper.writeValueAsString(addDefRequest)))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message")
-                        .value(NO_DEF.getMessage()));
+                        .value(GeneralResponseCode.NO_DEF.getMessage()));
 
         //Fail with invalid definition pattern
         addDefRequest.setMeaning(UUID.randomUUID().toString());
@@ -285,7 +284,7 @@ public class DefinitionIntegrationTest {
                         .content(objectMapper.writeValueAsString(addDefRequest)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message")
-                        .value(INVALID_REQUEST_BODY.getMessage()))
+                        .value(GeneralResponseCode.INVALID_REQUEST_BODY.getMessage()))
                 .andExpect(jsonPath("$.errors.meaning")
                         .value("32자 미만이어야 합니다."));
 
@@ -299,7 +298,7 @@ public class DefinitionIntegrationTest {
                         .content(wrongRequest))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message")
-                        .value(INVALID_REQUEST_BODY.getMessage()));
+                        .value(GeneralResponseCode.INVALID_REQUEST_BODY.getMessage()));
     }
 
     @Test
@@ -331,7 +330,7 @@ public class DefinitionIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.message")
-                        .value(UNAUTHORIZED.getMessage()));
+                        .value(AuthResponseCode.UNAUTHORIZED.getMessage()));
 
         //Fail with unauthorized token
         mockMvc.perform(delete("/api/definitions/" + defId)
@@ -339,7 +338,7 @@ public class DefinitionIntegrationTest {
                         .header("Authorization", "Bearer " + jwtProvider.generateToken(UUID.randomUUID())))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.message")
-                        .value(UNAUTHORIZED.getMessage()));
+                        .value(AuthResponseCode.UNAUTHORIZED.getMessage()));
 
         //Success
         mockMvc.perform(delete("/api/definitions/" + defId)
@@ -359,7 +358,7 @@ public class DefinitionIntegrationTest {
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message")
-                        .value(NO_DEF.getMessage()));
+                        .value(GeneralResponseCode.NO_DEF.getMessage()));
     }
 
     private UUID addWordAndGetId(String token) throws Exception {

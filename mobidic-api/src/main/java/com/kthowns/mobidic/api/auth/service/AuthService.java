@@ -1,7 +1,7 @@
 package com.kthowns.mobidic.api.auth.service;
 
-import com.kthowns.mobidic.api.auth.dto.LoginRequest;
-import com.kthowns.mobidic.api.auth.dto.LoginResponse;
+import com.kthowns.mobidic.api.dto.request.auth.LoginRequest;
+import com.kthowns.mobidic.api.dto.response.auth.LoginResponse;
 import com.kthowns.mobidic.api.security.jwt.JwtBlacklistService;
 import com.kthowns.mobidic.api.security.jwt.JwtProvider;
 import com.kthowns.mobidic.api.user.entity.User;

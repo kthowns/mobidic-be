@@ -1,7 +1,7 @@
 package com.kthowns.mobidic.api.dictionary.repository;
 
-import com.kthowns.mobidic.api.dictionary.dto.DefinitionDto;
-import com.kthowns.mobidic.api.dictionary.dto.WordDetail;
+import com.kthowns.mobidic.api.dto.common.dictionary.DefinitionDto;
+import com.kthowns.mobidic.api.dto.common.dictionary.WordDetail;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;

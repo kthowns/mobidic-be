@@ -1,0 +1,32 @@
+package com.kthowns.mobidic.api.dto.common.dictionary;
+
+import com.kthowns.mobidic.api.dictionary.entity.Vocabulary;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
+import java.util.UUID;
+
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+public class VocabularyDto {
+    private UUID id;
+    private String title;
+    private String description;
+    private Long wordCount;
+    private LocalDateTime createdAt;
+
+    public static VocabularyDto fromEntity(Vocabulary vocabulary) {
+        return VocabularyDto.builder()
+                .title(vocabulary.getTitle())
+                .id(vocabulary.getId())
+                .description(vocabulary.getDescription())
+                .wordCount(vocabulary.getWordCount())
+                .createdAt(vocabulary.getCreatedAt())
+                .build();
+    }
+}

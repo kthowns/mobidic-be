@@ -2,7 +2,7 @@ package com.kthowns.mobidic.api.user.facade;
 
 import com.kthowns.mobidic.api.preset.service.PresetVocabularyService;
 import com.kthowns.mobidic.api.term.service.TermService;
-import com.kthowns.mobidic.api.user.dto.SignUpRequestDto;
+import com.kthowns.mobidic.api.dto.request.user.SignUpRequestDto;
 import com.kthowns.mobidic.api.user.entity.User;
 import com.kthowns.mobidic.api.user.service.UserService;
 import lombok.RequiredArgsConstructor;

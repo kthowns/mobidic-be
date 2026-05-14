@@ -1,10 +1,10 @@
 package com.kthowns.mobidic.api.integration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.kthowns.mobidic.api.auth.dto.LoginRequest;
-import com.kthowns.mobidic.api.user.dto.SignUpRequestDto;
-import com.kthowns.mobidic.api.common.code.AuthResponseCode;
-import com.kthowns.mobidic.api.common.code.GeneralResponseCode;
+import com.kthowns.mobidic.api.dto.request.auth.LoginRequest;
+import com.kthowns.mobidic.api.dto.request.user.SignUpRequestDto;
+import com.kthowns.mobidic.common.code.AuthResponseCode;
+import com.kthowns.mobidic.common.code.GeneralResponseCode;
 import com.kthowns.mobidic.api.security.jwt.JwtProvider;
 import com.kthowns.mobidic.api.util.DatabaseCleaner;
 import org.junit.jupiter.api.BeforeEach;

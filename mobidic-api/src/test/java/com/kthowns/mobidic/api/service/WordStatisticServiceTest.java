@@ -5,7 +5,7 @@ import com.kthowns.mobidic.api.dictionary.entity.Vocabulary;
 import com.kthowns.mobidic.api.dictionary.entity.Word;
 import com.kthowns.mobidic.api.dictionary.repository.VocabularyRepository;
 import com.kthowns.mobidic.api.dictionary.repository.WordRepository;
-import com.kthowns.mobidic.api.statistic.dto.StatisticDto;
+import com.kthowns.mobidic.api.dto.common.statistic.StatisticDto;
 import com.kthowns.mobidic.api.statistic.entity.WordStatistic;
 import com.kthowns.mobidic.api.statistic.repository.WordStatisticRepository;
 import com.kthowns.mobidic.api.statistic.service.StatisticService;

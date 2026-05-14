@@ -1,11 +1,11 @@
 package com.kthowns.mobidic.api.integration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.kthowns.mobidic.api.auth.dto.LoginRequest;
-import com.kthowns.mobidic.api.dictionary.dto.AddVocabularyRequestDto;
-import com.kthowns.mobidic.api.dictionary.dto.AddWordRequestDto;
+import com.kthowns.mobidic.api.dto.request.auth.LoginRequest;
+import com.kthowns.mobidic.api.dto.request.dictionary.AddVocabularyRequestDto;
+import com.kthowns.mobidic.api.dto.request.dictionary.AddWordRequestDto;
 import com.kthowns.mobidic.api.security.jwt.JwtProvider;
-import com.kthowns.mobidic.api.user.dto.SignUpRequestDto;
+import com.kthowns.mobidic.api.dto.request.user.SignUpRequestDto;
 import com.kthowns.mobidic.api.util.DatabaseCleaner;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;

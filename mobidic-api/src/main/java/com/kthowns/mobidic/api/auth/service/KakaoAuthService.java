@@ -1,12 +1,12 @@
 package com.kthowns.mobidic.api.auth.service;
 
-import com.kthowns.mobidic.api.auth.dto.KakaoLoginUrlResponse;
-import com.kthowns.mobidic.api.auth.dto.KakaoTokenResponse;
-import com.kthowns.mobidic.api.auth.dto.KakaoUserInfo;
+import com.kthowns.mobidic.api.dto.response.auth.KakaoLoginUrlResponse;
+import com.kthowns.mobidic.api.dto.response.auth.KakaoTokenResponse;
+import com.kthowns.mobidic.api.dto.common.auth.KakaoUserInfo;
 import com.kthowns.mobidic.api.auth.util.KakaoProperties;
-import com.kthowns.mobidic.api.common.code.GeneralResponseCode;
-import com.kthowns.mobidic.api.common.code.KakaoApiUrl;
-import com.kthowns.mobidic.api.common.exception.ApiException;
+import com.kthowns.mobidic.common.code.GeneralResponseCode;
+import com.kthowns.mobidic.common.code.KakaoApiUrl;
+import com.kthowns.mobidic.common.exception.ApiException;
 import com.kthowns.mobidic.api.user.entity.User;
 import com.kthowns.mobidic.api.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
