@@ -1,18 +1,20 @@
 package com.kthowns.mobidic.api.integration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.kthowns.mobidic.api.dto.request.auth.LoginRequest;
-import com.kthowns.mobidic.api.dto.request.user.SignUpRequestDto;
-import com.kthowns.mobidic.api.dto.request.dictionary.AddVocabularyRequestDto;
-import com.kthowns.mobidic.api.dto.request.dictionary.AddWordRequestDto;
+import com.kthowns.mobidic.api.dictionary.service.WordService;
 import com.kthowns.mobidic.api.dto.common.dictionary.VocabularyDto;
 import com.kthowns.mobidic.api.dto.common.dictionary.WordDto;
-import com.kthowns.mobidic.api.dictionary.service.WordService;
+import com.kthowns.mobidic.api.dto.request.auth.LoginRequest;
+import com.kthowns.mobidic.api.dto.request.dictionary.AddVocabularyRequestDto;
+import com.kthowns.mobidic.api.dto.request.dictionary.AddWordRequestDto;
+import com.kthowns.mobidic.api.dto.request.user.SignUpRequestDto;
 import com.kthowns.mobidic.api.security.jwt.JwtProvider;
 import com.kthowns.mobidic.api.statistic.service.StatisticService;
 import com.kthowns.mobidic.api.user.entity.User;
 import com.kthowns.mobidic.api.user.repository.UserRepository;
 import com.kthowns.mobidic.api.util.DatabaseCleaner;
+import com.kthowns.mobidic.common.code.AuthResponseCode;
+import com.kthowns.mobidic.common.code.GeneralResponseCode;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -28,7 +30,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import static com.kthowns.mobidic.common.code.AuthResponseCode.UNAUTHORIZED;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -94,7 +95,7 @@ public class VocabularyIntegrationTest {
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.message")
-                        .value(DUPLICATED_TITLE.getMessage()));
+                        .value(GeneralResponseCode.DUPLICATED_TITLE.getMessage()));
 
         //Fail without token
         mockMvc.perform(post("/api/vocabularies")
@@ -103,7 +104,7 @@ public class VocabularyIntegrationTest {
                 .andExpect(status().isUnauthorized())
                 .andExpect(
                         jsonPath("$.message")
-                                .value(UNAUTHORIZED.getMessage()));
+                                .value(AuthResponseCode.UNAUTHORIZED.getMessage()));
 
         //Fail with unauthorized token
         mockMvc.perform(post("/api/vocabularies")
@@ -113,7 +114,7 @@ public class VocabularyIntegrationTest {
                 .andExpect(status().isUnauthorized())
                 .andExpect(
                         jsonPath("$.message")
-                                .value(UNAUTHORIZED.getMessage()));
+                                .value(AuthResponseCode.UNAUTHORIZED.getMessage()));
 
         //Fail with invalid pattern
         addVocabRequest.setTitle(UUID.randomUUID().toString());
@@ -125,7 +126,7 @@ public class VocabularyIntegrationTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(
                         jsonPath("$.message")
-                                .value(INVALID_REQUEST_BODY.getMessage()))
+                                .value(GeneralResponseCode.INVALID_REQUEST_BODY.getMessage()))
                 .andExpect(
                         jsonPath("$.errors.title")
                                 .value("제목은 32자 미만이어야 합니다."))
@@ -198,7 +199,7 @@ public class VocabularyIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.message")
-                        .value(UNAUTHORIZED.getMessage()));
+                        .value(AuthResponseCode.UNAUTHORIZED.getMessage()));
 
         //Fail with unauthorized token
         mockMvc.perform(get("/api/vocabularies")
@@ -206,7 +207,7 @@ public class VocabularyIntegrationTest {
                         .header("Authorization", "Bearer " + jwtProvider.generateToken(UUID.randomUUID())))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.message")
-                        .value(UNAUTHORIZED.getMessage()));
+                        .value(AuthResponseCode.UNAUTHORIZED.getMessage()));
     }
 
     @Test
@@ -255,7 +256,7 @@ public class VocabularyIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.message")
-                        .value(UNAUTHORIZED.getMessage()));
+                        .value(AuthResponseCode.UNAUTHORIZED.getMessage()));
 
         //Fail with unauthorized token
         mockMvc.perform(get("/api/vocabularies/" + addVocabResponse.getId())
@@ -263,7 +264,7 @@ public class VocabularyIntegrationTest {
                         .header("Authorization", "Bearer " + jwtProvider.generateToken(UUID.randomUUID())))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.message")
-                        .value(UNAUTHORIZED.getMessage()));
+                        .value(AuthResponseCode.UNAUTHORIZED.getMessage()));
 
         //Fail with no resource
         mockMvc.perform(get("/api/vocabularies/" + UUID.randomUUID())
@@ -271,7 +272,7 @@ public class VocabularyIntegrationTest {
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message")
-                        .value(NO_VOCAB.getMessage()));
+                        .value(GeneralResponseCode.NO_VOCAB.getMessage()));
     }
 
     @Test
@@ -345,7 +346,7 @@ public class VocabularyIntegrationTest {
                         .content(objectMapper.writeValueAsString(updateVocabRequest)))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.message")
-                        .value(DUPLICATED_TITLE.getMessage()));
+                        .value(GeneralResponseCode.DUPLICATED_TITLE.getMessage()));
 
         //Fail without token
         mockMvc.perform(patch("/api/vocabularies/" + addVocabResponse.getId())
@@ -353,7 +354,7 @@ public class VocabularyIntegrationTest {
                         .content(objectMapper.writeValueAsString(updateVocabRequest)))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.message")
-                        .value(UNAUTHORIZED.getMessage()));
+                        .value(AuthResponseCode.UNAUTHORIZED.getMessage()));
 
         //Fail with unauthorized token
         mockMvc.perform(patch("/api/vocabularies/" + addVocabResponse.getId())
@@ -362,7 +363,7 @@ public class VocabularyIntegrationTest {
                         .content(objectMapper.writeValueAsString(updateVocabRequest)))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.message")
-                        .value(UNAUTHORIZED.getMessage()));
+                        .value(AuthResponseCode.UNAUTHORIZED.getMessage()));
 
         //Fail with no resource
         mockMvc.perform(patch("/api/vocabularies/" + UUID.randomUUID())
@@ -371,7 +372,7 @@ public class VocabularyIntegrationTest {
                         .content(objectMapper.writeValueAsString(updateVocabRequest)))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message")
-                        .value(NO_VOCAB.getMessage()));
+                        .value(GeneralResponseCode.NO_VOCAB.getMessage()));
 
         //Fail with invalid pattern
         updateVocabRequest.setTitle(UUID.randomUUID().toString());
@@ -382,7 +383,7 @@ public class VocabularyIntegrationTest {
                         .content(objectMapper.writeValueAsString(updateVocabRequest)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message")
-                        .value(INVALID_REQUEST_BODY.getMessage()))
+                        .value(GeneralResponseCode.INVALID_REQUEST_BODY.getMessage()))
                 .andExpect(jsonPath("$.errors.title")
                         .value("제목은 32자 미만이어야 합니다."))
                 .andExpect(jsonPath("$.errors.description")
@@ -419,7 +420,7 @@ public class VocabularyIntegrationTest {
                         .param("vocabId", addVocabResponse.getId().toString()))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.message")
-                        .value(UNAUTHORIZED.getMessage()));
+                        .value(AuthResponseCode.UNAUTHORIZED.getMessage()));
 
         //Fail with unauthorized token
         mockMvc.perform(delete("/api/vocabularies/" + addVocabResponse.getId())
@@ -428,7 +429,7 @@ public class VocabularyIntegrationTest {
                         .param("vocabId", addVocabResponse.getId().toString()))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.message")
-                        .value(UNAUTHORIZED.getMessage()));
+                        .value(AuthResponseCode.UNAUTHORIZED.getMessage()));
 
         //Fail with no resource
         mockMvc.perform(delete("/api/vocabularies/" + UUID.randomUUID())
@@ -437,7 +438,7 @@ public class VocabularyIntegrationTest {
                         .param("vocabId", addVocabResponse.getId().toString()))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message")
-                        .value(NO_VOCAB.getMessage()));
+                        .value(GeneralResponseCode.NO_VOCAB.getMessage()));
 
         //Success
         mockMvc.perform(delete("/api/vocabularies/" + addVocabResponse.getId())
@@ -458,7 +459,7 @@ public class VocabularyIntegrationTest {
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message")
-                        .value(NO_VOCAB.getMessage()));
+                        .value(GeneralResponseCode.NO_VOCAB.getMessage()));
     }
 
 

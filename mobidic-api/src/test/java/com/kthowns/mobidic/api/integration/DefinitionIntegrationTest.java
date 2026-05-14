@@ -1,12 +1,12 @@
 package com.kthowns.mobidic.api.integration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.kthowns.mobidic.api.dictionary.type.PartOfSpeech;
 import com.kthowns.mobidic.api.dto.request.auth.LoginRequest;
-import com.kthowns.mobidic.api.dto.request.user.SignUpRequestDto;
 import com.kthowns.mobidic.api.dto.request.dictionary.AddDefinitionRequestDto;
 import com.kthowns.mobidic.api.dto.request.dictionary.AddVocabularyRequestDto;
 import com.kthowns.mobidic.api.dto.request.dictionary.AddWordRequestDto;
-import com.kthowns.mobidic.api.dictionary.type.PartOfSpeech;
+import com.kthowns.mobidic.api.dto.request.user.SignUpRequestDto;
 import com.kthowns.mobidic.api.security.jwt.JwtProvider;
 import com.kthowns.mobidic.api.util.DatabaseCleaner;
 import com.kthowns.mobidic.common.code.AuthResponseCode;

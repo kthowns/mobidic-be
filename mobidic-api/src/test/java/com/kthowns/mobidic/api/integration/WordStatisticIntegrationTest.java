@@ -2,11 +2,13 @@ package com.kthowns.mobidic.api.integration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kthowns.mobidic.api.dto.request.auth.LoginRequest;
-import com.kthowns.mobidic.api.dto.request.user.SignUpRequestDto;
 import com.kthowns.mobidic.api.dto.request.dictionary.AddVocabularyRequestDto;
 import com.kthowns.mobidic.api.dto.request.dictionary.AddWordRequestDto;
+import com.kthowns.mobidic.api.dto.request.user.SignUpRequestDto;
 import com.kthowns.mobidic.api.security.jwt.JwtProvider;
 import com.kthowns.mobidic.api.util.DatabaseCleaner;
+import com.kthowns.mobidic.common.code.AuthResponseCode;
+import com.kthowns.mobidic.common.code.GeneralResponseCode;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -21,7 +23,6 @@ import org.springframework.test.web.servlet.MvcResult;
 import java.util.List;
 import java.util.UUID;
 
-import static com.kthowns.mobidic.common.code.AuthResponseCode.UNAUTHORIZED;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -76,7 +77,7 @@ public class WordStatisticIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.message")
-                        .value(UNAUTHORIZED.getMessage()));
+                        .value(AuthResponseCode.UNAUTHORIZED.getMessage()));
 
         //Fail with unauthorized token
         mockMvc.perform(get("/api/words/" + wordId + "/statistic")
@@ -84,7 +85,7 @@ public class WordStatisticIntegrationTest {
                         .header("Authorization", "Bearer " + jwtProvider.generateToken(UUID.randomUUID())))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.message")
-                        .value(UNAUTHORIZED.getMessage()));
+                        .value(AuthResponseCode.UNAUTHORIZED.getMessage()));
 
         //Fail with no resource
         mockMvc.perform(get("/api/words/" + UUID.randomUUID() + "/statistic")
@@ -92,7 +93,7 @@ public class WordStatisticIntegrationTest {
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message")
-                        .value(NO_STAT.getMessage()));
+                        .value(GeneralResponseCode.NO_STAT.getMessage()));
     }
 
     @Test
@@ -117,7 +118,7 @@ public class WordStatisticIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.message")
-                        .value(UNAUTHORIZED.getMessage()));
+                        .value(AuthResponseCode.UNAUTHORIZED.getMessage()));
 
         //Fail with unauthorized token
         mockMvc.perform(get("/api/vocabularies/" + vocabularyId + "/learning-rate")
@@ -125,7 +126,7 @@ public class WordStatisticIntegrationTest {
                         .header("Authorization", "Bearer " + jwtProvider.generateToken(UUID.randomUUID())))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.message")
-                        .value(UNAUTHORIZED.getMessage()));
+                        .value(AuthResponseCode.UNAUTHORIZED.getMessage()));
 
         //Fail with no resource
         mockMvc.perform(get("/api/vocabularies/" + UUID.randomUUID() + "/learning-rate")
@@ -133,7 +134,7 @@ public class WordStatisticIntegrationTest {
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message")
-                        .value(NO_VOCAB.getMessage()));
+                        .value(GeneralResponseCode.NO_VOCAB.getMessage()));
     }
 
     @Test
@@ -177,7 +178,7 @@ public class WordStatisticIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.message")
-                        .value(UNAUTHORIZED.getMessage()));
+                        .value(AuthResponseCode.UNAUTHORIZED.getMessage()));
 
         //Fail with unauthorized token
         mockMvc.perform(patch("/api/words/" + wordId + "/toggle-learned")
@@ -185,7 +186,7 @@ public class WordStatisticIntegrationTest {
                         .header("Authorization", "Bearer " + jwtProvider.generateToken(UUID.randomUUID())))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.message")
-                        .value(UNAUTHORIZED.getMessage()));
+                        .value(AuthResponseCode.UNAUTHORIZED.getMessage()));
 
         //Fail with no resource
         mockMvc.perform(patch("/api/words/" + UUID.randomUUID() + "/toggle-learned")
@@ -193,7 +194,7 @@ public class WordStatisticIntegrationTest {
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message")
-                        .value(NO_STAT.getMessage()));
+                        .value(GeneralResponseCode.NO_STAT.getMessage()));
     }
 
     private UUID addVocabAndGetId(String token) throws Exception {

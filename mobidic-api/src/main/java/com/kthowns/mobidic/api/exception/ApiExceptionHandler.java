@@ -1,5 +1,7 @@
 package com.kthowns.mobidic.api.exception;
 
+import com.kthowns.mobidic.common.code.AuthResponseCode;
+import com.kthowns.mobidic.common.code.GeneralResponseCode;
 import com.kthowns.mobidic.common.dto.ErrorResponse;
 import com.kthowns.mobidic.common.exception.ApiException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -18,9 +20,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import java.util.HashMap;
 
 import static com.kthowns.mobidic.common.code.AuthResponseCode.LOGIN_FAILED;
-import static com.kthowns.mobidic.common.code.AuthResponseCode.UNAUTHORIZED;
 import static com.kthowns.mobidic.common.code.GeneralResponseCode.INTERNAL_SERVER_ERROR;
-import static com.kthowns.mobidic.common.code.GeneralResponseCode.INVALID_REQUEST_BODY;
 
 @Slf4j
 @RestControllerAdvice(annotations = RestController.class)
@@ -30,7 +30,7 @@ public class ApiExceptionHandler {
             final MethodArgumentNotValidException e, final HttpServletRequest request
     ) {
         log.error("errorCode : {}, uri : {}, message : {}",
-                        e, request.getRequestURI(), e.getMessage());
+                e, request.getRequestURI(), e.getMessage());
 
         HashMap<String, String> errors = new HashMap<>();
 
@@ -38,7 +38,7 @@ public class ApiExceptionHandler {
             errors.put(error.getField(), error.getDefaultMessage());
         }
 
-        return ErrorResponse.toResponseEntity(INVALID_REQUEST_BODY, errors);
+        return ErrorResponse.toResponseEntity(GeneralResponseCode.INVALID_REQUEST_BODY, errors);
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
@@ -58,7 +58,7 @@ public class ApiExceptionHandler {
         log.error("errorCode : {}, uri : {}, message : {}",
                 e, request.getRequestURI(), e.getMessage());
 
-        return ErrorResponse.toResponseEntity(INVALID_REQUEST_BODY, null);
+        return ErrorResponse.toResponseEntity(GeneralResponseCode.INVALID_REQUEST_BODY, null);
     }
 
     @ExceptionHandler(BadCredentialsException.class)
@@ -76,7 +76,7 @@ public class ApiExceptionHandler {
     ) {
         log.error("errorCode : {}, uri : {}, message : {}",
                 e, request.getRequestURI(), e.getMessage());
-        return ErrorResponse.toResponseEntity(UNAUTHORIZED, null);
+        return ErrorResponse.toResponseEntity(AuthResponseCode.UNAUTHORIZED, null);
     }
 
     @ExceptionHandler(ApiException.class)

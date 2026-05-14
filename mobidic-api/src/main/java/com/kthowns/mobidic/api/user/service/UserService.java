@@ -2,6 +2,7 @@ package com.kthowns.mobidic.api.user.service;
 
 import com.kthowns.mobidic.api.dto.common.auth.KakaoUserInfo;
 import com.kthowns.mobidic.api.auth.service.AuthService;
+import com.kthowns.mobidic.common.code.AuthResponseCode;
 import com.kthowns.mobidic.common.code.GeneralResponseCode;
 import com.kthowns.mobidic.common.exception.ApiException;
 import com.kthowns.mobidic.api.security.jwt.JwtBlacklistService;
@@ -34,7 +35,7 @@ public class UserService {
     @Transactional
     public User registerUser(SignUpRequestDto request) {
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new ApiException(DUPLICATED_EMAIL);
+            throw new ApiException(GeneralResponseCode.DUPLICATED_EMAIL);
         }
 
         return userRepository.save(
@@ -60,7 +61,7 @@ public class UserService {
     @Transactional
     public UserDto updateUser(User user, UpdateUserRequestDto request, String token) {
         User updateUser = userRepository.findById(user.getId())
-                .orElseThrow(() -> new ApiException(NO_USER));
+                .orElseThrow(() -> new ApiException(AuthResponseCode.NO_USER));
 
         if (request.getNickname() != null) {
             if (userRepository.existsByNicknameAndIdNot(request.getNickname(), user.getId())) {

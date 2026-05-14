@@ -1,6 +1,7 @@
 package com.kthowns.mobidic.api.security.exception;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.kthowns.mobidic.common.code.AuthResponseCode;
 import com.kthowns.mobidic.common.dto.ErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -12,8 +13,6 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-
-import static com.kthowns.mobidic.common.code.AuthResponseCode.UNAUTHORIZED;
 
 @Component
 @Slf4j
@@ -31,8 +30,8 @@ public class AuthAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .errors(null)
-                .status(UNAUTHORIZED.getStatus().value())
-                .message(UNAUTHORIZED.getMessage())
+                .status(AuthResponseCode.UNAUTHORIZED.getStatus().value())
+                .message(AuthResponseCode.UNAUTHORIZED.getMessage())
                 .build();
 
         String responseBody = objectMapper.writeValueAsString(errorResponse);

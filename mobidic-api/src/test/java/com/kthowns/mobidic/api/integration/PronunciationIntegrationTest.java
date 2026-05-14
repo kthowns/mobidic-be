@@ -4,8 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kthowns.mobidic.api.dto.request.auth.LoginRequest;
 import com.kthowns.mobidic.api.dto.request.dictionary.AddVocabularyRequestDto;
 import com.kthowns.mobidic.api.dto.request.dictionary.AddWordRequestDto;
-import com.kthowns.mobidic.api.security.jwt.JwtProvider;
 import com.kthowns.mobidic.api.dto.request.user.SignUpRequestDto;
+import com.kthowns.mobidic.api.security.jwt.JwtProvider;
 import com.kthowns.mobidic.api.util.DatabaseCleaner;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -105,7 +105,7 @@ public class PronunciationIntegrationTest {
                             .file(largeFile))
                     .andExpect(status().isUnauthorized())
                     .andExpect(jsonPath("$.message")
-                            .value(UNAUTHORIZED.getMessage()));
+                            .value(AuthResponseCode.UNAUTHORIZED.getMessage()));
 
             //Fail with unauthorized token
             mockMvc.perform(multipart("/api/words/" + wordId + "/pronunciation")
@@ -113,7 +113,7 @@ public class PronunciationIntegrationTest {
                             .header("Authorization", "Bearer " + jwtProvider.generateToken(UUID.randomUUID())))
                     .andExpect(status().isUnauthorized())
                     .andExpect(jsonPath("$.message")
-                            .value(UNAUTHORIZED.getMessage()));
+                            .value(AuthResponseCode.UNAUTHORIZED.getMessage()));
 
             //Fail with no resource
             mockMvc.perform(multipart("/api/words/" + UUID.randomUUID() + "/pronunciation")
@@ -121,7 +121,7 @@ public class PronunciationIntegrationTest {
                             .header("Authorization", "Bearer " + token))
                     .andExpect(status().isNotFound())
                     .andExpect(jsonPath("$.message")
-                            .value(NO_WORD.getMessage()));
+                            .value(GeneralResponseCode.NO_WORD.getMessage()));
         }
     */
     private UUID addVocabAndGetId(String token) throws Exception {

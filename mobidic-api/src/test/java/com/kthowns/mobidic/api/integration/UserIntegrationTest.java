@@ -3,9 +3,11 @@ package com.kthowns.mobidic.api.integration;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kthowns.mobidic.api.dto.request.auth.LoginRequest;
 import com.kthowns.mobidic.api.dto.request.user.SignUpRequestDto;
-import com.kthowns.mobidic.api.security.jwt.JwtProvider;
 import com.kthowns.mobidic.api.dto.request.user.UpdateUserRequestDto;
+import com.kthowns.mobidic.api.security.jwt.JwtProvider;
 import com.kthowns.mobidic.api.util.DatabaseCleaner;
+import com.kthowns.mobidic.common.code.AuthResponseCode;
+import com.kthowns.mobidic.common.code.GeneralResponseCode;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -20,9 +22,6 @@ import org.springframework.test.web.servlet.MvcResult;
 import java.util.List;
 import java.util.UUID;
 
-import static com.kthowns.mobidic.common.code.AuthResponseCode.UNAUTHORIZED;
-import static com.kthowns.mobidic.common.code.GeneralResponseCode.DUPLICATED_NICKNAME;
-import static com.kthowns.mobidic.common.code.GeneralResponseCode.INVALID_REQUEST_BODY;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -75,7 +74,7 @@ public class UserIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.message")
-                        .value(UNAUTHORIZED.getMessage()));
+                        .value(AuthResponseCode.UNAUTHORIZED.getMessage()));
 
         //Fail with unauthorized token
         mockMvc.perform(get("/api/users/me")
@@ -84,7 +83,7 @@ public class UserIntegrationTest {
                         .param("uId", userId.toString()))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.message")
-                        .value(UNAUTHORIZED.getMessage()));
+                        .value(AuthResponseCode.UNAUTHORIZED.getMessage()));
 
         //Fail with no resource
         mockMvc.perform(get("/api/users/me")
@@ -93,7 +92,7 @@ public class UserIntegrationTest {
                         .param("uId", UUID.randomUUID().toString()))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.message")
-                        .value(UNAUTHORIZED.getMessage()));
+                        .value(AuthResponseCode.UNAUTHORIZED.getMessage()));
     }
 
     @Test
@@ -148,7 +147,7 @@ public class UserIntegrationTest {
                         .content(objectMapper.writeValueAsString(updateNicknameRequest)))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.message")
-                        .value(DUPLICATED_NICKNAME.getMessage()));
+                        .value(GeneralResponseCode.DUPLICATED_NICKNAME.getMessage()));
 
         //Fail without token
         mockMvc.perform(patch("/api/users/me")
@@ -156,7 +155,7 @@ public class UserIntegrationTest {
                         .content(objectMapper.writeValueAsString(updateNicknameRequest)))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.message")
-                        .value(UNAUTHORIZED.getMessage()));
+                        .value(AuthResponseCode.UNAUTHORIZED.getMessage()));
 
         //Fail with unauthorized token
         mockMvc.perform(patch("/api/users/me")
@@ -165,7 +164,7 @@ public class UserIntegrationTest {
                         .content(objectMapper.writeValueAsString(updateNicknameRequest)))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.message")
-                        .value(UNAUTHORIZED.getMessage()));
+                        .value(AuthResponseCode.UNAUTHORIZED.getMessage()));
 
         //Fail with invalid nickname pattern
         updateNicknameRequest.setNickname(nickname + "testqweqweqqq");
@@ -175,7 +174,7 @@ public class UserIntegrationTest {
                         .content(objectMapper.writeValueAsString(updateNicknameRequest)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message")
-                        .value(INVALID_REQUEST_BODY.getMessage()))
+                        .value(GeneralResponseCode.INVALID_REQUEST_BODY.getMessage()))
                 .andExpect(jsonPath("$.errors.nickname")
                         .value("유효하지 않은 닉네임 형식 입니다."));
 
@@ -199,7 +198,7 @@ public class UserIntegrationTest {
                         .content(objectMapper.writeValueAsString(updatePasswordRequest)))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.message")
-                        .value(UNAUTHORIZED.getMessage()));
+                        .value(AuthResponseCode.UNAUTHORIZED.getMessage()));
 
         //Fail with unauthorized token
         mockMvc.perform(patch("/api/users/me")
@@ -208,7 +207,7 @@ public class UserIntegrationTest {
                         .content(objectMapper.writeValueAsString(updatePasswordRequest)))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.message")
-                        .value(UNAUTHORIZED.getMessage()));
+                        .value(AuthResponseCode.UNAUTHORIZED.getMessage()));
 
         //Fail with invalid nickname pattern
         updatePasswordRequest.setPassword("test");
@@ -218,7 +217,7 @@ public class UserIntegrationTest {
                         .content(objectMapper.writeValueAsString(updatePasswordRequest)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message")
-                        .value(INVALID_REQUEST_BODY.getMessage()))
+                        .value(GeneralResponseCode.INVALID_REQUEST_BODY.getMessage()))
                 .andExpect(jsonPath("$.errors.password")
                         .value("비밀번호는 8자 이상, 영문자와 숫자를 포함해야 합니다."));
 
@@ -237,7 +236,7 @@ public class UserIntegrationTest {
                         .param("uId", userId.toString()))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.message")
-                        .value(UNAUTHORIZED.getMessage()));
+                        .value(AuthResponseCode.UNAUTHORIZED.getMessage()));
     }
 
     private String loginAndGetToken(String email, String nickname) throws Exception {
