@@ -1,15 +1,15 @@
 package com.kthowns.mobidic.api.service;
 
 import com.kthowns.mobidic.api.config.ServiceTestConfig;
-import com.kthowns.mobidic.api.dto.request.dictionary.AddDefinitionRequestDto;
-import com.kthowns.mobidic.api.dto.common.dictionary.DefinitionDto;
-import com.kthowns.mobidic.api.dictionary.entity.Definition;
-import com.kthowns.mobidic.api.dictionary.entity.Word;
-import com.kthowns.mobidic.api.dictionary.repository.DefinitionRepository;
-import com.kthowns.mobidic.api.dictionary.repository.WordRepository;
-import com.kthowns.mobidic.api.dictionary.service.DefinitionService;
-import com.kthowns.mobidic.api.dictionary.type.PartOfSpeech;
-import com.kthowns.mobidic.api.user.entity.User;
+import com.kthowns.mobidic.api.dictionary.dto.request.AddDefinitionRequestDto;
+import com.kthowns.mobidic.api.dictionary.dto.response.DefinitionDto;
+import com.kthowns.mobidic.storage.dictionary.jpaentity.Definition;
+import com.kthowns.mobidic.storage.dictionary.jpaentity.Word;
+import com.kthowns.mobidic.storage.dictionary.jparepository.DefinitionRepository;
+import com.kthowns.mobidic.storage.dictionary.jparepository.WordRepository;
+import com.kthowns.mobidic.domain.dictionary.service.DefinitionService;
+import com.kthowns.mobidic.domain.dictionary.model.PartOfSpeech;
+import com.kthowns.mobidic.storage.user.jpaentity.User;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

@@ -1,15 +1,15 @@
 package com.kthowns.mobidic.api.service;
 
 import com.kthowns.mobidic.api.config.ServiceTestConfig;
-import com.kthowns.mobidic.api.dictionary.entity.Vocabulary;
-import com.kthowns.mobidic.api.dictionary.entity.Word;
-import com.kthowns.mobidic.api.dictionary.repository.VocabularyRepository;
-import com.kthowns.mobidic.api.dictionary.repository.WordRepository;
-import com.kthowns.mobidic.api.dto.common.statistic.StatisticDto;
-import com.kthowns.mobidic.api.statistic.entity.WordStatistic;
-import com.kthowns.mobidic.api.statistic.repository.WordStatisticRepository;
-import com.kthowns.mobidic.api.statistic.service.StatisticService;
-import com.kthowns.mobidic.api.user.entity.User;
+import com.kthowns.mobidic.storage.dictionary.jpaentity.Vocabulary;
+import com.kthowns.mobidic.storage.dictionary.jpaentity.Word;
+import com.kthowns.mobidic.storage.dictionary.jparepository.VocabularyRepository;
+import com.kthowns.mobidic.storage.dictionary.jparepository.WordRepository;
+import com.kthowns.mobidic.api.statistic.dto.response.StatisticDto;
+import com.kthowns.mobidic.storage.statistic.jpaentity.WordStatistic;
+import com.kthowns.mobidic.storage.statistic.jparepository.WordStatisticRepository;
+import com.kthowns.mobidic.domain.statistic.service.StatisticService;
+import com.kthowns.mobidic.storage.user.jpaentity.User;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

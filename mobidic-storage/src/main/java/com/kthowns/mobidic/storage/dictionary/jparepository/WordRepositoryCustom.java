@@ -1,0 +1,10 @@
+package com.kthowns.mobidic.storage.dictionary.jparepository;
+
+import com.kthowns.mobidic.api.dto.common.dictionary.WordDetail;
+
+import java.util.List;
+import java.util.UUID;
+
+public interface WordRepositoryCustom {
+    List<WordDetail> findWordDetailsByVocabularyId(UUID userId, UUID vocabularyId, boolean notLearned);
+}

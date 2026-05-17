@@ -1,12 +1,12 @@
 package com.kthowns.mobidic.api.service;
 
 import com.kthowns.mobidic.api.config.ServiceTestConfig;
-import com.kthowns.mobidic.api.dto.request.user.SignUpRequestDto;
-import com.kthowns.mobidic.api.dto.request.user.UpdateUserRequestDto;
-import com.kthowns.mobidic.api.dto.common.user.UserDto;
-import com.kthowns.mobidic.api.user.entity.User;
-import com.kthowns.mobidic.api.user.repository.UserRepository;
-import com.kthowns.mobidic.api.user.service.UserService;
+import com.kthowns.mobidic.api.user.dto.request.SignUpRequestDto;
+import com.kthowns.mobidic.api.user.dto.request.UpdateUserRequestDto;
+import com.kthowns.mobidic.api.user.dto.response.UserDto;
+import com.kthowns.mobidic.storage.user.jpaentity.User;
+import com.kthowns.mobidic.storage.user.jparepository.UserRepository;
+import com.kthowns.mobidic.domain.user.service.UserService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
