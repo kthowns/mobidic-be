@@ -1,4 +1,4 @@
-package com.kthowns.mobidic.api;
+package com.kthowns.mobidic;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
