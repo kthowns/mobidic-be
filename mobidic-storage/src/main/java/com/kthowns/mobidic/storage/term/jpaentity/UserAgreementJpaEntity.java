@@ -1,6 +1,6 @@
 package com.kthowns.mobidic.storage.term.jpaentity;
 
-import com.kthowns.mobidic.api.user.entity.User;
+import com.kthowns.mobidic.storage.user.jpaentity.UserJpaEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -23,7 +23,7 @@ import java.time.LocalDateTime;
         uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "term_id"})
 )
 @EntityListeners(AuditingEntityListener.class)
-public class UserAgreement {
+public class UserAgreementJpaEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -31,12 +31,12 @@ public class UserAgreement {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
-    private User user;
+    private UserJpaEntity user;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "term_id", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
-    private Term term;
+    private TermJpaEntity term;
 
     @Column(name = "agreed_at", nullable = false, updatable = false)
     @CreatedDate

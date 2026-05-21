@@ -1,5 +1,6 @@
 package com.kthowns.mobidic.storage.preset.jpaentity;
 
+import com.kthowns.mobidic.domain.dictionary.model.PartOfSpeech;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -7,9 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -17,22 +16,22 @@ import java.util.UUID;
 @NoArgsConstructor
 @Builder
 @Entity
-@Table(name = "preset_words")
-@EntityListeners(AuditingEntityListener.class)
-public class PresetWord {
+@Table(name = "preset_definitions")
+public class PresetDefinitionJpaEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id", columnDefinition = "BINARY(16)")
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "preset_vocabulary_id")
+    @JoinColumn(name = "preset_word_id")
     @OnDelete(action = OnDeleteAction.CASCADE)
-    private PresetVocabulary vocabulary;
+    private PresetWordJpaEntity word;
 
-    @OneToMany(mappedBy = "word", fetch = FetchType.LAZY)
-    private List<PresetDefinition> definitions;
+    @Column(name = "meaning", nullable = false)
+    private String meaning;
 
-    @Column(name = "expression", nullable = false)
-    private String expression;
+    @Column(name = "part", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private PartOfSpeech part;
 }

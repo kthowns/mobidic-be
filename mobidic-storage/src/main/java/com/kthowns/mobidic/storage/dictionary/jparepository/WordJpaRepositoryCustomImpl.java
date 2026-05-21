@@ -1,7 +1,6 @@
 package com.kthowns.mobidic.storage.dictionary.jparepository;
 
-import com.kthowns.mobidic.api.dto.common.dictionary.DefinitionDto;
-import com.kthowns.mobidic.api.dto.common.dictionary.WordDetail;
+import com.kthowns.mobidic.domain.dictionary.model.WordDetail;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -12,12 +11,8 @@ import lombok.RequiredArgsConstructor;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.kthowns.mobidic.api.dictionary.entity.QDefinition.definition;
-import static com.kthowns.mobidic.api.dictionary.entity.QWord.word;
-import static com.kthowns.mobidic.api.statistic.entity.QWordStatistic.wordStatistic;
-
 @RequiredArgsConstructor
-public class WordRepositoryCustomImpl implements WordRepositoryCustom {
+public class WordJpaRepositoryCustomImpl implements WordJpaRepositoryCustom {
     private final JPAQueryFactory queryFactory;
 
     @Override

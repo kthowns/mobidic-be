@@ -14,14 +14,14 @@ import java.util.UUID;
 @Entity
 @Table(name = "preset_vocabularies")
 @EntityListeners(AuditingEntityListener.class)
-public class PresetVocabulary {
+public class PresetVocabularyJpaEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id", columnDefinition = "BINARY(16)")
     private UUID id;
 
     @OneToMany(mappedBy = "vocabulary", fetch = FetchType.LAZY)
-    private List<PresetWord> words;
+    private List<PresetWordJpaEntity> words;
 
     @Setter
     @Column(name = "title", nullable = false)

@@ -1,6 +1,6 @@
 package com.kthowns.mobidic.storage.user.jparepository;
 
-import com.kthowns.mobidic.storage.user.jpaentity.User;
+import com.kthowns.mobidic.storage.user.jpaentity.UserJpaEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -8,8 +8,8 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Repository
-public interface UserRepository extends JpaRepository<User, UUID> {
-    Optional<User> findByEmail(String email);
+public interface UserJpaRepository extends JpaRepository<UserJpaEntity, UUID> {
+    Optional<UserJpaEntity> findByEmail(String email);
 
     boolean existsByNickname(String nickname);
 
@@ -17,5 +17,5 @@ public interface UserRepository extends JpaRepository<User, UUID> {
 
     boolean existsByNicknameAndIdNot(String nickname, UUID id);
 
-    Optional<User> findByKakaoId(Long kakaoId);
+    Optional<UserJpaEntity> findByKakaoId(Long kakaoId);
 }

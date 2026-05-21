@@ -1,7 +1,7 @@
 package com.kthowns.mobidic.storage.dictionary.jparepository;
 
-import com.kthowns.mobidic.api.dto.common.dictionary.VocabularyDetail;
-import com.kthowns.mobidic.api.dto.common.dictionary.VocabularyDto;
+import com.kthowns.mobidic.domain.dictionary.model.Vocabulary;
+import com.kthowns.mobidic.domain.dictionary.model.VocabularyDetail;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -11,18 +11,15 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static com.kthowns.mobidic.api.dictionary.entity.QVocabulary.vocabulary;
-import static com.kthowns.mobidic.api.statistic.entity.QWordStatistic.wordStatistic;
-
 @RequiredArgsConstructor
-public class VocabularyDetailRepositoryCustomImpl implements VocabularyDetailRepositoryCustom {
+public class VocabularyDetailJpaRepositoryCustomImpl implements VocabularyDetailJpaRepositoryCustom {
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public List<VocabularyDetail> findVocabularyDetails(UUID userId) {
+    public List<com.kthowns.mobidic.domain.dictionary.model.VocabularyDetail> findVocabularyDetails(UUID userId) {
         return queryFactory
                 .select(Projections.constructor(VocabularyDetail.class,
-                        Projections.constructor(VocabularyDto.class,
+                        Projections.constructor(Vocabulary.class,
                                 QVocabulary.vocabulary.id,
                                 QVocabulary.vocabulary.title,
                                 QVocabulary.vocabulary.description,

@@ -1,12 +1,13 @@
 package com.kthowns.mobidic.storage.dictionary.jparepository;
 
-import com.kthowns.mobidic.api.dto.common.dictionary.VocabularyDetail;
+
+import com.kthowns.mobidic.domain.dictionary.model.VocabularyDetail;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-public interface VocabularyDetailRepositoryCustom {
+public interface VocabularyDetailJpaRepositoryCustom {
     List<VocabularyDetail> findVocabularyDetails(UUID userId);
 
     Optional<VocabularyDetail> findVocabularyDetail(UUID vocabularyId, UUID userId);

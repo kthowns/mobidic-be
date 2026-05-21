@@ -1,4 +1,4 @@
-package com.kthowns.mobidic.storage.preset.jpaentity;
+package com.kthowns.mobidic.storage.dictionary.jpaentity;
 
 import com.kthowns.mobidic.domain.dictionary.model.PartOfSpeech;
 import jakarta.persistence.*;
@@ -16,17 +16,17 @@ import java.util.UUID;
 @NoArgsConstructor
 @Builder
 @Entity
-@Table(name = "preset_definitions")
-public class PresetDefinition {
+@Table(name = "definitions")
+public class DefinitionJpaEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id", columnDefinition = "BINARY(16)")
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "preset_word_id")
+    @JoinColumn(name = "word_id")
     @OnDelete(action = OnDeleteAction.CASCADE)
-    private PresetWord word;
+    private WordJpaEntity word;
 
     @Column(name = "meaning", nullable = false)
     private String meaning;

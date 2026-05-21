@@ -1,6 +1,6 @@
 package com.kthowns.mobidic.storage.term.jpaentity;
 
-import com.kthowns.mobidic.api.term.type.TermType;
+import com.kthowns.mobidic.domain.term.model.TermType;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "terms")
 @EntityListeners(AuditingEntityListener.class)
-public class Term {
+public class TermJpaEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")

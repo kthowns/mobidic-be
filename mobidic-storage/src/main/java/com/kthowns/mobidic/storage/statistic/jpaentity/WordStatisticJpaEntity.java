@@ -1,6 +1,6 @@
 package com.kthowns.mobidic.storage.statistic.jpaentity;
 
-import com.kthowns.mobidic.storage.dictionary.jpaentity.Word;
+import com.kthowns.mobidic.storage.dictionary.jpaentity.WordJpaEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.OnDelete;
@@ -14,7 +14,7 @@ import java.util.UUID;
 @Builder
 @Entity
 @Table(name = "word_statistics")
-public class WordStatistic {
+public class WordStatisticJpaEntity {
     @Id
     private UUID wordId;
 
@@ -22,7 +22,7 @@ public class WordStatistic {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "word_id")
     @OnDelete(action = OnDeleteAction.CASCADE)
-    private Word word;
+    private WordJpaEntity word;
 
     @Column(name = "correct_count", nullable = false)
     @Builder.Default
