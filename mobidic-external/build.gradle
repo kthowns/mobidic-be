@@ -1,3 +1,6 @@
 dependencies {
+    implementation project(':mobidic-domain')
     implementation project(':mobidic-common')
+
+    implementation 'org.springframework.boot:spring-boot-starter-web'
 }
