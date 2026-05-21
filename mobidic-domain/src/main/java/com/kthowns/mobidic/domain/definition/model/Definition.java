@@ -13,6 +13,7 @@ import java.util.UUID;
 @Builder
 public class Definition {
     private UUID id;
+    private UUID wordId;
     private String meaning;
     private PartOfSpeech part;
 }

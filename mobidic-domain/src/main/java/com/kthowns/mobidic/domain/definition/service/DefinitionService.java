@@ -2,8 +2,9 @@ package com.kthowns.mobidic.domain.definition.service;
 
 import com.kthowns.mobidic.common.code.GeneralResponseCode;
 import com.kthowns.mobidic.common.exception.ApiException;
+import com.kthowns.mobidic.domain.definition.implementation.*;
 import com.kthowns.mobidic.domain.definition.model.Definition;
-import com.kthowns.mobidic.domain.word.model.Word;
+import com.kthowns.mobidic.domain.definition.model.PartOfSpeech;
 import com.kthowns.mobidic.domain.definition.repository.DefinitionRepository;
 import com.kthowns.mobidic.domain.word.repository.WordRepository;
 import lombok.RequiredArgsConstructor;
@@ -13,80 +14,77 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class DefinitionService {
+    private final DefinitionReader definitionReader;
+    private final DefinitionAppender definitionAppender;
+    private final DefinitionUpdater definitionUpdater;
+    private final DefinitionRemover definitionRemover;
+    private final DefinitionValidator definitionValidator;
+
     private final WordRepository wordRepository;
     private final DefinitionRepository definitionRepository;
 
     @Transactional
-    public Definition addDefinition(
+    public void addDefinition(
             UUID userId,
             UUID wordId,
-            AddDefinitionRequestDto request
+            String meaning,
+            PartOfSpeech part
     ) {
-        Word word = wordRepository.findByIdAndVocabulary_User_Id(wordId, userId)
+        wordRepository.readByIdAndUserId(wordId, userId)
                 .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_WORD));
 
-        if (definitionRepository.existsByMeaningAndWord(request.getMeaning(), word)) {
-            throw new ApiException(GeneralResponseCode.DUPLICATED_DEFINITION);
-        }
+        definitionValidator.validateMeaningDuplication(meaning, wordId);
 
         Definition definition = Definition.builder()
-                .word(word)
-                .part(request.getPart())
-                .meaning(request.getMeaning())
+                .wordId(wordId)
+                .part(part)
+                .meaning(meaning)
                 .build();
-        definitionRepository.save(definition);
-
-        return Definition.fromEntity(definition);
+        definitionAppender.append(definition);
     }
 
     @Transactional(readOnly = true)
-    public List<Definition> getDefinitionsByWordId(User user, UUID wordId) {
-        Word word = wordRepository.findByIdAndVocabulary_User_Id(wordId, user.getId())
+    public List<Definition> getDefinitionsByWordId(UUID userId, UUID wordId) {
+        wordRepository.readByIdAndUserId(wordId, userId)
                 .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_WORD));
 
-        return definitionRepository.findByWord(word)
-                .stream().map(Definition::fromEntity)
-                .collect(Collectors.toList());
+        return definitionReader.readByWordId(wordId);
     }
 
     @Transactional
-    public Definition updateDefinition(
-            User user,
+    public void updateDefinition(
+            UUID userId,
             UUID defId,
-            AddDefinitionRequestDto request
+            String meaning,
+            PartOfSpeech part
     ) {
-        Definition definition = definitionRepository.findByIdAndWord_Vocabulary_User_Id(
-                defId, user.getId()
-        ).orElseThrow(() -> new ApiException(GeneralResponseCode.NO_DEF));
+        Definition definition = definitionRepository.readByIdAndUserId(defId, userId)
+                .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_DEF));
 
-        if (definitionRepository.existsByMeaningAndWordAndIdNot(request.getMeaning(), definition.getWord(), defId)) {
-            throw new ApiException(GeneralResponseCode.DUPLICATED_DEFINITION);
-        }
+        definitionValidator.validateMeaningUpdateDuplication(meaning, definition.getWordId(), defId);
 
-        definition.setMeaning(request.getMeaning());
-        definition.setPart(request.getPart());
-        definitionRepository.save(definition);
-
-        return Definition.fromEntity(definition);
+        Definition updatedDefinition = Definition.builder()
+                .id(defId)
+                .wordId(definition.getWordId())
+                .meaning(meaning)
+                .part(part)
+                .build();
+        definitionUpdater.update(updatedDefinition);
     }
 
     @Transactional
-    public Definition deleteDefinition(
-            User user,
+    public void deleteDefinition(
+            UUID userId,
             UUID defId
     ) {
-        Definition definition = definitionRepository.findByIdAndWord_Vocabulary_User_Id(
-                defId, user.getId()
-        ).orElseThrow(() -> new ApiException(GeneralResponseCode.NO_DEF));
+        definitionRepository.readByIdAndUserId(defId, userId)
+                .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_DEF));
 
-        definitionRepository.delete(definition);
-
-        return Definition.fromEntity(definition);
+        definitionRemover.remove(defId, userId);
     }
 }

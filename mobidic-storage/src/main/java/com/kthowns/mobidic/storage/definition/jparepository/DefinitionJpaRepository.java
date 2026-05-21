@@ -9,11 +9,11 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface DefinitionJpaRepository extends JpaRepository<DefinitionJpaEntity, UUID> {
-    List<DefinitionJpaEntity> findByWord(WordJpaEntity word);
-
-    boolean existsByMeaningAndWord(String definition, WordJpaEntity word);
-
-    boolean existsByMeaningAndWordAndIdNot(String definition, WordJpaEntity word, UUID id);
-
     Optional<DefinitionJpaEntity> findByIdAndWord_Vocabulary_User_Id(UUID id, UUID wordVocabularyUserId);
+
+    List<DefinitionJpaEntity> findByWord_Id(UUID wordId);
+
+    boolean existsByMeaningAndWord_Id(String meaning, UUID wordId);
+
+    boolean existsByMeaningAndWord_IdAndIdNot(String meaning, UUID wordId, UUID id);
 }
