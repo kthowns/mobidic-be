@@ -1,78 +1,92 @@
 package com.kthowns.mobidic.domain.user.service;
 
-import com.kthowns.mobidic.common.code.AuthResponseCode;
-import com.kthowns.mobidic.common.code.GeneralResponseCode;
-import com.kthowns.mobidic.common.exception.ApiException;
-import com.kthowns.mobidic.domain.user.repository.UserRepository;
+import com.kthowns.mobidic.domain.user.client.PasswordEncoderClient;
+import com.kthowns.mobidic.domain.user.client.TokenWithdrawalClient;
+import com.kthowns.mobidic.domain.user.implementation.*;
+import com.kthowns.mobidic.domain.user.model.User;
+import com.kthowns.mobidic.domain.user.model.UserRole;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class UserService {
-    private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
-    private final AuthService authService;
+    private final UserReader userReader;
+    private final UserAppender userAppender;
+    private final UserUpdater userUpdater;
+    private final UserRemover userRemover;
+    private final UserValidator userValidator;
+
+    private final PasswordEncoderClient passwordEncoderClient;
+    private final TokenWithdrawalClient tokenWithdrawalClient;
 
     @Transactional
-    public User registerUser(SignUpRequestDto request) {
-        if (userRepository.existsByEmail(request.getEmail())) {
-            throw new ApiException(GeneralResponseCode.DUPLICATED_EMAIL);
-        }
+    public User registerUser(String email, String nickname, String password) {
+        userValidator.validateEmailDuplication(email);
+        userValidator.validateNicknameDuplication(nickname);
 
-        return userRepository.save(
-                User.builder()
-                        .email(request.getEmail())
-                        .nickname(request.getNickname())
-                        .password(passwordEncoder.encode(request.getPassword()))
-                        .build()
-        );
+        User user = User.builder()
+                .email(email)
+                .nickname(nickname)
+                .password(passwordEncoderClient.encode(password))
+                .role(UserRole.USER)
+                .isActive(true)
+                .build();
+
+        return userAppender.append(user);
     }
 
     @Transactional
-    public User registerKakaoUser(KakaoUserInfo kakaoUserInfo) {
-        return userRepository.save(
-                User.builder()
-                        .kakaoId(kakaoUserInfo.getId())
-                        .email(kakaoUserInfo.getKakaoAccount().getEmail())
-                        .nickname(kakaoUserInfo.getKakaoAccount().getProfile().getNickname())
-                        .password(passwordEncoder.encode(UUID.randomUUID().toString()))
-                        .build());
+    public User registerKakaoUser(Long kakaoId, String email, String nickname) {
+        // 카카오 사용자는 이메일 중복 체크를 스킵하거나 별도 정책 필요
+        User user = User.builder()
+                .kakaoId(kakaoId)
+                .email(email)
+                .nickname(nickname)
+                .password(passwordEncoderClient.encode(UUID.randomUUID().toString()))
+                .role(UserRole.USER)
+                .isActive(true)
+                .build();
+
+        return userAppender.append(user);
     }
 
     @Transactional
-    public UserDto updateUser(User user, UpdateUserRequestDto request, String token) {
-        User updateUser = userRepository.findById(user.getId())
-                .orElseThrow(() -> new ApiException(AuthResponseCode.NO_USER));
+    public User updateUser(UUID userId, String nickname, String password, String token) {
+        User user = userReader.readById(userId);
 
-        if (request.getNickname() != null) {
-            if (userRepository.existsByNicknameAndIdNot(request.getNickname(), user.getId())) {
-                throw new ApiException(GeneralResponseCode.DUPLICATED_NICKNAME);
-            }
-            updateUser.setNickname(request.getNickname());
+        if (nickname != null) {
+            userValidator.validateNicknameUpdateDuplication(nickname, userId);
         }
 
-        if (request.getPassword() != null) {
-            updateUser.setPassword(passwordEncoder.encode(request.getPassword()));
-            authService.logout(token);
+        User updatedUser = User.builder()
+                .id(user.getId())
+                .kakaoId(user.getKakaoId())
+                .email(user.getEmail())
+                .nickname(nickname != null ? nickname : user.getNickname())
+                .password(password != null ? passwordEncoderClient.encode(password) : user.getPassword())
+                .role(user.getRole())
+                .isActive(user.getIsActive())
+                .createdAt(user.getCreatedAt())
+                .build();
+
+        if (password != null) {
+            tokenWithdrawalClient.withdrawToken(token);
         }
 
-        return UserDto.fromEntity(updateUser);
+        return userUpdater.update(updatedUser);
     }
 
     @Transactional
-    public UserDto deactivateUser(User user, String token) {
-        user.setDeactivatedAt(LocalDateTime.now());
-        user.setIsActive(false);
-
-        jwtBlacklistService.withdrawToken(token);
-
-        return UserDto.fromEntity(user);
+    public User deactivateUser(UUID userId, String token) {
+        User user = userReader.readById(userId);
+        User deactivatedUser = userRemover.deactivate(user);
+        tokenWithdrawalClient.withdrawToken(token);
+        return deactivatedUser;
     }
 }
