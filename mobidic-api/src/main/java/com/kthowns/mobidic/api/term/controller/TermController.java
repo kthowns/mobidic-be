@@ -38,7 +38,12 @@ public class TermController {
     public ResponseEntity<GeneralResponse<Void>> addTerm(
             @RequestBody @Valid AddTermRequest addTermRequest
     ) {
-        termService.addTerm(addTermRequest);
+        termService.addTerm(
+                addTermRequest.getType(),
+                addTermRequest.getVersion(),
+                addTermRequest.isRequired(),
+                addTermRequest.getContent()
+        );
         return GeneralResponse.toResponseEntity(OK, null);
     }
 }

@@ -53,16 +53,16 @@ public class VocabularyController {
                     content = @Content(schema = @Schema(hidden = true)))
     })
     @PostMapping
-    public ResponseEntity<GeneralResponse<Vocabulary>> addVocabulary(
+    public ResponseEntity<GeneralResponse<Void>> addVocabulary(
             @RequestBody @Valid AddVocabularyRequestDto request,
             @AuthenticationPrincipal UserJpaEntity userJpaEntity
     ) {
-        return GeneralResponse.toResponseEntity(OK,
-                vocabularyService.addVocabulary(
-                        userJpaEntity.getId(),
-                        request.getTitle(),
-                        request.getDescription()
-                ));
+        vocabularyService.addVocabulary(
+                userJpaEntity.getId(),
+                request.getTitle(),
+                request.getDescription()
+        );
+        return GeneralResponse.toResponseEntity(OK, null);
     }
 
     @Operation(
@@ -133,18 +133,18 @@ public class VocabularyController {
                     content = @Content(schema = @Schema(hidden = true)))
     })
     @PatchMapping("/{vocabularyId}")
-    public ResponseEntity<GeneralResponse<Vocabulary>> updateVocabulary(
+    public ResponseEntity<GeneralResponse<Void>> updateVocabulary(
             @PathVariable String vocabularyId,
             @RequestBody @Valid AddVocabularyRequestDto request,
             @AuthenticationPrincipal UserJpaEntity userJpaEntity
     ) {
-        return GeneralResponse.toResponseEntity(OK,
-                vocabularyService.updateVocabulary(
-                        userJpaEntity.getId(),
-                        UUID.fromString(vocabularyId),
-                        request.getTitle(),
-                        request.getDescription()
-                ));
+        vocabularyService.updateVocabulary(
+                userJpaEntity.getId(),
+                UUID.fromString(vocabularyId),
+                request.getTitle(),
+                request.getDescription()
+        );
+        return GeneralResponse.toResponseEntity(OK, null);
     }
 
     @Operation(

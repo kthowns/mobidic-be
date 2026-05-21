@@ -34,10 +34,14 @@ public class KakaoAuthFacade {
     private UserJpaEntity getOrCreateUser(KakaoUserInfo kakaoUserInfo) {
         return kakaoAuthService.getUserByKakaoId(kakaoUserInfo.getId())
                 .orElseGet(() -> {
-                    UserJpaEntity u = userService.registerKakaoUser(kakaoUserInfo);
-                    presetVocabularyService.copyAllPresetToUser(u);
+                    User user = userService.registerKakaoUser(
+                            kakaoUserInfo.getId(),
+                            kakaoUserInfo.getKakaoAccount().getEmail(),
+                            kakaoUserInfo.getKakaoAccount().getProfile().getNickname()
+                    );
+                    presetVocabularyService.copyAllPresetToUser(user.getId());
 
-                    return u;
+                    return kakaoAuthService.getUserByKakaoId(kakaoUserInfo.getId()).get();
                 });
     }
 }

@@ -53,7 +53,7 @@ public class UserController {
     public ResponseEntity<GeneralResponse<User>> getMe(
             @AuthenticationPrincipal UserJpaEntity userJpaEntity
     ) {
-        return GeneralResponse.toResponseEntity(OK, User.fromEntity(userJpaEntity));
+        return GeneralResponse.toResponseEntity(OK, userJpaEntity.toModel());
     }
 
     @Operation(
@@ -77,13 +77,10 @@ public class UserController {
     @PatchMapping("/me")
     public ResponseEntity<GeneralResponse<User>> updateMe(
             @RequestBody @Valid UpdateUserRequestDto request,
-            @AuthenticationPrincipal UserJpaEntity userJpaEntity,
-            HttpServletRequest httpServletRequest
+            @AuthenticationPrincipal UserJpaEntity userJpaEntity
     ) {
-        String token = httpServletRequest.getHeader("Authorization").substring(7);
-
         return GeneralResponse.toResponseEntity(OK,
-                userService.updateUser(userJpaEntity, request, token));
+                userService.updateUser(userJpaEntity.getId(), request.getNickname(), request.getPassword()));
     }
 
     @Operation(
@@ -104,13 +101,10 @@ public class UserController {
     })
     @DeleteMapping("/me")
     public ResponseEntity<GeneralResponse<User>> deactivateUser(
-            @AuthenticationPrincipal UserJpaEntity userJpaEntity,
-            HttpServletRequest httpServletRequest
+            @AuthenticationPrincipal UserJpaEntity userJpaEntity
     ) {
-        String token = httpServletRequest.getHeader("Authorization").substring(7);
-
         return GeneralResponse.toResponseEntity(OK,
-                userService.deactivateUser(userJpaEntity, token));
+                userService.deactivateUser(userJpaEntity.getId()));
     }
 
     @Operation(
@@ -131,9 +125,14 @@ public class UserController {
                     content = @Content(schema = @Schema(hidden = true)))
     })
     @PostMapping("/signup")
-    public ResponseEntity<Void> signUp(@Valid @RequestBody SignUpRequestDto request) {
-        userFacade.signUp(request);
+    public ResponseEntity<GeneralResponse<Void>> signUp(@Valid @RequestBody SignUpRequestDto request) {
+        userFacade.signUp(
+                request.getEmail(),
+                request.getNickname(),
+                request.getPassword(),
+                request.getAgreeTermIds()
+        );
 
-        return ResponseEntity.ok().build();
+        return GeneralResponse.toResponseEntity(OK, null);
     }
 }
