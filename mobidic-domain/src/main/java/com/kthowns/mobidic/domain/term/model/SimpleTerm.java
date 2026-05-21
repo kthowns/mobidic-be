@@ -1,6 +1,5 @@
 package com.kthowns.mobidic.domain.term.model;
 
-import com.kthowns.mobidic.storage.term.jpaentity.TermJpaEntity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -12,23 +11,11 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class TermSimpleDto {
+public class SimpleTerm {
     private Long id;
     private TermType type;
     private String version;
     private boolean required;
     private String contentUri;
     private LocalDateTime createdAt;
-
-    public static TermSimpleDto fromEntity(TermJpaEntity term) {
-        return TermSimpleDto.builder()
-                .id(term.getId())
-                .type(term.getType())
-                .version(term.getVersion())
-                .required(term.isRequired())
-                .createdAt(term.getCreatedAt())
-                .contentUri(String.format("/terms/%s",
-                        term.getType().name().toLowerCase()))
-                .build();
-    }
 }

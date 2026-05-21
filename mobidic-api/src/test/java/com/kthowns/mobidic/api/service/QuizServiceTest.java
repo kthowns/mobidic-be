@@ -7,7 +7,7 @@ import com.kthowns.mobidic.domain.definition.service.DefinitionService;
 import com.kthowns.mobidic.domain.vocabulary.service.VocabularyService;
 import com.kthowns.mobidic.domain.word.service.WordService;
 import com.kthowns.mobidic.domain.definition.model.PartOfSpeech;
-import com.kthowns.mobidic.domain.quiz.model.QuizDto;
+import com.kthowns.mobidic.api.quiz.dto.response.QuizResponse;
 import com.kthowns.mobidic.api.quiz.dto.request.QuizRateRequest;
 import com.kthowns.mobidic.api.quiz.dto.response.QuizRateResponse;
 import com.kthowns.mobidic.domain.quiz.service.CryptoService;
@@ -117,11 +117,11 @@ public class QuizServiceTest {
 
         for (int i = 0; i < epoch; i++) {
             //when
-            List<QuizDto> result = quizService.getOXQuizzes(testUserJpaEntity, UUID.randomUUID());
+            List<QuizResponse> result = quizService.getOXQuizzes(testUserJpaEntity, UUID.randomUUID());
 
             //then
             int matchCnt = 0;
-            for (QuizDto question : result) {
+            for (QuizResponse question : result) {
                 for (WordDetail wordDetails : wordDetails) {
                     if (question.getStem().equals(wordDetails.expression())
                             && question.getOptions().getFirst().equals(wordDetails.definitions().getFirst().getMeaning())) {

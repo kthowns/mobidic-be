@@ -2,7 +2,7 @@ package com.kthowns.mobidic.api.quiz.controller;
 
 import com.kthowns.mobidic.common.dto.ErrorResponse;
 import com.kthowns.mobidic.common.dto.GeneralResponse;
-import com.kthowns.mobidic.domain.quiz.model.QuizDto;
+import com.kthowns.mobidic.api.quiz.dto.response.QuizResponse;
 import com.kthowns.mobidic.api.quiz.dto.request.QuizRateRequest;
 import com.kthowns.mobidic.api.quiz.dto.response.QuizRateResponse;
 import com.kthowns.mobidic.domain.quiz.service.QuizService;
@@ -50,7 +50,7 @@ public class QuizController {
                     content = @Content(schema = @Schema(hidden = true)))
     })
     @GetMapping("/vocabularies/{vocabularyId}/quizzes/ox")
-    public ResponseEntity<GeneralResponse<List<QuizDto>>> getOxQuizzes(
+    public ResponseEntity<GeneralResponse<List<QuizResponse>>> getOxQuizzes(
             @PathVariable UUID vocabularyId,
             @AuthenticationPrincipal UserJpaEntity userJpaEntity
     ) {
@@ -75,7 +75,7 @@ public class QuizController {
                     content = @Content(schema = @Schema(hidden = true)))
     })
     @GetMapping("/vocabularies/{vocabularyId}/quizzes/blank")
-    public ResponseEntity<GeneralResponse<List<QuizDto>>> getBlankQuizzes(
+    public ResponseEntity<GeneralResponse<List<QuizResponse>>> getBlankQuizzes(
             @PathVariable UUID vocabularyId,
             @AuthenticationPrincipal UserJpaEntity userJpaEntity
     ) {

@@ -4,7 +4,7 @@ import com.kthowns.mobidic.api.user.dto.request.SignUpRequestDto;
 import com.kthowns.mobidic.common.dto.ErrorResponse;
 import com.kthowns.mobidic.common.dto.GeneralResponse;
 import com.kthowns.mobidic.api.user.dto.request.UpdateUserRequestDto;
-import com.kthowns.mobidic.domain.user.model.UserDto;
+import com.kthowns.mobidic.domain.user.model.User;
 import com.kthowns.mobidic.storage.user.jpaentity.UserJpaEntity;
 import com.kthowns.mobidic.domain.user.facade.UserFacade;
 import com.kthowns.mobidic.domain.user.service.UserService;
@@ -50,10 +50,10 @@ public class UserController {
                     content = @Content(schema = @Schema(hidden = true)))
     })
     @GetMapping("/me")
-    public ResponseEntity<GeneralResponse<UserDto>> getMe(
+    public ResponseEntity<GeneralResponse<User>> getMe(
             @AuthenticationPrincipal UserJpaEntity userJpaEntity
     ) {
-        return GeneralResponse.toResponseEntity(OK, UserDto.fromEntity(userJpaEntity));
+        return GeneralResponse.toResponseEntity(OK, User.fromEntity(userJpaEntity));
     }
 
     @Operation(
@@ -75,7 +75,7 @@ public class UserController {
                     content = @Content(schema = @Schema(hidden = true)))
     })
     @PatchMapping("/me")
-    public ResponseEntity<GeneralResponse<UserDto>> updateMe(
+    public ResponseEntity<GeneralResponse<User>> updateMe(
             @RequestBody @Valid UpdateUserRequestDto request,
             @AuthenticationPrincipal UserJpaEntity userJpaEntity,
             HttpServletRequest httpServletRequest
@@ -103,7 +103,7 @@ public class UserController {
                     content = @Content(schema = @Schema(hidden = true)))
     })
     @DeleteMapping("/me")
-    public ResponseEntity<GeneralResponse<UserDto>> deactivateUser(
+    public ResponseEntity<GeneralResponse<User>> deactivateUser(
             @AuthenticationPrincipal UserJpaEntity userJpaEntity,
             HttpServletRequest httpServletRequest
     ) {

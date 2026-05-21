@@ -3,7 +3,7 @@ package com.kthowns.mobidic.api.service;
 import com.kthowns.mobidic.api.config.ServiceTestConfig;
 import com.kthowns.mobidic.api.user.dto.request.SignUpRequestDto;
 import com.kthowns.mobidic.api.user.dto.request.UpdateUserRequestDto;
-import com.kthowns.mobidic.domain.user.model.UserDto;
+import com.kthowns.mobidic.domain.user.model.User;
 import com.kthowns.mobidic.storage.user.jpaentity.UserJpaEntity;
 import com.kthowns.mobidic.storage.user.jparepository.UserJpaRepository;
 import com.kthowns.mobidic.domain.user.service.UserService;
@@ -115,7 +115,7 @@ class UserServiceTest {
                 });
 
         //when
-        UserDto response = userService.updateUser(defaultUserJpaEntity, request, UUID.randomUUID().toString());
+        User response = userService.updateUser(defaultUserJpaEntity, request, UUID.randomUUID().toString());
 
         //then
         assertEquals(UUID.fromString(UID), response.getId());
@@ -154,7 +154,7 @@ class UserServiceTest {
                 });
 
         //when
-        UserDto response = userService.updateUser(defaultUserJpaEntity, request, UUID.randomUUID().toString());
+        User response = userService.updateUser(defaultUserJpaEntity, request, UUID.randomUUID().toString());
 
         //then
         assertThat(passwordEncoder.matches(request.getPassword(), "SomePassword"));

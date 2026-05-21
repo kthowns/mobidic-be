@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kthowns.mobidic.domain.definition.model.PartOfSpeech;
 import com.kthowns.mobidic.domain.word.model.WordDetail;
-import com.kthowns.mobidic.domain.quiz.model.QuizDto;
+import com.kthowns.mobidic.api.quiz.dto.response.QuizResponse;
 import com.kthowns.mobidic.api.auth.dto.request.LoginRequest;
 import com.kthowns.mobidic.api.definition.dto.request.AddDefinitionRequestDto;
 import com.kthowns.mobidic.api.vocabulary.dto.request.AddVocabularyRequestDto;
@@ -74,7 +74,7 @@ public class QuizIntegrationTest {
                 .andExpect(status().isOk())
                 .andReturn();
         JsonNode data = objectMapper.readTree(quizResult.getResponse().getContentAsString()).path("data");
-        List<QuizDto> resultQuestions = objectMapper.readValue(data.toString(), new TypeReference<>() {
+        List<QuizResponse> resultQuestions = objectMapper.readValue(data.toString(), new TypeReference<>() {
         });
 
         assertEquals(savedWords.size(), resultQuestions.size());
@@ -106,7 +106,7 @@ public class QuizIntegrationTest {
                 .andReturn();
 
         JsonNode data = objectMapper.readTree(quizResult.getResponse().getContentAsString()).path("data");
-        List<QuizDto> quizzesResponse = objectMapper.readValue(data.toString(), new TypeReference<>() {
+        List<QuizResponse> quizzesResponse = objectMapper.readValue(data.toString(), new TypeReference<>() {
         });
 
         for (int i = 0; i < savedWords.size(); i++) {
@@ -130,7 +130,7 @@ public class QuizIntegrationTest {
         }
     }
 
-    private String findCorrectAnswer(QuizDto quiz, String[] orgWords, String[] orgDefs) {
+    private String findCorrectAnswer(QuizResponse quiz, String[] orgWords, String[] orgDefs) {
         String stem = quiz.getStem();
         String correctAnswer = "";
 
@@ -162,12 +162,12 @@ public class QuizIntegrationTest {
                 .andExpect(status().isOk())
                 .andReturn();
         JsonNode data = objectMapper.readTree(quizResult.getResponse().getContentAsString()).path("data");
-        List<QuizDto> resultQuestions = objectMapper.readValue(data.toString(), new TypeReference<>() {
+        List<QuizResponse> resultQuestions = objectMapper.readValue(data.toString(), new TypeReference<>() {
         });
 
         assertEquals(savedWords.size(), resultQuestions.size());
-        for (QuizDto quizDto : resultQuestions) {
-            String stem = quizDto.getStem();
+        for (QuizResponse quizResponse : resultQuestions) {
+            String stem = quizResponse.getStem();
             int cnt = 0;
             for (int i = 0; i < stem.length(); i++) {
                 if (stem.charAt(i) == '_') {
@@ -197,7 +197,7 @@ public class QuizIntegrationTest {
                 .andExpect(status().isOk())
                 .andReturn();
         JsonNode data = objectMapper.readTree(quizResult.getResponse().getContentAsString()).path("data");
-        List<QuizDto> quizzes = objectMapper.readValue(data.toString(), new TypeReference<>() {
+        List<QuizResponse> quizzes = objectMapper.readValue(data.toString(), new TypeReference<>() {
         });
 
         for (int i = 0; i < savedWords.size(); i++) {
