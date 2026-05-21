@@ -20,4 +20,8 @@ public interface VocabularyJpaRepository extends JpaRepository<VocabularyJpaEnti
     Optional<VocabularyJpaEntity> findForUpdate(@Param("id") UUID id, @Param("userId") UUID userId);
 
     boolean existsByIdAndUser_Id(UUID id, UUID userId);
+
+    boolean existsByTitleAndUser_Id(String title, UUID userId);
+
+    boolean existsByTitleAndIdNotAndUser_Id(String title, UUID vocabularyId, UUID userId);
 }

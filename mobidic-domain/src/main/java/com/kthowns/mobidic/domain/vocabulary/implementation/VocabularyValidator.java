@@ -19,8 +19,8 @@ public class VocabularyValidator {
         }
     }
 
-    public void validateTitleUpdateDuplication(String title, UUID userId, UUID vocabularyId) {
-        if (vocabularyRepository.원본 Vocab 제외 타이틀 중복 체크) {
+    public void validateTitleUpdateDuplication(String title, UUID vocabularyId, UUID userId) {
+        if (vocabularyRepository.existsByTitleAndIdNotAndUserId(title, vocabularyId, userId)) {
             throw new ApiException(GeneralResponseCode.DUPLICATED_TITLE);
         }
     }

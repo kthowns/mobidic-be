@@ -56,8 +56,9 @@ public class VocabularyDetailJpaRepositoryCustomImpl implements VocabularyDetail
         return Optional.ofNullable(
                 queryFactory
                         .select(Projections.constructor(VocabularyDetail.class,
-                                Projections.constructor(VocabularyDto.class,
+                                Projections.constructor(Vocabulary.class,
                                         QVocabulary.vocabulary.id,
+                                        QVocabulary.vocabulary.user.id,
                                         QVocabulary.vocabulary.title,
                                         QVocabulary.vocabulary.description,
                                         QVocabulary.vocabulary.wordCount,
