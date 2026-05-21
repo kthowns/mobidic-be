@@ -5,7 +5,7 @@ import com.kthowns.mobidic.common.dto.ErrorResponse;
 import com.kthowns.mobidic.common.dto.GeneralResponse;
 import com.kthowns.mobidic.api.user.dto.request.UpdateUserRequestDto;
 import com.kthowns.mobidic.api.user.dto.response.UserDto;
-import com.kthowns.mobidic.storage.user.jpaentity.User;
+import com.kthowns.mobidic.storage.user.jpaentity.UserJpaEntity;
 import com.kthowns.mobidic.domain.user.facade.UserFacade;
 import com.kthowns.mobidic.domain.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -51,9 +51,9 @@ public class UserController {
     })
     @GetMapping("/me")
     public ResponseEntity<GeneralResponse<UserDto>> getMe(
-            @AuthenticationPrincipal User user
+            @AuthenticationPrincipal UserJpaEntity userJpaEntity
     ) {
-        return GeneralResponse.toResponseEntity(OK, UserDto.fromEntity(user));
+        return GeneralResponse.toResponseEntity(OK, UserDto.fromEntity(userJpaEntity));
     }
 
     @Operation(
@@ -77,13 +77,13 @@ public class UserController {
     @PatchMapping("/me")
     public ResponseEntity<GeneralResponse<UserDto>> updateMe(
             @RequestBody @Valid UpdateUserRequestDto request,
-            @AuthenticationPrincipal User user,
+            @AuthenticationPrincipal UserJpaEntity userJpaEntity,
             HttpServletRequest httpServletRequest
     ) {
         String token = httpServletRequest.getHeader("Authorization").substring(7);
 
         return GeneralResponse.toResponseEntity(OK,
-                userService.updateUser(user, request, token));
+                userService.updateUser(userJpaEntity, request, token));
     }
 
     @Operation(
@@ -104,13 +104,13 @@ public class UserController {
     })
     @DeleteMapping("/me")
     public ResponseEntity<GeneralResponse<UserDto>> deactivateUser(
-            @AuthenticationPrincipal User user,
+            @AuthenticationPrincipal UserJpaEntity userJpaEntity,
             HttpServletRequest httpServletRequest
     ) {
         String token = httpServletRequest.getHeader("Authorization").substring(7);
 
         return GeneralResponse.toResponseEntity(OK,
-                userService.deactivateUser(user, token));
+                userService.deactivateUser(userJpaEntity, token));
     }
 
     @Operation(

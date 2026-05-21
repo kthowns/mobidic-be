@@ -1,12 +1,12 @@
-package com.kthowns.mobidic.domain.auth.facade;
+package com.kthowns.mobidic.api.auth.facade;
 
 import com.kthowns.mobidic.api.auth.dto.response.KakaoUserInfo;
 import com.kthowns.mobidic.api.auth.dto.response.LoginResponse;
-import com.kthowns.mobidic.domain.auth.service.KakaoAuthService;
-import com.kthowns.mobidic.api.preset.service.PresetVocabularyService;
-import com.kthowns.mobidic.security.jwt.JwtProvider;
-import com.kthowns.mobidic.api.user.entity.User;
-import com.kthowns.mobidic.api.user.service.UserService;
+import com.kthowns.mobidic.api.auth.service.KakaoAuthService;
+import com.kthowns.mobidic.api.security.jwt.JwtProvider;
+import com.kthowns.mobidic.domain.preset.service.PresetVocabularyService;
+import com.kthowns.mobidic.domain.user.service.UserService;
+import com.kthowns.mobidic.storage.user.jpaentity.UserJpaEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -24,17 +24,17 @@ public class KakaoAuthFacade {
         String accessToken = kakaoAuthService.getKakaoAccessToken(authCode, isDev, platform);
         KakaoUserInfo kakaoUserInfo = kakaoAuthService.getKakaoUserInfo(accessToken);
 
-        User user = transactionTemplate.execute((status) -> getOrCreateUser(kakaoUserInfo));
+        UserJpaEntity userJpaEntity = transactionTemplate.execute((status) -> getOrCreateUser(kakaoUserInfo));
 
         return LoginResponse.builder()
-                .accessToken(jwtProvider.generateToken(user.getId()))
+                .accessToken(jwtProvider.generateToken(userJpaEntity.getId(), userJpaEntity.getRole().name()))
                 .build();
     }
 
-    private User getOrCreateUser(KakaoUserInfo kakaoUserInfo) {
+    private UserJpaEntity getOrCreateUser(KakaoUserInfo kakaoUserInfo) {
         return kakaoAuthService.getUserByKakaoId(kakaoUserInfo.getId())
                 .orElseGet(() -> {
-                    User u = userService.registerKakaoUser(kakaoUserInfo);
+                    UserJpaEntity u = userService.registerKakaoUser(kakaoUserInfo);
                     presetVocabularyService.copyAllPresetToUser(u);
 
                     return u;

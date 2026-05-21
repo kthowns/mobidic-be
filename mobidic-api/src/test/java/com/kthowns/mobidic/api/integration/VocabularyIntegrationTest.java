@@ -2,16 +2,16 @@ package com.kthowns.mobidic.api.integration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kthowns.mobidic.domain.dictionary.service.WordService;
-import com.kthowns.mobidic.api.dictionary.dto.response.VocabularyDto;
-import com.kthowns.mobidic.api.dictionary.dto.response.WordDto;
+import com.kthowns.mobidic.domain.dictionary.model.Vocabulary;
+import com.kthowns.mobidic.domain.dictionary.model.Word;
 import com.kthowns.mobidic.api.auth.dto.request.LoginRequest;
 import com.kthowns.mobidic.api.dictionary.dto.request.AddVocabularyRequestDto;
 import com.kthowns.mobidic.api.dictionary.dto.request.AddWordRequestDto;
 import com.kthowns.mobidic.api.user.dto.request.SignUpRequestDto;
-import com.kthowns.mobidic.security.jwt.JwtProvider;
+import com.kthowns.mobidic.api.security.jwt.JwtProvider;
 import com.kthowns.mobidic.domain.statistic.service.StatisticService;
-import com.kthowns.mobidic.storage.user.jpaentity.User;
-import com.kthowns.mobidic.storage.user.jparepository.UserRepository;
+import com.kthowns.mobidic.storage.user.jpaentity.UserJpaEntity;
+import com.kthowns.mobidic.storage.user.jparepository.UserJpaRepository;
 import com.kthowns.mobidic.api.util.DatabaseCleaner;
 import com.kthowns.mobidic.common.code.AuthResponseCode;
 import com.kthowns.mobidic.common.code.GeneralResponseCode;
@@ -53,7 +53,7 @@ public class VocabularyIntegrationTest {
     private WordService wordService;
 
     @Autowired
-    private UserRepository userRepository;
+    private UserJpaRepository userJpaRepository;
 
     @Autowired
     private StatisticService statisticService;
@@ -141,7 +141,7 @@ public class VocabularyIntegrationTest {
         String email = "test@test.com";
         String nickname = "test";
         String token = loginAndGetToken(email, nickname);
-        User user = userRepository.findByEmail(email).get();
+        UserJpaEntity userJpaEntity = userJpaRepository.findByEmail(email).get();
 
         AddVocabularyRequestDto addVocabRequest = AddVocabularyRequestDto.builder()
                 .title("title")
@@ -164,21 +164,21 @@ public class VocabularyIntegrationTest {
                 .andReturn();
 
         String json = addResult.getResponse().getContentAsString();
-        VocabularyDto addVocabulary = objectMapper.convertValue(
-                objectMapper.readTree(json).path("data"), VocabularyDto.class
+        Vocabulary addVocabulary = objectMapper.convertValue(
+                objectMapper.readTree(json).path("data"), Vocabulary.class
         );
 
-        List<WordDto> wordList = new ArrayList<>();
+        List<Word> wordList = new ArrayList<>();
         for (AddWordRequestDto addWordRequestDto : addWordRequestDtos) {
             wordList.add(
-                    wordService.addWord(user, addVocabulary.getId(), addWordRequestDto)
+                    wordService.addWord(userJpaEntity, addVocabulary.getId(), addWordRequestDto)
             );
         }
 
-        statisticService.toggleLearnedByWordId(user, wordList.get(0).getId());
-        statisticService.increaseCorrectCount(user, wordList.get(1).getId());
-        statisticService.increaseIncorrectCount(user, wordList.get(1).getId());
-        statisticService.increaseCorrectCount(user, wordList.get(2).getId());
+        statisticService.toggleLearnedByWordId(userJpaEntity, wordList.get(0).getId());
+        statisticService.increaseCorrectCount(userJpaEntity, wordList.get(1).getId());
+        statisticService.increaseIncorrectCount(userJpaEntity, wordList.get(1).getId());
+        statisticService.increaseCorrectCount(userJpaEntity, wordList.get(2).getId());
 
         //Success
         mockMvc.perform(get("/api/vocabularies")
@@ -231,8 +231,8 @@ public class VocabularyIntegrationTest {
                 .andReturn();
 
         String json = addResult.getResponse().getContentAsString();
-        VocabularyDto addVocabResponse = objectMapper.convertValue(
-                objectMapper.readTree(json).path("data"), VocabularyDto.class
+        Vocabulary addVocabResponse = objectMapper.convertValue(
+                objectMapper.readTree(json).path("data"), Vocabulary.class
         );
 
         //Success
@@ -305,12 +305,12 @@ public class VocabularyIntegrationTest {
                 .andReturn();
 
         String json = addResult.getResponse().getContentAsString();
-        VocabularyDto addVocabResponse = objectMapper.convertValue(
-                objectMapper.readTree(json).path("data"), VocabularyDto.class
+        Vocabulary addVocabResponse = objectMapper.convertValue(
+                objectMapper.readTree(json).path("data"), Vocabulary.class
         );
         json = addResult2.getResponse().getContentAsString();
-        VocabularyDto addVocabResponse2 = objectMapper.convertValue(
-                objectMapper.readTree(json).path("data"), VocabularyDto.class
+        Vocabulary addVocabResponse2 = objectMapper.convertValue(
+                objectMapper.readTree(json).path("data"), Vocabulary.class
         );
 
         AddVocabularyRequestDto updateVocabRequest = AddVocabularyRequestDto.builder()
@@ -410,8 +410,8 @@ public class VocabularyIntegrationTest {
                 .andReturn();
 
         String json = addResult.getResponse().getContentAsString();
-        VocabularyDto addVocabResponse = objectMapper.convertValue(
-                objectMapper.readTree(json).path("data"), VocabularyDto.class
+        Vocabulary addVocabResponse = objectMapper.convertValue(
+                objectMapper.readTree(json).path("data"), Vocabulary.class
         );
 
         //Fail without token

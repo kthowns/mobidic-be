@@ -1,14 +1,15 @@
-package com.kthowns.mobidic.domain.auth.service;
+package com.kthowns.mobidic.api.auth.service;
 
 import com.kthowns.mobidic.api.auth.dto.response.KakaoLoginUrlResponse;
 import com.kthowns.mobidic.api.auth.dto.response.KakaoTokenResponse;
 import com.kthowns.mobidic.api.auth.dto.response.KakaoUserInfo;
-import com.kthowns.mobidic.domain.auth.util.KakaoProperties;
+import com.kthowns.mobidic.api.auth.model.AuthUser;
+import com.kthowns.mobidic.api.auth.util.KakaoProperties;
 import com.kthowns.mobidic.common.code.GeneralResponseCode;
 import com.kthowns.mobidic.common.code.KakaoApiUrl;
 import com.kthowns.mobidic.common.exception.ApiException;
-import com.kthowns.mobidic.api.user.entity.User;
-import com.kthowns.mobidic.api.user.repository.UserRepository;
+import com.kthowns.mobidic.storage.user.jpaentity.UserJpaEntity;
+import com.kthowns.mobidic.storage.user.repository.jpa.AuthUserRepositoryImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -31,11 +32,13 @@ import java.util.Optional;
 public class KakaoAuthService {
     private final RestClient restClient;
     private final KakaoProperties kakaoProperties;
-    private final UserRepository userRepository;
+    private final AuthUserRepositoryImpl authUserRepositoryImpl;
 
     @Transactional(readOnly = true)
-    public Optional<User> getUserByKakaoId(Long kakaoId) {
-        return userRepository.findByKakaoId(kakaoId);
+    public Optional<AuthUser> getUserByKakaoId(Long kakaoId) {
+        Optional<UserJpaEntity> userJpaEntity = authUserRepositoryImpl.readByKakaoId(kakaoId);
+
+        return userJpaEntity.map(AuthUser::fromJpaEntity);
     }
 
     public KakaoLoginUrlResponse getKakaoLoginUrl(boolean isDev, String platform) {

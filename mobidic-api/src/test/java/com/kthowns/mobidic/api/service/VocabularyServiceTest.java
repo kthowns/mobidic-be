@@ -2,13 +2,13 @@ package com.kthowns.mobidic.api.service;
 
 import com.kthowns.mobidic.api.config.ServiceTestConfig;
 import com.kthowns.mobidic.api.dictionary.dto.request.AddVocabularyRequestDto;
-import com.kthowns.mobidic.api.dictionary.dto.response.VocabularyDetail;
-import com.kthowns.mobidic.api.dictionary.dto.response.VocabularyDto;
-import com.kthowns.mobidic.storage.dictionary.jpaentity.Vocabulary;
-import com.kthowns.mobidic.storage.dictionary.jparepository.VocabularyRepository;
+import com.kthowns.mobidic.domain.dictionary.model.VocabularyDetail;
+import com.kthowns.mobidic.domain.dictionary.model.Vocabulary;
+import com.kthowns.mobidic.storage.dictionary.jpaentity.VocabularyJpaEntity;
+import com.kthowns.mobidic.storage.dictionary.jparepository.VocabularyJpaRepository;
 import com.kthowns.mobidic.domain.dictionary.service.VocabularyService;
-import com.kthowns.mobidic.storage.user.jpaentity.User;
-import com.kthowns.mobidic.storage.user.jparepository.UserRepository;
+import com.kthowns.mobidic.storage.user.jpaentity.UserJpaEntity;
+import com.kthowns.mobidic.storage.user.jparepository.UserJpaRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -39,15 +39,15 @@ import static org.mockito.Mockito.*;
 })
 class VocabularyServiceTest {
     @Autowired
-    private VocabularyRepository vocabularyRepository;
+    private VocabularyJpaRepository vocabularyRepository;
 
     @Autowired
-    private UserRepository userRepository;
+    private UserJpaRepository userJpaRepository;
 
     @Autowired
     private VocabularyService vocabularyService;
 
-    private final User testUser = User.builder()
+    private final UserJpaEntity testUserJpaEntity = UserJpaEntity.builder()
             .id(UUID.randomUUID())
             .build();
 
@@ -62,22 +62,22 @@ class VocabularyServiceTest {
                 .title("title")
                 .description("description")
                 .build();
-        Vocabulary savedVocabulary = Vocabulary.builder()
+        VocabularyJpaEntity savedVocabulary = VocabularyJpaEntity.builder()
                 .id(vocabId)
                 .title(request.getTitle())
                 .description(request.getDescription())
                 .build();
-        ArgumentCaptor<Vocabulary> captor =
-                ArgumentCaptor.forClass(Vocabulary.class);
+        ArgumentCaptor<VocabularyJpaEntity> captor =
+                ArgumentCaptor.forClass(VocabularyJpaEntity.class);
 
         //given
-        given(vocabularyRepository.existsByTitleAndUser(anyString(), any(User.class)))
+        given(vocabularyRepository.existsByTitleAndUser(anyString(), any(UserJpaEntity.class)))
                 .willReturn(false);
-        given(vocabularyRepository.save(any(Vocabulary.class)))
+        given(vocabularyRepository.save(any(VocabularyJpaEntity.class)))
                 .willReturn(savedVocabulary);
 
         //when
-        VocabularyDto response = vocabularyService.addVocabulary(testUser, request);
+        Vocabulary response = vocabularyService.addVocabulary(testUserJpaEntity, request);
 
         //then
         verify(vocabularyRepository, times(1))
@@ -93,22 +93,22 @@ class VocabularyServiceTest {
     void getVocabularyDetailsSuccess() {
         resetMock();
 
-        Vocabulary defaultVocabulary = Vocabulary.builder()
-                .user(testUser)
+        VocabularyJpaEntity defaultVocabulary = VocabularyJpaEntity.builder()
+                .user(testUserJpaEntity)
                 .title("title")
                 .description("description")
                 .build();
 
-        ArrayList<Vocabulary> vocabularies = new ArrayList<>();
+        ArrayList<VocabularyJpaEntity> vocabularies = new ArrayList<>();
         vocabularies.add(defaultVocabulary);
 
         //given
         given(vocabularyRepository.findVocabularyDetails(any(UUID.class)))
                 .willReturn(List.of(
-                        new VocabularyDetail(VocabularyDto.fromEntity(defaultVocabulary), 0.0, 0.0)));
+                        new VocabularyDetail(Vocabulary.fromEntity(defaultVocabulary), 0.0, 0.0)));
 
         //when
-        List<VocabularyDetail> response = vocabularyService.getVocabularyDetails(testUser);
+        List<VocabularyDetail> response = vocabularyService.getVocabularyDetails(testUserJpaEntity);
 
         //then
         assertEquals(vocabularies.getFirst().getTitle(), response.getFirst().vocabulary().getTitle());
@@ -124,7 +124,7 @@ class VocabularyServiceTest {
 
         VocabularyDetail defaultVocabulary =
                 VocabularyDetail.builder()
-                        .vocabulary(VocabularyDto.builder()
+                        .vocabulary(Vocabulary.builder()
                                 .id(vocabId)
                                 .title("title")
                                 .description("description")
@@ -136,7 +136,7 @@ class VocabularyServiceTest {
                 .willReturn(Optional.of(defaultVocabulary));
 
         //when
-        VocabularyDetail response = vocabularyService.getVocabularyById(testUser, vocabId);
+        VocabularyDetail response = vocabularyService.getVocabularyById(testUserJpaEntity, vocabId);
 
         //then
         assertEquals(vocabId, response.vocabulary().getId());
@@ -151,9 +151,9 @@ class VocabularyServiceTest {
 
         UUID vocabId = UUID.randomUUID();
 
-        Vocabulary defaultVocabulary = Vocabulary.builder()
+        VocabularyJpaEntity defaultVocabulary = VocabularyJpaEntity.builder()
                 .id(vocabId)
-                .user(testUser)
+                .user(testUserJpaEntity)
                 .title("title")
                 .description("description")
                 .build();
@@ -164,25 +164,25 @@ class VocabularyServiceTest {
                         .description("description2")
                         .build();
 
-        ArgumentCaptor<Vocabulary> captor =
-                ArgumentCaptor.forClass(Vocabulary.class);
+        ArgumentCaptor<VocabularyJpaEntity> captor =
+                ArgumentCaptor.forClass(VocabularyJpaEntity.class);
 
         //given
         given(vocabularyRepository.findForUpdate(any(UUID.class), any(UUID.class)))
                 .willReturn(Optional.of(defaultVocabulary));
-        given(vocabularyRepository.existsByTitleAndUserAndIdNot(anyString(), any(User.class), any(UUID.class)))
+        given(vocabularyRepository.existsByTitleAndUserAndIdNot(anyString(), any(UserJpaEntity.class), any(UUID.class)))
                 .willReturn(false);
-        given(vocabularyRepository.save(any(Vocabulary.class)))
+        given(vocabularyRepository.save(any(VocabularyJpaEntity.class)))
                 .willAnswer(invocation -> {
-                    Vocabulary vocabularyArg = invocation.getArgument(0);
+                    VocabularyJpaEntity vocabularyArg = invocation.getArgument(0);
                     vocabularyArg.setTitle(request.getTitle());
                     vocabularyArg.setDescription(request.getDescription());
                     return vocabularyArg;
                 });
 
         //when
-        VocabularyDto response =
-                vocabularyService.updateVocabulary(testUser, vocabId, request);
+        Vocabulary response =
+                vocabularyService.updateVocabulary(testUserJpaEntity, vocabId, request);
 
         //then
         verify(vocabularyRepository, times(1))
@@ -193,6 +193,6 @@ class VocabularyServiceTest {
     }
 
     private void resetMock() {
-        Mockito.reset(vocabularyRepository, userRepository);
+        Mockito.reset(vocabularyRepository, userJpaRepository);
     }
 }

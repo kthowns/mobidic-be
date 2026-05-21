@@ -1,4 +1,4 @@
-package com.kthowns.mobidic.security.exception;
+package com.kthowns.mobidic.api.security.exception;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kthowns.mobidic.common.code.AuthResponseCode;

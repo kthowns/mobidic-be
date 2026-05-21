@@ -2,9 +2,9 @@ package com.kthowns.mobidic.api.statistic.controller;
 
 import com.kthowns.mobidic.common.dto.ErrorResponse;
 import com.kthowns.mobidic.common.dto.GeneralResponse;
-import com.kthowns.mobidic.api.statistic.dto.response.StatisticDto;
+import com.kthowns.mobidic.domain.statistic.model.WordStatistic;
 import com.kthowns.mobidic.domain.statistic.service.StatisticService;
-import com.kthowns.mobidic.storage.user.jpaentity.User;
+import com.kthowns.mobidic.storage.user.jpaentity.UserJpaEntity;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -47,12 +47,12 @@ public class StatisticController {
                     content = @Content(schema = @Schema(hidden = true)))
     })
     @GetMapping("/words/{wordId}/statistic")
-    public ResponseEntity<GeneralResponse<StatisticDto>> getWordStatisticById(
+    public ResponseEntity<GeneralResponse<WordStatistic>> getWordStatisticById(
             @PathVariable String wordId,
-            @AuthenticationPrincipal User user
+            @AuthenticationPrincipal UserJpaEntity userJpaEntity
     ) {
         return GeneralResponse.toResponseEntity(OK,
-                statisticService.getWordStatisticById(user, UUID.fromString(wordId)));
+                statisticService.getWordStatisticById(userJpaEntity, UUID.fromString(wordId)));
     }
 
     @Operation(
@@ -74,10 +74,10 @@ public class StatisticController {
     @GetMapping("/vocabularies/{vocabularyId}/learning-rate")
     public ResponseEntity<GeneralResponse<Double>> getVocabLearningRate(
             @PathVariable String vocabularyId,
-            @AuthenticationPrincipal User user
+            @AuthenticationPrincipal UserJpaEntity userJpaEntity
     ) {
         return GeneralResponse.toResponseEntity(OK,
-                statisticService.getVocabLearningRate(user, UUID.fromString(vocabularyId)));
+                statisticService.getVocabLearningRate(userJpaEntity, UUID.fromString(vocabularyId)));
     }
 
     @Operation(
@@ -99,10 +99,10 @@ public class StatisticController {
     @GetMapping("/vocabularies/{vocabularyId}/accuracy")
     public ResponseEntity<GeneralResponse<Double>> getAvgAccuracyByVocab(
             @PathVariable String vocabularyId,
-            @AuthenticationPrincipal User user
+            @AuthenticationPrincipal UserJpaEntity userJpaEntity
     ) {
         return GeneralResponse.toResponseEntity(OK,
-                statisticService.getAvgAccuracyByVocab(user, UUID.fromString(vocabularyId)));
+                statisticService.getAvgAccuracyByVocab(userJpaEntity, UUID.fromString(vocabularyId)));
     }
 
     @Operation(
@@ -123,10 +123,10 @@ public class StatisticController {
     })
     @GetMapping("/users/me/accuracy")
     public ResponseEntity<GeneralResponse<Double>> getAvgAccuracyOfAll(
-            @AuthenticationPrincipal User user
+            @AuthenticationPrincipal UserJpaEntity userJpaEntity
     ) {
         return GeneralResponse.toResponseEntity(OK,
-                statisticService.getTotalAvgAccuracy(user));
+                statisticService.getTotalAvgAccuracy(userJpaEntity));
     }
 
     @Operation(
@@ -148,9 +148,9 @@ public class StatisticController {
     @PatchMapping("/words/{wordId}/toggle-learned")
     public ResponseEntity<GeneralResponse<Void>> toggleLearnedByWordId(
             @PathVariable String wordId,
-            @AuthenticationPrincipal User user
+            @AuthenticationPrincipal UserJpaEntity userJpaEntity
     ) {
-        statisticService.toggleLearnedByWordId(user, UUID.fromString(wordId));
+        statisticService.toggleLearnedByWordId(userJpaEntity, UUID.fromString(wordId));
 
         return GeneralResponse.toResponseEntity(OK, null);
     }

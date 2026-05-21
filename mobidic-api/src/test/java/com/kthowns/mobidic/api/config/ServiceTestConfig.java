@@ -1,23 +1,21 @@
 package com.kthowns.mobidic.api.config;
 
-import com.kthowns.mobidic.domain.auth.service.AuthService;
-import com.kthowns.mobidic.storage.dictionary.jparepository.DefinitionRepository;
-import com.kthowns.mobidic.storage.dictionary.jparepository.VocabularyRepository;
-import com.kthowns.mobidic.storage.dictionary.jparepository.WordRepository;
+import com.kthowns.mobidic.storage.dictionary.jparepository.DefinitionJpaRepository;
+import com.kthowns.mobidic.storage.dictionary.jparepository.VocabularyJpaRepository;
+import com.kthowns.mobidic.storage.dictionary.jparepository.WordJpaRepository;
 import com.kthowns.mobidic.domain.dictionary.service.DefinitionService;
 import com.kthowns.mobidic.domain.dictionary.service.VocabularyService;
 import com.kthowns.mobidic.domain.dictionary.service.WordService;
-import com.kthowns.mobidic.storage.preset.jparepository.PresetVocabularyRepository;
+import com.kthowns.mobidic.storage.preset.jparepository.PresetVocabularyJpaRepository;
 import com.kthowns.mobidic.domain.preset.service.PresetVocabularyService;
 import com.kthowns.mobidic.domain.quiz.service.CryptoService;
-import com.kthowns.mobidic.security.jwt.JwtBlacklistService;
-import com.kthowns.mobidic.security.jwt.JwtProperties;
-import com.kthowns.mobidic.security.jwt.JwtProvider;
-import com.kthowns.mobidic.security.service.UserDetailsServiceImpl;
-import com.kthowns.mobidic.storage.statistic.jparepository.WordStatisticRepository;
+import com.kthowns.mobidic.api.security.jwt.JwtProperties;
+import com.kthowns.mobidic.api.security.jwt.JwtProvider;
+import com.kthowns.mobidic.api.security.service.UserDetailsServiceImpl;
+import com.kthowns.mobidic.storage.statistic.jparepository.WordStatisticJpaRepository;
 import com.kthowns.mobidic.domain.statistic.service.StatisticService;
 import com.kthowns.mobidic.domain.statistic.util.DifficultyUtil;
-import com.kthowns.mobidic.storage.user.jparepository.UserRepository;
+import com.kthowns.mobidic.storage.user.jparepository.UserJpaRepository;
 import org.mockito.Mockito;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
@@ -35,33 +33,33 @@ public class ServiceTestConfig {
     }
 
     @Bean
-    public PresetVocabularyRepository presetVocabularyRepository() {
-        return Mockito.mock(PresetVocabularyRepository.class);
+    public PresetVocabularyJpaRepository presetVocabularyRepository() {
+        return Mockito.mock(PresetVocabularyJpaRepository.class);
     }
 
     @Bean
-    public WordRepository wordRepository() {
-        return Mockito.mock(WordRepository.class);
+    public WordJpaRepository wordRepository() {
+        return Mockito.mock(WordJpaRepository.class);
     }
 
     @Bean
-    public VocabularyRepository vocabularyRepository() {
-        return Mockito.mock(VocabularyRepository.class);
+    public VocabularyJpaRepository vocabularyRepository() {
+        return Mockito.mock(VocabularyJpaRepository.class);
     }
 
     @Bean
-    public DefinitionRepository definitionRepository() {
-        return Mockito.mock(DefinitionRepository.class);
+    public DefinitionJpaRepository definitionRepository() {
+        return Mockito.mock(DefinitionJpaRepository.class);
     }
 
     @Bean
-    public WordStatisticRepository wordStatisticRepository() {
-        return Mockito.mock(WordStatisticRepository.class);
+    public WordStatisticJpaRepository wordStatisticRepository() {
+        return Mockito.mock(WordStatisticJpaRepository.class);
     }
 
     @Bean
-    public UserRepository userRepository() {
-        return Mockito.mock(UserRepository.class);
+    public UserJpaRepository userRepository() {
+        return Mockito.mock(UserJpaRepository.class);
     }
 
     @Bean
@@ -129,9 +127,9 @@ public class ServiceTestConfig {
 
     @Bean
     public UserDetailsServiceImpl userDetailsServiceImpl(
-            UserRepository userRepository
+            UserJpaRepository userJpaRepository
     ) {
-        return new UserDetailsServiceImpl(userRepository);
+        return new UserDetailsServiceImpl(userJpaRepository);
     }
 
     @Bean

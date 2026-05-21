@@ -3,10 +3,10 @@ package com.kthowns.mobidic.api.dictionary.controller;
 import com.kthowns.mobidic.common.dto.ErrorResponse;
 import com.kthowns.mobidic.common.dto.GeneralResponse;
 import com.kthowns.mobidic.api.dictionary.dto.request.AddVocabularyRequestDto;
-import com.kthowns.mobidic.api.dictionary.dto.response.VocabularyDetail;
-import com.kthowns.mobidic.api.dictionary.dto.response.VocabularyDto;
+import com.kthowns.mobidic.domain.dictionary.model.VocabularyDetail;
+import com.kthowns.mobidic.domain.dictionary.model.Vocabulary;
 import com.kthowns.mobidic.domain.dictionary.service.VocabularyService;
-import com.kthowns.mobidic.storage.user.jpaentity.User;
+import com.kthowns.mobidic.storage.user.jpaentity.UserJpaEntity;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -53,12 +53,12 @@ public class VocabularyController {
                     content = @Content(schema = @Schema(hidden = true)))
     })
     @PostMapping
-    public ResponseEntity<GeneralResponse<VocabularyDto>> addVocabulary(
+    public ResponseEntity<GeneralResponse<Vocabulary>> addVocabulary(
             @RequestBody @Valid AddVocabularyRequestDto request,
-            @AuthenticationPrincipal User user
+            @AuthenticationPrincipal UserJpaEntity userJpaEntity
     ) {
         return GeneralResponse.toResponseEntity(OK,
-                vocabularyService.addVocabulary(user, request));
+                vocabularyService.addVocabulary(userJpaEntity, request));
     }
 
     @Operation(
@@ -79,10 +79,10 @@ public class VocabularyController {
     })
     @GetMapping
     public ResponseEntity<GeneralResponse<List<VocabularyDetail>>> getAllVocabulary(
-            @AuthenticationPrincipal User user
+            @AuthenticationPrincipal UserJpaEntity userJpaEntity
     ) {
         return GeneralResponse.toResponseEntity(OK,
-                vocabularyService.getVocabularyDetails(user));
+                vocabularyService.getVocabularyDetails(userJpaEntity));
     }
 
     @Operation(
@@ -104,10 +104,10 @@ public class VocabularyController {
     @GetMapping("/{vocabularyId}")
     public ResponseEntity<GeneralResponse<VocabularyDetail>> getVocabularyDetail(
             @PathVariable String vocabularyId,
-            @AuthenticationPrincipal User user
+            @AuthenticationPrincipal UserJpaEntity userJpaEntity
     ) {
         return GeneralResponse.toResponseEntity(OK,
-                vocabularyService.getVocabularyById(user, UUID.fromString(vocabularyId)));
+                vocabularyService.getVocabularyById(userJpaEntity, UUID.fromString(vocabularyId)));
     }
 
     @Operation(
@@ -129,13 +129,13 @@ public class VocabularyController {
                     content = @Content(schema = @Schema(hidden = true)))
     })
     @PatchMapping("/{vocabularyId}")
-    public ResponseEntity<GeneralResponse<VocabularyDto>> updateVocabulary(
+    public ResponseEntity<GeneralResponse<Vocabulary>> updateVocabulary(
             @PathVariable String vocabularyId,
             @RequestBody @Valid AddVocabularyRequestDto request,
-            @AuthenticationPrincipal User user
+            @AuthenticationPrincipal UserJpaEntity userJpaEntity
     ) {
         return GeneralResponse.toResponseEntity(OK,
-                vocabularyService.updateVocabulary(user, UUID.fromString(vocabularyId), request));
+                vocabularyService.updateVocabulary(userJpaEntity, UUID.fromString(vocabularyId), request));
     }
 
     @Operation(
@@ -155,11 +155,11 @@ public class VocabularyController {
                     content = @Content(schema = @Schema(hidden = true)))
     })
     @DeleteMapping("/{vocabularyId}")
-    public ResponseEntity<GeneralResponse<VocabularyDto>> deleteVocabulary(
+    public ResponseEntity<GeneralResponse<Vocabulary>> deleteVocabulary(
             @PathVariable String vocabularyId,
-            @AuthenticationPrincipal User user
+            @AuthenticationPrincipal UserJpaEntity userJpaEntity
     ) {
         return GeneralResponse.toResponseEntity(OK,
-                vocabularyService.deleteVocab(user, UUID.fromString(vocabularyId)));
+                vocabularyService.deleteVocab(userJpaEntity, UUID.fromString(vocabularyId)));
     }
 }

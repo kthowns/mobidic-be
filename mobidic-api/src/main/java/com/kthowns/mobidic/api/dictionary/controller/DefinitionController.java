@@ -1,12 +1,13 @@
 package com.kthowns.mobidic.api.dictionary.controller;
 
+import com.kthowns.mobidic.api.auth.model.AuthUser;
+import com.kthowns.mobidic.api.dictionary.dto.request.AddDefinitionRequestDto;
+import com.kthowns.mobidic.domain.dictionary.model.Definition;
 import com.kthowns.mobidic.common.code.GeneralResponseCode;
 import com.kthowns.mobidic.common.dto.ErrorResponse;
 import com.kthowns.mobidic.common.dto.GeneralResponse;
-import com.kthowns.mobidic.api.dictionary.dto.request.AddDefinitionRequestDto;
-import com.kthowns.mobidic.api.dictionary.dto.response.DefinitionDto;
 import com.kthowns.mobidic.domain.dictionary.service.DefinitionService;
-import com.kthowns.mobidic.storage.user.jpaentity.User;
+import com.kthowns.mobidic.storage.user.jpaentity.UserJpaEntity;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -49,12 +50,12 @@ public class DefinitionController {
                     content = @Content(schema = @Schema(hidden = true)))
     })
     @GetMapping("/words/{wordId}/definitions")
-    public ResponseEntity<GeneralResponse<List<DefinitionDto>>> getDefinitionsByWordId(
+    public ResponseEntity<GeneralResponse<List<Definition>>> getDefinitionsByWordId(
             @PathVariable String wordId,
-            @AuthenticationPrincipal User user
+            @AuthenticationPrincipal AuthUser authUser
     ) {
         return GeneralResponse.toResponseEntity(GeneralResponseCode.OK,
-                definitionService.getDefinitionsByWordId(user, UUID.fromString(wordId)));
+                definitionService.getDefinitionsByWordId(userJpaEntity, UUID.fromString(wordId)));
     }
 
     @Operation(
@@ -74,13 +75,13 @@ public class DefinitionController {
                     content = @Content(schema = @Schema(hidden = true)))
     })
     @PostMapping("/words/{wordId}/definition")
-    public ResponseEntity<GeneralResponse<DefinitionDto>> addDefinition(
+    public ResponseEntity<GeneralResponse<Definition>> addDefinition(
             @PathVariable String wordId,
             @RequestBody @Valid AddDefinitionRequestDto request,
-            @AuthenticationPrincipal User user
+            @AuthenticationPrincipal UserJpaEntity userJpaEntity
     ) {
         return GeneralResponse.toResponseEntity(GeneralResponseCode.OK,
-                definitionService.addDefinition(user, UUID.fromString(wordId), request));
+                definitionService.addDefinition(userJpaEntity, UUID.fromString(wordId), request));
     }
 
     @Operation(
@@ -102,13 +103,13 @@ public class DefinitionController {
                     content = @Content(schema = @Schema(hidden = true)))
     })
     @PatchMapping("/definitions/{definitionId}")
-    public ResponseEntity<GeneralResponse<DefinitionDto>> updateDefinition(
+    public ResponseEntity<GeneralResponse<Definition>> updateDefinition(
             @PathVariable String definitionId,
             @RequestBody @Valid AddDefinitionRequestDto request,
-            @AuthenticationPrincipal User user
+            @AuthenticationPrincipal UserJpaEntity userJpaEntity
     ) {
         return GeneralResponse.toResponseEntity(GeneralResponseCode.OK,
-                definitionService.updateDefinition(user, UUID.fromString(definitionId), request));
+                definitionService.updateDefinition(userJpaEntity, UUID.fromString(definitionId), request));
     }
 
     @Operation(
@@ -127,11 +128,11 @@ public class DefinitionController {
                     content = @Content(schema = @Schema(hidden = true)))
     })
     @DeleteMapping("/definitions/{definitionId}")
-    public ResponseEntity<GeneralResponse<DefinitionDto>> deleteDefinition(
+    public ResponseEntity<GeneralResponse<Definition>> deleteDefinition(
             @PathVariable String definitionId,
-            @AuthenticationPrincipal User user
+            @AuthenticationPrincipal UserJpaEntity userJpaEntity
     ) {
         return GeneralResponse.toResponseEntity(GeneralResponseCode.OK,
-                definitionService.deleteDefinition(user, UUID.fromString(definitionId)));
+                definitionService.deleteDefinition(userJpaEntity, UUID.fromString(definitionId)));
     }
 }

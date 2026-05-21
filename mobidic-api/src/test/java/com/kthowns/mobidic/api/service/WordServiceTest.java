@@ -2,16 +2,16 @@ package com.kthowns.mobidic.api.service;
 
 import com.kthowns.mobidic.api.config.ServiceTestConfig;
 import com.kthowns.mobidic.api.dictionary.dto.request.AddWordRequestDto;
-import com.kthowns.mobidic.api.dictionary.dto.response.WordDetail;
-import com.kthowns.mobidic.api.dictionary.dto.response.WordDto;
-import com.kthowns.mobidic.storage.dictionary.jpaentity.Vocabulary;
-import com.kthowns.mobidic.storage.dictionary.jpaentity.Word;
-import com.kthowns.mobidic.storage.dictionary.jparepository.DefinitionRepository;
-import com.kthowns.mobidic.storage.dictionary.jparepository.VocabularyRepository;
-import com.kthowns.mobidic.storage.dictionary.jparepository.WordRepository;
+import com.kthowns.mobidic.domain.dictionary.model.WordDetail;
+import com.kthowns.mobidic.domain.dictionary.model.Word;
+import com.kthowns.mobidic.storage.dictionary.jpaentity.VocabularyJpaEntity;
+import com.kthowns.mobidic.storage.dictionary.jpaentity.WordJpaEntity;
+import com.kthowns.mobidic.storage.dictionary.jparepository.DefinitionJpaRepository;
+import com.kthowns.mobidic.storage.dictionary.jparepository.VocabularyJpaRepository;
+import com.kthowns.mobidic.storage.dictionary.jparepository.WordJpaRepository;
 import com.kthowns.mobidic.domain.dictionary.service.WordService;
-import com.kthowns.mobidic.storage.statistic.jparepository.WordStatisticRepository;
-import com.kthowns.mobidic.storage.user.jpaentity.User;
+import com.kthowns.mobidic.storage.statistic.jparepository.WordStatisticJpaRepository;
+import com.kthowns.mobidic.storage.user.jpaentity.UserJpaEntity;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -41,20 +41,20 @@ import static org.mockito.Mockito.*;
 })
 class WordServiceTest {
     @Autowired
-    private WordRepository wordRepository;
+    private WordJpaRepository wordRepository;
     @Autowired
-    private VocabularyRepository vocabularyRepository;
+    private VocabularyJpaRepository vocabularyRepository;
 
     @Autowired
-    private DefinitionRepository definitionRepository;
+    private DefinitionJpaRepository definitionRepository;
 
     @Autowired
-    private WordStatisticRepository wordStatisticRepository;
+    private WordStatisticJpaRepository wordStatisticRepository;
 
     @Autowired
     private WordService wordService;
 
-    private final User testUser = User.builder()
+    private final UserJpaEntity testUserJpaEntity = UserJpaEntity.builder()
             .id(UUID.randomUUID())
             .build();
 
@@ -69,23 +69,23 @@ class WordServiceTest {
                 .expression("test")
                 .build();
 
-        ArgumentCaptor<Word> captor =
-                ArgumentCaptor.forClass(Word.class);
+        ArgumentCaptor<WordJpaEntity> captor =
+                ArgumentCaptor.forClass(WordJpaEntity.class);
 
         //given
         given(vocabularyRepository.findForUpdate(any(UUID.class), any(UUID.class)))
-                .willReturn(Optional.of(Mockito.mock(Vocabulary.class)));
-        given(wordRepository.existsByExpressionAndVocabulary(anyString(), any(Vocabulary.class)))
+                .willReturn(Optional.of(Mockito.mock(VocabularyJpaEntity.class)));
+        given(wordRepository.existsByExpressionAndVocabulary(anyString(), any(VocabularyJpaEntity.class)))
                 .willReturn(false);
-        given(wordRepository.save(any(Word.class)))
+        given(wordRepository.save(any(WordJpaEntity.class)))
                 .willAnswer(invocation -> {
-                    Word wordArg = invocation.getArgument(0);
+                    WordJpaEntity wordArg = invocation.getArgument(0);
                     wordArg.setId(wordId);
                     return wordArg;
                 });
 
         //when
-        WordDto response = wordService.addWord(testUser, UUID.randomUUID(), request);
+        Word response = wordService.addWord(testUserJpaEntity, UUID.randomUUID(), request);
 
         //then
         verify(wordRepository, times(1))
@@ -114,7 +114,7 @@ class WordServiceTest {
                 .willReturn(words);
 
         //when
-        List<WordDetail> response = wordService.getWordDetailsByVocabularyId(testUser, UUID.randomUUID());
+        List<WordDetail> response = wordService.getWordDetailsByVocabularyId(testUserJpaEntity, UUID.randomUUID());
 
         //then
         assertEquals(words.getFirst().expression(), response.getFirst().expression());
@@ -127,9 +127,9 @@ class WordServiceTest {
 
         UUID wordId = UUID.randomUUID();
 
-        Word defaultWord = Word.builder()
+        WordJpaEntity defaultWord = WordJpaEntity.builder()
                 .id(wordId)
-                .vocabulary(Mockito.mock(Vocabulary.class))
+                .vocabulary(Mockito.mock(VocabularyJpaEntity.class))
                 .expression("expression")
                 .build();
 
@@ -138,23 +138,23 @@ class WordServiceTest {
                         .expression("expression2")
                         .build();
 
-        ArgumentCaptor<Word> captor =
-                ArgumentCaptor.forClass(Word.class);
+        ArgumentCaptor<WordJpaEntity> captor =
+                ArgumentCaptor.forClass(WordJpaEntity.class);
 
         //given
         given(wordRepository.findByIdAndVocabulary_User_Id(any(UUID.class), any(UUID.class)))
                 .willReturn(Optional.of(defaultWord));
-        given(vocabularyRepository.existsByTitleAndUserAndIdNot(anyString(), any(User.class), any(UUID.class)))
+        given(vocabularyRepository.existsByTitleAndUserAndIdNot(anyString(), any(UserJpaEntity.class), any(UUID.class)))
                 .willReturn(false);
-        given(wordRepository.save(any(Word.class)))
+        given(wordRepository.save(any(WordJpaEntity.class)))
                 .willAnswer(invocation -> {
-                    Word wordArg = invocation.getArgument(0);
+                    WordJpaEntity wordArg = invocation.getArgument(0);
                     wordArg.setExpression(request.getExpression());
                     return wordArg;
                 });
 
         //when
-        WordDto response = wordService.updateWord(testUser, wordId, request);
+        Word response = wordService.updateWord(testUserJpaEntity, wordId, request);
 
         //then
         verify(wordRepository, times(1))

@@ -1,4 +1,4 @@
-package com.kthowns.mobidic.domain.auth.util;
+package com.kthowns.mobidic.api.auth.util;
 
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;

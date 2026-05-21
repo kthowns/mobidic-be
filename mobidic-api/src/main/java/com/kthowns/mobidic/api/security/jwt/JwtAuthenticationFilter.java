@@ -1,4 +1,4 @@
-package com.kthowns.mobidic.security.jwt;
+package com.kthowns.mobidic.api.security.jwt;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -25,7 +25,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     public static final String BEARER_PREFIX = "Bearer ";
 
     private final JwtProvider jwtProvider;
-    private final JwtBlacklistService jwtBlacklistService;
     private final AuthenticationEntryPoint authenticationEntryPoint;
 
     @Override
@@ -36,8 +35,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         try {
             if (StringUtils.hasText(jwt) //Validating JWT Token
                     && jwtProvider.validateToken(jwt)
-                    && !jwtBlacklistService.isTokenWithdrawn(jwt)
-                    && !jwtBlacklistService.isTokenLogout(jwt)
             ) {
                 Authentication authentication = jwtProvider.getAuthentication(jwt);
                 SecurityContextHolder.getContext().setAuthentication(authentication);

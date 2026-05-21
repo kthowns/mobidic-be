@@ -5,7 +5,7 @@ import com.kthowns.mobidic.api.auth.dto.request.LoginRequest;
 import com.kthowns.mobidic.api.dictionary.dto.request.AddVocabularyRequestDto;
 import com.kthowns.mobidic.api.dictionary.dto.request.AddWordRequestDto;
 import com.kthowns.mobidic.api.user.dto.request.SignUpRequestDto;
-import com.kthowns.mobidic.security.jwt.JwtProvider;
+import com.kthowns.mobidic.api.security.jwt.JwtProvider;
 import com.kthowns.mobidic.api.util.DatabaseCleaner;
 import com.kthowns.mobidic.common.code.AuthResponseCode;
 import com.kthowns.mobidic.common.code.GeneralResponseCode;

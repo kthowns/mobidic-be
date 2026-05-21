@@ -1,15 +1,15 @@
 package com.kthowns.mobidic.api.service;
 
 import com.kthowns.mobidic.api.config.ServiceTestConfig;
-import com.kthowns.mobidic.storage.dictionary.jpaentity.Vocabulary;
-import com.kthowns.mobidic.storage.dictionary.jpaentity.Word;
-import com.kthowns.mobidic.storage.dictionary.jparepository.VocabularyRepository;
-import com.kthowns.mobidic.storage.dictionary.jparepository.WordRepository;
-import com.kthowns.mobidic.api.statistic.dto.response.StatisticDto;
-import com.kthowns.mobidic.storage.statistic.jpaentity.WordStatistic;
-import com.kthowns.mobidic.storage.statistic.jparepository.WordStatisticRepository;
+import com.kthowns.mobidic.storage.dictionary.jpaentity.VocabularyJpaEntity;
+import com.kthowns.mobidic.storage.dictionary.jpaentity.WordJpaEntity;
+import com.kthowns.mobidic.storage.dictionary.jparepository.VocabularyJpaRepository;
+import com.kthowns.mobidic.storage.dictionary.jparepository.WordJpaRepository;
+import com.kthowns.mobidic.domain.statistic.model.WordStatistic;
+import com.kthowns.mobidic.storage.statistic.jpaentity.WordStatisticJpaEntity;
+import com.kthowns.mobidic.storage.statistic.jparepository.WordStatisticJpaRepository;
 import com.kthowns.mobidic.domain.statistic.service.StatisticService;
-import com.kthowns.mobidic.storage.user.jpaentity.User;
+import com.kthowns.mobidic.storage.user.jpaentity.UserJpaEntity;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -37,18 +37,18 @@ import static org.mockito.Mockito.*;
 })
 class WordStatisticServiceTest {
     @Autowired
-    private WordStatisticRepository wordStatisticRepository;
+    private WordStatisticJpaRepository wordStatisticRepository;
 
     @Autowired
-    private WordRepository wordRepository;
+    private WordJpaRepository wordRepository;
 
     @Autowired
-    private VocabularyRepository vocabularyRepository;
+    private VocabularyJpaRepository vocabularyRepository;
 
     @Autowired
     private StatisticService statisticService;
 
-    private final User testUser = User.builder()
+    private final UserJpaEntity testUserJpaEntity = UserJpaEntity.builder()
             .id(UUID.randomUUID())
             .build();
 
@@ -59,8 +59,8 @@ class WordStatisticServiceTest {
 
         UUID wordId = UUID.randomUUID();
 
-        WordStatistic defaultWordStatistic = WordStatistic.builder()
-                .word(mock(Word.class))
+        WordStatisticJpaEntity defaultWordStatistic = WordStatisticJpaEntity.builder()
+                .word(mock(WordJpaEntity.class))
                 .wordId(wordId)
                 .correctCount(3L)
                 .incorrectCount(5L)
@@ -72,7 +72,7 @@ class WordStatisticServiceTest {
                 .willReturn(Optional.of(defaultWordStatistic));
 
         //when
-        StatisticDto response = statisticService.getWordStatisticById(testUser, UUID.randomUUID());
+        WordStatistic response = statisticService.getWordStatisticById(testUserJpaEntity, UUID.randomUUID());
 
         //then
         assertEquals(defaultWordStatistic.getWordId(), response.getWordId());
@@ -90,15 +90,15 @@ class WordStatisticServiceTest {
         Double learningRate = 0.8;
 
         //given
-        given(wordStatisticRepository.getVocabularyLearningRate(any(Vocabulary.class)))
+        given(wordStatisticRepository.getVocabularyLearningRate(any(VocabularyJpaEntity.class)))
                 .willReturn(Optional.of(learningRate));
         given(vocabularyRepository.findByIdAndUser_Id(any(UUID.class), any(UUID.class)))
-                .willReturn(Optional.of(Mockito.mock(Vocabulary.class)));
-        given(wordRepository.countByVocabulary(any(Vocabulary.class)))
+                .willReturn(Optional.of(Mockito.mock(VocabularyJpaEntity.class)));
+        given(wordRepository.countByVocabulary(any(VocabularyJpaEntity.class)))
                 .willReturn(1L);
 
         //when
-        Double foundLearningRate = statisticService.getVocabLearningRate(testUser, vocabularyId);
+        Double foundLearningRate = statisticService.getVocabLearningRate(testUserJpaEntity, vocabularyId);
 
         //then
         assertEquals(learningRate, foundLearningRate);
@@ -111,9 +111,9 @@ class WordStatisticServiceTest {
 
         UUID wordId = UUID.randomUUID();
 
-        WordStatistic defaultStatistic = WordStatistic.builder()
+        WordStatisticJpaEntity defaultStatistic = WordStatisticJpaEntity.builder()
                 .wordId(wordId)
-                .word(Mockito.mock(Word.class))
+                .word(Mockito.mock(WordJpaEntity.class))
                 .correctCount(3L)
                 .isLearned(true)
                 .incorrectCount(4L)
@@ -121,18 +121,18 @@ class WordStatisticServiceTest {
 
         //given
         given(wordRepository.findById(any(UUID.class)))
-                .willReturn(Optional.of(Mockito.mock(Word.class)));
+                .willReturn(Optional.of(Mockito.mock(WordJpaEntity.class)));
         given(wordStatisticRepository.findForUpdate(any(UUID.class), any(UUID.class)))
                 .willReturn(Optional.of(defaultStatistic));
-        given(wordStatisticRepository.save(any(WordStatistic.class)))
-                .willReturn(Mockito.mock(WordStatistic.class));
+        given(wordStatisticRepository.save(any(WordStatisticJpaEntity.class)))
+                .willReturn(Mockito.mock(WordStatisticJpaEntity.class));
 
         //when
-        statisticService.toggleLearnedByWordId(testUser, wordId);
+        statisticService.toggleLearnedByWordId(testUserJpaEntity, wordId);
 
         // then
         assertFalse(defaultStatistic.isLearned());
-        verify(wordStatisticRepository, times(1)).findForUpdate(wordId, testUser.getId());
+        verify(wordStatisticRepository, times(1)).findForUpdate(wordId, testUserJpaEntity.getId());
         verify(wordStatisticRepository, never()).save(any());
     }
 

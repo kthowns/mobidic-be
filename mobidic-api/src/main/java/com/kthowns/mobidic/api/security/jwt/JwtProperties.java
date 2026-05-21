@@ -1,4 +1,4 @@
-package com.kthowns.mobidic.security.jwt;
+package com.kthowns.mobidic.api.security.jwt;
 
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;

@@ -1,8 +1,8 @@
-package com.kthowns.mobidic.security.config;
+package com.kthowns.mobidic.api.security.config;
 
-import com.kthowns.mobidic.security.exception.AuthAccessDeniedHandler;
-import com.kthowns.mobidic.security.exception.AuthAuthenticationEntryPoint;
-import com.kthowns.mobidic.security.jwt.JwtAuthenticationFilter;
+import com.kthowns.mobidic.api.security.exception.AuthAccessDeniedHandler;
+import com.kthowns.mobidic.api.security.exception.AuthAuthenticationEntryPoint;
+import com.kthowns.mobidic.api.security.jwt.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

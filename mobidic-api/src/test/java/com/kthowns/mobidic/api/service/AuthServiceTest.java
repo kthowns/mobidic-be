@@ -1,11 +1,10 @@
 package com.kthowns.mobidic.api.service;
 
-import com.kthowns.mobidic.domain.auth.service.AuthService;
 import com.kthowns.mobidic.api.config.ServiceTestConfig;
 import com.kthowns.mobidic.api.auth.dto.request.LoginRequest;
-import com.kthowns.mobidic.security.jwt.JwtProvider;
-import com.kthowns.mobidic.storage.user.jpaentity.User;
-import com.kthowns.mobidic.storage.user.jparepository.UserRepository;
+import com.kthowns.mobidic.api.security.jwt.JwtProvider;
+import com.kthowns.mobidic.storage.user.jpaentity.UserJpaEntity;
+import com.kthowns.mobidic.storage.user.jparepository.UserJpaRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -41,7 +40,7 @@ class AuthServiceTest {
     private PasswordEncoder passwordEncoder;
 
     @Autowired
-    private UserRepository userRepository; // mock
+    private UserJpaRepository userJpaRepository; // mock
 
     @Autowired
     private JwtProvider jwtProvider;
@@ -59,7 +58,7 @@ class AuthServiceTest {
                 .password(rawPassword)
                 .build();
 
-        User principal = User.builder()
+        UserJpaEntity principal = UserJpaEntity.builder()
                 .id(UUID.randomUUID())
                 .email(request.getEmail())
                 .build();

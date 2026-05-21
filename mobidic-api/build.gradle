@@ -3,12 +3,18 @@ dependencies {
     implementation project(':mobidic-external')
     implementation project(':mobidic-common')
     implementation project(':mobidic-storage')
-    implementation project(':mobidic-security')
 
     // Security
     implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'io.jsonwebtoken:jjwt-api:0.12.6'
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.6'
+    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.6'
 
     // Web & UI
+    implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+    // Transactional
+    implementation 'org.springframework:spring-tx'
 }

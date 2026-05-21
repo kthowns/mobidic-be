@@ -1,6 +1,6 @@
 package com.kthowns.mobidic.api.user.dto.response;
 
-import com.kthowns.mobidic.storage.user.jpaentity.User;
+import com.kthowns.mobidic.storage.user.jpaentity.UserJpaEntity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -19,12 +19,12 @@ public class UserDto {
     private String nickname;
     private LocalDateTime createdAt;
 
-    public static UserDto fromEntity(User user) {
+    public static UserDto fromEntity(UserJpaEntity userJpaEntity) {
         return UserDto.builder()
-                .id(user.getId())
-                .email(user.getEmail())
-                .nickname(user.getNickname())
-                .createdAt(user.getCreatedAt())
+                .id(userJpaEntity.getId())
+                .email(userJpaEntity.getEmail())
+                .nickname(userJpaEntity.getNickname())
+                .createdAt(userJpaEntity.getCreatedAt())
                 .build();
     }
 }

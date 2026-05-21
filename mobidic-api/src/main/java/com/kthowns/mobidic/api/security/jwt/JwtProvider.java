@@ -1,13 +1,12 @@
-package com.kthowns.mobidic.security.jwt;
+package com.kthowns.mobidic.api.security.jwt;
 
-import com.kthowns.mobidic.security.service.UserDetailsServiceImpl;
+import com.kthowns.mobidic.api.auth.model.AuthUser;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.SignatureException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
@@ -18,11 +17,11 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class JwtProvider {
     private final JwtProperties jwtProperties;
-    private final UserDetailsServiceImpl userDetailsServiceImpl;
 
-    public String generateToken(UUID userId) {
+    public String generateToken(UUID userId, String userRole) {
         return Jwts.builder()
                 .subject(userId.toString())
+                .claim("role", userRole)
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + jwtProperties.getJwtExp()))
                 .signWith(jwtProperties.getSecretKey())
@@ -32,8 +31,14 @@ public class JwtProvider {
     public Authentication getAuthentication(String token) {
         Claims claims = getClaims(token);
         String userId = claims.getSubject();
-        UserDetails userDetails = userDetailsServiceImpl.loadUserByUserId(UUID.fromString(userId));
-        return new UsernamePasswordAuthenticationToken(userDetails, token, userDetails.getAuthorities());
+        String role = claims.get("role", String.class);
+
+        AuthUser authUser = AuthUser.builder()
+                .id(UUID.fromString(userId))
+                .role(role)
+                .build();
+
+        return new UsernamePasswordAuthenticationToken(authUser, null, authUser.getAuthorities());
     }
 
     public boolean validateToken(String token) {

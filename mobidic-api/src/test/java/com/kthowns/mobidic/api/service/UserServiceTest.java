@@ -4,8 +4,8 @@ import com.kthowns.mobidic.api.config.ServiceTestConfig;
 import com.kthowns.mobidic.api.user.dto.request.SignUpRequestDto;
 import com.kthowns.mobidic.api.user.dto.request.UpdateUserRequestDto;
 import com.kthowns.mobidic.api.user.dto.response.UserDto;
-import com.kthowns.mobidic.storage.user.jpaentity.User;
-import com.kthowns.mobidic.storage.user.jparepository.UserRepository;
+import com.kthowns.mobidic.storage.user.jpaentity.UserJpaEntity;
+import com.kthowns.mobidic.storage.user.jparepository.UserJpaRepository;
 import com.kthowns.mobidic.domain.user.service.UserService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -41,7 +41,7 @@ class UserServiceTest {
     private UserService userService;
 
     @Autowired
-    private UserRepository userRepository;
+    private UserJpaRepository userJpaRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -61,25 +61,25 @@ class UserServiceTest {
                 .password(rawPassword)
                 .build();
 
-        User userToReturn = User.builder()
+        UserJpaEntity userJpaEntityToReturn = UserJpaEntity.builder()
                 .email(request.getEmail())
                 .nickname(request.getNickname())
                 .password(encodedPassword)
                 .build();
 
         // mocking
-        Mockito.when(userRepository.existsByNickname(anyString()))
+        Mockito.when(userJpaRepository.existsByNickname(anyString()))
                 .thenReturn(false);
-        Mockito.when(userRepository.existsByEmail(anyString()))
+        Mockito.when(userJpaRepository.existsByEmail(anyString()))
                 .thenReturn(false);
-        Mockito.when(userRepository.save(Mockito.any(User.class)))
-                .thenReturn(userToReturn);
+        Mockito.when(userJpaRepository.save(Mockito.any(UserJpaEntity.class)))
+                .thenReturn(userJpaEntityToReturn);
 
         // when
         userService.registerUser(request);
 
         // then
-        Mockito.verify(userRepository).save(Mockito.any(User.class));
+        Mockito.verify(userJpaRepository).save(Mockito.any(UserJpaEntity.class));
     }
 
     @Test
@@ -88,7 +88,7 @@ class UserServiceTest {
     void updateUserNicknameSuccess() {
         resetMock();
 
-        User defaultUser = User.builder()
+        UserJpaEntity defaultUserJpaEntity = UserJpaEntity.builder()
                 .id(UUID.fromString(UID))
                 .email("test@test.com")
                 .nickname("test")
@@ -99,23 +99,23 @@ class UserServiceTest {
                 .nickname("test2")
                 .build();
 
-        ArgumentCaptor<User> userCaptor =
-                ArgumentCaptor.forClass(User.class);
+        ArgumentCaptor<UserJpaEntity> userCaptor =
+                ArgumentCaptor.forClass(UserJpaEntity.class);
 
         //given
-        given(userRepository.existsByNicknameAndIdNot(anyString(), any(UUID.class)))
+        given(userJpaRepository.existsByNicknameAndIdNot(anyString(), any(UUID.class)))
                 .willReturn(false);
-        given(userRepository.findById(any(UUID.class)))
-                .willReturn(Optional.of(defaultUser));
-        given(userRepository.save(any(User.class)))
+        given(userJpaRepository.findById(any(UUID.class)))
+                .willReturn(Optional.of(defaultUserJpaEntity));
+        given(userJpaRepository.save(any(UserJpaEntity.class)))
                 .willAnswer(invocation -> {
-                    User userArg = invocation.getArgument(0);
-                    userArg.setNickname(request.getNickname());
-                    return userArg;
+                    UserJpaEntity userJpaEntityArg = invocation.getArgument(0);
+                    userJpaEntityArg.setNickname(request.getNickname());
+                    return userJpaEntityArg;
                 });
 
         //when
-        UserDto response = userService.updateUser(defaultUser, request, UUID.randomUUID().toString());
+        UserDto response = userService.updateUser(defaultUserJpaEntity, request, UUID.randomUUID().toString());
 
         //then
         assertEquals(UUID.fromString(UID), response.getId());
@@ -128,7 +128,7 @@ class UserServiceTest {
     void updateUserPasswordSuccess() {
         resetMock();
 
-        User defaultUser = User.builder()
+        UserJpaEntity defaultUserJpaEntity = UserJpaEntity.builder()
                 .id(UUID.fromString(UID))
                 .email("test@test.com")
                 .nickname("test")
@@ -139,28 +139,28 @@ class UserServiceTest {
                 .password("SomePassword")
                 .build();
 
-        ArgumentCaptor<User> userCaptor =
-                ArgumentCaptor.forClass(User.class);
+        ArgumentCaptor<UserJpaEntity> userCaptor =
+                ArgumentCaptor.forClass(UserJpaEntity.class);
 
         //given
-        given(userRepository.findById(any(UUID.class)))
-                .willReturn(Optional.of(defaultUser));
-        given(userRepository.save(any(User.class)))
+        given(userJpaRepository.findById(any(UUID.class)))
+                .willReturn(Optional.of(defaultUserJpaEntity));
+        given(userJpaRepository.save(any(UserJpaEntity.class)))
                 .willAnswer(invocation -> {
-                    User userArg = invocation.getArgument(0);
-                    userArg.setPassword(passwordEncoder.encode(
+                    UserJpaEntity userJpaEntityArg = invocation.getArgument(0);
+                    userJpaEntityArg.setPassword(passwordEncoder.encode(
                             request.getPassword()));
-                    return userArg;
+                    return userJpaEntityArg;
                 });
 
         //when
-        UserDto response = userService.updateUser(defaultUser, request, UUID.randomUUID().toString());
+        UserDto response = userService.updateUser(defaultUserJpaEntity, request, UUID.randomUUID().toString());
 
         //then
         assertThat(passwordEncoder.matches(request.getPassword(), "SomePassword"));
     }
 
     private void resetMock() {
-        Mockito.reset(userRepository);
+        Mockito.reset(userJpaRepository);
     }
 }

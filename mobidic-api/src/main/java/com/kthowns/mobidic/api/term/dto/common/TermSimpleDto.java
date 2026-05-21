@@ -1,6 +1,6 @@
 package com.kthowns.mobidic.api.term.dto.common;
 
-import com.kthowns.mobidic.storage.term.jpaentity.Term;
+import com.kthowns.mobidic.storage.term.jpaentity.TermJpaEntity;
 import com.kthowns.mobidic.domain.term.model.TermType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -21,7 +21,7 @@ public class TermSimpleDto {
     private String contentUri;
     private LocalDateTime createdAt;
 
-    public static TermSimpleDto fromEntity(Term term) {
+    public static TermSimpleDto fromEntity(TermJpaEntity term) {
         return TermSimpleDto.builder()
                 .id(term.getId())
                 .type(term.getType())
