@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface TermRepository extends JpaRepository<TermJpaEntity, Long> {
+public interface TermJpaRepository extends JpaRepository<TermJpaEntity, Long> {
     Optional<TermJpaEntity> findFirstByTypeAndActiveTrueOrderByCreatedAtDesc(TermType type);
 
     Optional<TermJpaEntity> findByTypeAndVersion(TermType type, String version);

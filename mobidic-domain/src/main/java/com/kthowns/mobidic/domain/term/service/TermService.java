@@ -1,108 +1,60 @@
 package com.kthowns.mobidic.domain.term.service;
 
-import com.kthowns.mobidic.common.code.GeneralResponseCode;
-import com.kthowns.mobidic.common.exception.ApiException;
-import com.kthowns.mobidic.api.term.dto.request.AddTermRequest;
-import com.kthowns.mobidic.api.term.dto.common.TermDto;
-import com.kthowns.mobidic.api.term.dto.common.TermSimpleDto;
-import com.kthowns.mobidic.storage.term.jpaentity.Term;
-import com.kthowns.mobidic.storage.term.jpaentity.UserAgreement;
-import com.kthowns.mobidic.storage.term.jparepository.TermRepository;
-import com.kthowns.mobidic.storage.term.jparepository.UserAgreementRepository;
+import com.kthowns.mobidic.domain.term.implementation.TermAppender;
+import com.kthowns.mobidic.domain.term.implementation.TermReader;
+import com.kthowns.mobidic.domain.term.implementation.TermValidator;
+import com.kthowns.mobidic.domain.term.implementation.UserAgreementAppender;
+import com.kthowns.mobidic.domain.term.model.SimpleTerm;
+import com.kthowns.mobidic.domain.term.model.Term;
 import com.kthowns.mobidic.domain.term.model.TermType;
-import com.kthowns.mobidic.api.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
 public class TermService {
-
-    private final TermRepository termRepository;
-    private final UserAgreementRepository userAgreementRepository;
+    private final TermReader termReader;
+    private final TermAppender termAppender;
+    private final TermValidator termValidator;
+    private final UserAgreementAppender userAgreementAppender;
 
     @Transactional(readOnly = true)
-    public TermDto getTerm(TermType type, String version) {
-        if (version == null || version.isEmpty()) {
-            Term term = termRepository.findFirstByTypeAndActiveTrueOrderByCreatedAtDesc(type)
-                    .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_TERM));
-
-            return TermDto.fromEntity(term);
-        }
-
-        Term term = termRepository.findByTypeAndVersion(type, version)
-                .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_TERM));
-
-        return TermDto.fromEntity(term);
+    public Term getTerm(TermType type, String version) {
+        return termReader.readTerm(type, version);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @Transactional
-    public void addTerm(AddTermRequest addTermRequest) {
-        boolean isVersionDuplicated = termRepository.existsByTypeAndVersion(addTermRequest.getType(), addTermRequest.getVersion());
-
-        if (isVersionDuplicated) {
-            throw new ApiException(GeneralResponseCode.DUPLICATED_TERM_VERSION);
-        }
-
-        termRepository.deactivateAllByType(addTermRequest.getType());
+    public void addTerm(TermType type, String version, boolean required, String content) {
+        termValidator.validateVersionDuplication(type, version);
 
         Term term = Term.builder()
-                .type(addTermRequest.getType())
-                .version(addTermRequest.getVersion())
-                .required(addTermRequest.isRequired())
-                .content(addTermRequest.getContent())
+                .type(type)
+                .version(version)
+                .required(required)
+                .content(content)
                 .build();
 
-        termRepository.save(term);
+        termAppender.append(term);
     }
 
     @Transactional(readOnly = true)
     public void validateSignUpAgreement(List<Long> agreeTermIds) {
-        // term.isRequired, term.isActive가 true인 모든 Term의 Id가 포함되었는지 검사
-        List<Long> requiredIds = termRepository.findAllRequiredTermIds();
-
-        Set<Long> agreedSet = new HashSet<>(agreeTermIds);
-
-        for (Long requiredId : requiredIds) {
-            if (!agreedSet.contains(requiredId)) {
-                // 필수 약관 중 하나라도 동의하지 않음
-                throw new ApiException(GeneralResponseCode.REQUIRED_TERM_NOT_AGREED);
-            }
-        }
-
-        // terms 테이블에 없는 id가 포함되었는지 검사
-        long validCount = termRepository.countByIdIn(agreeTermIds);
-        if (validCount != agreeTermIds.size()) {
-            throw new ApiException(GeneralResponseCode.INVALID_TERM_ID_INCLUDED);
-        }
+        termValidator.validateAgreement(agreeTermIds);
     }
 
     @Transactional
-    public void addUserAgreement(User user, List<Long> agreeTermIds) {
-        List<Term> terms = termRepository.findByIdIn(agreeTermIds);
-        List<UserAgreement> userAgreements = terms.stream()
-                .map(term ->
-                        UserAgreement.builder()
-                                .term(term)
-                                .user(user)
-                                .build()
-                ).toList();
-
-        userAgreementRepository.saveAll(userAgreements);
+    public void addUserAgreement(UUID userId, List<Long> agreeTermIds) {
+        userAgreementAppender.appendAgreements(userId, agreeTermIds);
     }
 
     @Transactional(readOnly = true)
-    public List<TermSimpleDto> getActiveTerms() {
-        List<Term> terms = termRepository.findAllByActiveTrue();
-
-        return terms.stream().map(TermSimpleDto::fromEntity).toList();
+    public List<SimpleTerm> getActiveTerms() {
+        return termReader.readActiveTerms();
     }
 }
