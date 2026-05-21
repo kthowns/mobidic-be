@@ -1,7 +1,6 @@
 package com.kthowns.mobidic.domain.user.service;
 
 import com.kthowns.mobidic.domain.user.client.PasswordEncoderClient;
-import com.kthowns.mobidic.domain.user.client.TokenWithdrawalClient;
 import com.kthowns.mobidic.domain.user.implementation.*;
 import com.kthowns.mobidic.domain.user.model.User;
 import com.kthowns.mobidic.domain.user.model.UserRole;
@@ -23,7 +22,6 @@ public class UserService {
     private final UserValidator userValidator;
 
     private final PasswordEncoderClient passwordEncoderClient;
-    private final TokenWithdrawalClient tokenWithdrawalClient;
 
     @Transactional
     public User registerUser(String email, String nickname, String password) {
@@ -57,7 +55,7 @@ public class UserService {
     }
 
     @Transactional
-    public User updateUser(UUID userId, String nickname, String password, String token) {
+    public User updateUser(UUID userId, String nickname, String password) {
         User user = userReader.readById(userId);
 
         if (nickname != null) {
@@ -75,18 +73,12 @@ public class UserService {
                 .createdAt(user.getCreatedAt())
                 .build();
 
-        if (password != null) {
-            tokenWithdrawalClient.withdrawToken(token);
-        }
-
         return userUpdater.update(updatedUser);
     }
 
     @Transactional
-    public User deactivateUser(UUID userId, String token) {
+    public User deactivateUser(UUID userId) {
         User user = userReader.readById(userId);
-        User deactivatedUser = userRemover.deactivate(user);
-        tokenWithdrawalClient.withdrawToken(token);
-        return deactivatedUser;
+        return userRemover.deactivate(user);
     }
 }

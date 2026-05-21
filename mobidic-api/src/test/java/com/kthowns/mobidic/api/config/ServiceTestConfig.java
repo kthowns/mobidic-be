@@ -133,11 +133,6 @@ public class ServiceTestConfig {
     }
 
     @Bean
-    public JwtBlacklistService jwtBlacklistService() {
-        return Mockito.mock(JwtBlacklistService.class);
-    }
-
-    @Bean
     public AuthenticationManager authenticationManager() {
         return Mockito.mock(AuthenticationManager.class);
     }
