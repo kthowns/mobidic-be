@@ -15,6 +15,10 @@ public interface VocabularyRepository {
 
     Optional<VocabularyDetail> readDetailById(UUID vocabularyId, UUID userId);
 
+    Optional<Vocabulary> findForUpdate(UUID vocabularyId, UUID userId);
+
+    boolean existsByIdAndUser_Id(UUID vocabularyId, UUID userId);
+
     void delete(UUID vocabularyId, UUID userId);
 
     void update(String title, String description, UUID vocabularyId, UUID userId);

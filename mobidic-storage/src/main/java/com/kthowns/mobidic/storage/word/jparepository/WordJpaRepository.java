@@ -13,4 +13,8 @@ public interface WordJpaRepository extends JpaRepository<WordJpaEntity, UUID>, W
     Optional<WordJpaEntity> findByIdAndVocabulary_User_Id(UUID id, UUID userId);
 
     boolean existsByExpressionAndVocabulary(String expression, VocabularyJpaEntity vocabulary);
+
+    boolean existsByExpressionAndVocabulary_Id(String expression, UUID vocabularyId);
+
+    boolean existsByExpressionAndVocabulary_IdAndIdNot(String expression, UUID vocabularyId, UUID wordId);
 }

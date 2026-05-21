@@ -1,6 +1,10 @@
 package com.kthowns.mobidic.storage.word.jparepository;
 
+import com.kthowns.mobidic.domain.definition.model.Definition;
 import com.kthowns.mobidic.domain.word.model.WordDetail;
+import com.kthowns.mobidic.storage.definition.jpaentity.QDefinitionJpaEntity;
+import com.kthowns.mobidic.storage.statistic.jpaentity.QWordStatisticJpaEntity;
+import com.kthowns.mobidic.storage.word.jpaentity.QWordJpaEntity;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -15,29 +19,33 @@ import java.util.stream.Collectors;
 public class WordJpaRepositoryCustomImpl implements WordJpaRepositoryCustom {
     private final JPAQueryFactory queryFactory;
 
+    private final QWordJpaEntity word = QWordJpaEntity.wordJpaEntity;
+    private final QWordStatisticJpaEntity wordStatistic = QWordStatisticJpaEntity.wordStatisticJpaEntity;
+    private final QDefinitionJpaEntity definition = QDefinitionJpaEntity.definitionJpaEntity;
+
     @Override
     public List<WordDetail> findWordDetailsByVocabularyId(UUID userId, UUID vocabularyId, boolean notLearned) {
         List<WordDetail> wordDetails = queryFactory
                 .select(Projections.constructor(WordDetail.class,
-                        QWord.word.id,
-                        QWord.word.expression,
-                        QWordStatistic.wordStatistic.difficulty.coalesce(0.5),
-                        QWordStatistic.wordStatistic.accuracy.coalesce(0.0),
-                        QWordStatistic.wordStatistic.isLearned.coalesce(false),
-                        Expressions.constant(new ArrayList<DefinitionDto>()), // 빈 리스트
-                        QWord.word.createdAt
+                        word.id,
+                        word.expression,
+                        wordStatistic.difficulty.coalesce(0.5),
+                        wordStatistic.accuracy.coalesce(0.0),
+                        wordStatistic.isLearned.coalesce(false),
+                        Expressions.constant(new ArrayList<Definition>()), // 빈 리스트 (도메인 모델 Definition 사용)
+                        word.createdAt
                 ))
-                .from(QWord.word)
-                .leftJoin(QWordStatistic.wordStatistic).on(QWordStatistic.wordStatistic.word.id.eq(QWord.word.id))
+                .from(word)
+                .leftJoin(wordStatistic).on(wordStatistic.word.id.eq(word.id))
                 .where(
-                        QWord.word.vocabulary.id.eq(vocabularyId),
-                        QWord.word.vocabulary.user.id.eq(userId),
+                        word.vocabulary.id.eq(vocabularyId),
+                        word.vocabulary.user.id.eq(userId),
                         isNotLearned(notLearned)
                 )
                 .fetch();
 
         List<UUID> wordIds = wordDetails.stream()
-                .map(WordDetail::id) // Record id가 String일 경우
+                .map(WordDetail::id)
                 .toList();
 
         if (wordIds.isEmpty()) {
@@ -46,23 +54,23 @@ public class WordJpaRepositoryCustomImpl implements WordJpaRepositoryCustom {
 
         List<Tuple> definitions = queryFactory
                 .select(
-                        QDefinition.definition.word.id,
-                        QDefinition.definition.id,
-                        QDefinition.definition.meaning,
-                        QDefinition.definition.part
+                        definition.word.id,
+                        definition.id,
+                        definition.meaning,
+                        definition.part
                 )
-                .from(QDefinition.definition)
-                .where(QDefinition.definition.word.id.in(wordIds))
+                .from(definition)
+                .where(definition.word.id.in(wordIds))
                 .fetch();
 
-        Map<UUID, List<DefinitionDto>> definitionMap = definitions.stream()
+        Map<UUID, List<Definition>> definitionMap = definitions.stream()
                 .collect(Collectors.groupingBy(
-                        tuple -> tuple.get(QDefinition.definition.word.id), // 단어 ID를 Key로
-                        Collectors.mapping(tuple -> new DefinitionDto(
-                                tuple.get(QDefinition.definition.id),
-                                tuple.get(QDefinition.definition.meaning),
-                                tuple.get(QDefinition.definition.part)
-                        ), Collectors.toList())
+                        tuple -> tuple.get(definition.word.id), // 단어 ID를 Key로
+                        Collectors.mapping(tuple -> Definition.builder()
+                                .id(tuple.get(definition.id))
+                                .meaning(tuple.get(definition.meaning))
+                                .part(tuple.get(definition.part))
+                                .build(), Collectors.toList())
                 ));
 
         return wordDetails.stream()
@@ -77,6 +85,6 @@ public class WordJpaRepositoryCustomImpl implements WordJpaRepositoryCustom {
 
     private BooleanExpression isNotLearned(boolean notLearned) {
         // true일 때만 '학습하지 않음' 조건 반환, false면 조건 없음(null)
-        return notLearned ? QWordStatistic.wordStatistic.isLearned.isFalse() : null;
+        return notLearned ? wordStatistic.isLearned.isFalse() : null;
     }
 }
