@@ -46,15 +46,15 @@ public class WordService {
                 .build();
         wordAppender.append(word);
 
-        // WordStatistic 생성 로직 (추후 Statistic 도메인 리팩토링 시 이동 검토)
+        // WordStatistic 생성 로직
         wordStatisticRepository.save(WordStatistic.builder()
                 .wordId(word.getId())
                 .isLearned(false)
                 .build());
 
-        // Vocabulary 단어 수 업데이트는 JPA 엔티티의 Dirty Checking에 의존하거나 
-        // 도메인 모델을 통해 처리 후 Repository에 반영하는 방식 중 선택 필요
-        // 현재는 기존 로직 유지를 위해 Repository 인터페이스 확장이 필요할 수 있음
+        // Vocabulary 단어 수 업데이트
+        vocabulary.addWordCount();
+        vocabularyRepository.save(vocabulary);
     }
 
     @Transactional(readOnly = true)
@@ -101,6 +101,12 @@ public class WordService {
         Word word = wordRepository.readByIdAndUserId(wordId, userId)
                 .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_WORD));
 
+        Vocabulary vocabulary = vocabularyRepository.findForUpdate(word.getVocabularyId(), userId)
+                .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_VOCAB));
+
         wordRemover.remove(wordId, userId);
+
+        vocabulary.removeWordCount();
+        vocabularyRepository.save(vocabulary);
     }
 }

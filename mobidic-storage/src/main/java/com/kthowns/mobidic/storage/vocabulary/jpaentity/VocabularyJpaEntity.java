@@ -1,5 +1,6 @@
 package com.kthowns.mobidic.storage.vocabulary.jpaentity;
 
+import com.kthowns.mobidic.domain.vocabulary.model.Vocabulary;
 import com.kthowns.mobidic.storage.user.jpaentity.UserJpaEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -29,7 +30,6 @@ public class VocabularyJpaEntity {
     @OnDelete(action = OnDeleteAction.CASCADE)
     private UserJpaEntity user;
 
-    @Setter
     @Column(name = "title", nullable = false)
     private String title;
 
@@ -37,7 +37,6 @@ public class VocabularyJpaEntity {
     @Builder.Default
     private Long wordCount = 0L;
 
-    @Setter
     @Column(name = "description")
     private String description;
 
@@ -45,11 +44,31 @@ public class VocabularyJpaEntity {
     @CreatedDate
     private LocalDateTime createdAt;
 
+    public void update(String title, String description) {
+        this.title = title;
+        this.description = description;
+    }
+
+    public void syncWordCount(Long wordCount) {
+        this.wordCount = wordCount;
+    }
+
     public void addWordCount() {
         wordCount++;
     }
 
     public void removeWordCount() {
         wordCount--;
+    }
+
+    public Vocabulary toModel() {
+        return Vocabulary.builder()
+                .id(this.id)
+                .userId(this.user.getId())
+                .title(this.title)
+                .description(this.description)
+                .wordCount(this.wordCount)
+                .createdAt(this.createdAt)
+                .build();
     }
 }

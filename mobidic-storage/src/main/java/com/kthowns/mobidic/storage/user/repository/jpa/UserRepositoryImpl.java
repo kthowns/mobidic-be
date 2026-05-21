@@ -23,18 +23,17 @@ public class UserRepositoryImpl implements UserRepository {
                         .build());
         
         updateEntityFromModel(entity, user);
-        UserJpaEntity savedEntity = userJpaEntityRepository.save(entity);
-        return mapToModel(savedEntity);
+        return userJpaEntityRepository.save(entity).toModel();
     }
 
     @Override
     public Optional<User> readById(UUID id) {
-        return userJpaEntityRepository.findById(id).map(this::mapToModel);
+        return userJpaEntityRepository.findById(id).map(UserJpaEntity::toModel);
     }
 
     @Override
     public Optional<User> readByEmail(String email) {
-        return userJpaEntityRepository.findByEmail(email).map(this::mapToModel);
+        return userJpaEntityRepository.findByEmail(email).map(UserJpaEntity::toModel);
     }
 
     @Override
@@ -52,28 +51,14 @@ public class UserRepositoryImpl implements UserRepository {
         return userJpaEntityRepository.existsByNicknameAndIdNot(nickname, id);
     }
 
-    private User mapToModel(UserJpaEntity entity) {
-        return User.builder()
-                .id(entity.getId())
-                .kakaoId(entity.getKakaoId())
-                .email(entity.getEmail())
-                .nickname(entity.getNickname())
-                .password(entity.getPassword())
-                .role(entity.getRole())
-                .isActive(entity.getIsActive())
-                .createdAt(entity.getCreatedAt())
-                .deactivatedAt(entity.getDeactivatedAt())
-                .build();
-    }
-
     private void updateEntityFromModel(UserJpaEntity entity, User model) {
-        entity.setNickname(model.getNickname());
-        entity.setPassword(model.getPassword());
-        entity.setRole(model.getRole());
-        entity.setIsActive(model.getIsActive());
-        entity.setDeactivatedAt(model.getDeactivatedAt());
-        if (model.getKakaoId() != null) {
-            entity.setKakaoId(model.getKakaoId());
-        }
+        entity.update(
+                model.getNickname(),
+                model.getPassword(),
+                model.getRole(),
+                model.getIsActive(),
+                model.getDeactivatedAt(),
+                model.getKakaoId()
+        );
     }
 }

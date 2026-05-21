@@ -37,8 +37,29 @@ public class VocabularyRepositoryImpl implements VocabularyRepository {
     }
 
     @Override
+    public void save(Vocabulary vocabulary) {
+        VocabularyJpaEntity entity = vocabularyJpaRepository.findById(vocabulary.getId())
+                .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_VOCAB));
+
+        entity.update(vocabulary.getTitle(), vocabulary.getDescription());
+        entity.syncWordCount(vocabulary.getWordCount());
+        vocabularyJpaRepository.save(entity);
+    }
+
+    @Override
     public Optional<VocabularyDetail> readDetailById(UUID vocabularyId, UUID userId) {
         return vocabularyJpaRepository.findVocabularyDetail(vocabularyId, userId);
+    }
+
+    @Override
+    public Optional<Vocabulary> findForUpdate(UUID vocabularyId, UUID userId) {
+        return vocabularyJpaRepository.findForUpdate(vocabularyId, userId)
+                .map(VocabularyJpaEntity::toModel);
+    }
+
+    @Override
+    public boolean existsByIdAndUser_Id(UUID vocabularyId, UUID userId) {
+        return vocabularyJpaRepository.existsByIdAndUser_Id(vocabularyId, userId);
     }
 
     @Override
@@ -54,8 +75,7 @@ public class VocabularyRepositoryImpl implements VocabularyRepository {
         VocabularyJpaEntity vocabularyJpaEntity = vocabularyJpaRepository.findForUpdate(vocabularyId, userId)
                 .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_VOCAB));
 
-        vocabularyJpaEntity.setTitle(title);
-        vocabularyJpaEntity.setDescription(description);
+        vocabularyJpaEntity.update(title, description);
     }
 
     @Override

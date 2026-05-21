@@ -1,5 +1,6 @@
 package com.kthowns.mobidic.storage.statistic.jpaentity;
 
+import com.kthowns.mobidic.domain.statistic.model.WordStatistic;
 import com.kthowns.mobidic.storage.word.jpaentity.WordJpaEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -32,12 +33,10 @@ public class WordStatisticJpaEntity {
     @Builder.Default
     private Long incorrectCount = 0L;
 
-    @Setter
     @Column(name = "difficulty", nullable = false)
     @Builder.Default
     private double difficulty = 0.5;
 
-    @Setter
     @Column(name = "accuracy", nullable = false)
     @Builder.Default
     private double accuracy = 0.0;
@@ -52,5 +51,16 @@ public class WordStatisticJpaEntity {
         this.isLearned = isLearned;
         this.difficulty = difficulty;
         this.accuracy = accuracy;
+    }
+
+    public WordStatistic toModel() {
+        return WordStatistic.builder()
+                .wordId(this.word.getId())
+                .correctCount(this.correctCount)
+                .incorrectCount(this.incorrectCount)
+                .isLearned(this.isLearned)
+                .difficulty(this.difficulty)
+                .accuracy(this.accuracy)
+                .build();
     }
 }

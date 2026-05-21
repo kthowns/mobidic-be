@@ -32,12 +32,7 @@ public class WordRepositoryImpl implements WordRepository {
     @Override
     public Optional<Word> readByIdAndUserId(UUID wordId, UUID userId) {
         return wordJpaRepository.findByIdAndVocabulary_User_Id(wordId, userId)
-                .map(entity -> Word.builder()
-                        .id(entity.getId())
-                        .vocabularyId(entity.getVocabulary().getId())
-                        .expression(entity.getExpression())
-                        .createdAt(entity.getCreatedAt())
-                        .build());
+                .map(WordJpaEntity::toModel);
     }
 
     @Override
@@ -50,7 +45,7 @@ public class WordRepositoryImpl implements WordRepository {
         WordJpaEntity wordJpaEntity = wordJpaRepository.findById(word.getId())
                 .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_WORD));
         
-        wordJpaEntity.setExpression(word.getExpression());
+        wordJpaEntity.update(word.getExpression());
         wordJpaRepository.save(wordJpaEntity);
     }
 

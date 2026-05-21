@@ -21,13 +21,13 @@ public class TermRepositoryImpl implements TermRepository {
     @Override
     public Optional<Term> readLatestByType(TermType type) {
         return termJpaRepository.findFirstByTypeAndActiveTrueOrderByCreatedAtDesc(type)
-                .map(this::mapToModel);
+                .map(TermJpaEntity::toModel);
     }
 
     @Override
     public Optional<Term> readByTypeAndVersion(TermType type, String version) {
         return termJpaRepository.findByTypeAndVersion(type, version)
-                .map(this::mapToModel);
+                .map(TermJpaEntity::toModel);
     }
 
     @Override
@@ -59,29 +59,12 @@ public class TermRepositoryImpl implements TermRepository {
     @Override
     public List<SimpleTerm> readActiveTerms() {
         return termJpaRepository.findAllByActiveTrue().stream()
-                .map(entity -> SimpleTerm.builder()
-                        .id(entity.getId())
-                        .type(entity.getType())
-                        .version(entity.getVersion())
-                        .required(entity.isRequired())
-                        .createdAt(entity.getCreatedAt())
-                        .build())
+                .map(TermJpaEntity::toSimpleModel)
                 .collect(Collectors.toList());
     }
 
     @Override
     public boolean existsByTypeAndVersion(TermType type, String version) {
         return termJpaRepository.existsByTypeAndVersion(type, version);
-    }
-
-    private Term mapToModel(TermJpaEntity entity) {
-        return Term.builder()
-                .id(entity.getId())
-                .type(entity.getType())
-                .version(entity.getVersion())
-                .required(entity.isRequired())
-                .content(entity.getContent())
-                .createdAt(entity.getCreatedAt())
-                .build();
     }
 }

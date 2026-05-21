@@ -13,6 +13,8 @@ public interface VocabularyRepository {
 
     void append(Vocabulary vocabulary);
 
+    void save(Vocabulary vocabulary);
+
     Optional<VocabularyDetail> readDetailById(UUID vocabularyId, UUID userId);
 
     Optional<Vocabulary> findForUpdate(UUID vocabularyId, UUID userId);

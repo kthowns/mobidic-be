@@ -1,5 +1,6 @@
 package com.kthowns.mobidic.storage.word.jpaentity;
 
+import com.kthowns.mobidic.domain.word.model.Word;
 import com.kthowns.mobidic.storage.vocabulary.jpaentity.VocabularyJpaEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -38,4 +39,17 @@ public class WordJpaEntity {
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
+
+    public void update(String expression) {
+        this.expression = expression;
+    }
+
+    public Word toModel() {
+        return Word.builder()
+                .id(this.id)
+                .vocabularyId(this.vocabulary.getId())
+                .expression(this.expression)
+                .createdAt(this.createdAt)
+                .build();
+    }
 }

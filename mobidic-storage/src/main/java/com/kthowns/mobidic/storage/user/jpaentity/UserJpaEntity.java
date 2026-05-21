@@ -1,6 +1,7 @@
 package com.kthowns.mobidic.storage.user.jpaentity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.kthowns.mobidic.domain.user.model.User;
 import com.kthowns.mobidic.domain.user.model.UserRole;
 import jakarta.persistence.*;
 import lombok.*;
@@ -29,16 +30,13 @@ public class UserJpaEntity {
     @Column(name = "email", nullable = false, unique = true)
     private String email;
 
-    @Setter
     @Column(name = "nickname", nullable = false)
     private String nickname;
 
-    @Setter
     @Column(name = "password", nullable = false)
     @JsonIgnore
     private String password;
 
-    @Setter
     @Column(name = "is_active", nullable = false)
     @Builder.Default
     private Boolean isActive = true;
@@ -52,7 +50,29 @@ public class UserJpaEntity {
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    @Setter
     @Column(name = "deactivated_at")
     private LocalDateTime deactivatedAt;
+
+    public User toModel() {
+        return User.builder()
+                .id(this.id)
+                .kakaoId(this.kakaoId)
+                .email(this.email)
+                .nickname(this.nickname)
+                .password(this.password)
+                .role(this.role)
+                .isActive(this.isActive)
+                .createdAt(this.createdAt)
+                .deactivatedAt(this.deactivatedAt)
+                .build();
+    }
+
+    public void update(String nickname, String password, UserRole role, Boolean isActive, LocalDateTime deactivatedAt, Long kakaoId) {
+        this.nickname = nickname;
+        this.password = password;
+        this.role = role;
+        this.isActive = isActive;
+        this.deactivatedAt = deactivatedAt;
+        this.kakaoId = kakaoId;
+    }
 }

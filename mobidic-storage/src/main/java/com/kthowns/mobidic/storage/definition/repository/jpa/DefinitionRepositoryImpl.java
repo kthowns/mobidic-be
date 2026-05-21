@@ -33,23 +33,13 @@ public class DefinitionRepositoryImpl implements DefinitionRepository {
     @Override
     public Optional<Definition> readByIdAndUserId(UUID definitionId, UUID userId) {
         return definitionJpaRepository.findByIdAndWord_Vocabulary_User_Id(definitionId, userId)
-                .map(entity -> Definition.builder()
-                        .id(entity.getId())
-                        .wordId(entity.getWord().getId())
-                        .meaning(entity.getMeaning())
-                        .part(entity.getPart())
-                        .build());
+                .map(DefinitionJpaEntity::toModel);
     }
 
     @Override
     public List<Definition> readByWordId(UUID wordId) {
         return definitionJpaRepository.findByWord_Id(wordId).stream()
-                .map(entity -> Definition.builder()
-                        .id(entity.getId())
-                        .wordId(entity.getWord().getId())
-                        .meaning(entity.getMeaning())
-                        .part(entity.getPart())
-                        .build())
+                .map(DefinitionJpaEntity::toModel)
                 .collect(Collectors.toList());
     }
 
@@ -58,8 +48,7 @@ public class DefinitionRepositoryImpl implements DefinitionRepository {
         DefinitionJpaEntity definitionJpaEntity = definitionJpaRepository.findById(definition.getId())
                 .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_DEF));
         
-        definitionJpaEntity.setMeaning(definition.getMeaning());
-        definitionJpaEntity.setPart(definition.getPart());
+        definitionJpaEntity.update(definition.getMeaning(), definition.getPart());
         definitionJpaRepository.save(definitionJpaEntity);
     }
 

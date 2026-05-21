@@ -1,5 +1,7 @@
 package com.kthowns.mobidic.storage.term.jpaentity;
 
+import com.kthowns.mobidic.domain.term.model.SimpleTerm;
+import com.kthowns.mobidic.domain.term.model.Term;
 import com.kthowns.mobidic.domain.term.model.TermType;
 import jakarta.persistence.*;
 import lombok.*;
@@ -43,4 +45,25 @@ public class TermJpaEntity {
     @Column(name = "created_at", nullable = false, updatable = false)
     @CreatedDate
     private LocalDateTime createdAt;
+
+    public Term toModel() {
+        return Term.builder()
+                .id(this.id)
+                .type(this.type)
+                .version(this.version)
+                .required(this.required)
+                .content(this.content)
+                .createdAt(this.createdAt)
+                .build();
+    }
+
+    public SimpleTerm toSimpleModel() {
+        return SimpleTerm.builder()
+                .id(this.id)
+                .type(this.type)
+                .version(this.version)
+                .required(this.required)
+                .createdAt(this.createdAt)
+                .build();
+    }
 }

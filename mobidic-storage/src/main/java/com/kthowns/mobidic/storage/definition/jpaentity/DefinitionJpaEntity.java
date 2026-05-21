@@ -1,5 +1,6 @@
 package com.kthowns.mobidic.storage.definition.jpaentity;
 
+import com.kthowns.mobidic.domain.definition.model.Definition;
 import com.kthowns.mobidic.domain.definition.model.PartOfSpeech;
 import com.kthowns.mobidic.storage.word.jpaentity.WordJpaEntity;
 import jakarta.persistence.*;
@@ -35,4 +36,18 @@ public class DefinitionJpaEntity {
     @Column(name = "part", nullable = false)
     @Enumerated(EnumType.STRING)
     private PartOfSpeech part;
+
+    public void update(String meaning, PartOfSpeech part) {
+        this.meaning = meaning;
+        this.part = part;
+    }
+
+    public Definition toModel() {
+        return Definition.builder()
+                .id(this.id)
+                .wordId(this.word.getId())
+                .meaning(this.meaning)
+                .part(this.part)
+                .build();
+    }
 }

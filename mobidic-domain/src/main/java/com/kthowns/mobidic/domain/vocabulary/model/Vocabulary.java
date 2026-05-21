@@ -19,4 +19,17 @@ public class Vocabulary {
     private String description;
     private Long wordCount;
     private LocalDateTime createdAt;
+
+    public void addWordCount() {
+        if (this.wordCount == null) this.wordCount = 0L;
+        this.wordCount++;
+    }
+
+    public void removeWordCount() {
+        if (this.wordCount == null || this.wordCount <= 0) {
+            this.wordCount = 0L;
+            return;
+        }
+        this.wordCount--;
+    }
 }

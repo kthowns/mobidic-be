@@ -36,43 +36,32 @@ public class WordStatisticRepositoryImpl implements WordStatisticRepository {
     @Override
     public Optional<WordStatistic> readByWordIdAndUserId(UUID wordId, UUID userId) {
         return wordStatisticJpaRepository.findByWordIdAndWord_Vocabulary_User_Id(wordId, userId)
-                .map(this::mapToModel);
+                .map(WordStatisticJpaEntity::toModel);
     }
 
     @Override
     public Optional<WordStatistic> readForUpdate(UUID wordId, UUID userId) {
         return wordStatisticJpaRepository.findForUpdate(wordId, userId)
-                .map(this::mapToModel);
+                .map(WordStatisticJpaEntity::toModel);
     }
 
     @Override
     public List<WordStatistic> readByVocabularyId(UUID vocabularyId) {
         return wordStatisticJpaRepository.findByWord_Vocabulary_Id(vocabularyId).stream()
-                .map(this::mapToModel)
+                .map(WordStatisticJpaEntity::toModel)
                 .collect(Collectors.toList());
     }
 
     @Override
     public List<WordStatistic> readByUserId(UUID userId) {
         return wordStatisticJpaRepository.findByWord_Vocabulary_User_Id(userId).stream()
-                .map(this::mapToModel)
+                .map(WordStatisticJpaEntity::toModel)
                 .collect(Collectors.toList());
     }
 
     @Override
     public Optional<Double> calculateVocabularyLearningRate(UUID vocabularyId, UUID userId) {
         return wordStatisticJpaRepository.getVocabularyLearningRate(vocabularyId, userId);
-    }
-
-    private WordStatistic mapToModel(WordStatisticJpaEntity entity) {
-        return WordStatistic.builder()
-                .wordId(entity.getWordId())
-                .correctCount(entity.getCorrectCount())
-                .incorrectCount(entity.getIncorrectCount())
-                .isLearned(entity.isLearned())
-                .difficulty(entity.getDifficulty())
-                .accuracy(entity.getAccuracy())
-                .build();
     }
 
     private void updateEntityFromModel(WordStatisticJpaEntity entity, WordStatistic model) {
