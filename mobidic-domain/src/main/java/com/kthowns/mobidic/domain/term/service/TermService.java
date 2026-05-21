@@ -8,7 +8,6 @@ import com.kthowns.mobidic.domain.term.model.SimpleTerm;
 import com.kthowns.mobidic.domain.term.model.Term;
 import com.kthowns.mobidic.domain.term.model.TermType;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,7 +27,6 @@ public class TermService {
         return termReader.readTerm(type, version);
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
     @Transactional
     public void addTerm(TermType type, String version, boolean required, String content) {
         termValidator.validateVersionDuplication(type, version);

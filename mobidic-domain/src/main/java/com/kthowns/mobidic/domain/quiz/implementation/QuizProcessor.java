@@ -1,19 +1,19 @@
 package com.kthowns.mobidic.domain.quiz.implementation;
 
-import com.kthowns.mobidic.domain.quiz.service.CryptoService;
+import com.kthowns.mobidic.domain.quiz.client.CryptoClient;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
 public class QuizProcessor {
-    private final CryptoService cryptoService;
+    private final CryptoClient cryptoClient;
 
     public String encryptKey(String key) {
-        return cryptoService.encrypt(key);
+        return cryptoClient.encrypt(key);
     }
 
     public String decryptKey(String token) {
-        return cryptoService.decrypt(token);
+        return cryptoClient.decrypt(token);
     }
 }
