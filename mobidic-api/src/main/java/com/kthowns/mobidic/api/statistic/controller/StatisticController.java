@@ -52,7 +52,7 @@ public class StatisticController {
             @AuthenticationPrincipal UserJpaEntity userJpaEntity
     ) {
         return GeneralResponse.toResponseEntity(OK,
-                statisticService.getWordStatisticById(userJpaEntity, UUID.fromString(wordId)));
+                statisticService.getWordStatisticById(userJpaEntity.getId(), UUID.fromString(wordId)));
     }
 
     @Operation(
@@ -77,7 +77,7 @@ public class StatisticController {
             @AuthenticationPrincipal UserJpaEntity userJpaEntity
     ) {
         return GeneralResponse.toResponseEntity(OK,
-                statisticService.getVocabLearningRate(userJpaEntity, UUID.fromString(vocabularyId)));
+                statisticService.getVocabLearningRate(userJpaEntity.getId(), UUID.fromString(vocabularyId)));
     }
 
     @Operation(
@@ -102,7 +102,7 @@ public class StatisticController {
             @AuthenticationPrincipal UserJpaEntity userJpaEntity
     ) {
         return GeneralResponse.toResponseEntity(OK,
-                statisticService.getAvgAccuracyByVocab(userJpaEntity, UUID.fromString(vocabularyId)));
+                statisticService.getAvgAccuracyByVocab(userJpaEntity.getId(), UUID.fromString(vocabularyId)));
     }
 
     @Operation(
@@ -126,7 +126,7 @@ public class StatisticController {
             @AuthenticationPrincipal UserJpaEntity userJpaEntity
     ) {
         return GeneralResponse.toResponseEntity(OK,
-                statisticService.getTotalAvgAccuracy(userJpaEntity));
+                statisticService.getTotalAvgAccuracy(userJpaEntity.getId()));
     }
 
     @Operation(
@@ -150,7 +150,7 @@ public class StatisticController {
             @PathVariable String wordId,
             @AuthenticationPrincipal UserJpaEntity userJpaEntity
     ) {
-        statisticService.toggleLearnedByWordId(userJpaEntity, UUID.fromString(wordId));
+        statisticService.toggleLearnedByWordId(userJpaEntity.getId(), UUID.fromString(wordId));
 
         return GeneralResponse.toResponseEntity(OK, null);
     }

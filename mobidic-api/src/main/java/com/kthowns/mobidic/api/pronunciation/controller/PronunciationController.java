@@ -62,6 +62,6 @@ public class PronunciationController {
         }
 
         return GeneralResponse.toResponseEntity(OK,
-                pronunciationService.ratePronunciation(userJpaEntity, wordId, file));
+                pronunciationService.ratePronunciation(userJpaEntity.getId(), wordId, file));
     }
 }

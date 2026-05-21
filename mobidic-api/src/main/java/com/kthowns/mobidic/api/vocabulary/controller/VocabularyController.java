@@ -58,7 +58,11 @@ public class VocabularyController {
             @AuthenticationPrincipal UserJpaEntity userJpaEntity
     ) {
         return GeneralResponse.toResponseEntity(OK,
-                vocabularyService.addVocabulary(userJpaEntity, request));
+                vocabularyService.addVocabulary(
+                        userJpaEntity.getId(),
+                        request.getTitle(),
+                        request.getDescription()
+                ));
     }
 
     @Operation(
@@ -82,7 +86,7 @@ public class VocabularyController {
             @AuthenticationPrincipal UserJpaEntity userJpaEntity
     ) {
         return GeneralResponse.toResponseEntity(OK,
-                vocabularyService.getVocabularyDetails(userJpaEntity));
+                vocabularyService.getVocabularyDetails(userJpaEntity.getId()));
     }
 
     @Operation(
@@ -107,7 +111,7 @@ public class VocabularyController {
             @AuthenticationPrincipal UserJpaEntity userJpaEntity
     ) {
         return GeneralResponse.toResponseEntity(OK,
-                vocabularyService.getVocabularyById(userJpaEntity, UUID.fromString(vocabularyId)));
+                vocabularyService.getVocabularyById(userJpaEntity.getId(), UUID.fromString(vocabularyId)));
     }
 
     @Operation(
@@ -135,7 +139,12 @@ public class VocabularyController {
             @AuthenticationPrincipal UserJpaEntity userJpaEntity
     ) {
         return GeneralResponse.toResponseEntity(OK,
-                vocabularyService.updateVocabulary(userJpaEntity, UUID.fromString(vocabularyId), request));
+                vocabularyService.updateVocabulary(
+                        userJpaEntity.getId(),
+                        UUID.fromString(vocabularyId),
+                        request.getTitle(),
+                        request.getDescription()
+                ));
     }
 
     @Operation(
@@ -155,11 +164,11 @@ public class VocabularyController {
                     content = @Content(schema = @Schema(hidden = true)))
     })
     @DeleteMapping("/{vocabularyId}")
-    public ResponseEntity<GeneralResponse<Vocabulary>> deleteVocabulary(
+    public ResponseEntity<GeneralResponse<Void>> deleteVocabulary(
             @PathVariable String vocabularyId,
             @AuthenticationPrincipal UserJpaEntity userJpaEntity
     ) {
-        return GeneralResponse.toResponseEntity(OK,
-                vocabularyService.deleteVocab(userJpaEntity, UUID.fromString(vocabularyId)));
+        vocabularyService.deleteVocab(userJpaEntity.getId(), UUID.fromString(vocabularyId));
+        return GeneralResponse.toResponseEntity(OK, null);
     }
 }

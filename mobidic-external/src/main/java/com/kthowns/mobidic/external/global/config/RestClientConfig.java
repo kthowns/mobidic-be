@@ -1,4 +1,4 @@
-package com.kthowns.mobidic.api.global.config;
+package com.kthowns.mobidic.external.global.config;
 
 
 import org.springframework.context.annotation.Bean;

@@ -56,7 +56,7 @@ public class WordController {
             @AuthenticationPrincipal UserJpaEntity userJpaEntity
     ) {
         return GeneralResponse.toResponseEntity(OK,
-                wordService.getWordDetailsByVocabularyId(userJpaEntity, UUID.fromString(vocabularyId)));
+                wordService.getWordDetailsByVocabularyId(userJpaEntity.getId(), UUID.fromString(vocabularyId)));
     }
 
     @Operation(
@@ -78,13 +78,13 @@ public class WordController {
                     content = @Content(schema = @Schema(hidden = true)))
     })
     @PostMapping("/vocabularies/{vocabularyId}/word")
-    public ResponseEntity<GeneralResponse<Word>> addWord(
+    public ResponseEntity<GeneralResponse<Void>> addWord(
             @PathVariable("vocabularyId") String vocabularyId,
             @RequestBody @Valid AddWordRequestDto request,
             @AuthenticationPrincipal UserJpaEntity userJpaEntity
     ) {
-        return GeneralResponse.toResponseEntity(OK,
-                wordService.addWord(userJpaEntity, UUID.fromString(vocabularyId), request));
+        wordService.addWord(userJpaEntity.getId(), UUID.fromString(vocabularyId), request.getExpression());
+        return GeneralResponse.toResponseEntity(OK, null);
     }
 
     @Operation(
@@ -106,13 +106,13 @@ public class WordController {
                     content = @Content(schema = @Schema(hidden = true)))
     })
     @PatchMapping("/words/{wordId}")
-    public ResponseEntity<GeneralResponse<Word>> updateWord(
+    public ResponseEntity<GeneralResponse<Void>> updateWord(
             @PathVariable("wordId") String wordId,
             @RequestBody @Valid AddWordRequestDto request,
             @AuthenticationPrincipal UserJpaEntity userJpaEntity
     ) {
-        return GeneralResponse.toResponseEntity(OK,
-                wordService.updateWord(userJpaEntity, UUID.fromString(wordId), request));
+        wordService.updateWord(userJpaEntity.getId(), UUID.fromString(wordId), request.getExpression());
+        return GeneralResponse.toResponseEntity(OK, null);
     }
 
     @Operation(
@@ -132,11 +132,11 @@ public class WordController {
                     content = @Content(schema = @Schema(hidden = true)))
     })
     @DeleteMapping("/words/{wordId}")
-    public ResponseEntity<GeneralResponse<Word>> deleteWord(
+    public ResponseEntity<GeneralResponse<Void>> deleteWord(
             @PathVariable String wordId,
             @AuthenticationPrincipal UserJpaEntity userJpaEntity
     ) {
-        return GeneralResponse.toResponseEntity(OK,
-                wordService.deleteWord(userJpaEntity, UUID.fromString(wordId)));
+        wordService.deleteWord(userJpaEntity.getId(), UUID.fromString(wordId));
+        return GeneralResponse.toResponseEntity(OK, null);
     }
 }

@@ -1,4 +1,4 @@
-package com.kthowns.mobidic.api.global.config;
+package com.kthowns.mobidic.storage.global.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;

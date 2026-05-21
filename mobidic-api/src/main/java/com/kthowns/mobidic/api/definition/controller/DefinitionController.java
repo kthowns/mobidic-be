@@ -52,10 +52,10 @@ public class DefinitionController {
     @GetMapping("/words/{wordId}/definitions")
     public ResponseEntity<GeneralResponse<List<Definition>>> getDefinitionsByWordId(
             @PathVariable String wordId,
-            @AuthenticationPrincipal AuthUser authUser
+            @AuthenticationPrincipal UserJpaEntity userJpaEntity
     ) {
         return GeneralResponse.toResponseEntity(GeneralResponseCode.OK,
-                definitionService.getDefinitionsByWordId(userJpaEntity, UUID.fromString(wordId)));
+                definitionService.getDefinitionsByWordId(userJpaEntity.getId(), UUID.fromString(wordId)));
     }
 
     @Operation(
@@ -75,13 +75,13 @@ public class DefinitionController {
                     content = @Content(schema = @Schema(hidden = true)))
     })
     @PostMapping("/words/{wordId}/definition")
-    public ResponseEntity<GeneralResponse<Definition>> addDefinition(
+    public ResponseEntity<GeneralResponse<Void>> addDefinition(
             @PathVariable String wordId,
             @RequestBody @Valid AddDefinitionRequestDto request,
             @AuthenticationPrincipal UserJpaEntity userJpaEntity
     ) {
-        return GeneralResponse.toResponseEntity(GeneralResponseCode.OK,
-                definitionService.addDefinition(userJpaEntity, UUID.fromString(wordId), request));
+        definitionService.addDefinition(userJpaEntity.getId(), UUID.fromString(wordId), request.getMeaning(), request.getPart());
+        return GeneralResponse.toResponseEntity(GeneralResponseCode.OK, null);
     }
 
     @Operation(
@@ -103,13 +103,13 @@ public class DefinitionController {
                     content = @Content(schema = @Schema(hidden = true)))
     })
     @PatchMapping("/definitions/{definitionId}")
-    public ResponseEntity<GeneralResponse<Definition>> updateDefinition(
+    public ResponseEntity<GeneralResponse<Void>> updateDefinition(
             @PathVariable String definitionId,
             @RequestBody @Valid AddDefinitionRequestDto request,
             @AuthenticationPrincipal UserJpaEntity userJpaEntity
     ) {
-        return GeneralResponse.toResponseEntity(GeneralResponseCode.OK,
-                definitionService.updateDefinition(userJpaEntity, UUID.fromString(definitionId), request));
+        definitionService.updateDefinition(userJpaEntity.getId(), UUID.fromString(definitionId), request.getMeaning(), request.getPart());
+        return GeneralResponse.toResponseEntity(GeneralResponseCode.OK, null);
     }
 
     @Operation(
@@ -128,11 +128,11 @@ public class DefinitionController {
                     content = @Content(schema = @Schema(hidden = true)))
     })
     @DeleteMapping("/definitions/{definitionId}")
-    public ResponseEntity<GeneralResponse<Definition>> deleteDefinition(
+    public ResponseEntity<GeneralResponse<Void>> deleteDefinition(
             @PathVariable String definitionId,
             @AuthenticationPrincipal UserJpaEntity userJpaEntity
     ) {
-        return GeneralResponse.toResponseEntity(GeneralResponseCode.OK,
-                definitionService.deleteDefinition(userJpaEntity, UUID.fromString(definitionId)));
+        definitionService.deleteDefinition(userJpaEntity.getId(), UUID.fromString(definitionId));
+        return GeneralResponse.toResponseEntity(GeneralResponseCode.OK, null);
     }
 }

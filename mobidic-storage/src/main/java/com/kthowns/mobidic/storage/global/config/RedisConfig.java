@@ -1,4 +1,4 @@
-package com.kthowns.mobidic.api.global.config;
+package com.kthowns.mobidic.storage.global.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
