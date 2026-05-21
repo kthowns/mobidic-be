@@ -1,10 +1,10 @@
 package com.kthowns.mobidic.api.service;
 
 import com.kthowns.mobidic.api.config.ServiceTestConfig;
-import com.kthowns.mobidic.storage.dictionary.jpaentity.VocabularyJpaEntity;
-import com.kthowns.mobidic.storage.dictionary.jpaentity.WordJpaEntity;
-import com.kthowns.mobidic.storage.dictionary.jparepository.VocabularyJpaRepository;
-import com.kthowns.mobidic.storage.dictionary.jparepository.WordJpaRepository;
+import com.kthowns.mobidic.storage.vocabulary.jpaentity.VocabularyJpaEntity;
+import com.kthowns.mobidic.storage.word.jpaentity.WordJpaEntity;
+import com.kthowns.mobidic.storage.vocabulary.jparepository.VocabularyJpaRepository;
+import com.kthowns.mobidic.storage.word.jparepository.WordJpaRepository;
 import com.kthowns.mobidic.domain.statistic.model.WordStatistic;
 import com.kthowns.mobidic.storage.statistic.jpaentity.WordStatisticJpaEntity;
 import com.kthowns.mobidic.storage.statistic.jparepository.WordStatisticJpaRepository;

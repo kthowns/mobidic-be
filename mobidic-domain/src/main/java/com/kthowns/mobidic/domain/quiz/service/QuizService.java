@@ -3,7 +3,7 @@ package com.kthowns.mobidic.domain.quiz.service;
 import com.kthowns.mobidic.common.code.GeneralResponseCode;
 import com.kthowns.mobidic.common.exception.ApiException;
 import com.kthowns.mobidic.api.dictionary.dto.response.WordDetail;
-import com.kthowns.mobidic.domain.dictionary.service.WordService;
+import com.kthowns.mobidic.domain.word.service.WordService;
 import com.kthowns.mobidic.api.quiz.dto.response.QuizDto;
 import com.kthowns.mobidic.api.quiz.dto.request.QuizRateRequest;
 import com.kthowns.mobidic.api.quiz.dto.response.QuizRateResponse;

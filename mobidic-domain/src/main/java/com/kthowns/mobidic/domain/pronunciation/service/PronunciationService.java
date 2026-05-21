@@ -2,8 +2,8 @@ package com.kthowns.mobidic.domain.pronunciation.service;
 
 import com.kthowns.mobidic.common.code.GeneralResponseCode;
 import com.kthowns.mobidic.common.exception.ApiException;
-import com.kthowns.mobidic.api.dictionary.dto.response.WordDto;
-import com.kthowns.mobidic.domain.dictionary.service.WordService;
+import com.kthowns.mobidic.api.dictionary.dto.response.Word;
+import com.kthowns.mobidic.domain.word.service.WordService;
 import com.kthowns.mobidic.api.pronunciation.dto.response.SttResponse;
 import com.kthowns.mobidic.api.user.entity.User;
 import lombok.NonNull;
@@ -31,7 +31,7 @@ public class PronunciationService {
     private String flaskServerBaseUrl;
 
     public Double ratePronunciation(User user, UUID wordId, MultipartFile multipartFile) {
-        WordDto word = wordService.getWordById(user, wordId);
+        Word word = wordService.getWordById(user, wordId);
 
         MultipartBodyBuilder builder = new MultipartBodyBuilder();
         builder.part("file", multipartFile.getResource());

@@ -1,11 +1,11 @@
 package com.kthowns.mobidic.api.config;
 
-import com.kthowns.mobidic.storage.dictionary.jparepository.DefinitionJpaRepository;
-import com.kthowns.mobidic.storage.dictionary.jparepository.VocabularyJpaRepository;
-import com.kthowns.mobidic.storage.dictionary.jparepository.WordJpaRepository;
-import com.kthowns.mobidic.domain.dictionary.service.DefinitionService;
-import com.kthowns.mobidic.domain.dictionary.service.VocabularyService;
-import com.kthowns.mobidic.domain.dictionary.service.WordService;
+import com.kthowns.mobidic.storage.definition.jparepository.DefinitionJpaRepository;
+import com.kthowns.mobidic.storage.vocabulary.jparepository.VocabularyJpaRepository;
+import com.kthowns.mobidic.storage.word.jparepository.WordJpaRepository;
+import com.kthowns.mobidic.domain.definition.service.DefinitionService;
+import com.kthowns.mobidic.domain.vocabulary.service.VocabularyService;
+import com.kthowns.mobidic.domain.word.service.WordService;
 import com.kthowns.mobidic.storage.preset.jparepository.PresetVocabularyJpaRepository;
 import com.kthowns.mobidic.domain.preset.service.PresetVocabularyService;
 import com.kthowns.mobidic.domain.quiz.service.CryptoService;

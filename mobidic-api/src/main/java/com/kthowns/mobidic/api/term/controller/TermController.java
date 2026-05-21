@@ -2,7 +2,7 @@ package com.kthowns.mobidic.api.term.controller;
 
 import com.kthowns.mobidic.common.dto.GeneralResponse;
 import com.kthowns.mobidic.api.term.dto.request.AddTermRequest;
-import com.kthowns.mobidic.api.term.dto.common.TermSimpleDto;
+import com.kthowns.mobidic.domain.term.model.TermSimpleDto;
 import com.kthowns.mobidic.domain.term.service.TermService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;

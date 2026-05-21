@@ -50,7 +50,7 @@
     - **결합도 분리:** 클라이언트 응답에는 정답을 제외한 토큰과 문제 정보만 포함하여 채점 로직과의 기밀성 유지
     - **Simple Factory Method 패턴:** OX 퀴즈, 빈칸 채우기 등 다양한 퀴즈 형태에 유연하게 대응할 수 있도록 설계
 - **결과:** 퀴즈 데이터의 보안성을 강화하고 새로운 퀴즈 유형 추가 시 기존 코드 수정 최소화
-<img width="600" height="300" alt="image" src="https://github.com/user-attachments/assets/2de8d660-80da-45cb-8027-8f82c8dd41a2" />
+<img width="600" height="300" alt="image" src="https://github.com/userJpaEntity-attachments/assets/2de8d660-80da-45cb-8027-8f82c8dd41a2" />
 
 ### 3. Whisper STT 기반 발음 체크 시스템
 - **구현 로직:** 사용자 음성 데이터를 Flask 서버로 전송 ➡️ Whisper 모델(`base.en`)로 텍스트 변환 ➡️ **Damerau-Levenshtein Distance** 알고리즘으로 유사도 비교 및 점수 산출

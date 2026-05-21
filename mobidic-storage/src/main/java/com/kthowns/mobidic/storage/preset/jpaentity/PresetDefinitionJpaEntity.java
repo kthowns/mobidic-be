@@ -1,6 +1,6 @@
 package com.kthowns.mobidic.storage.preset.jpaentity;
 
-import com.kthowns.mobidic.domain.dictionary.model.PartOfSpeech;
+import com.kthowns.mobidic.domain.definition.model.PartOfSpeech;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

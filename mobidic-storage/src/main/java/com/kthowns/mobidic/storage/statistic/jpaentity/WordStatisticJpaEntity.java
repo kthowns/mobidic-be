@@ -1,6 +1,6 @@
 package com.kthowns.mobidic.storage.statistic.jpaentity;
 
-import com.kthowns.mobidic.storage.dictionary.jpaentity.WordJpaEntity;
+import com.kthowns.mobidic.storage.word.jpaentity.WordJpaEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.OnDelete;

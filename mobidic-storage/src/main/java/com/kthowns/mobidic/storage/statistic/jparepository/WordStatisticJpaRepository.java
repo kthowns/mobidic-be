@@ -1,6 +1,6 @@
 package com.kthowns.mobidic.storage.statistic.jparepository;
 
-import com.kthowns.mobidic.storage.dictionary.jpaentity.VocabularyJpaEntity;
+import com.kthowns.mobidic.storage.vocabulary.jpaentity.VocabularyJpaEntity;
 import com.kthowns.mobidic.storage.statistic.jpaentity.WordStatisticJpaEntity;
 import io.lettuce.core.dynamic.annotation.Param;
 import jakarta.persistence.LockModeType;

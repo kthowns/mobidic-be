@@ -1,12 +1,12 @@
 package com.kthowns.mobidic.api.service;
 
 import com.kthowns.mobidic.api.config.ServiceTestConfig;
-import com.kthowns.mobidic.domain.dictionary.model.Definition;
-import com.kthowns.mobidic.domain.dictionary.model.WordDetail;
-import com.kthowns.mobidic.domain.dictionary.service.DefinitionService;
-import com.kthowns.mobidic.domain.dictionary.service.VocabularyService;
-import com.kthowns.mobidic.domain.dictionary.service.WordService;
-import com.kthowns.mobidic.domain.dictionary.model.PartOfSpeech;
+import com.kthowns.mobidic.domain.definition.model.Definition;
+import com.kthowns.mobidic.domain.word.model.WordDetail;
+import com.kthowns.mobidic.domain.definition.service.DefinitionService;
+import com.kthowns.mobidic.domain.vocabulary.service.VocabularyService;
+import com.kthowns.mobidic.domain.word.service.WordService;
+import com.kthowns.mobidic.domain.definition.model.PartOfSpeech;
 import com.kthowns.mobidic.domain.quiz.model.QuizDto;
 import com.kthowns.mobidic.api.quiz.dto.request.QuizRateRequest;
 import com.kthowns.mobidic.api.quiz.dto.response.QuizRateResponse;

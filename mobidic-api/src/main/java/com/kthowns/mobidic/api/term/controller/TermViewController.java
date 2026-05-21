@@ -1,6 +1,6 @@
 package com.kthowns.mobidic.api.term.controller;
 
-import com.kthowns.mobidic.api.term.dto.common.TermDto;
+import com.kthowns.mobidic.domain.term.model.Term;
 import com.kthowns.mobidic.domain.term.service.TermService;
 import com.kthowns.mobidic.domain.term.model.TermType;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +21,7 @@ public class TermViewController {
             @RequestParam(required = false) String version,
             Model model
     ) {
-        TermDto term = termService.getTerm(TermType.valueOf(type.toUpperCase()), version);
+        Term term = termService.getTerm(TermType.valueOf(type.toUpperCase()), version);
         model.addAttribute("term", term);
 
         return "term/term";

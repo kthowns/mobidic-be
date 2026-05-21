@@ -1,19 +1,11 @@
 package com.kthowns.mobidic.domain.user.service;
 
-import com.kthowns.mobidic.api.auth.dto.response.KakaoUserInfo;
-import com.kthowns.mobidic.domain.auth.service.AuthService;
 import com.kthowns.mobidic.common.code.AuthResponseCode;
 import com.kthowns.mobidic.common.code.GeneralResponseCode;
 import com.kthowns.mobidic.common.exception.ApiException;
-import com.kthowns.mobidic.security.jwt.JwtBlacklistService;
-import com.kthowns.mobidic.api.user.dto.request.SignUpRequestDto;
-import com.kthowns.mobidic.api.user.dto.request.UpdateUserRequestDto;
-import com.kthowns.mobidic.api.user.dto.response.UserDto;
-import com.kthowns.mobidic.storage.user.jpaentity.User;
-import com.kthowns.mobidic.api.user.repository.UserRepository;
+import com.kthowns.mobidic.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,7 +18,6 @@ import java.util.UUID;
 public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final JwtBlacklistService jwtBlacklistService;
     private final AuthService authService;
 
     @Transactional

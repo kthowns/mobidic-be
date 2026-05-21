@@ -4,7 +4,7 @@ import com.kthowns.mobidic.api.user.dto.request.SignUpRequestDto;
 import com.kthowns.mobidic.common.dto.ErrorResponse;
 import com.kthowns.mobidic.common.dto.GeneralResponse;
 import com.kthowns.mobidic.api.user.dto.request.UpdateUserRequestDto;
-import com.kthowns.mobidic.api.user.dto.response.UserDto;
+import com.kthowns.mobidic.domain.user.model.UserDto;
 import com.kthowns.mobidic.storage.user.jpaentity.UserJpaEntity;
 import com.kthowns.mobidic.domain.user.facade.UserFacade;
 import com.kthowns.mobidic.domain.user.service.UserService;

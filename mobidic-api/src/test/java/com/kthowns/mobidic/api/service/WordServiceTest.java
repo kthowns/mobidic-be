@@ -1,15 +1,15 @@
 package com.kthowns.mobidic.api.service;
 
 import com.kthowns.mobidic.api.config.ServiceTestConfig;
-import com.kthowns.mobidic.api.dictionary.dto.request.AddWordRequestDto;
-import com.kthowns.mobidic.domain.dictionary.model.WordDetail;
-import com.kthowns.mobidic.domain.dictionary.model.Word;
-import com.kthowns.mobidic.storage.dictionary.jpaentity.VocabularyJpaEntity;
-import com.kthowns.mobidic.storage.dictionary.jpaentity.WordJpaEntity;
-import com.kthowns.mobidic.storage.dictionary.jparepository.DefinitionJpaRepository;
-import com.kthowns.mobidic.storage.dictionary.jparepository.VocabularyJpaRepository;
-import com.kthowns.mobidic.storage.dictionary.jparepository.WordJpaRepository;
-import com.kthowns.mobidic.domain.dictionary.service.WordService;
+import com.kthowns.mobidic.api.word.dto.request.AddWordRequestDto;
+import com.kthowns.mobidic.domain.word.model.WordDetail;
+import com.kthowns.mobidic.domain.word.model.Word;
+import com.kthowns.mobidic.storage.vocabulary.jpaentity.VocabularyJpaEntity;
+import com.kthowns.mobidic.storage.word.jpaentity.WordJpaEntity;
+import com.kthowns.mobidic.storage.definition.jparepository.DefinitionJpaRepository;
+import com.kthowns.mobidic.storage.vocabulary.jparepository.VocabularyJpaRepository;
+import com.kthowns.mobidic.storage.word.jparepository.WordJpaRepository;
+import com.kthowns.mobidic.domain.word.service.WordService;
 import com.kthowns.mobidic.storage.statistic.jparepository.WordStatisticJpaRepository;
 import com.kthowns.mobidic.storage.user.jpaentity.UserJpaEntity;
 import org.junit.jupiter.api.DisplayName;
