@@ -67,4 +67,9 @@ public class VocabularyRepositoryImpl implements VocabularyRepository {
     public boolean existsByTitleAndIdNotAndUserId(String title, UUID vocabularyId, UUID userId) {
         return vocabularyJpaRepository.existsByTitleAndIdNotAndUser_Id(title, vocabularyId, userId);
     }
+
+    @Override
+    public boolean existsByUserId(UUID userId) {
+        return vocabularyJpaRepository.existsByUser_Id(userId);
+    }
 }

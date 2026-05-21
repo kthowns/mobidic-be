@@ -26,4 +26,6 @@ public interface VocabularyRepository {
     boolean existsByTitleAndUserId(String title, UUID userId);
 
     boolean existsByTitleAndIdNotAndUserId(String title, UUID vocabularyId, UUID userId);
+
+    boolean existsByUserId(UUID userId);
 }

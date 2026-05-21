@@ -24,4 +24,6 @@ public interface VocabularyJpaRepository extends JpaRepository<VocabularyJpaEnti
     boolean existsByTitleAndUser_Id(String title, UUID userId);
 
     boolean existsByTitleAndIdNotAndUser_Id(String title, UUID vocabularyId, UUID userId);
+
+    boolean existsByUser_Id(UUID userId);
 }
