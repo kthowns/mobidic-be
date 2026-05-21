@@ -1,7 +1,7 @@
 package com.kthowns.mobidic.domain.quiz.util;
 
-import com.kthowns.mobidic.api.dictionary.dto.response.DefinitionDto;
-import com.kthowns.mobidic.api.dictionary.dto.response.WordDetail;
+import com.kthowns.mobidic.domain.definition.model.Definition;
+import com.kthowns.mobidic.domain.word.model.WordDetail;
 import com.kthowns.mobidic.domain.quiz.model.Quiz;
 
 import java.util.ArrayList;
@@ -34,7 +34,7 @@ public class OXQuizGenerator extends QuizGenerator {
             String answer = "0";
 
             List<String> defs = wordDetails.get(i).definitions().stream()
-                    .map(DefinitionDto::getMeaning).toList();
+                    .map(Definition::getMeaning).toList();
 
             if (defs.contains(options.get(i))) {
                 answer = "1";
