@@ -63,6 +63,7 @@ public class TermJpaEntity {
                 .type(this.type)
                 .version(this.version)
                 .required(this.required)
+                .contentUri("/terms/" + this.type.name().toLowerCase() + "?version=" + this.version)
                 .createdAt(this.createdAt)
                 .build();
     }

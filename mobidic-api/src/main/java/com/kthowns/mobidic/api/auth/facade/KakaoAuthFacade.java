@@ -2,11 +2,12 @@ package com.kthowns.mobidic.api.auth.facade;
 
 import com.kthowns.mobidic.api.auth.dto.response.KakaoUserInfo;
 import com.kthowns.mobidic.api.auth.dto.response.LoginResponse;
+import com.kthowns.mobidic.api.auth.model.AuthUser;
 import com.kthowns.mobidic.api.auth.service.KakaoAuthService;
 import com.kthowns.mobidic.api.security.jwt.JwtProvider;
 import com.kthowns.mobidic.domain.preset.service.PresetVocabularyService;
+import com.kthowns.mobidic.domain.user.model.User;
 import com.kthowns.mobidic.domain.user.service.UserService;
-import com.kthowns.mobidic.storage.user.jpaentity.UserJpaEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -24,14 +25,14 @@ public class KakaoAuthFacade {
         String accessToken = kakaoAuthService.getKakaoAccessToken(authCode, isDev, platform);
         KakaoUserInfo kakaoUserInfo = kakaoAuthService.getKakaoUserInfo(accessToken);
 
-        UserJpaEntity userJpaEntity = transactionTemplate.execute((status) -> getOrCreateUser(kakaoUserInfo));
+        AuthUser authUser = transactionTemplate.execute((status) -> getOrCreateUser(kakaoUserInfo));
 
         return LoginResponse.builder()
-                .accessToken(jwtProvider.generateToken(userJpaEntity.getId(), userJpaEntity.getRole().name()))
+                .accessToken(jwtProvider.generateToken(authUser.getId(), authUser.getRole()))
                 .build();
     }
 
-    private UserJpaEntity getOrCreateUser(KakaoUserInfo kakaoUserInfo) {
+    private AuthUser getOrCreateUser(KakaoUserInfo kakaoUserInfo) {
         return kakaoAuthService.getUserByKakaoId(kakaoUserInfo.getId())
                 .orElseGet(() -> {
                     User user = userService.registerKakaoUser(
