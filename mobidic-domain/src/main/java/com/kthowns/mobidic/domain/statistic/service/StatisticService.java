@@ -1,15 +1,12 @@
 package com.kthowns.mobidic.domain.statistic.service;
 
+import com.kthowns.mobidic.domain.statistic.implementation.StatisticCalculator;
+import com.kthowns.mobidic.domain.statistic.implementation.StatisticReader;
+import com.kthowns.mobidic.domain.statistic.implementation.StatisticUpdater;
+import com.kthowns.mobidic.domain.statistic.model.WordStatistic;
+import com.kthowns.mobidic.domain.vocabulary.repository.VocabularyRepository;
 import com.kthowns.mobidic.common.code.GeneralResponseCode;
 import com.kthowns.mobidic.common.exception.ApiException;
-import com.kthowns.mobidic.storage.dictionary.jpaentity.Vocabulary;
-import com.kthowns.mobidic.storage.dictionary.jparepository.VocabularyRepository;
-import com.kthowns.mobidic.storage.dictionary.jparepository.WordRepository;
-import com.kthowns.mobidic.api.statistic.dto.response.StatisticDto;
-import com.kthowns.mobidic.storage.statistic.jpaentity.WordStatistic;
-import com.kthowns.mobidic.storage.statistic.jparepository.WordStatisticRepository;
-import com.kthowns.mobidic.domain.statistic.util.DifficultyUtil;
-import com.kthowns.mobidic.api.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -22,77 +19,59 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Slf4j
 public class StatisticService {
-    private final WordRepository wordRepository;
-    private final WordStatisticRepository wordStatisticRepository;
+    private final StatisticReader statisticReader;
+    private final StatisticUpdater statisticUpdater;
+    private final StatisticCalculator statisticCalculator;
     private final VocabularyRepository vocabularyRepository;
-    private final DifficultyUtil difficultyUtil;
 
     @Transactional(readOnly = true)
-    public StatisticDto getWordStatisticById(User user, UUID wordId) {
-        WordStatistic wordStatistic = wordStatisticRepository
-                .findByWordIdAndWord_Vocabulary_User_Id(wordId, user.getId())
-                .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_STAT));
-
-        return StatisticDto.fromEntity(wordStatistic);
+    public WordStatistic getWordStatisticById(UUID userId, UUID wordId) {
+        return statisticReader.readByWordIdAndUserId(wordId, userId);
     }
 
     @Transactional(readOnly = true)
-    public Double getVocabLearningRate(User user, UUID vocabId) {
-        Vocabulary vocabulary = vocabularyRepository
-                .findByIdAndUser_Id(vocabId, user.getId())
-                .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_VOCAB));
-
-        if (wordRepository.countByVocabulary(vocabulary) < 1) {
-            return 0.0;
+    public Double getVocabLearningRate(UUID userId, UUID vocabId) {
+        if (!vocabularyRepository.existsByIdAndUser_Id(vocabId, userId)) {
+            throw new ApiException(GeneralResponseCode.NO_VOCAB);
         }
 
-        return wordStatisticRepository.getVocabularyLearningRate(vocabulary)
-                .orElseThrow(() -> new ApiException(GeneralResponseCode.INTERNAL_SERVER_ERROR));
+        return statisticReader.readVocabLearningRate(vocabId, userId);
     }
 
     @Transactional
-    public void toggleLearnedByWordId(User user, UUID wordId) {
-        WordStatistic wordStatistic = wordStatisticRepository
-                .findForUpdate(wordId, user.getId())
-                .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_STAT));
-
-        wordStatistic.toggleIsLearned();
+    public void toggleLearnedByWordId(UUID userId, UUID wordId) {
+        WordStatistic wordStatistic = statisticReader.readForUpdate(wordId, userId);
+        wordStatistic.setLearned(!wordStatistic.isLearned());
+        statisticUpdater.updateStatistic(wordStatistic);
     }
 
     @Transactional
-    public void increaseCorrectCount(User user, UUID wordId) {
-        WordStatistic wordStatistic = wordStatisticRepository
-                .findForUpdate(wordId, user.getId())
-                .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_STAT));
-
-        wordStatistic.increaseCorrectCount();
-        setDifficultyAndAccuracy(wordStatistic);
+    public void increaseCorrectCount(UUID userId, UUID wordId) {
+        WordStatistic wordStatistic = statisticReader.readForUpdate(wordId, userId);
+        wordStatistic.setCorrectCount(wordStatistic.getCorrectCount() + 1);
+        statisticUpdater.updateStatistic(wordStatistic);
     }
 
     @Transactional
-    public void increaseIncorrectCount(User user, UUID wordId) {
-        WordStatistic wordStatistic = wordStatisticRepository
-                .findForUpdate(wordId, user.getId())
-                .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_STAT));
-
-        wordStatistic.increaseIncorrectCount();
-        setDifficultyAndAccuracy(wordStatistic);
+    public void increaseIncorrectCount(UUID userId, UUID wordId) {
+        WordStatistic wordStatistic = statisticReader.readForUpdate(wordId, userId);
+        wordStatistic.setIncorrectCount(wordStatistic.getIncorrectCount() + 1);
+        statisticUpdater.updateStatistic(wordStatistic);
     }
 
     @Transactional(readOnly = true)
-    public double getAvgAccuracyByVocab(User user, UUID vocabularyId) {
-        vocabularyRepository.findByIdAndUser_Id(vocabularyId, user.getId())
-                .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_VOCAB));
+    public double getAvgAccuracyByVocab(UUID userId, UUID vocabularyId) {
+        if (!vocabularyRepository.existsByIdAndUser_Id(vocabularyId, userId)) {
+            throw new ApiException(GeneralResponseCode.NO_VOCAB);
+        }
 
-        List<WordStatistic> wordStatistics = wordStatisticRepository.findByWord_Vocabulary_Id(vocabularyId);
-
+        List<WordStatistic> wordStatistics = statisticReader.readByVocabularyId(vocabularyId);
         return calcAvgRate(wordStatistics);
     }
 
     @Transactional(readOnly = true)
-    public double getTotalAvgAccuracy(User user) {
-        List<WordStatistic> wordStatistics = wordStatisticRepository.findByWord_Vocabulary_User_Id(user.getId());
-
+    public double getTotalAvgAccuracy(UUID userId) {
+        List<WordStatistic> wordStatistics = statisticReader.readByUserId(userId);
         return calcAvgRate(wordStatistics);
     }
 
@@ -101,26 +80,9 @@ public class StatisticService {
             return 0.0;
         }
 
-        double sum = 0.0;
-        for (WordStatistic wordStatistic : wordStatistics) {
-            if (wordStatistic.getIncorrectCount() == 0) {
-                if (wordStatistic.getCorrectCount() > 0) {
-                    sum += 1;
-                }
-            } else {
-                sum += (double) wordStatistic.getCorrectCount() / (wordStatistic.getIncorrectCount() + wordStatistic.getCorrectCount());
-            }
-        }
-
-        return sum / wordStatistics.size();
-    }
-
-    private void setDifficultyAndAccuracy(WordStatistic wordStatistic) {
-        wordStatistic.setDifficulty(difficultyUtil.calcDifficultyRatio(
-                wordStatistic.getCorrectCount(), wordStatistic.getIncorrectCount()
-        ));
-        wordStatistic.setAccuracy(difficultyUtil.calcAccuracyRatio(
-                wordStatistic.getCorrectCount(), wordStatistic.getIncorrectCount()
-        ));
+        return wordStatistics.stream()
+                .mapToDouble(ws -> statisticCalculator.calculateAverageAccuracy(ws.getCorrectCount(), ws.getIncorrectCount()))
+                .average()
+                .orElse(0.0);
     }
 }

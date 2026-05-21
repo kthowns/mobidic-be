@@ -46,15 +46,11 @@ public class WordStatisticJpaEntity {
     @Builder.Default
     private boolean isLearned = false;
 
-    public void increaseCorrectCount() {
-        correctCount++;
-    }
-
-    public void increaseIncorrectCount() {
-        incorrectCount++;
-    }
-
-    public void toggleIsLearned() {
-        isLearned = !isLearned;
+    public void update(Long correctCount, Long incorrectCount, boolean isLearned, double difficulty, double accuracy) {
+        this.correctCount = correctCount;
+        this.incorrectCount = incorrectCount;
+        this.isLearned = isLearned;
+        this.difficulty = difficulty;
+        this.accuracy = accuracy;
     }
 }

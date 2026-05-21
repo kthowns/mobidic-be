@@ -2,7 +2,7 @@ package com.kthowns.mobidic.storage.statistic.jparepository;
 
 import com.kthowns.mobidic.storage.vocabulary.jpaentity.VocabularyJpaEntity;
 import com.kthowns.mobidic.storage.statistic.jpaentity.WordStatisticJpaEntity;
-import io.lettuce.core.dynamic.annotation.Param;
+import org.springframework.data.repository.query.Param;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
@@ -17,8 +17,8 @@ public interface WordStatisticJpaRepository extends JpaRepository<WordStatisticJ
             "case when ws.isLearned = true then 1 else 0 end" +
             ")) / count(ws)" +
             " from WordStatisticJpaEntity ws" +
-            " where ws.word.vocabulary = :vocabulary")
-    Optional<Double> getVocabularyLearningRate(@Param("vocabulary") VocabularyJpaEntity vocabulary);
+            " where ws.word.vocabulary.id = :vocabularyId and ws.word.vocabulary.user.id = :userId")
+    Optional<Double> getVocabularyLearningRate(@Param("vocabularyId") UUID vocabularyId, @Param("userId") UUID userId);
 
     List<WordStatisticJpaEntity> findByWord_Vocabulary_User_Id(UUID userId);
 
