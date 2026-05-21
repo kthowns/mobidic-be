@@ -1,5 +1,6 @@
 package com.kthowns.mobidic.api.vocabulary.controller;
 
+import com.kthowns.mobidic.api.auth.model.AuthUser;
 import com.kthowns.mobidic.common.dto.ErrorResponse;
 import com.kthowns.mobidic.common.dto.GeneralResponse;
 import com.kthowns.mobidic.api.vocabulary.dto.request.AddVocabularyRequestDto;
@@ -55,10 +56,10 @@ public class VocabularyController {
     @PostMapping
     public ResponseEntity<GeneralResponse<Void>> addVocabulary(
             @RequestBody @Valid AddVocabularyRequestDto request,
-            @AuthenticationPrincipal UserJpaEntity userJpaEntity
+            @AuthenticationPrincipal AuthUser authUser
     ) {
         vocabularyService.addVocabulary(
-                userJpaEntity.getId(),
+                authUser.getId(),
                 request.getTitle(),
                 request.getDescription()
         );
@@ -83,10 +84,10 @@ public class VocabularyController {
     })
     @GetMapping
     public ResponseEntity<GeneralResponse<List<VocabularyDetail>>> getAllVocabulary(
-            @AuthenticationPrincipal UserJpaEntity userJpaEntity
+            @AuthenticationPrincipal AuthUser authUser
     ) {
         return GeneralResponse.toResponseEntity(OK,
-                vocabularyService.getVocabularyDetails(userJpaEntity.getId()));
+                vocabularyService.getVocabularyDetails(authUser.getId()));
     }
 
     @Operation(

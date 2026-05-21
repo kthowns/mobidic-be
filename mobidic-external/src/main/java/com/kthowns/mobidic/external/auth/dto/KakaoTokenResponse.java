@@ -1,4 +1,4 @@
-package com.kthowns.mobidic.api.auth.dto.response;
+package com.kthowns.mobidic.external.auth.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
