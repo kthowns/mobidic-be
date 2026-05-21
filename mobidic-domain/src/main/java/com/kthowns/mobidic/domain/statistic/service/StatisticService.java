@@ -4,7 +4,7 @@ import com.kthowns.mobidic.domain.statistic.implementation.StatisticCalculator;
 import com.kthowns.mobidic.domain.statistic.implementation.StatisticReader;
 import com.kthowns.mobidic.domain.statistic.implementation.StatisticUpdater;
 import com.kthowns.mobidic.domain.statistic.model.WordStatistic;
-import com.kthowns.mobidic.domain.vocabulary.repository.VocabularyRepository;
+import com.kthowns.mobidic.domain.vocabulary.implementation.VocabularyReader;
 import com.kthowns.mobidic.common.code.GeneralResponseCode;
 import com.kthowns.mobidic.common.exception.ApiException;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +22,7 @@ public class StatisticService {
     private final StatisticReader statisticReader;
     private final StatisticUpdater statisticUpdater;
     private final StatisticCalculator statisticCalculator;
-    private final VocabularyRepository vocabularyRepository;
+    private final VocabularyReader vocabularyReader;
 
     @Transactional(readOnly = true)
     public WordStatistic getWordStatisticById(UUID userId, UUID wordId) {
@@ -31,7 +31,7 @@ public class StatisticService {
 
     @Transactional(readOnly = true)
     public Double getVocabLearningRate(UUID userId, UUID vocabId) {
-        if (!vocabularyRepository.existsByIdAndUser_Id(vocabId, userId)) {
+        if (!vocabularyReader.existsByIdAndUser(vocabId, userId)) {
             throw new ApiException(GeneralResponseCode.NO_VOCAB);
         }
 
@@ -41,27 +41,45 @@ public class StatisticService {
     @Transactional
     public void toggleLearnedByWordId(UUID userId, UUID wordId) {
         WordStatistic wordStatistic = statisticReader.readForUpdate(wordId, userId);
-        wordStatistic.setLearned(!wordStatistic.isLearned());
-        statisticUpdater.updateStatistic(wordStatistic);
+        
+        statisticUpdater.update(
+                userId, 
+                wordId, 
+                wordStatistic.getCorrectCount(), 
+                wordStatistic.getIncorrectCount(), 
+                !wordStatistic.isLearned()
+        );
     }
 
     @Transactional
     public void increaseCorrectCount(UUID userId, UUID wordId) {
         WordStatistic wordStatistic = statisticReader.readForUpdate(wordId, userId);
-        wordStatistic.setCorrectCount(wordStatistic.getCorrectCount() + 1);
-        statisticUpdater.updateStatistic(wordStatistic);
+        
+        statisticUpdater.update(
+                userId,
+                wordId,
+                wordStatistic.getCorrectCount() + 1,
+                wordStatistic.getIncorrectCount(),
+                wordStatistic.isLearned()
+        );
     }
 
     @Transactional
     public void increaseIncorrectCount(UUID userId, UUID wordId) {
         WordStatistic wordStatistic = statisticReader.readForUpdate(wordId, userId);
-        wordStatistic.setIncorrectCount(wordStatistic.getIncorrectCount() + 1);
-        statisticUpdater.updateStatistic(wordStatistic);
+        
+        statisticUpdater.update(
+                userId,
+                wordId,
+                wordStatistic.getCorrectCount(),
+                wordStatistic.getIncorrectCount() + 1,
+                wordStatistic.isLearned()
+        );
     }
 
     @Transactional(readOnly = true)
     public double getAvgAccuracyByVocab(UUID userId, UUID vocabularyId) {
-        if (!vocabularyRepository.existsByIdAndUser_Id(vocabularyId, userId)) {
+        if (!vocabularyReader.existsByIdAndUser(vocabularyId, userId)) {
             throw new ApiException(GeneralResponseCode.NO_VOCAB);
         }
 

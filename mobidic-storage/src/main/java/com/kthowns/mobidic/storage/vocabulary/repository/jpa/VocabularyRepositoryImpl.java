@@ -70,8 +70,18 @@ public class VocabularyRepositoryImpl implements VocabularyRepository {
     }
 
     @Override
-    @Transactional
+    public void increaseWordCount(UUID vocabularyId) {
+        vocabularyJpaRepository.increaseWordCount(vocabularyId);
+    }
+
+    @Override
+    public void decreaseWordCount(UUID vocabularyId) {
+        vocabularyJpaRepository.decreaseWordCount(vocabularyId);
+    }
+
+    @Override
     public void update(String title, String description, UUID vocabularyId, UUID userId) {
+
         VocabularyJpaEntity vocabularyJpaEntity = vocabularyJpaRepository.findForUpdate(vocabularyId, userId)
                 .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_VOCAB));
 

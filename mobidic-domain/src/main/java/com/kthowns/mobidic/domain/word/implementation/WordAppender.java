@@ -5,12 +5,19 @@ import com.kthowns.mobidic.domain.word.repository.WordRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.util.UUID;
+
 @Component
 @RequiredArgsConstructor
 public class WordAppender {
     private final WordRepository wordRepository;
 
-    public void append(Word word) {
+    public Word append(String expression, UUID vocabularyId) {
+        Word word = Word.builder()
+                .expression(expression)
+                .vocabularyId(vocabularyId)
+                .build();
         wordRepository.append(word);
+        return word;
     }
 }

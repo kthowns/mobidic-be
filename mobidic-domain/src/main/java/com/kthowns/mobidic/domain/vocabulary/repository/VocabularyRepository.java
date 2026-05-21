@@ -21,6 +21,10 @@ public interface VocabularyRepository {
 
     boolean existsByIdAndUser_Id(UUID vocabularyId, UUID userId);
 
+    void increaseWordCount(UUID vocabularyId);
+
+    void decreaseWordCount(UUID vocabularyId);
+
     void delete(UUID vocabularyId, UUID userId);
 
     void update(String title, String description, UUID vocabularyId, UUID userId);

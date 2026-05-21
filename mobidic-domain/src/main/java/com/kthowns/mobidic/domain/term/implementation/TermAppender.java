@@ -11,8 +11,15 @@ import org.springframework.stereotype.Component;
 public class TermAppender {
     private final TermRepository termRepository;
 
-    public void append(Term term) {
-        termRepository.deactivateAllByType(term.getType());
+    public void append(TermType type, String version, boolean required, String content) {
+        termRepository.deactivateAllByType(type);
+        
+        Term term = Term.builder()
+                .type(type)
+                .version(version)
+                .required(required)
+                .content(content)
+                .build();
         termRepository.append(term);
     }
 }

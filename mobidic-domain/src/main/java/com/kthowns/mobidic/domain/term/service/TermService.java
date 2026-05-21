@@ -31,14 +31,7 @@ public class TermService {
     public void addTerm(TermType type, String version, boolean required, String content) {
         termValidator.validateVersionDuplication(type, version);
 
-        Term term = Term.builder()
-                .type(type)
-                .version(version)
-                .required(required)
-                .content(content)
-                .build();
-
-        termAppender.append(term);
+        termAppender.append(type, version, required, content);
     }
 
     @Transactional(readOnly = true)

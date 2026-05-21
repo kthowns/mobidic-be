@@ -1,5 +1,8 @@
 package com.kthowns.mobidic.domain.word.implementation;
 
+import com.kthowns.mobidic.common.code.GeneralResponseCode;
+import com.kthowns.mobidic.common.exception.ApiException;
+import com.kthowns.mobidic.domain.word.model.Word;
 import com.kthowns.mobidic.domain.word.model.WordDetail;
 import com.kthowns.mobidic.domain.word.repository.WordRepository;
 import lombok.RequiredArgsConstructor;
@@ -15,5 +18,10 @@ public class WordReader {
 
     public List<WordDetail> readDetailsByVocabularyId(UUID userId, UUID vocabularyId, boolean onlyNotLearned) {
         return wordRepository.readDetailsByVocabularyId(userId, vocabularyId, onlyNotLearned);
+    }
+
+    public Word readByIdAndUserId(UUID wordId, UUID userId) {
+        return wordRepository.readByIdAndUserId(wordId, userId)
+                .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_WORD));
     }
 }

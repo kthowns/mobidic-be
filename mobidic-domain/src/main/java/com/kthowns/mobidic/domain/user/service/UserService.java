@@ -28,30 +28,18 @@ public class UserService {
         userValidator.validateEmailDuplication(email);
         userValidator.validateNicknameDuplication(nickname);
 
-        User user = User.builder()
-                .email(email)
-                .nickname(nickname)
-                .password(passwordEncoderClient.encode(password))
-                .role(UserRole.USER)
-                .isActive(true)
-                .build();
-
-        return userAppender.append(user);
+        return userAppender.append(email, nickname, passwordEncoderClient.encode(password), UserRole.USER);
     }
 
     @Transactional
     public User registerKakaoUser(Long kakaoId, String email, String nickname) {
         // 카카오 사용자는 이메일 중복 체크를 스킵하거나 별도 정책 필요
-        User user = User.builder()
-                .kakaoId(kakaoId)
-                .email(email)
-                .nickname(nickname)
-                .password(passwordEncoderClient.encode(UUID.randomUUID().toString()))
-                .role(UserRole.USER)
-                .isActive(true)
-                .build();
-
-        return userAppender.append(user);
+        return userAppender.appendKakao(
+                kakaoId,
+                email,
+                nickname,
+                passwordEncoderClient.encode(UUID.randomUUID().toString())
+        );
     }
 
     @Transactional

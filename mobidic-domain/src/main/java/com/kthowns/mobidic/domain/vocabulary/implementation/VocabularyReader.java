@@ -2,6 +2,7 @@ package com.kthowns.mobidic.domain.vocabulary.implementation;
 
 import com.kthowns.mobidic.common.code.GeneralResponseCode;
 import com.kthowns.mobidic.common.exception.ApiException;
+import com.kthowns.mobidic.domain.vocabulary.model.Vocabulary;
 import com.kthowns.mobidic.domain.vocabulary.model.VocabularyDetail;
 import com.kthowns.mobidic.domain.vocabulary.repository.VocabularyRepository;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +22,19 @@ public class VocabularyReader {
 
     public VocabularyDetail readDetailById(UUID userId, UUID vocabularyId) {
         return vocabularyRepository.readDetailById(vocabularyId, userId)
+                .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_VOCAB));
+    }
+
+    public boolean existsByUser(UUID userId) {
+        return vocabularyRepository.existsByUserId(userId);
+    }
+
+    public boolean existsByIdAndUser(UUID vocabularyId, UUID userId) {
+        return vocabularyRepository.existsByIdAndUser_Id(vocabularyId, userId);
+    }
+
+    public Vocabulary readForUpdate(UUID vocabularyId, UUID userId) {
+        return vocabularyRepository.findForUpdate(vocabularyId, userId)
                 .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_VOCAB));
     }
 }

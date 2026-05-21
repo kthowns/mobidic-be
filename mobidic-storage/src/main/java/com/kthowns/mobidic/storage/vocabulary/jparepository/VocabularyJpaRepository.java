@@ -4,6 +4,7 @@ import com.kthowns.mobidic.storage.vocabulary.jpaentity.VocabularyJpaEntity;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -26,4 +27,12 @@ public interface VocabularyJpaRepository extends JpaRepository<VocabularyJpaEnti
     boolean existsByTitleAndIdNotAndUser_Id(String title, UUID vocabularyId, UUID userId);
 
     boolean existsByUser_Id(UUID userId);
+
+    @Modifying
+    @Query("update VocabularyJpaEntity v set v.wordCount = v.wordCount + 1 where v.id = :vocabularyId")
+    void increaseWordCount(@Param("vocabularyId") UUID vocabularyId);
+
+    @Modifying
+    @Query("update VocabularyJpaEntity v set v.wordCount = v.wordCount - 1 where v.id = :vocabularyId and v.wordCount > 0")
+    void decreaseWordCount(@Param("vocabularyId") UUID vocabularyId);
 }

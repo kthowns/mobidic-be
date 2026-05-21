@@ -5,8 +5,7 @@ import com.kthowns.mobidic.common.exception.ApiException;
 import com.kthowns.mobidic.domain.definition.implementation.*;
 import com.kthowns.mobidic.domain.definition.model.Definition;
 import com.kthowns.mobidic.domain.definition.model.PartOfSpeech;
-import com.kthowns.mobidic.domain.definition.repository.DefinitionRepository;
-import com.kthowns.mobidic.domain.word.repository.WordRepository;
+import com.kthowns.mobidic.domain.word.implementation.WordReader;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -25,8 +24,7 @@ public class DefinitionService {
     private final DefinitionRemover definitionRemover;
     private final DefinitionValidator definitionValidator;
 
-    private final WordRepository wordRepository;
-    private final DefinitionRepository definitionRepository;
+    private final WordReader wordReader;
 
     @Transactional
     public void addDefinition(
@@ -35,23 +33,16 @@ public class DefinitionService {
             String meaning,
             PartOfSpeech part
     ) {
-        wordRepository.readByIdAndUserId(wordId, userId)
-                .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_WORD));
+        wordReader.readByIdAndUserId(wordId, userId);
 
         definitionValidator.validateMeaningDuplication(meaning, wordId);
 
-        Definition definition = Definition.builder()
-                .wordId(wordId)
-                .part(part)
-                .meaning(meaning)
-                .build();
-        definitionAppender.append(definition);
+        definitionAppender.append(wordId, meaning, part);
     }
 
     @Transactional(readOnly = true)
     public List<Definition> getDefinitionsByWordId(UUID userId, UUID wordId) {
-        wordRepository.readByIdAndUserId(wordId, userId)
-                .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_WORD));
+        wordReader.readByIdAndUserId(wordId, userId);
 
         return definitionReader.readByWordId(wordId);
     }
@@ -63,8 +54,7 @@ public class DefinitionService {
             String meaning,
             PartOfSpeech part
     ) {
-        Definition definition = definitionRepository.readByIdAndUserId(defId, userId)
-                .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_DEF));
+        Definition definition = definitionReader.readByIdAndUserId(defId, userId);
 
         definitionValidator.validateMeaningUpdateDuplication(meaning, definition.getWordId(), defId);
 
@@ -82,8 +72,7 @@ public class DefinitionService {
             UUID userId,
             UUID defId
     ) {
-        definitionRepository.readByIdAndUserId(defId, userId)
-                .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_DEF));
+        definitionReader.readByIdAndUserId(defId, userId);
 
         definitionRemover.remove(defId, userId);
     }

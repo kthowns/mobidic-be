@@ -18,4 +18,8 @@ public class VocabularyUpdater {
         // Patch vs Put 방식 결정 필요
         vocabularyRepository.update(title, description, vocabularyId, userId);
     }
+
+    public void save(Vocabulary vocabulary) {
+        vocabularyRepository.save(vocabulary);
+    }
 }
