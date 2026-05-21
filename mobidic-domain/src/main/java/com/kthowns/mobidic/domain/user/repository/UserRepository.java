@@ -12,6 +12,8 @@ public interface UserRepository {
 
     Optional<User> readByEmail(String email);
 
+    Optional<User> readByKakaoId(Long kakaoId);
+
     boolean existsByEmail(String email);
 
     boolean existsByNickname(String nickname);

@@ -37,6 +37,11 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
+    public Optional<User> readByKakaoId(Long kakaoId) {
+        return userJpaEntityRepository.findByKakaoId(kakaoId).map(UserJpaEntity::toModel);
+    }
+
+    @Override
     public boolean existsByEmail(String email) {
         return userJpaEntityRepository.existsByEmail(email);
     }

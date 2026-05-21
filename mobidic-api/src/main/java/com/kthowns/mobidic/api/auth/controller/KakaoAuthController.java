@@ -2,9 +2,11 @@ package com.kthowns.mobidic.api.auth.controller;
 
 import com.kthowns.mobidic.api.auth.dto.response.KakaoLoginUrlResponse;
 import com.kthowns.mobidic.api.auth.dto.response.LoginResponse;
-import com.kthowns.mobidic.api.auth.facade.KakaoAuthFacade;
-import com.kthowns.mobidic.api.auth.service.KakaoAuthService;
-import com.kthowns.mobidic.api.auth.util.KakaoProperties;
+import com.kthowns.mobidic.api.security.jwt.JwtProvider;
+import com.kthowns.mobidic.domain.auth.facade.KakaoAuthFacade;
+import com.kthowns.mobidic.domain.auth.service.KakaoAuthService;
+import com.kthowns.mobidic.domain.user.model.User;
+import com.kthowns.mobidic.external.auth.util.KakaoProperties;
 import com.kthowns.mobidic.common.code.GeneralResponseCode;
 import com.kthowns.mobidic.common.dto.GeneralResponse;
 import lombok.RequiredArgsConstructor;
@@ -24,15 +26,15 @@ public class KakaoAuthController {
     private final KakaoAuthService kakaoAuthService;
     private final KakaoProperties kakaoProperties;
     private final KakaoAuthFacade kakaoAuthFacade;
+    private final JwtProvider jwtProvider;
 
     @GetMapping("/login-url/kakao")
     public ResponseEntity<GeneralResponse<KakaoLoginUrlResponse>> getKakaoLoginUrl(
             @RequestParam(value = "isDev", defaultValue = "false") boolean isDev,
             @RequestParam(value = "platform", defaultValue = "web") String platform
     ) {
-        final KakaoLoginUrlResponse response = kakaoAuthService.getKakaoLoginUrl(isDev, platform);
-
-        return GeneralResponse.toResponseEntity(GeneralResponseCode.OK, response);
+        final String url = kakaoAuthService.getKakaoLoginUrl(isDev, platform);
+        return GeneralResponse.toResponseEntity(GeneralResponseCode.OK, new KakaoLoginUrlResponse(url));
     }
 
     @GetMapping("/v1/oauth2/kakao")
@@ -41,8 +43,8 @@ public class KakaoAuthController {
             @RequestParam(value = "isDev", defaultValue = "false") boolean isDev,
             @RequestParam(value = "platform", defaultValue = "web") String platform
     ) {
-        final LoginResponse loginResponse = kakaoAuthFacade.kakaoLogin(code, isDev, platform);
-        final String accessToken = loginResponse.getAccessToken();
+        final User user = kakaoAuthFacade.kakaoLogin(code, isDev, platform);
+        final String accessToken = jwtProvider.generateToken(user.getId(), user.getRole().name());
         final String redirectUrl = kakaoProperties.getFrontendCallbackUrl(isDev, platform);
 
         return new RedirectView(redirectUrl + "?access_token=" + accessToken);
