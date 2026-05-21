@@ -6,13 +6,17 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
 public class UserRemover {
     private final UserRepository userRepository;
+    private final UserReader userReader;
 
-    public User deactivate(User user) {
+    public User deactivate(UUID userId) {
+        User user = userReader.readById(userId);
+        
         User deactivatedUser = User.builder()
                 .id(user.getId())
                 .kakaoId(user.getKakaoId())

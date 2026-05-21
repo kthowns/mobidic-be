@@ -58,13 +58,7 @@ public class DefinitionService {
 
         definitionValidator.validateMeaningUpdateDuplication(meaning, definition.getWordId(), defId);
 
-        Definition updatedDefinition = Definition.builder()
-                .id(defId)
-                .wordId(definition.getWordId())
-                .meaning(meaning)
-                .part(part)
-                .build();
-        definitionUpdater.update(updatedDefinition);
+        definitionUpdater.update(defId, meaning, part);
     }
 
     @Transactional

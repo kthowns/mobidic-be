@@ -44,29 +44,17 @@ public class UserService {
 
     @Transactional
     public User updateUser(UUID userId, String nickname, String password) {
-        User user = userReader.readById(userId);
-
         if (nickname != null) {
             userValidator.validateNicknameUpdateDuplication(nickname, userId);
         }
 
-        User updatedUser = User.builder()
-                .id(user.getId())
-                .kakaoId(user.getKakaoId())
-                .email(user.getEmail())
-                .nickname(nickname != null ? nickname : user.getNickname())
-                .password(password != null ? passwordEncoderClient.encode(password) : user.getPassword())
-                .role(user.getRole())
-                .isActive(user.getIsActive())
-                .createdAt(user.getCreatedAt())
-                .build();
+        String encodedPassword = password != null ? passwordEncoderClient.encode(password) : null;
 
-        return userUpdater.update(updatedUser);
+        return userUpdater.update(userId, nickname, encodedPassword);
     }
 
     @Transactional
     public User deactivateUser(UUID userId) {
-        User user = userReader.readById(userId);
-        return userRemover.deactivate(user);
+        return userRemover.deactivate(userId);
     }
 }
