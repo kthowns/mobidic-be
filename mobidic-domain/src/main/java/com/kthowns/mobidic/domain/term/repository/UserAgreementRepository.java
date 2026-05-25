@@ -4,5 +4,5 @@ import java.util.List;
 import java.util.UUID;
 
 public interface UserAgreementRepository {
-    void saveAgreements(UUID userId, List<Long> termIds);
+    void appendAgreements(UUID userId, List<Long> termIds);
 }

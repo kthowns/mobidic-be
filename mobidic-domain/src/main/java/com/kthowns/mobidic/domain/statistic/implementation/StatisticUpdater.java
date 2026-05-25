@@ -15,15 +15,15 @@ public class StatisticUpdater {
     private final StatisticReader statisticReader;
 
     public void update(UUID userId, UUID wordId, Long correctCount, Long incorrectCount, boolean isLearned) {
-        WordStatistic wordStatistic = statisticReader.readForUpdate(wordId, userId);
+        WordStatistic wordStatistic = WordStatistic.builder()
+                .wordId(wordId)
+                .correctCount(correctCount)
+                .incorrectCount(incorrectCount)
+                .isLearned(isLearned)
+                .difficulty(statisticCalculator.calculateDifficulty(correctCount, incorrectCount))
+                .accuracy(statisticCalculator.calculateAccuracy(correctCount, incorrectCount))
+                .build();
         
-        wordStatistic.setCorrectCount(correctCount);
-        wordStatistic.setIncorrectCount(incorrectCount);
-        wordStatistic.setLearned(isLearned);
-        
-        wordStatistic.setDifficulty(statisticCalculator.calculateDifficulty(correctCount, incorrectCount));
-        wordStatistic.setAccuracy(statisticCalculator.calculateAccuracy(correctCount, incorrectCount));
-        
-        wordStatisticRepository.save(wordStatistic);
+        wordStatisticRepository.update(wordStatistic);
     }
 }

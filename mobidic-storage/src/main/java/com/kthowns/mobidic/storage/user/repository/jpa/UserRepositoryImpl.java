@@ -30,7 +30,18 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public User update(User user) {
-        return null;
+        UserJpaEntity userJpaEntity = userJpaEntityRepository.findById(user.id())
+                .orElseThrow(() -> new IllegalArgumentException("User not found: " + user.id()));
+
+        userJpaEntity.update(
+                user.nickname(),
+                user.password(),
+                user.role(),
+                user.isActive(),
+                user.deactivatedAt(),
+                user.kakaoId()
+        );
+        return userJpaEntity.toModel();
     }
 
 
@@ -62,16 +73,5 @@ public class UserRepositoryImpl implements UserRepository {
     @Override
     public boolean existsByNicknameAndIdNot(String nickname, UUID id) {
         return userJpaEntityRepository.existsByNicknameAndIdNot(nickname, id);
-    }
-
-    private void updateEntityFromModel(UserJpaEntity entity, User model) {
-        entity.update(
-                model.nickname(),
-                model.password(),
-                model.role(),
-                model.isActive(),
-                model.deactivatedAt(),
-                model.kakaoId()
-        );
     }
 }

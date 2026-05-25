@@ -28,6 +28,6 @@ public class UserRemover {
                 .createdAt(user.createdAt())
                 .deactivatedAt(LocalDateTime.now())
                 .build();
-        return userRepository.save(deactivatedUser);
+        return userRepository.update(deactivatedUser);
     }
 }

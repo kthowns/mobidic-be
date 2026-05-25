@@ -19,7 +19,7 @@ public class UserAppender {
                 .role(role)
                 .isActive(true)
                 .build();
-        return userRepository.save(user);
+        return userRepository.append(user);
     }
 
     public User appendKakao(Long kakaoId, String email, String nickname, String password) {
@@ -31,6 +31,6 @@ public class UserAppender {
                 .role(UserRole.USER)
                 .isActive(true)
                 .build();
-        return userRepository.save(user);
+        return userRepository.append(user);
     }
 }

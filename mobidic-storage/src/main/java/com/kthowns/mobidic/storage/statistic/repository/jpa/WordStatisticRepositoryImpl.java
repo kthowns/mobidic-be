@@ -33,7 +33,17 @@ public class WordStatisticRepositoryImpl implements WordStatisticRepository {
 
     @Override
     public void update(WordStatistic wordStatistic) {
+        WordStatisticJpaEntity entity = wordStatisticJpaRepository.findById(wordStatistic.wordId())
+                .orElseThrow(() -> new IllegalArgumentException("Word statistic not found: " + wordStatistic.wordId()));
 
+        entity.update(
+                wordStatistic.correctCount(),
+                wordStatistic.incorrectCount(),
+                wordStatistic.isLearned(),
+                wordStatistic.difficulty(),
+                wordStatistic.accuracy()
+        );
+        wordStatisticJpaRepository.save(entity);
     }
 
     @Override

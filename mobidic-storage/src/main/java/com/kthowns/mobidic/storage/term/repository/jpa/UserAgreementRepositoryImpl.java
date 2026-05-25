@@ -19,7 +19,7 @@ public class UserAgreementRepositoryImpl implements UserAgreementRepository {
     private final TermJpaRepository termJpaRepository;
 
     @Override
-    public void saveAgreements(UUID userId, List<Long> termIds) {
+    public void appendAgreements(UUID userId, List<Long> termIds) {
         List<TermJpaEntity> terms = termJpaRepository.findByIdIn(termIds);
         List<UserAgreementJpaEntity> userAgreements = terms.stream()
                 .map(term ->

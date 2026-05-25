@@ -15,7 +15,7 @@ public class UserUpdater {
 
     public User update(UUID userId, String nickname, String password) {
         User user = userReader.readById(userId);
-        
+
         User updatedUser = User.builder()
                 .id(user.id())
                 .kakaoId(user.kakaoId())
@@ -26,7 +26,7 @@ public class UserUpdater {
                 .isActive(user.isActive())
                 .createdAt(user.createdAt())
                 .build();
-                
-        return userRepository.save(updatedUser);
+
+        return userRepository.update(updatedUser);
     }
 }

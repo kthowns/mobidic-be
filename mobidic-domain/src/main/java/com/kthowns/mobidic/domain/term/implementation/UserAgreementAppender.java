@@ -13,6 +13,6 @@ public class UserAgreementAppender {
     private final UserAgreementRepository userAgreementRepository;
 
     public void appendAgreements(UUID userId, List<Long> agreeTermIds) {
-        userAgreementRepository.saveAgreements(userId, agreeTermIds);
+        userAgreementRepository.appendAgreements(userId, agreeTermIds);
     }
 }
