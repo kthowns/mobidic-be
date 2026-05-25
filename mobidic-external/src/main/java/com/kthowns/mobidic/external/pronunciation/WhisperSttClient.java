@@ -36,11 +36,11 @@ public class WhisperSttClient implements SpeechToTextClient {
                     .retrieve()
                     .body(SttResponse.class);
 
-            if (sttResponse == null || sttResponse.getResult() == null) {
+            if (sttResponse == null || sttResponse.result() == null) {
                 throw new ApiException(GeneralResponseCode.INTERNAL_SERVER_ERROR);
             }
 
-            return sttResponse.getResult();
+            return sttResponse.result();
         } catch (RestClientException e) {
             throw new ApiException(GeneralResponseCode.INTERNAL_SERVER_ERROR);
         }

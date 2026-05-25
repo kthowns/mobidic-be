@@ -11,13 +11,9 @@ public interface VocabularyRepository {
 
     List<VocabularyDetail> readDetailsByUserId(UUID userId);
 
-    void append(Vocabulary vocabulary);
-
-    void save(Vocabulary vocabulary);
+    Vocabulary append(Vocabulary vocabulary);
 
     Optional<VocabularyDetail> readDetailById(UUID vocabularyId, UUID userId);
-
-    Optional<Vocabulary> findForUpdate(UUID vocabularyId, UUID userId);
 
     boolean existsByIdAndUser_Id(UUID vocabularyId, UUID userId);
 

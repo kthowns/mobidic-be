@@ -10,6 +10,6 @@ public class QuizAppender {
     private final QuizRepository quizRepository;
 
     public void saveAnswer(String key, String answer, long expMillis) {
-        quizRepository.saveAnswer(key, answer, expMillis);
+        quizRepository.appendAnswer(key, answer, expMillis);
     }
 }

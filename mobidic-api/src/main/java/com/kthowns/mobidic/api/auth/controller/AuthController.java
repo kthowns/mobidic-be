@@ -2,8 +2,7 @@ package com.kthowns.mobidic.api.auth.controller;
 
 import com.kthowns.mobidic.api.auth.dto.request.LoginRequest;
 import com.kthowns.mobidic.api.auth.dto.response.LoginResponse;
-import com.kthowns.mobidic.api.auth.model.AuthUser;
-import com.kthowns.mobidic.api.security.jwt.JwtProvider;
+import com.kthowns.mobidic.api.service.AuthService;
 import com.kthowns.mobidic.common.code.AuthResponseCode;
 import com.kthowns.mobidic.common.dto.ErrorResponse;
 import com.kthowns.mobidic.common.dto.GeneralResponse;
@@ -16,9 +15,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -29,8 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/auth")
 @Tag(name = "인증 관련 서비스", description = "로그인, 회원가입 등")
 public class AuthController {
-    private final AuthenticationManager authenticationManager;
-    private final JwtProvider jwtProvider;
+    private final AuthService authService;
 
     @Operation(
             summary = "로그인",
@@ -47,16 +42,7 @@ public class AuthController {
     })
     @PostMapping("/login")
     public ResponseEntity<GeneralResponse<LoginResponse>> login(@Valid @RequestBody LoginRequest request) {
-        Authentication auth = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
-        );
-
-        AuthUser authUser = (AuthUser) auth.getPrincipal();
-
-        LoginResponse loginResponse = LoginResponse.builder()
-                .accessToken(jwtProvider.generateToken(authUser.getId(), authUser.getRole()))
-                .build();
-
+        LoginResponse loginResponse = authService.login(request);
         return GeneralResponse.toResponseEntity(AuthResponseCode.LOGIN_OK, loginResponse);
     }
 }

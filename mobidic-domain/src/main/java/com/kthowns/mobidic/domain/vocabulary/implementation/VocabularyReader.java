@@ -32,9 +32,4 @@ public class VocabularyReader {
     public boolean existsByIdAndUser(UUID vocabularyId, UUID userId) {
         return vocabularyRepository.existsByIdAndUser_Id(vocabularyId, userId);
     }
-
-    public Vocabulary readForUpdate(UUID vocabularyId, UUID userId) {
-        return vocabularyRepository.findForUpdate(vocabularyId, userId)
-                .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_VOCAB));
-    }
 }

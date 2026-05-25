@@ -12,8 +12,8 @@ import java.util.UUID;
 public class VocabularyAppender {
     private final VocabularyRepository vocabularyRepository;
 
-    public void append(String title, String description, UUID userId) {
-        vocabularyRepository.append(Vocabulary.builder()
+    public Vocabulary append(String title, String description, UUID userId) {
+        return vocabularyRepository.append(Vocabulary.builder()
                 .title(title)
                 .description(description)
                 .userId(userId).build());

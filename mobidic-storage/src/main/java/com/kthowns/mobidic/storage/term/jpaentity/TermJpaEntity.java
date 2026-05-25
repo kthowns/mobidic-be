@@ -48,12 +48,12 @@ public class TermJpaEntity {
 
     public Term toModel() {
         return Term.builder()
-                .id(this.id)
-                .type(this.type)
-                .version(this.version)
+                .id(this.getId())
+                .type(this.getType())
+                .version(this.getVersion())
                 .required(this.required)
-                .content(this.content)
-                .createdAt(this.createdAt)
+                .content(this.getContent())
+                .createdAt(this.getCreatedAt())
                 .build();
     }
 

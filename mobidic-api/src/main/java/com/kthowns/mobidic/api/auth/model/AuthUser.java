@@ -62,7 +62,7 @@ public class AuthUser implements UserDetails {
                 .id(userJpaEntity.getId())
                 .email(userJpaEntity.getEmail())
                 .password(userJpaEntity.getPassword())
-                .isActive(userJpaEntity.getIsActive())
+                .isActive(userJpaEntity.isActive())
                 .role(userJpaEntity.getRole().name())
                 .build();
     }

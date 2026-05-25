@@ -1,6 +1,7 @@
 package com.kthowns.mobidic.domain.vocabulary.service;
 
 import com.kthowns.mobidic.domain.vocabulary.implementation.*;
+import com.kthowns.mobidic.domain.vocabulary.model.Vocabulary;
 import com.kthowns.mobidic.domain.vocabulary.model.VocabularyDetail;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,14 +22,14 @@ public class VocabularyService {
     private final VocabularyRemover vocabularyRemover;
 
     @Transactional
-    public void addVocabulary(
+    public Vocabulary addVocabulary(
             UUID userId,
             String title,
             String description
     ) {
         // 동시성 제어 필요
         vocabularyValidator.validateTitleAppendDuplication(title, userId);
-        vocabularyAppender.append(title, description, userId);
+        return vocabularyAppender.append(title, description, userId);
     }
 
     @Transactional(readOnly = true)

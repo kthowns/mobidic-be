@@ -1,8 +1,5 @@
 package com.kthowns.mobidic.domain.vocabulary.implementation;
 
-import com.kthowns.mobidic.common.code.GeneralResponseCode;
-import com.kthowns.mobidic.common.exception.ApiException;
-import com.kthowns.mobidic.domain.vocabulary.model.Vocabulary;
 import com.kthowns.mobidic.domain.vocabulary.repository.VocabularyRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;

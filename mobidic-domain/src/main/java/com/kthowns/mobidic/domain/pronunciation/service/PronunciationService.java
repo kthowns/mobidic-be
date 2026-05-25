@@ -23,6 +23,6 @@ public class PronunciationService {
         Word word = wordService.getWordById(userId, wordId);
         String transcribedText = sttClient.transcribe(multipartFile);
 
-        return pronunciationCalculator.calculateSimilarity(word.getExpression(), transcribedText);
+        return pronunciationCalculator.calculateSimilarity(word.expression(), transcribedText);
     }
 }

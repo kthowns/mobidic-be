@@ -1,12 +1,11 @@
 package com.kthowns.mobidic.api.word.controller;
 
+import com.kthowns.mobidic.api.auth.model.AuthUser;
 import com.kthowns.mobidic.common.dto.ErrorResponse;
 import com.kthowns.mobidic.common.dto.GeneralResponse;
 import com.kthowns.mobidic.api.word.dto.request.AddWordRequestDto;
 import com.kthowns.mobidic.domain.word.model.WordDetail;
-import com.kthowns.mobidic.domain.word.model.Word;
 import com.kthowns.mobidic.domain.word.service.WordService;
-import com.kthowns.mobidic.storage.user.jpaentity.UserJpaEntity;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -52,11 +51,11 @@ public class WordController {
     })
     @GetMapping("/vocabularies/{vocabularyId}/words")
     public ResponseEntity<GeneralResponse<List<WordDetail>>> getWordsByVocabularyId(
-            @PathVariable String vocabularyId,
-            @AuthenticationPrincipal UserJpaEntity userJpaEntity
+            @PathVariable UUID vocabularyId,
+            @AuthenticationPrincipal AuthUser authUser
     ) {
         return GeneralResponse.toResponseEntity(OK,
-                wordService.getWordDetailsByVocabularyId(userJpaEntity.getId(), UUID.fromString(vocabularyId)));
+                wordService.getWordDetailsByVocabularyId(authUser.getId(), vocabularyId));
     }
 
     @Operation(
@@ -79,11 +78,11 @@ public class WordController {
     })
     @PostMapping("/vocabularies/{vocabularyId}/word")
     public ResponseEntity<GeneralResponse<Void>> addWord(
-            @PathVariable("vocabularyId") String vocabularyId,
+            @PathVariable UUID vocabularyId,
             @RequestBody @Valid AddWordRequestDto request,
-            @AuthenticationPrincipal UserJpaEntity userJpaEntity
+            @AuthenticationPrincipal AuthUser authUser
     ) {
-        wordService.addWord(userJpaEntity.getId(), UUID.fromString(vocabularyId), request.getExpression());
+        wordService.addWord(authUser.getId(), vocabularyId, request.getExpression());
         return GeneralResponse.toResponseEntity(OK, null);
     }
 
@@ -107,11 +106,11 @@ public class WordController {
     })
     @PatchMapping("/words/{wordId}")
     public ResponseEntity<GeneralResponse<Void>> updateWord(
-            @PathVariable("wordId") String wordId,
+            @PathVariable UUID wordId,
             @RequestBody @Valid AddWordRequestDto request,
-            @AuthenticationPrincipal UserJpaEntity userJpaEntity
+            @AuthenticationPrincipal AuthUser authUser
     ) {
-        wordService.updateWord(userJpaEntity.getId(), UUID.fromString(wordId), request.getExpression());
+        wordService.updateWord(authUser.getId(), wordId, request.getExpression());
         return GeneralResponse.toResponseEntity(OK, null);
     }
 
@@ -133,10 +132,10 @@ public class WordController {
     })
     @DeleteMapping("/words/{wordId}")
     public ResponseEntity<GeneralResponse<Void>> deleteWord(
-            @PathVariable String wordId,
-            @AuthenticationPrincipal UserJpaEntity userJpaEntity
+            @PathVariable UUID wordId,
+            @AuthenticationPrincipal AuthUser authUser
     ) {
-        wordService.deleteWord(userJpaEntity.getId(), UUID.fromString(wordId));
+        wordService.deleteWord(authUser.getId(), wordId);
         return GeneralResponse.toResponseEntity(OK, null);
     }
 }

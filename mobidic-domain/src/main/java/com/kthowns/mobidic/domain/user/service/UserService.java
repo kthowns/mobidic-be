@@ -57,4 +57,9 @@ public class UserService {
     public User deactivateUser(UUID userId) {
         return userRemover.deactivate(userId);
     }
+
+    @Transactional(readOnly = true)
+    public User getUserById(UUID userId) {
+        return userReader.readById(userId);
+    }
 }

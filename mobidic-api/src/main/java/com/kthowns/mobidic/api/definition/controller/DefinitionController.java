@@ -7,7 +7,6 @@ import com.kthowns.mobidic.common.code.GeneralResponseCode;
 import com.kthowns.mobidic.common.dto.ErrorResponse;
 import com.kthowns.mobidic.common.dto.GeneralResponse;
 import com.kthowns.mobidic.domain.definition.service.DefinitionService;
-import com.kthowns.mobidic.storage.user.jpaentity.UserJpaEntity;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -51,11 +50,11 @@ public class DefinitionController {
     })
     @GetMapping("/words/{wordId}/definitions")
     public ResponseEntity<GeneralResponse<List<Definition>>> getDefinitionsByWordId(
-            @PathVariable String wordId,
-            @AuthenticationPrincipal UserJpaEntity userJpaEntity
+            @PathVariable UUID wordId,
+            @AuthenticationPrincipal AuthUser authUser
     ) {
         return GeneralResponse.toResponseEntity(GeneralResponseCode.OK,
-                definitionService.getDefinitionsByWordId(userJpaEntity.getId(), UUID.fromString(wordId)));
+                definitionService.getDefinitionsByWordId(authUser.getId(), wordId));
     }
 
     @Operation(
@@ -76,11 +75,11 @@ public class DefinitionController {
     })
     @PostMapping("/words/{wordId}/definition")
     public ResponseEntity<GeneralResponse<Void>> addDefinition(
-            @PathVariable String wordId,
+            @PathVariable UUID wordId,
             @RequestBody @Valid AddDefinitionRequestDto request,
-            @AuthenticationPrincipal UserJpaEntity userJpaEntity
+            @AuthenticationPrincipal AuthUser authUser
     ) {
-        definitionService.addDefinition(userJpaEntity.getId(), UUID.fromString(wordId), request.getMeaning(), request.getPart());
+        definitionService.addDefinition(authUser.getId(), wordId, request.getMeaning(), request.getPart());
         return GeneralResponse.toResponseEntity(GeneralResponseCode.OK, null);
     }
 
@@ -104,11 +103,11 @@ public class DefinitionController {
     })
     @PatchMapping("/definitions/{definitionId}")
     public ResponseEntity<GeneralResponse<Void>> updateDefinition(
-            @PathVariable String definitionId,
+            @PathVariable UUID definitionId,
             @RequestBody @Valid AddDefinitionRequestDto request,
-            @AuthenticationPrincipal UserJpaEntity userJpaEntity
+            @AuthenticationPrincipal AuthUser authUser
     ) {
-        definitionService.updateDefinition(userJpaEntity.getId(), UUID.fromString(definitionId), request.getMeaning(), request.getPart());
+        definitionService.updateDefinition(authUser.getId(), definitionId, request.getMeaning(), request.getPart());
         return GeneralResponse.toResponseEntity(GeneralResponseCode.OK, null);
     }
 
@@ -129,10 +128,10 @@ public class DefinitionController {
     })
     @DeleteMapping("/definitions/{definitionId}")
     public ResponseEntity<GeneralResponse<Void>> deleteDefinition(
-            @PathVariable String definitionId,
-            @AuthenticationPrincipal UserJpaEntity userJpaEntity
+            @PathVariable UUID definitionId,
+            @AuthenticationPrincipal AuthUser authUser
     ) {
-        definitionService.deleteDefinition(userJpaEntity.getId(), UUID.fromString(definitionId));
+        definitionService.deleteDefinition(authUser.getId(), definitionId);
         return GeneralResponse.toResponseEntity(GeneralResponseCode.OK, null);
     }
 }

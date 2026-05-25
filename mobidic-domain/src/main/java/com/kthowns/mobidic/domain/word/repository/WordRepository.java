@@ -8,7 +8,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface WordRepository {
-    void append(Word word);
+    Word append(Word word);
 
     Optional<Word> readByIdAndUserId(UUID wordId, UUID userId);
 

@@ -91,13 +91,13 @@ public class QuizService {
         long expSec = expPerQuiz * quizzes.size();
 
         for (Quiz quiz : quizzes) {
-            String key = QUIZ_PREFIX + ":" + quiz.getUserId() + ":" + quiz.getWordId() + ":" + quiz.getId();
-            quizAppender.saveAnswer(key, quiz.getAnswer(), expSec);
+            String key = QUIZ_PREFIX + ":" + quiz.userId() + ":" + quiz.wordId() + ":" + quiz.id();
+            quizAppender.saveAnswer(key, quiz.answer(), expSec);
 
             quizInfos.add(QuizInfo.builder()
                     .token(quizProcessor.encryptKey(key))
-                    .options(quiz.getOptions())
-                    .stem(quiz.getStem())
+                    .options(quiz.options())
+                    .stem(quiz.stem())
                     .expMil(expSec)
                     .build());
         }

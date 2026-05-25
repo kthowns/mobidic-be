@@ -1,22 +1,17 @@
 package com.kthowns.mobidic.domain.term.model;
 
-import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
-@Getter
-@AllArgsConstructor
-@NoArgsConstructor
 @Builder
-public class Term {
-    private Long id;
-    private TermType type;
-    private String version;
-    private boolean required;
-    private String content;
-    private LocalDateTime createdAt;
+public record Term(
+        Long id,
+        TermType type,
+        String version,
+        boolean required,
+        String content,
+        LocalDateTime createdAt
+) {
 }
 

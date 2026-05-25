@@ -52,10 +52,6 @@ public class VocabularyJpaEntity {
         this.description = description;
     }
 
-    public void syncWordCount(Long wordCount) {
-        this.wordCount = wordCount;
-    }
-
     public void addWordCount() {
         wordCount++;
     }

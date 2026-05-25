@@ -13,7 +13,7 @@ public class RedisQuizRepository implements QuizRepository {
     private final RedisTemplate<String, String> redisTemplate;
 
     @Override
-    public void saveAnswer(String key, String answer, long expMillis) {
+    public void appendAnswer(String key, String answer, long expMillis) {
         redisTemplate.opsForValue().set(key, answer, Duration.ofMillis(expMillis));
     }
 

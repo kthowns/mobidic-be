@@ -6,7 +6,9 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface UserRepository {
-    User save(User user);
+    User append(User user);
+
+    User update(User user);
 
     Optional<User> readById(UUID id);
 

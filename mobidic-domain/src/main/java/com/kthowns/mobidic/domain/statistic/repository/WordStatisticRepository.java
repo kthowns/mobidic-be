@@ -7,7 +7,9 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface WordStatisticRepository {
-    void save(WordStatistic wordStatistic);
+    void append(WordStatistic wordStatistic);
+
+    void update(WordStatistic wordStatistic);
 
     Optional<WordStatistic> readByWordIdAndUserId(UUID wordId, UUID userId);
 

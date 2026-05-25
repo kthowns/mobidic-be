@@ -17,7 +17,6 @@ public class WordAppender {
                 .expression(expression)
                 .vocabularyId(vocabularyId)
                 .build();
-        wordRepository.append(word);
-        return word;
+        return wordRepository.append(word);
     }
 }

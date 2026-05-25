@@ -1,11 +1,11 @@
 package com.kthowns.mobidic.api.pronunciation.controller;
 
+import com.kthowns.mobidic.api.auth.model.AuthUser;
 import com.kthowns.mobidic.common.code.GeneralResponseCode;
 import com.kthowns.mobidic.common.dto.ErrorResponse;
 import com.kthowns.mobidic.common.dto.GeneralResponse;
 import com.kthowns.mobidic.common.exception.ApiException;
 import com.kthowns.mobidic.domain.pronunciation.service.PronunciationService;
-import com.kthowns.mobidic.storage.user.jpaentity.UserJpaEntity;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -55,13 +55,13 @@ public class PronunciationController {
     public ResponseEntity<GeneralResponse<Double>> ratePronunciation(
             @RequestParam MultipartFile file,
             @PathVariable UUID wordId,
-            @AuthenticationPrincipal UserJpaEntity userJpaEntity
+            @AuthenticationPrincipal AuthUser authUser
     ) {
         if (file.getSize() > 500 * 1024) { // Allow file size under 500KB
             throw new ApiException(GeneralResponseCode.TOO_BIG_FILE_SIZE);
         }
 
         return GeneralResponse.toResponseEntity(OK,
-                pronunciationService.ratePronunciation(userJpaEntity.getId(), wordId, file));
+                pronunciationService.ratePronunciation(authUser.getId(), wordId, file));
     }
 }

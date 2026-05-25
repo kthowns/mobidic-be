@@ -1,12 +1,12 @@
 package com.kthowns.mobidic.api.quiz.controller;
 
+import com.kthowns.mobidic.api.auth.model.AuthUser;
 import com.kthowns.mobidic.common.dto.ErrorResponse;
 import com.kthowns.mobidic.common.dto.GeneralResponse;
 import com.kthowns.mobidic.api.quiz.dto.request.QuizRateRequest;
 import com.kthowns.mobidic.domain.quiz.model.QuizInfo;
 import com.kthowns.mobidic.domain.quiz.model.QuizResult;
 import com.kthowns.mobidic.domain.quiz.service.QuizService;
-import com.kthowns.mobidic.storage.user.jpaentity.UserJpaEntity;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -52,10 +52,10 @@ public class QuizController {
     @GetMapping("/vocabularies/{vocabularyId}/quizzes/ox")
     public ResponseEntity<GeneralResponse<List<QuizInfo>>> getOxQuizzes(
             @PathVariable UUID vocabularyId,
-            @AuthenticationPrincipal UserJpaEntity userJpaEntity
+            @AuthenticationPrincipal AuthUser authUser
     ) {
         return GeneralResponse.toResponseEntity(OK,
-                quizService.getOXQuizzes(userJpaEntity.getId(), vocabularyId));
+                quizService.getOXQuizzes(authUser.getId(), vocabularyId));
     }
 
     @Operation(
@@ -77,10 +77,10 @@ public class QuizController {
     @GetMapping("/vocabularies/{vocabularyId}/quizzes/blank")
     public ResponseEntity<GeneralResponse<List<QuizInfo>>> getBlankQuizzes(
             @PathVariable UUID vocabularyId,
-            @AuthenticationPrincipal UserJpaEntity userJpaEntity
+            @AuthenticationPrincipal AuthUser authUser
     ) {
         return GeneralResponse.toResponseEntity(OK,
-                quizService.getBlankQuizzes(userJpaEntity.getId(), vocabularyId));
+                quizService.getBlankQuizzes(authUser.getId(), vocabularyId));
     }
 
     @Operation(
@@ -104,9 +104,9 @@ public class QuizController {
     @PostMapping("/quizzes/rate")
     public ResponseEntity<GeneralResponse<QuizResult>> rateOxQuiz(
             @RequestBody QuizRateRequest quizRateRequest,
-            @AuthenticationPrincipal UserJpaEntity userJpaEntity
+            @AuthenticationPrincipal AuthUser authUser
     ) {
         return GeneralResponse.toResponseEntity(OK,
-                quizService.rateQuiz(userJpaEntity.getId(), quizRateRequest.getToken(), quizRateRequest.getAnswer()));
+                quizService.rateQuiz(authUser.getId(), quizRateRequest.getToken(), quizRateRequest.getAnswer()));
     }
 }

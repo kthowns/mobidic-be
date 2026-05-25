@@ -17,6 +17,6 @@ public class StatisticAppender {
                 .wordId(wordId)
                 .isLearned(isLearned)
                 .build();
-        wordStatisticRepository.save(wordStatistic);
+        wordStatisticRepository.append(wordStatistic);
     }
 }

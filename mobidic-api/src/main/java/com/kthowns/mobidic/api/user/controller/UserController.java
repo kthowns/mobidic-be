@@ -1,11 +1,11 @@
 package com.kthowns.mobidic.api.user.controller;
 
+import com.kthowns.mobidic.api.auth.model.AuthUser;
 import com.kthowns.mobidic.api.user.dto.request.SignUpRequestDto;
 import com.kthowns.mobidic.common.dto.ErrorResponse;
 import com.kthowns.mobidic.common.dto.GeneralResponse;
 import com.kthowns.mobidic.api.user.dto.request.UpdateUserRequestDto;
 import com.kthowns.mobidic.domain.user.model.User;
-import com.kthowns.mobidic.storage.user.jpaentity.UserJpaEntity;
 import com.kthowns.mobidic.domain.user.facade.UserFacade;
 import com.kthowns.mobidic.domain.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -15,7 +15,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -51,9 +50,9 @@ public class UserController {
     })
     @GetMapping("/me")
     public ResponseEntity<GeneralResponse<User>> getMe(
-            @AuthenticationPrincipal UserJpaEntity userJpaEntity
+            @AuthenticationPrincipal AuthUser authUser
     ) {
-        return GeneralResponse.toResponseEntity(OK, userJpaEntity.toModel());
+        return GeneralResponse.toResponseEntity(OK, userService.getUserById(authUser.getId()));
     }
 
     @Operation(
@@ -77,10 +76,10 @@ public class UserController {
     @PatchMapping("/me")
     public ResponseEntity<GeneralResponse<User>> updateMe(
             @RequestBody @Valid UpdateUserRequestDto request,
-            @AuthenticationPrincipal UserJpaEntity userJpaEntity
+            @AuthenticationPrincipal AuthUser authUser
     ) {
         return GeneralResponse.toResponseEntity(OK,
-                userService.updateUser(userJpaEntity.getId(), request.getNickname(), request.getPassword()));
+                userService.updateUser(authUser.getId(), request.getNickname(), request.getPassword()));
     }
 
     @Operation(
@@ -101,10 +100,10 @@ public class UserController {
     })
     @DeleteMapping("/me")
     public ResponseEntity<GeneralResponse<User>> deactivateUser(
-            @AuthenticationPrincipal UserJpaEntity userJpaEntity
+            @AuthenticationPrincipal AuthUser authUser
     ) {
         return GeneralResponse.toResponseEntity(OK,
-                userService.deactivateUser(userJpaEntity.getId()));
+                userService.deactivateUser(authUser.getId()));
     }
 
     @Operation(

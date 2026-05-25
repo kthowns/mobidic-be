@@ -23,8 +23,8 @@ public class UserFacade {
     public void signUp(String email, String nickname, String password, List<Long> agreeTermIds) {
         termService.validateSignUpAgreement(agreeTermIds);
         User user = userService.registerUser(email, nickname, password);
-        termService.addUserAgreement(user.getId(), agreeTermIds);
+        termService.addUserAgreement(user.id(), agreeTermIds);
 
-        presetVocabularyService.copyAllPresetToUser(user.getId());
+        presetVocabularyService.copyAllPresetToUser(user.id());
     }
 }
