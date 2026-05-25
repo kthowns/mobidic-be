@@ -25,14 +25,14 @@ public class KakaoAuthFacade {
     }
 
     private User getOrCreateUser(OAuthUserInfo oauthUserInfo) {
-        return kakaoAuthService.getUserByKakaoId(Long.parseLong(oauthUserInfo.getSocialId()))
+        return kakaoAuthService.getUserByKakaoId(Long.parseLong(oauthUserInfo.socialId()))
                 .orElseGet(() -> {
                     User user = userService.registerKakaoUser(
-                            Long.parseLong(oauthUserInfo.getSocialId()),
-                            oauthUserInfo.getEmail(),
-                            oauthUserInfo.getNickname()
+                            Long.parseLong(oauthUserInfo.socialId()),
+                            oauthUserInfo.email(),
+                            oauthUserInfo.nickname()
                     );
-                    presetVocabularyService.copyAllPresetToUser(user.getId());
+                    presetVocabularyService.copyAllPresetToUser(user.id());
 
                     return user;
                 });

@@ -1,12 +1,11 @@
 package com.kthowns.mobidic.storage.statistic.repository.jpa;
 
-import com.kthowns.mobidic.common.code.GeneralResponseCode;
-import com.kthowns.mobidic.common.exception.ApiException;
 import com.kthowns.mobidic.domain.statistic.model.WordStatistic;
 import com.kthowns.mobidic.domain.statistic.repository.WordStatisticRepository;
 import com.kthowns.mobidic.storage.statistic.jpaentity.WordStatisticJpaEntity;
 import com.kthowns.mobidic.storage.statistic.jparepository.WordStatisticJpaRepository;
 import com.kthowns.mobidic.storage.word.jpaentity.WordJpaEntity;
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -19,18 +18,22 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class WordStatisticRepositoryImpl implements WordStatisticRepository {
     private final WordStatisticJpaRepository wordStatisticJpaRepository;
+    private final EntityManager em;
 
     @Override
-    public void save(WordStatistic wordStatistic) {
-        WordStatisticJpaEntity entity = wordStatisticJpaRepository.findById(wordStatistic.getWordId())
-                .orElseGet(() -> WordStatisticJpaEntity.builder()
-                        .word(WordJpaEntity.builder().id(wordStatistic.getWordId()).build())
-                        .build());
+    public void append(WordStatistic wordStatistic) {
+        WordJpaEntity wordRef =
+                em.getReference(WordJpaEntity.class, wordStatistic.wordId());
+        WordStatisticJpaEntity wordStatisticJpaEntity = WordStatisticJpaEntity.builder()
+                .word(wordRef)
+                .build();
 
-        // 도메인 모델의 필드들을 엔티티에 반영 (increaseCount 등은 엔티티 메서드 활용 가능하지만 여기선 필드 세팅)
-        // 현재 엔티티 구조상 Setter가 제한적이므로, 도메인 모델의 값을 직접 넣어주는 방식으로 구현
-        updateEntityFromModel(entity, wordStatistic);
-        wordStatisticJpaRepository.save(entity);
+        wordStatisticJpaRepository.save(wordStatisticJpaEntity);
+    }
+
+    @Override
+    public void update(WordStatistic wordStatistic) {
+
     }
 
     @Override
@@ -62,15 +65,5 @@ public class WordStatisticRepositoryImpl implements WordStatisticRepository {
     @Override
     public Optional<Double> calculateVocabularyLearningRate(UUID vocabularyId, UUID userId) {
         return wordStatisticJpaRepository.getVocabularyLearningRate(vocabularyId, userId);
-    }
-
-    private void updateEntityFromModel(WordStatisticJpaEntity entity, WordStatistic model) {
-        entity.update(
-                model.getCorrectCount(),
-                model.getIncorrectCount(),
-                model.isLearned(),
-                model.getDifficulty(),
-                model.getAccuracy()
-        );
     }
 }

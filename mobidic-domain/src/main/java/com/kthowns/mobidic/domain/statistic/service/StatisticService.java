@@ -45,8 +45,8 @@ public class StatisticService {
         statisticUpdater.update(
                 userId, 
                 wordId, 
-                wordStatistic.getCorrectCount(), 
-                wordStatistic.getIncorrectCount(), 
+                wordStatistic.correctCount(), 
+                wordStatistic.incorrectCount(), 
                 !wordStatistic.isLearned()
         );
     }
@@ -58,8 +58,8 @@ public class StatisticService {
         statisticUpdater.update(
                 userId,
                 wordId,
-                wordStatistic.getCorrectCount() + 1,
-                wordStatistic.getIncorrectCount(),
+                wordStatistic.correctCount() + 1,
+                wordStatistic.incorrectCount(),
                 wordStatistic.isLearned()
         );
     }
@@ -71,8 +71,8 @@ public class StatisticService {
         statisticUpdater.update(
                 userId,
                 wordId,
-                wordStatistic.getCorrectCount(),
-                wordStatistic.getIncorrectCount() + 1,
+                wordStatistic.correctCount(),
+                wordStatistic.incorrectCount() + 1,
                 wordStatistic.isLearned()
         );
     }
@@ -99,7 +99,7 @@ public class StatisticService {
         }
 
         return wordStatistics.stream()
-                .mapToDouble(ws -> statisticCalculator.calculateAverageAccuracy(ws.getCorrectCount(), ws.getIncorrectCount()))
+                .mapToDouble(ws -> statisticCalculator.calculateAverageAccuracy(ws.correctCount(), ws.incorrectCount()))
                 .average()
                 .orElse(0.0);
     }

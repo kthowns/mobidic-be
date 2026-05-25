@@ -16,15 +16,23 @@ public class UserRepositoryImpl implements UserRepository {
     private final UserJpaEntityRepository userJpaEntityRepository;
 
     @Override
-    public User save(User user) {
-        UserJpaEntity entity = userJpaEntityRepository.findById(user.getId() != null ? user.getId() : UUID.randomUUID())
-                .orElseGet(() -> UserJpaEntity.builder()
-                        .email(user.getEmail())
-                        .build());
-        
-        updateEntityFromModel(entity, user);
-        return userJpaEntityRepository.save(entity).toModel();
+    public User append(User user) {
+        UserJpaEntity userJpaEntity = UserJpaEntity.builder()
+                .email(user.email())
+                .password(user.password())
+                .kakaoId(user.kakaoId())
+                .role(user.role())
+                .isActive(user.isActive())
+                .build();
+
+        return userJpaEntityRepository.save(userJpaEntity).toModel();
     }
+
+    @Override
+    public User update(User user) {
+        return null;
+    }
+
 
     @Override
     public Optional<User> readById(UUID id) {
@@ -58,12 +66,12 @@ public class UserRepositoryImpl implements UserRepository {
 
     private void updateEntityFromModel(UserJpaEntity entity, User model) {
         entity.update(
-                model.getNickname(),
-                model.getPassword(),
-                model.getRole(),
-                model.getIsActive(),
-                model.getDeactivatedAt(),
-                model.getKakaoId()
+                model.nickname(),
+                model.password(),
+                model.role(),
+                model.isActive(),
+                model.deactivatedAt(),
+                model.kakaoId()
         );
     }
 }

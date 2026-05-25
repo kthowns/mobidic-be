@@ -18,14 +18,14 @@ public class UserRemover {
         User user = userReader.readById(userId);
         
         User deactivatedUser = User.builder()
-                .id(user.getId())
-                .kakaoId(user.getKakaoId())
-                .email(user.getEmail())
-                .nickname(user.getNickname())
-                .password(user.getPassword())
-                .role(user.getRole())
+                .id(user.id())
+                .kakaoId(user.kakaoId())
+                .email(user.email())
+                .nickname(user.nickname())
+                .password(user.password())
+                .role(user.role())
                 .isActive(false)
-                .createdAt(user.getCreatedAt())
+                .createdAt(user.createdAt())
                 .deactivatedAt(LocalDateTime.now())
                 .build();
         return userRepository.save(deactivatedUser);

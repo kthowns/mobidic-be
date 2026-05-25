@@ -6,6 +6,7 @@ import com.kthowns.mobidic.domain.word.model.Word;
 import com.kthowns.mobidic.domain.word.model.WordDetail;
 import com.kthowns.mobidic.domain.word.repository.WordRepository;
 import com.kthowns.mobidic.storage.vocabulary.jpaentity.VocabularyJpaEntity;
+import com.kthowns.mobidic.storage.vocabulary.jparepository.VocabularyJpaRepository;
 import com.kthowns.mobidic.storage.word.jpaentity.WordJpaEntity;
 import com.kthowns.mobidic.storage.word.jparepository.WordJpaRepository;
 import lombok.RequiredArgsConstructor;
@@ -19,14 +20,18 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class WordRepositoryImpl implements WordRepository {
     private final WordJpaRepository wordJpaRepository;
+    private final VocabularyJpaRepository vocabularyJpaRepository;
 
     @Override
-    public void append(Word word) {
+    public Word append(Word word) {
+        VocabularyJpaEntity vocabulary = vocabularyJpaRepository.findById(word.vocabularyId())
+                .orElseThrow(() -> new IllegalArgumentException("Vocabulary not found: " + word.vocabularyId()));
+
         WordJpaEntity wordJpaEntity = WordJpaEntity.builder()
-                .expression(word.getExpression())
-                .vocabulary(VocabularyJpaEntity.builder().id(word.getVocabularyId()).build())
+                .expression(word.expression())
+                .vocabulary(vocabulary)
                 .build();
-        wordJpaRepository.save(wordJpaEntity);
+        return wordJpaRepository.save(wordJpaEntity).toModel();
     }
 
     @Override
@@ -42,10 +47,10 @@ public class WordRepositoryImpl implements WordRepository {
 
     @Override
     public void update(Word word) {
-        WordJpaEntity wordJpaEntity = wordJpaRepository.findById(word.getId())
+        WordJpaEntity wordJpaEntity = wordJpaRepository.findById(word.id())
                 .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_WORD));
         
-        wordJpaEntity.update(word.getExpression());
+        wordJpaEntity.update(word.expression());
         wordJpaRepository.save(wordJpaEntity);
     }
 

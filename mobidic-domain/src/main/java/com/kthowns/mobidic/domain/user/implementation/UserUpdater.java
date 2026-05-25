@@ -17,14 +17,14 @@ public class UserUpdater {
         User user = userReader.readById(userId);
         
         User updatedUser = User.builder()
-                .id(user.getId())
-                .kakaoId(user.getKakaoId())
-                .email(user.getEmail())
-                .nickname(nickname != null ? nickname : user.getNickname())
-                .password(password != null ? password : user.getPassword())
-                .role(user.getRole())
-                .isActive(user.getIsActive())
-                .createdAt(user.getCreatedAt())
+                .id(user.id())
+                .kakaoId(user.kakaoId())
+                .email(user.email())
+                .nickname(nickname != null ? nickname : user.nickname())
+                .password(password != null ? password : user.password())
+                .role(user.role())
+                .isActive(user.isActive())
+                .createdAt(user.createdAt())
                 .build();
                 
         return userRepository.save(updatedUser);

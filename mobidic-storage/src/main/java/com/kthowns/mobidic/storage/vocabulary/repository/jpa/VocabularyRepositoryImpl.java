@@ -6,11 +6,11 @@ import com.kthowns.mobidic.domain.vocabulary.model.Vocabulary;
 import com.kthowns.mobidic.domain.vocabulary.model.VocabularyDetail;
 import com.kthowns.mobidic.domain.vocabulary.repository.VocabularyRepository;
 import com.kthowns.mobidic.storage.user.jpaentity.UserJpaEntity;
+import com.kthowns.mobidic.storage.user.jparepository.UserJpaEntityRepository;
 import com.kthowns.mobidic.storage.vocabulary.jpaentity.VocabularyJpaEntity;
 import com.kthowns.mobidic.storage.vocabulary.jparepository.VocabularyJpaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -20,6 +20,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class VocabularyRepositoryImpl implements VocabularyRepository {
     private final VocabularyJpaRepository vocabularyJpaRepository;
+    private final UserJpaEntityRepository userJpaEntityRepository;
 
     @Override
     public List<VocabularyDetail> readDetailsByUserId(UUID userId) {
@@ -27,34 +28,21 @@ public class VocabularyRepositoryImpl implements VocabularyRepository {
     }
 
     @Override
-    public void append(Vocabulary vocabulary) {
+    public Vocabulary append(Vocabulary vocabulary) {
+        UserJpaEntity user = userJpaEntityRepository.findById(vocabulary.userId())
+                .orElseThrow(() -> new IllegalArgumentException("User not found: " + vocabulary.userId()));
+
         VocabularyJpaEntity vocabularyJpaEntity = VocabularyJpaEntity.builder()
-                .title(vocabulary.getTitle())
-                .description(vocabulary.getDescription())
-                .user(UserJpaEntity.builder().id(vocabulary.getUserId()).build())
+                .title(vocabulary.title())
+                .description(vocabulary.description())
+                .user(user)
                 .build();
-        vocabularyJpaRepository.save(vocabularyJpaEntity);
-    }
-
-    @Override
-    public void save(Vocabulary vocabulary) {
-        VocabularyJpaEntity entity = vocabularyJpaRepository.findById(vocabulary.getId())
-                .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_VOCAB));
-
-        entity.update(vocabulary.getTitle(), vocabulary.getDescription());
-        entity.syncWordCount(vocabulary.getWordCount());
-        vocabularyJpaRepository.save(entity);
+        return vocabularyJpaRepository.save(vocabularyJpaEntity).toModel();
     }
 
     @Override
     public Optional<VocabularyDetail> readDetailById(UUID vocabularyId, UUID userId) {
         return vocabularyJpaRepository.findVocabularyDetail(vocabularyId, userId);
-    }
-
-    @Override
-    public Optional<Vocabulary> findForUpdate(UUID vocabularyId, UUID userId) {
-        return vocabularyJpaRepository.findForUpdate(vocabularyId, userId)
-                .map(VocabularyJpaEntity::toModel);
     }
 
     @Override
@@ -81,7 +69,6 @@ public class VocabularyRepositoryImpl implements VocabularyRepository {
 
     @Override
     public void update(String title, String description, UUID vocabularyId, UUID userId) {
-
         VocabularyJpaEntity vocabularyJpaEntity = vocabularyJpaRepository.findForUpdate(vocabularyId, userId)
                 .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_VOCAB));
 

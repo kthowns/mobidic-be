@@ -44,7 +44,7 @@ public class KakaoAuthController {
             @RequestParam(value = "platform", defaultValue = "web") String platform
     ) {
         final User user = kakaoAuthFacade.kakaoLogin(code, isDev, platform);
-        final String accessToken = jwtProvider.generateToken(user.getId(), user.getRole().name());
+        final String accessToken = jwtProvider.generateToken(user.id(), user.role().name());
         final String redirectUrl = kakaoProperties.getFrontendCallbackUrl(isDev, platform);
 
         return new RedirectView(redirectUrl + "?access_token=" + accessToken);

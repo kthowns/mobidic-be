@@ -7,6 +7,7 @@ import com.kthowns.mobidic.domain.definition.repository.DefinitionRepository;
 import com.kthowns.mobidic.storage.definition.jpaentity.DefinitionJpaEntity;
 import com.kthowns.mobidic.storage.definition.jparepository.DefinitionJpaRepository;
 import com.kthowns.mobidic.storage.word.jpaentity.WordJpaEntity;
+import com.kthowns.mobidic.storage.word.jparepository.WordJpaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -19,13 +20,17 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class DefinitionRepositoryImpl implements DefinitionRepository {
     private final DefinitionJpaRepository definitionJpaRepository;
+    private final WordJpaRepository wordJpaRepository;
 
     @Override
     public void append(Definition definition) {
+        WordJpaEntity word = wordJpaRepository.findById(definition.wordId())
+                .orElseThrow(() -> new IllegalArgumentException("Word not found: " + definition.wordId()));
+
         DefinitionJpaEntity definitionJpaEntity = DefinitionJpaEntity.builder()
-                .meaning(definition.getMeaning())
-                .part(definition.getPart())
-                .word(WordJpaEntity.builder().id(definition.getWordId()).build())
+                .meaning(definition.meaning())
+                .part(definition.part())
+                .word(word)
                 .build();
         definitionJpaRepository.save(definitionJpaEntity);
     }
@@ -45,10 +50,10 @@ public class DefinitionRepositoryImpl implements DefinitionRepository {
 
     @Override
     public void update(Definition definition) {
-        DefinitionJpaEntity definitionJpaEntity = definitionJpaRepository.findById(definition.getId())
+        DefinitionJpaEntity definitionJpaEntity = definitionJpaRepository.findById(definition.id())
                 .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_DEF));
         
-        definitionJpaEntity.update(definition.getMeaning(), definition.getPart());
+        definitionJpaEntity.update(definition.meaning(), definition.part());
         definitionJpaRepository.save(definitionJpaEntity);
     }
 

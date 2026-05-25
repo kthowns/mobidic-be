@@ -24,7 +24,7 @@ public class BlankQuizGenerator extends QuizGenerator {
 
             if (wordDetail.definitions() != null && !wordDetail.definitions().isEmpty()) {
                 int randIdx = ThreadLocalRandom.current().nextInt(wordDetail.definitions().size());
-                option = wordDetail.definitions().get(randIdx).getMeaning();
+                option = wordDetail.definitions().get(randIdx).meaning();
             }
 
             options.add(option);
@@ -55,12 +55,9 @@ public class BlankQuizGenerator extends QuizGenerator {
                             .userId(memberId)
                             .stem(new String(stem))
                             .answer(wordDetail.expression())
+                            .options(List.of(option))
                             .build()
             );
-        }
-
-        for (int i = 0; i < wordDetails.size(); i++) {
-            quizzes.get(i).setOptions(List.of(options.get(i)));
         }
 
         return quizzes;

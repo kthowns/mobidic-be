@@ -56,7 +56,7 @@ public class DefinitionService {
     ) {
         Definition definition = definitionReader.readByIdAndUserId(defId, userId);
 
-        definitionValidator.validateMeaningUpdateDuplication(meaning, definition.getWordId(), defId);
+        definitionValidator.validateMeaningUpdateDuplication(meaning, definition.wordId(), defId);
 
         definitionUpdater.update(defId, meaning, part);
     }

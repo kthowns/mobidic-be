@@ -31,7 +31,7 @@ public class WordService {
     private final StatisticAppender statisticAppender;
 
     @Transactional
-    public void addWord(UUID userId, UUID vocabId, String expression) {
+    public Word addWord(UUID userId, UUID vocabId, String expression) {
         validateVocabularyExist(vocabId, userId);
 
         wordValidator.validateExpressionDuplication(expression, vocabId);
@@ -39,10 +39,12 @@ public class WordService {
         Word word = wordAppender.append(expression, vocabId);
 
         // WordStatistic 생성 로직
-        statisticAppender.append(word.getId(), false);
+        statisticAppender.append(word.id(), false);
 
         // Vocabulary 단어 수 원자적 업데이트
         vocabularyManager.increaseWordCount(vocabId);
+
+        return word;
     }
 
     @Transactional(readOnly = true)
@@ -68,7 +70,7 @@ public class WordService {
     public void updateWord(UUID userId, UUID wordId, String expression) {
         Word word = wordReader.readByIdAndUserId(wordId, userId);
 
-        wordValidator.validateExpressionUpdateDuplication(expression, word.getVocabularyId(), wordId);
+        wordValidator.validateExpressionUpdateDuplication(expression, word.vocabularyId(), wordId);
 
         wordUpdater.update(wordId, expression);
     }
@@ -80,7 +82,7 @@ public class WordService {
         wordRemover.remove(wordId, userId);
 
         // Vocabulary 단어 수 원자적 업데이트
-        vocabularyManager.decreaseWordCount(word.getVocabularyId());
+        vocabularyManager.decreaseWordCount(word.vocabularyId());
     }
 
     private void validateVocabularyExist(UUID vocabularyId, UUID userId) {
