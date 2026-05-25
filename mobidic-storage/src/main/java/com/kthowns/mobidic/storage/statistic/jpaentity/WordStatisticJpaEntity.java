@@ -3,7 +3,10 @@ package com.kthowns.mobidic.storage.statistic.jpaentity;
 import com.kthowns.mobidic.domain.statistic.model.WordStatistic;
 import com.kthowns.mobidic.storage.word.jpaentity.WordJpaEntity;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
@@ -27,11 +30,11 @@ public class WordStatisticJpaEntity {
 
     @Column(name = "correct_count", nullable = false)
     @Builder.Default
-    private Long correctCount = 0L;
+    private long correctCount = 0L;
 
     @Column(name = "incorrect_count", nullable = false)
     @Builder.Default
-    private Long incorrectCount = 0L;
+    private long incorrectCount = 0L;
 
     @Column(name = "difficulty", nullable = false)
     @Builder.Default

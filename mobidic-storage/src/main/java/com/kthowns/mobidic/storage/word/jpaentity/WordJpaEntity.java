@@ -5,7 +5,7 @@ import com.kthowns.mobidic.storage.vocabulary.jpaentity.VocabularyJpaEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -15,7 +15,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Data
+@Getter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
@@ -46,10 +46,10 @@ public class WordJpaEntity {
 
     public Word toModel() {
         return Word.builder()
-                .id(this.id)
-                .vocabularyId(this.vocabulary.getId())
-                .expression(this.expression)
-                .createdAt(this.createdAt)
+                .id(this.getId())
+                .vocabularyId(this.getVocabulary().getId())
+                .expression(this.getExpression())
+                .createdAt(this.getCreatedAt())
                 .build();
     }
 }

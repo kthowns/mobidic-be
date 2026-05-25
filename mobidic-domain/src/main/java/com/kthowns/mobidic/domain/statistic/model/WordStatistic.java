@@ -4,7 +4,7 @@ import lombok.*;
 
 import java.util.UUID;
 
-@Data
+@Getter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
@@ -15,25 +15,5 @@ public class WordStatistic {
     private boolean isLearned;
     private double difficulty;
     private double accuracy;
-
-    public void setLearned(boolean isLearned) {
-        this.isLearned = isLearned;
-    }
-
-    public void setCorrectCount(Long correctCount) {
-        this.correctCount = correctCount;
-    }
-
-    public void setIncorrectCount(Long incorrectCount) {
-        this.incorrectCount = incorrectCount;
-    }
-
-    public void setDifficulty(double difficulty) {
-        this.difficulty = difficulty;
-    }
-
-    public void setAccuracy(double accuracy) {
-        this.accuracy = accuracy;
-    }
 }
 

@@ -17,19 +17,14 @@ public class Vocabulary {
     private UUID userId;
     private String title;
     private String description;
-    private Long wordCount;
+    private long wordCount;
     private LocalDateTime createdAt;
 
-    public void addWordCount() {
-        if (this.wordCount == null) this.wordCount = 0L;
+    public void increaseWordCount() {
         this.wordCount++;
     }
 
-    public void removeWordCount() {
-        if (this.wordCount == null || this.wordCount <= 0) {
-            this.wordCount = 0L;
-            return;
-        }
+    public void decreaseWordCount() {
         this.wordCount--;
     }
 }

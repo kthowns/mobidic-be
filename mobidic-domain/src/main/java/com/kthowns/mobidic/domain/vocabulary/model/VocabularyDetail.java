@@ -5,7 +5,7 @@ import lombok.Builder;
 @Builder
 public record VocabularyDetail(
         Vocabulary vocabulary,
-        Double learningRate,
-        Double accuracy
+        double learningRate,
+        double accuracy
 ) {
 }

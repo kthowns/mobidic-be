@@ -4,7 +4,10 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.kthowns.mobidic.domain.user.model.User;
 import com.kthowns.mobidic.domain.user.model.UserRole;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -39,7 +42,7 @@ public class UserJpaEntity {
 
     @Column(name = "is_active", nullable = false)
     @Builder.Default
-    private Boolean isActive = true;
+    private boolean isActive = true;
 
     @Column(name = "role", nullable = false)
     @Enumerated(EnumType.STRING)

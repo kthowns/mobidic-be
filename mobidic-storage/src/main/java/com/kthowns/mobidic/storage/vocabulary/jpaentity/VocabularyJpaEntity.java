@@ -3,7 +3,10 @@ package com.kthowns.mobidic.storage.vocabulary.jpaentity;
 import com.kthowns.mobidic.domain.vocabulary.model.Vocabulary;
 import com.kthowns.mobidic.storage.user.jpaentity.UserJpaEntity;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.springframework.data.annotation.CreatedDate;
@@ -63,12 +66,12 @@ public class VocabularyJpaEntity {
 
     public Vocabulary toModel() {
         return Vocabulary.builder()
-                .id(this.id)
-                .userId(this.user.getId())
-                .title(this.title)
-                .description(this.description)
-                .wordCount(this.wordCount)
-                .createdAt(this.createdAt)
+                .id(this.getId())
+                .userId(this.getUser().getId())
+                .title(this.getTitle())
+                .description(this.getDescription())
+                .wordCount(this.getWordCount())
+                .createdAt(this.getCreatedAt())
                 .build();
     }
 }

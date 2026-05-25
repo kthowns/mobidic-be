@@ -18,8 +18,10 @@ public class User {
     private String email;
     private String nickname;
     private String password;
-    private UserRole role;
-    private Boolean isActive;
+    @Builder.Default
+    private UserRole role = UserRole.USER;
+    @Builder.Default
+    private boolean isActive = true;
     private LocalDateTime createdAt;
     private LocalDateTime deactivatedAt;
 }
