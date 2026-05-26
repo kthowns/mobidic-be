@@ -16,17 +16,9 @@ public class UserUpdater {
     public User update(UUID userId, String nickname, String password) {
         User user = userReader.readById(userId);
 
-        User updatedUser = User.builder()
-                .id(user.id())
-                .kakaoId(user.kakaoId())
-                .email(user.email())
-                .nickname(nickname != null ? nickname : user.nickname())
-                .password(password != null ? password : user.password())
-                .role(user.role())
-                .isActive(user.isActive())
-                .createdAt(user.createdAt())
-                .build();
-
-        return userRepository.update(updatedUser);
+        return userRepository.update(
+                user.changeNickname(nickname)
+                        .changePassword(password)
+        );
     }
 }

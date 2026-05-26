@@ -1,5 +1,7 @@
 package com.kthowns.mobidic.storage.user.repository.jpa;
 
+import com.kthowns.mobidic.common.code.GeneralResponseCode;
+import com.kthowns.mobidic.common.exception.ApiException;
 import com.kthowns.mobidic.domain.user.model.User;
 import com.kthowns.mobidic.domain.user.repository.UserRepository;
 import com.kthowns.mobidic.storage.user.jpaentity.UserJpaEntity;
@@ -17,13 +19,7 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public User append(User user) {
-        UserJpaEntity userJpaEntity = UserJpaEntity.builder()
-                .email(user.email())
-                .password(user.password())
-                .kakaoId(user.kakaoId())
-                .role(user.role())
-                .isActive(user.isActive())
-                .build();
+        UserJpaEntity userJpaEntity = UserJpaEntity.createFromModel(user);
 
         return userJpaEntityRepository.save(userJpaEntity).toModel();
     }
@@ -31,33 +27,16 @@ public class UserRepositoryImpl implements UserRepository {
     @Override
     public User update(User user) {
         UserJpaEntity userJpaEntity = userJpaEntityRepository.findById(user.id())
-                .orElseThrow(() -> new IllegalArgumentException("User not found: " + user.id()));
+                .orElseThrow(() -> new ApiException(GeneralResponseCode.INVALID_REQUEST));
 
-        userJpaEntity.update(
-                user.nickname(),
-                user.password(),
-                user.role(),
-                user.isActive(),
-                user.deactivatedAt(),
-                user.kakaoId()
-        );
+        userJpaEntity.updateFromModel(user);
+
         return userJpaEntity.toModel();
     }
-
 
     @Override
     public Optional<User> readById(UUID id) {
         return userJpaEntityRepository.findById(id).map(UserJpaEntity::toModel);
-    }
-
-    @Override
-    public Optional<User> readByEmail(String email) {
-        return userJpaEntityRepository.findByEmail(email).map(UserJpaEntity::toModel);
-    }
-
-    @Override
-    public Optional<User> readByKakaoId(Long kakaoId) {
-        return userJpaEntityRepository.findByKakaoId(kakaoId).map(UserJpaEntity::toModel);
     }
 
     @Override

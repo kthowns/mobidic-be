@@ -14,20 +14,26 @@ public class UserValidator {
     private final UserRepository userRepository;
 
     public void validateEmailDuplication(String email) {
-        if (userRepository.existsByEmail(email)) {
+        if (email == null || userRepository.existsByEmail(email)) {
             throw new ApiException(GeneralResponseCode.DUPLICATED_EMAIL);
         }
     }
 
     public void validateNicknameDuplication(String nickname) {
-        if (userRepository.existsByNickname(nickname)) {
+        if (nickname == null || userRepository.existsByNickname(nickname)) {
             throw new ApiException(GeneralResponseCode.DUPLICATED_NICKNAME);
         }
     }
 
     public void validateNicknameUpdateDuplication(String nickname, UUID userId) {
-        if (userRepository.existsByNicknameAndIdNot(nickname, userId)) {
+        if (nickname == null || userRepository.existsByNicknameAndIdNot(nickname, userId)) {
             throw new ApiException(GeneralResponseCode.DUPLICATED_NICKNAME);
+        }
+    }
+
+    public void validatePassword(String plainPassword) {
+        if (plainPassword == null || plainPassword.length() < 8) {
+            throw new ApiException(GeneralResponseCode.INVALID_REQUEST, "비밀번호는 8자 이상이어야 합니다.");
         }
     }
 }

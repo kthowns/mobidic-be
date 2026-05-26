@@ -27,8 +27,11 @@ public class UserService {
     public User registerUser(String email, String nickname, String password) {
         userValidator.validateEmailDuplication(email);
         userValidator.validateNicknameDuplication(nickname);
+        userValidator.validatePassword(password);
 
-        return userAppender.append(email, nickname, passwordEncoderClient.encode(password), UserRole.USER);
+        String encodedPassword = passwordEncoderClient.encode(password);
+
+        return userAppender.append(email, nickname, encodedPassword, UserRole.USER);
     }
 
     @Transactional
@@ -38,17 +41,17 @@ public class UserService {
                 kakaoId,
                 email,
                 nickname,
-                passwordEncoderClient.encode(UUID.randomUUID().toString())
+                passwordEncoderClient.encode(UUID.randomUUID().toString()),
+                UserRole.USER
         );
     }
 
     @Transactional
     public User updateUser(UUID userId, String nickname, String password) {
-        if (nickname != null) {
-            userValidator.validateNicknameUpdateDuplication(nickname, userId);
-        }
+        userValidator.validateNicknameUpdateDuplication(nickname, userId);
+        userValidator.validatePassword(password);
 
-        String encodedPassword = password != null ? passwordEncoderClient.encode(password) : null;
+        String encodedPassword = passwordEncoderClient.encode(password);
 
         return userUpdater.update(userId, nickname, encodedPassword);
     }

@@ -1,6 +1,5 @@
 package com.kthowns.mobidic.storage.user.jpaentity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.kthowns.mobidic.domain.user.model.User;
 import com.kthowns.mobidic.domain.user.model.UserRole;
 import jakarta.persistence.*;
@@ -37,7 +36,6 @@ public class UserJpaEntity {
     private String nickname;
 
     @Column(name = "password", nullable = false)
-    @JsonIgnore
     private String password;
 
     @Column(name = "is_active", nullable = false)
@@ -57,25 +55,38 @@ public class UserJpaEntity {
     private LocalDateTime deactivatedAt;
 
     public User toModel() {
-        return User.builder()
-                .id(this.id)
-                .kakaoId(this.kakaoId)
-                .email(this.email)
-                .nickname(this.nickname)
-                .password(this.password)
-                .role(this.role)
-                .isActive(this.isActive)
-                .createdAt(this.createdAt)
-                .deactivatedAt(this.deactivatedAt)
-                .build();
+        return new User(
+                this.getId(),
+                this.getKakaoId(),
+                this.getEmail(),
+                this.getNickname(),
+                this.getPassword(),
+                this.getRole(),
+                this.isActive,
+                this.createdAt,
+                this.deactivatedAt
+        );
     }
 
-    public void update(String nickname, String password, UserRole role, Boolean isActive, LocalDateTime deactivatedAt, Long kakaoId) {
-        this.nickname = nickname;
-        this.password = password;
-        this.role = role;
-        this.isActive = isActive;
-        this.deactivatedAt = deactivatedAt;
-        this.kakaoId = kakaoId;
+    public static UserJpaEntity createFromModel(User user) {
+        return new UserJpaEntity(
+                user.id(),
+                user.kakaoId(),
+                user.email(),
+                user.nickname(),
+                user.password(),
+                user.isActive(),
+                user.role(),
+                user.createdAt(),
+                user.deactivatedAt()
+        );
+    }
+
+    public void updateFromModel(User user) {
+        this.nickname = user.nickname();
+        this.password = user.password();
+        this.role = user.role();
+        this.isActive = user.isActive();
+        this.deactivatedAt = user.deactivatedAt();
     }
 }
