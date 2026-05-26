@@ -1,6 +1,5 @@
 package com.kthowns.mobidic.domain.statistic.service;
 
-import com.kthowns.mobidic.domain.statistic.implementation.StatisticCalculator;
 import com.kthowns.mobidic.domain.statistic.implementation.StatisticReader;
 import com.kthowns.mobidic.domain.statistic.implementation.StatisticUpdater;
 import com.kthowns.mobidic.domain.statistic.model.WordStatistic;
@@ -21,7 +20,6 @@ import java.util.UUID;
 public class StatisticService {
     private final StatisticReader statisticReader;
     private final StatisticUpdater statisticUpdater;
-    private final StatisticCalculator statisticCalculator;
     private final VocabularyReader vocabularyReader;
 
     @Transactional(readOnly = true)
@@ -40,41 +38,17 @@ public class StatisticService {
 
     @Transactional
     public void toggleLearnedByWordId(UUID userId, UUID wordId) {
-        WordStatistic wordStatistic = statisticReader.readForUpdate(wordId, userId);
-        
-        statisticUpdater.update(
-                userId, 
-                wordId, 
-                wordStatistic.correctCount(), 
-                wordStatistic.incorrectCount(), 
-                !wordStatistic.isLearned()
-        );
+        statisticUpdater.toggleLearned(userId, wordId);
     }
 
     @Transactional
     public void increaseCorrectCount(UUID userId, UUID wordId) {
-        WordStatistic wordStatistic = statisticReader.readForUpdate(wordId, userId);
-        
-        statisticUpdater.update(
-                userId,
-                wordId,
-                wordStatistic.correctCount() + 1,
-                wordStatistic.incorrectCount(),
-                wordStatistic.isLearned()
-        );
+        statisticUpdater.increaseCorrectCount(userId, wordId);
     }
 
     @Transactional
     public void increaseIncorrectCount(UUID userId, UUID wordId) {
-        WordStatistic wordStatistic = statisticReader.readForUpdate(wordId, userId);
-        
-        statisticUpdater.update(
-                userId,
-                wordId,
-                wordStatistic.correctCount(),
-                wordStatistic.incorrectCount() + 1,
-                wordStatistic.isLearned()
-        );
+        statisticUpdater.increaseIncorrectCount(userId, wordId);
     }
 
     @Transactional(readOnly = true)
@@ -99,7 +73,7 @@ public class StatisticService {
         }
 
         return wordStatistics.stream()
-                .mapToDouble(ws -> statisticCalculator.calculateAverageAccuracy(ws.correctCount(), ws.incorrectCount()))
+                .mapToDouble(ws -> WordStatistic.calculateAverageAccuracy(ws.correctCount(), ws.incorrectCount()))
                 .average()
                 .orElse(0.0);
     }

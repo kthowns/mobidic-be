@@ -66,11 +66,12 @@ public class WordJpaRepositoryCustomImpl implements WordJpaRepositoryCustom {
         Map<UUID, List<Definition>> definitionMap = definitions.stream()
                 .collect(Collectors.groupingBy(
                         tuple -> tuple.get(definition.word.id), // 단어 ID를 Key로
-                        Collectors.mapping(tuple -> Definition.builder()
-                                .id(tuple.get(definition.id))
-                                .meaning(tuple.get(definition.meaning))
-                                .part(tuple.get(definition.part))
-                                .build(), Collectors.toList())
+                        Collectors.mapping(tuple -> Definition.of(
+                                tuple.get(definition.id),
+                                tuple.get(definition.word.id),
+                                tuple.get(definition.meaning),
+                                tuple.get(definition.part)
+                        ), Collectors.toList())
                 ));
 
         return wordDetails.stream()

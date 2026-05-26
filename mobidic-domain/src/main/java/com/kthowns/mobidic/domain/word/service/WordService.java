@@ -3,8 +3,8 @@ package com.kthowns.mobidic.domain.word.service;
 import com.kthowns.mobidic.common.code.GeneralResponseCode;
 import com.kthowns.mobidic.common.exception.ApiException;
 import com.kthowns.mobidic.domain.statistic.implementation.StatisticAppender;
-import com.kthowns.mobidic.domain.vocabulary.implementation.VocabularyManager;
 import com.kthowns.mobidic.domain.vocabulary.implementation.VocabularyReader;
+import com.kthowns.mobidic.domain.vocabulary.implementation.VocabularyUpdater;
 import com.kthowns.mobidic.domain.word.implementation.*;
 import com.kthowns.mobidic.domain.word.model.Word;
 import com.kthowns.mobidic.domain.word.model.WordDetail;
@@ -27,7 +27,7 @@ public class WordService {
     private final WordValidator wordValidator;
 
     private final VocabularyReader vocabularyReader;
-    private final VocabularyManager vocabularyManager;
+    private final VocabularyUpdater vocabularyUpdater;
     private final StatisticAppender statisticAppender;
 
     @Transactional
@@ -39,10 +39,10 @@ public class WordService {
         Word word = wordAppender.append(expression, vocabId);
 
         // WordStatistic 생성 로직
-        statisticAppender.append(word.id(), false);
+        statisticAppender.append(word.id());
 
         // Vocabulary 단어 수 원자적 업데이트
-        vocabularyManager.increaseWordCount(vocabId);
+        vocabularyUpdater.increaseWordCount(vocabId);
 
         return word;
     }
@@ -82,7 +82,7 @@ public class WordService {
         wordRemover.remove(wordId, userId);
 
         // Vocabulary 단어 수 원자적 업데이트
-        vocabularyManager.decreaseWordCount(word.vocabularyId());
+        vocabularyUpdater.decreaseWordCount(word.vocabularyId());
     }
 
     private void validateVocabularyExist(UUID vocabularyId, UUID userId) {

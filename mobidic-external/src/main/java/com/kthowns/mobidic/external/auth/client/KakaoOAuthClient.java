@@ -80,10 +80,10 @@ public class KakaoOAuthClient implements OAuthClient {
                 })
                 .body(KakaoUserInfo.class);
 
-        return OAuthUserInfo.builder()
-                .socialId(String.valueOf(userInfo.getId()))
-                .email(userInfo.getKakaoAccount().getEmail())
-                .nickname(userInfo.getKakaoAccount().getProfile().getNickname())
-                .build();
+        return OAuthUserInfo.of(
+                String.valueOf(userInfo.getId()),
+                userInfo.getKakaoAccount().getEmail(),
+                userInfo.getKakaoAccount().getProfile().getNickname()
+        );
     }
 }

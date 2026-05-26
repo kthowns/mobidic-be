@@ -12,11 +12,8 @@ import java.util.UUID;
 public class StatisticAppender {
     private final WordStatisticRepository wordStatisticRepository;
 
-    public void append(UUID wordId, boolean isLearned) {
-        WordStatistic wordStatistic = WordStatistic.builder()
-                .wordId(wordId)
-                .isLearned(isLearned)
-                .build();
+    public void append(UUID wordId) {
+        WordStatistic wordStatistic = WordStatistic.create(wordId);
         wordStatisticRepository.append(wordStatistic);
     }
 }

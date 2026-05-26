@@ -1,5 +1,7 @@
 package com.kthowns.mobidic.domain.statistic.implementation;
 
+import com.kthowns.mobidic.common.code.GeneralResponseCode;
+import com.kthowns.mobidic.common.exception.ApiException;
 import com.kthowns.mobidic.domain.statistic.model.WordStatistic;
 import com.kthowns.mobidic.domain.statistic.repository.WordStatisticRepository;
 import lombok.RequiredArgsConstructor;
@@ -11,19 +13,25 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class StatisticUpdater {
     private final WordStatisticRepository wordStatisticRepository;
-    private final StatisticCalculator statisticCalculator;
-    private final StatisticReader statisticReader;
 
-    public void update(UUID userId, UUID wordId, Long correctCount, Long incorrectCount, boolean isLearned) {
-        WordStatistic wordStatistic = WordStatistic.builder()
-                .wordId(wordId)
-                .correctCount(correctCount)
-                .incorrectCount(incorrectCount)
-                .isLearned(isLearned)
-                .difficulty(statisticCalculator.calculateDifficulty(correctCount, incorrectCount))
-                .accuracy(statisticCalculator.calculateAccuracy(correctCount, incorrectCount))
-                .build();
-        
-        wordStatisticRepository.update(wordStatistic);
+    public void toggleLearned(UUID userId, UUID wordId) {
+        WordStatistic wordStatistic = wordStatisticRepository.readForUpdate(wordId, userId)
+                .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_STAT));
+
+        wordStatisticRepository.update(wordStatistic.toggleLearned());
+    }
+
+    public void increaseCorrectCount(UUID userId, UUID wordId) {
+        WordStatistic wordStatistic = wordStatisticRepository.readForUpdate(wordId, userId)
+                .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_STAT));
+
+        wordStatisticRepository.update(wordStatistic.increaseCorrectCount());
+    }
+
+    public void increaseIncorrectCount(UUID userId, UUID wordId) {
+        WordStatistic wordStatistic = wordStatisticRepository.readForUpdate(wordId, userId)
+                .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_STAT));
+
+        wordStatisticRepository.update(wordStatistic.increaseIncorrectCount());
     }
 }

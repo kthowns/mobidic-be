@@ -50,7 +50,7 @@ public class VocabularyService {
             String description
     ) {
         vocabularyValidator.validateTitleUpdateDuplication(title, vocabularyId, userId);
-        vocabularyUpdater.update(title, description, vocabularyId, userId);
+        vocabularyUpdater.update(userId, vocabularyId, title, description);
     }
 
     @Transactional

@@ -8,6 +8,10 @@ public record Definition(
         String meaning,
         PartOfSpeech part
 ) {
+    public static Definition of(UUID id, UUID wordId, String meaning, PartOfSpeech part) {
+        return new Definition(id, wordId, meaning, part);
+    }
+
     public static Definition create(UUID wordId, String meaning, PartOfSpeech part) {
         return new Definition(
                 null,

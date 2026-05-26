@@ -13,9 +13,17 @@ public class VocabularyUpdater {
     private final VocabularyRepository vocabularyRepository;
     private final VocabularyReader vocabularyReader;
 
-    public void update(String title, String description, UUID vocabularyId, UUID userId) {
+    public void update(UUID userId, UUID vocabularyId, String title, String description) {
         Vocabulary vocabulary = vocabularyReader.readById(vocabularyId, userId);
 
         vocabularyRepository.update(vocabulary.updateInfo(title, description));
+    }
+
+    public void increaseWordCount(UUID vocabularyId) {
+        vocabularyRepository.increaseWordCount(vocabularyId);
+    }
+
+    public void decreaseWordCount(UUID vocabularyId) {
+        vocabularyRepository.decreaseWordCount(vocabularyId);
     }
 }

@@ -48,22 +48,34 @@ public class WordStatisticJpaEntity {
     @Builder.Default
     private boolean isLearned = false;
 
-    public void update(Long correctCount, Long incorrectCount, boolean isLearned, double difficulty, double accuracy) {
-        this.correctCount = correctCount;
-        this.incorrectCount = incorrectCount;
-        this.isLearned = isLearned;
-        this.difficulty = difficulty;
-        this.accuracy = accuracy;
+    public void updateFromModel(WordStatistic wordStatistic) {
+        this.correctCount = wordStatistic.correctCount();
+        this.incorrectCount = wordStatistic.incorrectCount();
+        this.difficulty = wordStatistic.difficulty();
+        this.accuracy = wordStatistic.accuracy();
+        this.isLearned = wordStatistic.isLearned();
+    }
+
+    public static WordStatisticJpaEntity fromModel(WordStatistic wordStatistic, WordJpaEntity word) {
+        return new WordStatisticJpaEntity(
+                wordStatistic.wordId(),
+                word,
+                wordStatistic.correctCount(),
+                wordStatistic.incorrectCount(),
+                wordStatistic.difficulty(),
+                wordStatistic.accuracy(),
+                wordStatistic.isLearned()
+        );
     }
 
     public WordStatistic toModel() {
-        return WordStatistic.builder()
-                .wordId(this.word.getId())
-                .correctCount(this.correctCount)
-                .incorrectCount(this.incorrectCount)
-                .isLearned(this.isLearned)
-                .difficulty(this.difficulty)
-                .accuracy(this.accuracy)
-                .build();
+        return new WordStatistic(
+                this.wordId,
+                this.correctCount,
+                this.incorrectCount,
+                this.isLearned,
+                this.difficulty,
+                this.accuracy
+        );
     }
 }

@@ -20,11 +20,6 @@ public class StatisticReader {
                 .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_STAT));
     }
 
-    public WordStatistic readForUpdate(UUID wordId, UUID userId) {
-        return wordStatisticRepository.readForUpdate(wordId, userId)
-                .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_STAT));
-    }
-
     public List<WordStatistic> readByVocabularyId(UUID vocabularyId) {
         return wordStatisticRepository.readByVocabularyId(vocabularyId);
     }

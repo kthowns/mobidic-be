@@ -1,5 +1,7 @@
 package com.kthowns.mobidic.storage.statistic.repository.jpa;
 
+import com.kthowns.mobidic.common.code.GeneralResponseCode;
+import com.kthowns.mobidic.common.exception.ApiException;
 import com.kthowns.mobidic.domain.statistic.model.WordStatistic;
 import com.kthowns.mobidic.domain.statistic.repository.WordStatisticRepository;
 import com.kthowns.mobidic.storage.statistic.jpaentity.WordStatisticJpaEntity;
@@ -22,28 +24,18 @@ public class WordStatisticRepositoryImpl implements WordStatisticRepository {
 
     @Override
     public void append(WordStatistic wordStatistic) {
-        WordJpaEntity wordRef =
-                em.getReference(WordJpaEntity.class, wordStatistic.wordId());
-        WordStatisticJpaEntity wordStatisticJpaEntity = WordStatisticJpaEntity.builder()
-                .word(wordRef)
-                .build();
+        WordJpaEntity word = em.getReference(WordJpaEntity.class, wordStatistic.wordId());
+        WordStatisticJpaEntity wordStatisticJpaEntity = WordStatisticJpaEntity.fromModel(wordStatistic, word);
 
         wordStatisticJpaRepository.save(wordStatisticJpaEntity);
     }
 
     @Override
     public void update(WordStatistic wordStatistic) {
-        WordStatisticJpaEntity entity = wordStatisticJpaRepository.findById(wordStatistic.wordId())
-                .orElseThrow(() -> new IllegalArgumentException("Word statistic not found: " + wordStatistic.wordId()));
+        WordStatisticJpaEntity wordStatisticJpaEntity = wordStatisticJpaRepository.findById(wordStatistic.wordId())
+                .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_STAT));
 
-        entity.update(
-                wordStatistic.correctCount(),
-                wordStatistic.incorrectCount(),
-                wordStatistic.isLearned(),
-                wordStatistic.difficulty(),
-                wordStatistic.accuracy()
-        );
-        wordStatisticJpaRepository.save(entity);
+        wordStatisticJpaEntity.updateFromModel(wordStatistic);
     }
 
     @Override
