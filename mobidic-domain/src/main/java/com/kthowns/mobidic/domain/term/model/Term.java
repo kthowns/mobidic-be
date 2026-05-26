@@ -1,10 +1,7 @@
 package com.kthowns.mobidic.domain.term.model;
 
-import lombok.Builder;
-
 import java.time.LocalDateTime;
 
-@Builder
 public record Term(
         Long id,
         TermType type,
@@ -13,5 +10,14 @@ public record Term(
         String content,
         LocalDateTime createdAt
 ) {
+    public static Term create(TermType type, String version, boolean required, String content) {
+        return new Term(
+                null,
+                type,
+                version,
+                required,
+                content,
+                null
+        );
+    }
 }
-

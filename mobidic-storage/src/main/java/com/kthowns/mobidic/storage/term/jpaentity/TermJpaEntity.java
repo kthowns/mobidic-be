@@ -46,25 +46,37 @@ public class TermJpaEntity {
     @CreatedDate
     private LocalDateTime createdAt;
 
-    public Term toModel() {
-        return Term.builder()
-                .id(this.getId())
-                .type(this.getType())
-                .version(this.getVersion())
-                .required(this.required)
-                .content(this.getContent())
-                .createdAt(this.getCreatedAt())
+    public static TermJpaEntity fromModel(Term term) {
+        return TermJpaEntity.builder()
+                .id(term.id())
+                .type(term.type())
+                .version(term.version())
+                .required(term.required())
+                .content(term.content())
+                .createdAt(term.createdAt())
+                .active(true)
                 .build();
     }
 
+    public Term toModel() {
+        return new Term(
+                this.id,
+                this.type,
+                this.version,
+                this.required,
+                this.content,
+                this.createdAt
+        );
+    }
+
     public SimpleTerm toSimpleModel() {
-        return SimpleTerm.builder()
-                .id(this.id)
-                .type(this.type)
-                .version(this.version)
-                .required(this.required)
-                .contentUri("/terms/" + this.type.name().toLowerCase() + "?version=" + this.version)
-                .createdAt(this.createdAt)
-                .build();
+        return new SimpleTerm(
+                this.id,
+                this.type,
+                this.version,
+                this.required,
+                "/terms/" + this.type.name().toLowerCase() + "?version=" + this.version,
+                this.createdAt
+        );
     }
 }

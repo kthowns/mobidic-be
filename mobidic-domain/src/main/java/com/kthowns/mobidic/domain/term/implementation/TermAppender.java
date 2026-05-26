@@ -13,13 +13,6 @@ public class TermAppender {
 
     public void append(TermType type, String version, boolean required, String content) {
         termRepository.deactivateAllByType(type);
-        
-        Term term = Term.builder()
-                .type(type)
-                .version(version)
-                .required(required)
-                .content(content)
-                .build();
-        termRepository.append(term);
-    }
-}
+
+        termRepository.append(Term.create(type, version, required, content));
+    }}

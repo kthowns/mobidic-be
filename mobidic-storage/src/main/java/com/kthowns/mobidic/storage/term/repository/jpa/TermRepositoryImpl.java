@@ -37,13 +37,7 @@ public class TermRepositoryImpl implements TermRepository {
 
     @Override
     public void append(Term term) {
-        TermJpaEntity entity = TermJpaEntity.builder()
-                .type(term.type())
-                .version(term.version())
-                .required(term.required())
-                .content(term.content())
-                .build();
-        termJpaRepository.save(entity);
+        termJpaRepository.save(TermJpaEntity.fromModel(term));
     }
 
     @Override
