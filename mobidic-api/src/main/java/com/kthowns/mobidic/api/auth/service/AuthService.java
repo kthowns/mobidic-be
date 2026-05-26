@@ -1,4 +1,4 @@
-package com.kthowns.mobidic.api.service;
+package com.kthowns.mobidic.api.auth.service;
 
 import com.kthowns.mobidic.api.auth.dto.request.LoginRequest;
 import com.kthowns.mobidic.api.auth.dto.response.LoginResponse;

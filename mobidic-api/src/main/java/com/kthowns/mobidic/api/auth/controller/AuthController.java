@@ -2,7 +2,7 @@ package com.kthowns.mobidic.api.auth.controller;
 
 import com.kthowns.mobidic.api.auth.dto.request.LoginRequest;
 import com.kthowns.mobidic.api.auth.dto.response.LoginResponse;
-import com.kthowns.mobidic.api.service.AuthService;
+import com.kthowns.mobidic.api.auth.service.AuthService;
 import com.kthowns.mobidic.common.code.AuthResponseCode;
 import com.kthowns.mobidic.common.dto.ErrorResponse;
 import com.kthowns.mobidic.common.dto.GeneralResponse;

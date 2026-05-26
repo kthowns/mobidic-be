@@ -18,9 +18,4 @@ public class UserReader {
         return userRepository.readById(id)
                 .orElseThrow(() -> new ApiException(AuthResponseCode.NO_USER));
     }
-
-    public User readByEmail(String email) {
-        return userRepository.readByEmail(email)
-                .orElseThrow(() -> new ApiException(AuthResponseCode.NO_USER));
-    }
 }

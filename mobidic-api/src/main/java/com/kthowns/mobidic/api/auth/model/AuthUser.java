@@ -1,6 +1,6 @@
 package com.kthowns.mobidic.api.auth.model;
 
-import com.kthowns.mobidic.storage.user.jpaentity.UserJpaEntity;
+import com.kthowns.mobidic.domain.user.model.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -57,13 +57,13 @@ public class AuthUser implements UserDetails {
         return true;
     }
 
-    public static AuthUser fromJpaEntity(UserJpaEntity userJpaEntity) {
+    public static AuthUser fromUser(User user) {
         return AuthUser.builder()
-                .id(userJpaEntity.getId())
-                .email(userJpaEntity.getEmail())
-                .password(userJpaEntity.getPassword())
-                .isActive(userJpaEntity.isActive())
-                .role(userJpaEntity.getRole().name())
+                .id(user.id())
+                .email(user.email())
+                .password(user.password())
+                .isActive(user.isActive())
+                .role(user.role().name())
                 .build();
     }
 }
