@@ -14,11 +14,6 @@ public class DefinitionAppender {
     private final DefinitionRepository definitionRepository;
 
     public void append(UUID wordId, String meaning, PartOfSpeech part) {
-        Definition definition = Definition.builder()
-                .wordId(wordId)
-                .meaning(meaning)
-                .part(part)
-                .build();
-        definitionRepository.append(definition);
+        definitionRepository.append(Definition.create(wordId, meaning, part));
     }
 }

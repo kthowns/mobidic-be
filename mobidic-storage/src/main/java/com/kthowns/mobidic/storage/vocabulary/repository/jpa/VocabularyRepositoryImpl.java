@@ -9,6 +9,7 @@ import com.kthowns.mobidic.storage.user.jpaentity.UserJpaEntity;
 import com.kthowns.mobidic.storage.user.jparepository.UserJpaEntityRepository;
 import com.kthowns.mobidic.storage.vocabulary.jpaentity.VocabularyJpaEntity;
 import com.kthowns.mobidic.storage.vocabulary.jparepository.VocabularyJpaRepository;
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -20,7 +21,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class VocabularyRepositoryImpl implements VocabularyRepository {
     private final VocabularyJpaRepository vocabularyJpaRepository;
-    private final UserJpaEntityRepository userJpaEntityRepository;
+    private final EntityManager em;
 
     @Override
     public List<VocabularyDetail> readDetailsByUserId(UUID userId) {
@@ -29,15 +30,15 @@ public class VocabularyRepositoryImpl implements VocabularyRepository {
 
     @Override
     public Vocabulary append(Vocabulary vocabulary) {
-        UserJpaEntity user = userJpaEntityRepository.findById(vocabulary.userId())
-                .orElseThrow(() -> new IllegalArgumentException("User not found: " + vocabulary.userId()));
-
-        VocabularyJpaEntity vocabularyJpaEntity = VocabularyJpaEntity.builder()
-                .title(vocabulary.title())
-                .description(vocabulary.description())
-                .user(user)
-                .build();
+        UserJpaEntity user = em.getReference(UserJpaEntity.class, vocabulary.userId());
+        VocabularyJpaEntity vocabularyJpaEntity = VocabularyJpaEntity.fromModel(vocabulary, user);
         return vocabularyJpaRepository.save(vocabularyJpaEntity).toModel();
+    }
+
+    @Override
+    public Optional<Vocabulary> readByIdAndUserId(UUID vocabularyId, UUID userId) {
+        return vocabularyJpaRepository.findByIdAndUser_Id(vocabularyId, userId)
+                .map(VocabularyJpaEntity::toModel);
     }
 
     @Override
@@ -68,11 +69,11 @@ public class VocabularyRepositoryImpl implements VocabularyRepository {
     }
 
     @Override
-    public void update(String title, String description, UUID vocabularyId, UUID userId) {
-        VocabularyJpaEntity vocabularyJpaEntity = vocabularyJpaRepository.findForUpdate(vocabularyId, userId)
+    public void update(Vocabulary vocabulary) {
+        VocabularyJpaEntity vocabularyJpaEntity = vocabularyJpaRepository.findForUpdate(vocabulary.id(), vocabulary.userId())
                 .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_VOCAB));
 
-        vocabularyJpaEntity.update(title, description);
+        vocabularyJpaEntity.updateFromModel(vocabulary);
     }
 
     @Override

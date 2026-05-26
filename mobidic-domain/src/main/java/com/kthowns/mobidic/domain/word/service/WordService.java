@@ -72,7 +72,7 @@ public class WordService {
 
         wordValidator.validateExpressionUpdateDuplication(expression, word.vocabularyId(), wordId);
 
-        wordUpdater.update(wordId, expression);
+        wordUpdater.update(userId, wordId, expression);
     }
 
     @Transactional

@@ -20,6 +20,11 @@ public class VocabularyReader {
         return vocabularyRepository.readDetailsByUserId(userId);
     }
 
+    public Vocabulary readById(UUID vocabularyId, UUID userId) {
+        return vocabularyRepository.readByIdAndUserId(vocabularyId, userId)
+                .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_VOCAB));
+    }
+
     public VocabularyDetail readDetailById(UUID userId, UUID vocabularyId) {
         return vocabularyRepository.readDetailById(vocabularyId, userId)
                 .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_VOCAB));

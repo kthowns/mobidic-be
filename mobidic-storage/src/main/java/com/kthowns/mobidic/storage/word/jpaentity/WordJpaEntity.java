@@ -40,16 +40,25 @@ public class WordJpaEntity {
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    public void update(String expression) {
-        this.expression = expression;
+    public static WordJpaEntity fromModel(Word word, VocabularyJpaEntity vocabulary) {
+        return new WordJpaEntity(
+                word.id(),
+                vocabulary,
+                word.expression(),
+                word.createdAt()
+        );
+    }
+
+    public void updateFromModel(Word word) {
+        this.expression = word.expression();
     }
 
     public Word toModel() {
-        return Word.builder()
-                .id(this.getId())
-                .vocabularyId(this.getVocabulary().getId())
-                .expression(this.getExpression())
-                .createdAt(this.getCreatedAt())
-                .build();
+        return new Word(
+                this.id,
+                this.vocabulary.getId(),
+                this.expression,
+                this.createdAt
+        );
     }
 }

@@ -11,12 +11,10 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class WordUpdater {
     private final WordRepository wordRepository;
+    private final WordReader wordReader;
 
-    public void update(UUID wordId, String expression) {
-        Word word = Word.builder()
-                .id(wordId)
-                .expression(expression)
-                .build();
-        wordRepository.update(word);
+    public void update(UUID userId, UUID wordId, String expression) {
+        Word word = wordReader.readByIdAndUserId(wordId, userId);
+        wordRepository.update(word.updateExpression(expression));
     }
 }

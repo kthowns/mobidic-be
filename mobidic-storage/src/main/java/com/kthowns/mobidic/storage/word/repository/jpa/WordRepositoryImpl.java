@@ -9,6 +9,7 @@ import com.kthowns.mobidic.storage.vocabulary.jpaentity.VocabularyJpaEntity;
 import com.kthowns.mobidic.storage.vocabulary.jparepository.VocabularyJpaRepository;
 import com.kthowns.mobidic.storage.word.jpaentity.WordJpaEntity;
 import com.kthowns.mobidic.storage.word.jparepository.WordJpaRepository;
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -20,17 +21,13 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class WordRepositoryImpl implements WordRepository {
     private final WordJpaRepository wordJpaRepository;
-    private final VocabularyJpaRepository vocabularyJpaRepository;
+    private final EntityManager em;
 
     @Override
     public Word append(Word word) {
-        VocabularyJpaEntity vocabulary = vocabularyJpaRepository.findById(word.vocabularyId())
-                .orElseThrow(() -> new IllegalArgumentException("Vocabulary not found: " + word.vocabularyId()));
+        VocabularyJpaEntity vocabulary = em.getReference(VocabularyJpaEntity.class, word.vocabularyId());
 
-        WordJpaEntity wordJpaEntity = WordJpaEntity.builder()
-                .expression(word.expression())
-                .vocabulary(vocabulary)
-                .build();
+        WordJpaEntity wordJpaEntity = WordJpaEntity.fromModel(word, vocabulary);
         return wordJpaRepository.save(wordJpaEntity).toModel();
     }
 
@@ -50,8 +47,7 @@ public class WordRepositoryImpl implements WordRepository {
         WordJpaEntity wordJpaEntity = wordJpaRepository.findById(word.id())
                 .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_WORD));
         
-        wordJpaEntity.update(word.expression());
-        wordJpaRepository.save(wordJpaEntity);
+        wordJpaEntity.updateFromModel(word);
     }
 
     @Override

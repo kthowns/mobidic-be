@@ -7,7 +7,7 @@ import com.kthowns.mobidic.domain.definition.repository.DefinitionRepository;
 import com.kthowns.mobidic.storage.definition.jpaentity.DefinitionJpaEntity;
 import com.kthowns.mobidic.storage.definition.jparepository.DefinitionJpaRepository;
 import com.kthowns.mobidic.storage.word.jpaentity.WordJpaEntity;
-import com.kthowns.mobidic.storage.word.jparepository.WordJpaRepository;
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -20,18 +20,13 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class DefinitionRepositoryImpl implements DefinitionRepository {
     private final DefinitionJpaRepository definitionJpaRepository;
-    private final WordJpaRepository wordJpaRepository;
+    private final EntityManager em;
 
     @Override
     public void append(Definition definition) {
-        WordJpaEntity word = wordJpaRepository.findById(definition.wordId())
-                .orElseThrow(() -> new IllegalArgumentException("Word not found: " + definition.wordId()));
+        WordJpaEntity word = em.getReference(WordJpaEntity.class, definition.wordId());
 
-        DefinitionJpaEntity definitionJpaEntity = DefinitionJpaEntity.builder()
-                .meaning(definition.meaning())
-                .part(definition.part())
-                .word(word)
-                .build();
+        DefinitionJpaEntity definitionJpaEntity = DefinitionJpaEntity.createFromModel(definition, word);
         definitionJpaRepository.save(definitionJpaEntity);
     }
 
@@ -53,8 +48,7 @@ public class DefinitionRepositoryImpl implements DefinitionRepository {
         DefinitionJpaEntity definitionJpaEntity = definitionJpaRepository.findById(definition.id())
                 .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_DEF));
         
-        definitionJpaEntity.update(definition.meaning(), definition.part());
-        definitionJpaRepository.save(definitionJpaEntity);
+        definitionJpaEntity.updateFromModel(definition);
     }
 
     @Override

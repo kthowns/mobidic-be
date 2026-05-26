@@ -13,6 +13,8 @@ public interface VocabularyRepository {
 
     Vocabulary append(Vocabulary vocabulary);
 
+    Optional<Vocabulary> readByIdAndUserId(UUID vocabularyId, UUID userId);
+
     Optional<VocabularyDetail> readDetailById(UUID vocabularyId, UUID userId);
 
     boolean existsByIdAndUser_Id(UUID vocabularyId, UUID userId);
@@ -23,7 +25,7 @@ public interface VocabularyRepository {
 
     void delete(UUID vocabularyId, UUID userId);
 
-    void update(String title, String description, UUID vocabularyId, UUID userId);
+    void update(Vocabulary vocabulary);
 
     boolean existsByTitleAndUserId(String title, UUID userId);
 

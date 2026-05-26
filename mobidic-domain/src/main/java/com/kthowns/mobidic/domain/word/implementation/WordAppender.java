@@ -13,10 +13,6 @@ public class WordAppender {
     private final WordRepository wordRepository;
 
     public Word append(String expression, UUID vocabularyId) {
-        Word word = Word.builder()
-                .expression(expression)
-                .vocabularyId(vocabularyId)
-                .build();
-        return wordRepository.append(word);
+        return wordRepository.append(Word.create(vocabularyId, expression));
     }
 }

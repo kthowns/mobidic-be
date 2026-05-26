@@ -47,27 +47,30 @@ public class VocabularyJpaEntity {
     @CreatedDate
     private LocalDateTime createdAt;
 
-    public void update(String title, String description) {
-        this.title = title;
-        this.description = description;
+    public static VocabularyJpaEntity fromModel(Vocabulary vocabulary, UserJpaEntity user) {
+        return new VocabularyJpaEntity(
+                vocabulary.id(),
+                user,
+                vocabulary.title(),
+                vocabulary.wordCount(),
+                vocabulary.description(),
+                vocabulary.createdAt()
+        );
     }
 
-    public void addWordCount() {
-        wordCount++;
-    }
-
-    public void removeWordCount() {
-        wordCount--;
+    public void updateFromModel(Vocabulary vocabulary) {
+        this.title = vocabulary.title();
+        this.description = vocabulary.description();
     }
 
     public Vocabulary toModel() {
-        return Vocabulary.builder()
-                .id(this.getId())
-                .userId(this.getUser().getId())
-                .title(this.getTitle())
-                .description(this.getDescription())
-                .wordCount(this.getWordCount())
-                .createdAt(this.getCreatedAt())
-                .build();
+        return new Vocabulary(
+                this.id,
+                this.user.getId(),
+                this.title,
+                this.description,
+                this.wordCount,
+                this.createdAt
+        );
     }
 }

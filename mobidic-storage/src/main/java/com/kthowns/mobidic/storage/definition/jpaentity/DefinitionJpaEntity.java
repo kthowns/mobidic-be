@@ -4,16 +4,13 @@ import com.kthowns.mobidic.domain.definition.model.Definition;
 import com.kthowns.mobidic.domain.definition.model.PartOfSpeech;
 import com.kthowns.mobidic.storage.word.jpaentity.WordJpaEntity;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 import java.util.UUID;
 
-@Data
+@Getter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
@@ -42,12 +39,26 @@ public class DefinitionJpaEntity {
         this.part = part;
     }
 
+    public static DefinitionJpaEntity createFromModel(Definition definition, WordJpaEntity word) {
+        return new DefinitionJpaEntity(
+                definition.id(),
+                word,
+                definition.meaning(),
+                definition.part()
+        );
+    }
+
+    public void updateFromModel(Definition definition) {
+        this.meaning = definition.meaning();
+        this.part = definition.part();
+    }
+
     public Definition toModel() {
-        return Definition.builder()
-                .id(this.id)
-                .wordId(this.word.getId())
-                .meaning(this.meaning)
-                .part(this.part)
-                .build();
+        return new Definition(
+                this.id,
+                this.word.getId(),
+                this.meaning,
+                this.part
+        );
     }
 }

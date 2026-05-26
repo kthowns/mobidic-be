@@ -12,13 +12,10 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class DefinitionUpdater {
     private final DefinitionRepository definitionRepository;
+    private final DefinitionReader definitionReader;
 
-    public void update(UUID defId, String meaning, PartOfSpeech part) {
-        Definition definition = Definition.builder()
-                .id(defId)
-                .meaning(meaning)
-                .part(part)
-                .build();
-        definitionRepository.update(definition);
+    public void update(UUID userId, UUID defId, String meaning, PartOfSpeech part) {
+        Definition definition = definitionReader.readByIdAndUserId(defId, userId);
+        definitionRepository.update(definition.update(meaning, part));
     }
 }
