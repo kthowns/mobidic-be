@@ -6,7 +6,6 @@ import com.kthowns.mobidic.domain.vocabulary.model.Vocabulary;
 import com.kthowns.mobidic.domain.vocabulary.model.VocabularyDetail;
 import com.kthowns.mobidic.domain.vocabulary.repository.VocabularyRepository;
 import com.kthowns.mobidic.storage.user.jpaentity.UserJpaEntity;
-import com.kthowns.mobidic.storage.user.jparepository.UserJpaEntityRepository;
 import com.kthowns.mobidic.storage.vocabulary.jpaentity.VocabularyJpaEntity;
 import com.kthowns.mobidic.storage.vocabulary.jparepository.VocabularyJpaRepository;
 import jakarta.persistence.EntityManager;
