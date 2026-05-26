@@ -82,7 +82,7 @@ public class WordStatisticIntegrationTest {
         //Fail with unauthorized token
         mockMvc.perform(get("/api/words/" + wordId + "/statistic")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer " + jwtProvider.generateToken(UUID.randomUUID())))
+                        .header("Authorization", "Bearer " + jwtProvider.generateToken(UUID.randomUUID(), "USER")))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.message")
                         .value(AuthResponseCode.UNAUTHORIZED.getMessage()));
@@ -123,7 +123,7 @@ public class WordStatisticIntegrationTest {
         //Fail with unauthorized token
         mockMvc.perform(get("/api/vocabularies/" + vocabularyId + "/learning-rate")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer " + jwtProvider.generateToken(UUID.randomUUID())))
+                        .header("Authorization", "Bearer " + jwtProvider.generateToken(UUID.randomUUID(), "USER")))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.message")
                         .value(AuthResponseCode.UNAUTHORIZED.getMessage()));
@@ -183,7 +183,7 @@ public class WordStatisticIntegrationTest {
         //Fail with unauthorized token
         mockMvc.perform(patch("/api/words/" + wordId + "/toggle-learned")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer " + jwtProvider.generateToken(UUID.randomUUID())))
+                        .header("Authorization", "Bearer " + jwtProvider.generateToken(UUID.randomUUID(), "USER")))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.message")
                         .value(AuthResponseCode.UNAUTHORIZED.getMessage()));

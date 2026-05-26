@@ -93,7 +93,7 @@ public class WordIntegrationTest {
         //Fail with unauthorized token
         mockMvc.perform(post("/api/vocabularies/" + vocabularyId + "/word")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer " + jwtProvider.generateToken(UUID.randomUUID()))
+                        .header("Authorization", "Bearer " + jwtProvider.generateToken(UUID.randomUUID(), "USER"))
                         .content(objectMapper.writeValueAsString(addWordRequest)))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.message")
@@ -164,7 +164,7 @@ public class WordIntegrationTest {
                 .part(PartOfSpeech.NOUN)
                 .build();
 
-        mockMvc.perform(post("/api/words/" + wordId + "/definition") // 뜻 추가 API 경로 확인 필요
+        mockMvc.perform(post("/api/words/" + wordId + "/definition")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + token)
                         .content(objectMapper.writeValueAsString(addDefRequest)))
@@ -192,7 +192,7 @@ public class WordIntegrationTest {
         //Fail with unauthorized token
         mockMvc.perform(get("/api/vocabularies/" + vocabularyId + "/words")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer " + jwtProvider.generateToken(UUID.randomUUID())))
+                        .header("Authorization", "Bearer " + jwtProvider.generateToken(UUID.randomUUID(), "USER")))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.message")
                         .value(AuthResponseCode.UNAUTHORIZED.getMessage()));
@@ -260,7 +260,7 @@ public class WordIntegrationTest {
                         .value(GeneralResponseCode.DUPLICATED_WORD.getMessage()));
 
         //Fail without token
-        mockMvc.perform(patch("/api/words/" + vocabularyId)
+        mockMvc.perform(patch("/api/words/" + wordId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(addWordRequest)))
                 .andExpect(status().isUnauthorized())
@@ -268,9 +268,9 @@ public class WordIntegrationTest {
                         .value(AuthResponseCode.UNAUTHORIZED.getMessage()));
 
         //Fail with unauthorized token
-        mockMvc.perform(patch("/api/words/" + vocabularyId)
+        mockMvc.perform(patch("/api/words/" + wordId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer " + jwtProvider.generateToken(UUID.randomUUID()))
+                        .header("Authorization", "Bearer " + jwtProvider.generateToken(UUID.randomUUID(), "USER"))
                         .content(objectMapper.writeValueAsString(addWordRequest)))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.message")
@@ -346,7 +346,7 @@ public class WordIntegrationTest {
         //Fail with unauthorized token
         mockMvc.perform(delete("/api/words/" + wordId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer " + jwtProvider.generateToken(UUID.randomUUID())))
+                        .header("Authorization", "Bearer " + jwtProvider.generateToken(UUID.randomUUID(), "USER")))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.message")
                         .value(AuthResponseCode.UNAUTHORIZED.getMessage()));
@@ -418,14 +418,3 @@ public class WordIntegrationTest {
         return objectMapper.readTree(json).path("data").path("accessToken").asText();
     }
 }
-// Resource api integration test convention
-//Success
-// -> OK
-//Fail without token
-// -> UNAUTHORIZED
-//Fail with unauthorized token
-// -> UNAUTHORIZED
-//Fail with no resource
-// -> UNAUTHORIZED
-//Fail with invalid pattern
-// -> INVALID_REQUEST_BODY

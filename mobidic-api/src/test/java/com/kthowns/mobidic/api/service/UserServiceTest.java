@@ -1,166 +1,132 @@
 package com.kthowns.mobidic.api.service;
 
-import com.kthowns.mobidic.api.config.ServiceTestConfig;
-import com.kthowns.mobidic.api.user.dto.request.SignUpRequestDto;
-import com.kthowns.mobidic.api.user.dto.request.UpdateUserRequestDto;
+import com.kthowns.mobidic.domain.user.client.PasswordEncoderClient;
+import com.kthowns.mobidic.domain.user.implementation.*;
 import com.kthowns.mobidic.domain.user.model.User;
-import com.kthowns.mobidic.storage.user.jpaentity.UserJpaEntity;
-import com.kthowns.mobidic.storage.user.jparepository.UserJpaRepository;
+import com.kthowns.mobidic.domain.user.model.UserRole;
 import com.kthowns.mobidic.domain.user.service.UserService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Optional;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verify;
 
-@ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {UserService.class, ServiceTestConfig.class})
-@ActiveProfiles("test")
-@TestPropertySource(properties = {
-        "jwt.secret=f825308ac5df56907db5835775baf3e4594526f127cb8d9bca70b435d596d424",
-        "jwt.exp=3600000"
-})
+@ExtendWith(MockitoExtension.class)
 class UserServiceTest {
-    @Autowired
+    @InjectMocks
     private UserService userService;
 
-    @Autowired
-    private UserJpaRepository userJpaRepository;
+    @Mock
+    private UserReader userReader;
+    @Mock
+    private UserAppender userAppender;
+    @Mock
+    private UserUpdater userUpdater;
+    @Mock
+    private UserRemover userRemover;
+    @Mock
+    private UserValidator userValidator;
+    @Mock
+    private PasswordEncoderClient passwordEncoderClient;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
-    private static final String UID = "9f81b0d7-2f8e-4ad3-ae18-41c73dc71b39";
+    private final UUID userId = UUID.randomUUID();
 
     @Test
-    @DisplayName("[AuthService] Join success")
-    void registerUserTestSuccess() {
+    @DisplayName("[UserService] Register user success")
+    void registerUserSuccess() {
         // given
-        String rawPassword = "test1234";
-        String encodedPassword = passwordEncoder.encode(rawPassword);
+        String email = "test@test.com";
+        String nickname = "test";
+        String password = "password123!";
+        String encodedPassword = "encodedPassword";
+        User user = new User(userId, null, email, nickname, encodedPassword, UserRole.USER, true, LocalDateTime.now(), null);
 
-        SignUpRequestDto request = SignUpRequestDto.builder()
-                .email("user@example.com")
-                .nickname("tester")
-                .password(rawPassword)
-                .build();
-
-        UserJpaEntity userJpaEntityToReturn = UserJpaEntity.builder()
-                .email(request.getEmail())
-                .nickname(request.getNickname())
-                .password(encodedPassword)
-                .build();
-
-        // mocking
-        Mockito.when(userJpaRepository.existsByNickname(anyString()))
-                .thenReturn(false);
-        Mockito.when(userJpaRepository.existsByEmail(anyString()))
-                .thenReturn(false);
-        Mockito.when(userJpaRepository.save(Mockito.any(UserJpaEntity.class)))
-                .thenReturn(userJpaEntityToReturn);
+        given(passwordEncoderClient.encode(password)).willReturn(encodedPassword);
+        given(userAppender.append(email, nickname, encodedPassword, UserRole.USER)).willReturn(user);
 
         // when
-        userService.registerUser(request);
+        User result = userService.registerUser(email, nickname, password);
 
         // then
-        Mockito.verify(userJpaRepository).save(Mockito.any(UserJpaEntity.class));
+        verify(userValidator).validateEmailDuplication(email);
+        verify(userValidator).validateNicknameDuplication(nickname);
+        verify(userValidator).validatePassword(password);
+        assertEquals(user, result);
     }
 
     @Test
-    @DisplayName("[UserService] Update user nickname success")
-    @WithMockUser(username = UID)
-    void updateUserNicknameSuccess() {
-        resetMock();
+    @DisplayName("[UserService] Register kakao user success")
+    void registerKakaoUserSuccess() {
+        // given
+        Long kakaoId = 12345L;
+        String email = "kakao@test.com";
+        String nickname = "kakaoUser";
+        User user = new User(userId, kakaoId, email, nickname, "pw", UserRole.USER, true, LocalDateTime.now(), null);
 
-        UserJpaEntity defaultUserJpaEntity = UserJpaEntity.builder()
-                .id(UUID.fromString(UID))
-                .email("test@test.com")
-                .nickname("test")
-                .password(passwordEncoder.encode("testTest1"))
-                .build();
+        given(passwordEncoderClient.encode(org.mockito.ArgumentMatchers.anyString())).willReturn("encoded");
+        given(userAppender.appendKakao(org.mockito.ArgumentMatchers.eq(kakaoId), org.mockito.ArgumentMatchers.eq(email), org.mockito.ArgumentMatchers.eq(nickname), org.mockito.ArgumentMatchers.anyString(), org.mockito.ArgumentMatchers.eq(UserRole.USER))).willReturn(user);
 
-        UpdateUserRequestDto request = UpdateUserRequestDto.builder()
-                .nickname("test2")
-                .build();
+        // when
+        User result = userService.registerKakaoUser(kakaoId, email, nickname);
 
-        ArgumentCaptor<UserJpaEntity> userCaptor =
-                ArgumentCaptor.forClass(UserJpaEntity.class);
-
-        //given
-        given(userJpaRepository.existsByNicknameAndIdNot(anyString(), any(UUID.class)))
-                .willReturn(false);
-        given(userJpaRepository.findById(any(UUID.class)))
-                .willReturn(Optional.of(defaultUserJpaEntity));
-        given(userJpaRepository.save(any(UserJpaEntity.class)))
-                .willAnswer(invocation -> {
-                    UserJpaEntity userJpaEntityArg = invocation.getArgument(0);
-                    userJpaEntityArg.setNickname(request.getNickname());
-                    return userJpaEntityArg;
-                });
-
-        //when
-        User response = userService.updateUser(defaultUserJpaEntity, request, UUID.randomUUID().toString());
-
-        //then
-        assertEquals(UUID.fromString(UID), response.getId());
-        assertEquals(request.getNickname(), response.getNickname());
+        // then
+        assertEquals(user, result);
     }
 
     @Test
-    @DisplayName("[UserService] Update user password success")
-    @WithMockUser(username = UID)
-    void updateUserPasswordSuccess() {
-        resetMock();
+    @DisplayName("[UserService] Update user success")
+    void updateUserSuccess() {
+        // given
+        String newNickname = "newNick";
+        String newPassword = "newPassword123!";
+        String encodedPassword = "encodedNewPassword";
+        User user = new User(userId, null, "test@test.com", newNickname, encodedPassword, UserRole.USER, true, LocalDateTime.now(), null);
 
-        UserJpaEntity defaultUserJpaEntity = UserJpaEntity.builder()
-                .id(UUID.fromString(UID))
-                .email("test@test.com")
-                .nickname("test")
-                .password(passwordEncoder.encode("testTest1"))
-                .build();
+        given(passwordEncoderClient.encode(newPassword)).willReturn(encodedPassword);
+        given(userUpdater.update(userId, newNickname, encodedPassword)).willReturn(user);
 
-        UpdateUserRequestDto request = UpdateUserRequestDto.builder()
-                .password("SomePassword")
-                .build();
+        // when
+        User result = userService.updateUser(userId, newNickname, newPassword);
 
-        ArgumentCaptor<UserJpaEntity> userCaptor =
-                ArgumentCaptor.forClass(UserJpaEntity.class);
-
-        //given
-        given(userJpaRepository.findById(any(UUID.class)))
-                .willReturn(Optional.of(defaultUserJpaEntity));
-        given(userJpaRepository.save(any(UserJpaEntity.class)))
-                .willAnswer(invocation -> {
-                    UserJpaEntity userJpaEntityArg = invocation.getArgument(0);
-                    userJpaEntityArg.setPassword(passwordEncoder.encode(
-                            request.getPassword()));
-                    return userJpaEntityArg;
-                });
-
-        //when
-        User response = userService.updateUser(defaultUserJpaEntity, request, UUID.randomUUID().toString());
-
-        //then
-        assertThat(passwordEncoder.matches(request.getPassword(), "SomePassword"));
+        // then
+        verify(userValidator).validateNicknameUpdateDuplication(newNickname, userId);
+        verify(userValidator).validatePassword(newPassword);
+        assertEquals(user, result);
     }
 
-    private void resetMock() {
-        Mockito.reset(userJpaRepository);
+    @Test
+    @DisplayName("[UserService] Deactivate user success")
+    void deactivateUserSuccess() {
+        // given
+        User user = new User(userId, null, "test@test.com", "nick", "pw", UserRole.USER, false, LocalDateTime.now(), LocalDateTime.now());
+        given(userRemover.deactivate(userId)).willReturn(user);
+
+        // when
+        User result = userService.deactivateUser(userId);
+
+        // then
+        assertEquals(user, result);
+    }
+
+    @Test
+    @DisplayName("[UserService] Get user by id success")
+    void getUserByIdSuccess() {
+        // given
+        User user = new User(userId, null, "test@test.com", "nick", "pw", UserRole.USER, true, LocalDateTime.now(), null);
+        given(userReader.readById(userId)).willReturn(user);
+
+        // when
+        User result = userService.getUserById(userId);
+
+        // then
+        assertEquals(user, result);
     }
 }

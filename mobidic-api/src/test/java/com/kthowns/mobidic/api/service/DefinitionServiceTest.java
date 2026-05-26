@@ -1,168 +1,105 @@
 package com.kthowns.mobidic.api.service;
 
-import com.kthowns.mobidic.api.config.ServiceTestConfig;
-import com.kthowns.mobidic.api.definition.dto.request.AddDefinitionRequestDto;
+import com.kthowns.mobidic.domain.definition.implementation.*;
 import com.kthowns.mobidic.domain.definition.model.Definition;
-import com.kthowns.mobidic.storage.definition.jpaentity.DefinitionJpaEntity;
-import com.kthowns.mobidic.storage.word.jpaentity.WordJpaEntity;
-import com.kthowns.mobidic.storage.definition.jparepository.DefinitionJpaRepository;
-import com.kthowns.mobidic.storage.word.jparepository.WordJpaRepository;
-import com.kthowns.mobidic.domain.definition.service.DefinitionService;
 import com.kthowns.mobidic.domain.definition.model.PartOfSpeech;
-import com.kthowns.mobidic.storage.user.jpaentity.UserJpaEntity;
+import com.kthowns.mobidic.domain.definition.service.DefinitionService;
+import com.kthowns.mobidic.domain.word.implementation.WordReader;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
 
-@ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {DefinitionService.class, ServiceTestConfig.class})
-@ActiveProfiles("test")
-@TestPropertySource(properties = {
-        "jwt.secret=f825308ac5df56907db5835775baf3e4594526f127cb8d9bca70b435d596d424",
-        "jwt.exp=3600000"
-})
+@ExtendWith(MockitoExtension.class)
 class DefinitionServiceTest {
-    @Autowired
-    private DefinitionJpaRepository definitionRepository;
-
-    @Autowired
-    private WordJpaRepository wordRepository;
-
-    @Autowired
+    @InjectMocks
     private DefinitionService definitionService;
 
-    private final UserJpaEntity testUserJpaEntity = UserJpaEntity.builder()
-            .id(UUID.randomUUID())
-            .build();
+    @Mock
+    private DefinitionReader definitionReader;
+    @Mock
+    private DefinitionAppender definitionAppender;
+    @Mock
+    private DefinitionUpdater definitionUpdater;
+    @Mock
+    private DefinitionRemover definitionRemover;
+    @Mock
+    private DefinitionValidator definitionValidator;
+
+    @Mock
+    private WordReader wordReader;
+
+    private final UUID userId = UUID.randomUUID();
+    private final UUID wordId = UUID.randomUUID();
+    private final UUID defId = UUID.randomUUID();
 
     @Test
     @DisplayName("[DefService] Add def success")
     void addDefinitionSuccess() {
-        resetMock();
+        // given
+        String meaning = "testMeaning";
+        PartOfSpeech part = PartOfSpeech.NOUN;
 
-        UUID defId = UUID.randomUUID();
+        // when
+        definitionService.addDefinition(userId, wordId, meaning, part);
 
-        AddDefinitionRequestDto request = AddDefinitionRequestDto.builder()
-                .meaning("definition")
-                .part(PartOfSpeech.NOUN)
-                .build();
-
-        ArgumentCaptor<DefinitionJpaEntity> captor =
-                ArgumentCaptor.forClass(DefinitionJpaEntity.class);
-
-        //given
-        given(wordRepository.findByIdAndVocabulary_User_Id(any(UUID.class), any(UUID.class)))
-                .willReturn(Optional.of(Mockito.mock(WordJpaEntity.class)));
-        given(definitionRepository.save(any(DefinitionJpaEntity.class)))
-                .willAnswer(invocation -> {
-                    DefinitionJpaEntity definitionArg = invocation.getArgument(0);
-                    definitionArg.setId(defId);
-                    return definitionArg;
-                });
-
-        //when
-        Definition response = definitionService.addDefinition(testUserJpaEntity, UUID.randomUUID(), request);
-
-        //then
-        verify(definitionRepository, times(1))
-                .save(captor.capture());
-
-        assertEquals(request.getMeaning(), response.getMeaning());
-        assertEquals(request.getPart(), response.getPart());
-        assertEquals(defId, response.getId());
+        // then
+        verify(wordReader).readByIdAndUserId(wordId, userId);
+        verify(definitionValidator).validateMeaningDuplication(meaning, wordId);
+        verify(definitionAppender).append(wordId, meaning, part);
     }
 
     @Test
     @DisplayName("[DefService] Get defs by word id success")
     void getDefinitionsByWordIdSuccess() {
-        resetMock();
+        // given
+        List<Definition> definitions = List.of(
+                new Definition(defId, wordId, "meaning", PartOfSpeech.NOUN)
+        );
+        given(definitionReader.readByWordId(wordId)).willReturn(definitions);
 
-        DefinitionJpaEntity defaultDefinition = DefinitionJpaEntity.builder()
-                .word(Mockito.mock(WordJpaEntity.class))
-                .meaning("definition")
-                .part(PartOfSpeech.NOUN)
-                .build();
+        // when
+        List<Definition> result = definitionService.getDefinitionsByWordId(userId, wordId);
 
-        ArrayList<DefinitionJpaEntity> definitions = new ArrayList<>();
-        definitions.add(defaultDefinition);
-
-        //given
-        given(wordRepository.findByIdAndVocabulary_User_Id(any(UUID.class), any(UUID.class)))
-                .willReturn(Optional.of(Mockito.mock(WordJpaEntity.class)));
-        given(definitionRepository.findByWord(any(WordJpaEntity.class)))
-                .willReturn(definitions);
-
-        //when
-        List<Definition> response = definitionService.getDefinitionsByWordId(testUserJpaEntity, UUID.randomUUID());
-
-        //then
-        assertEquals(definitions.getFirst().getMeaning(), response.getFirst().getMeaning());
-        assertEquals(definitions.getFirst().getPart(), response.getFirst().getPart());
+        // then
+        verify(wordReader).readByIdAndUserId(wordId, userId);
+        assertEquals(definitions, result);
     }
 
     @Test
     @DisplayName("[DefService] Update def success")
-    void updateWordSuccess() {
-        resetMock();
+    void updateDefinitionSuccess() {
+        // given
+        String newMeaning = "newMeaning";
+        PartOfSpeech newPart = PartOfSpeech.VERB;
+        Definition existingDefinition = new Definition(defId, wordId, "oldMeaning", PartOfSpeech.NOUN);
+        given(definitionReader.readByIdAndUserId(defId, userId)).willReturn(existingDefinition);
 
-        UUID defId = UUID.randomUUID();
+        // when
+        definitionService.updateDefinition(userId, defId, newMeaning, newPart);
 
-        DefinitionJpaEntity defaultDefinition = DefinitionJpaEntity.builder()
-                .id(defId)
-                .word(Mockito.mock(WordJpaEntity.class))
-                .meaning("definition")
-                .part(PartOfSpeech.NOUN)
-                .build();
-
-        AddDefinitionRequestDto request =
-                AddDefinitionRequestDto.builder()
-                        .meaning("definition2")
-                        .part(PartOfSpeech.VERB)
-                        .build();
-
-        ArgumentCaptor<DefinitionJpaEntity> captor =
-                ArgumentCaptor.forClass(DefinitionJpaEntity.class);
-
-        //given
-        given(definitionRepository.findByIdAndWord_Vocabulary_User_Id(any(UUID.class), any(UUID.class)))
-                .willReturn(Optional.of(defaultDefinition));
-        given(definitionRepository.save(any(DefinitionJpaEntity.class)))
-                .willAnswer(invocation -> {
-                    DefinitionJpaEntity definitionArg = invocation.getArgument(0);
-                    definitionArg.setMeaning(request.getMeaning());
-                    definitionArg.setPart(request.getPart());
-                    return definitionArg;
-                });
-
-        //when
-        Definition response =
-                definitionService.updateDefinition(testUserJpaEntity, defId, request);
-
-        //then
-        verify(definitionRepository, times(1))
-                .save(captor.capture());
-        assertEquals(defId, response.getId());
-        assertEquals(request.getMeaning(), response.getMeaning());
-        assertEquals(request.getPart(), response.getPart());
+        // then
+        verify(definitionValidator).validateMeaningUpdateDuplication(newMeaning, wordId, defId);
+        verify(definitionUpdater).update(userId, defId, newMeaning, newPart);
     }
 
-    private void resetMock() {
-        Mockito.reset(definitionRepository, wordRepository);
+    @Test
+    @DisplayName("[DefService] Delete def success")
+    void deleteDefinitionSuccess() {
+        // when
+        definitionService.deleteDefinition(userId, defId);
+
+        // then
+        verify(definitionReader).readByIdAndUserId(defId, userId);
+        verify(definitionRemover).remove(defId, userId);
     }
 }

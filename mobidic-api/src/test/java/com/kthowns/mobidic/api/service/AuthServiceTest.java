@@ -1,102 +1,72 @@
 package com.kthowns.mobidic.api.service;
 
-import com.kthowns.mobidic.api.config.ServiceTestConfig;
 import com.kthowns.mobidic.api.auth.dto.request.LoginRequest;
+import com.kthowns.mobidic.api.auth.dto.response.LoginResponse;
+import com.kthowns.mobidic.api.auth.model.AuthUser;
+import com.kthowns.mobidic.api.auth.service.AuthService;
 import com.kthowns.mobidic.api.security.jwt.JwtProvider;
-import com.kthowns.mobidic.storage.user.jpaentity.UserJpaEntity;
-import com.kthowns.mobidic.storage.user.jparepository.UserJpaRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.UUID;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
 
-@ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {AuthService.class, ServiceTestConfig.class})
-@TestPropertySource(properties = {
-        "jwt.secret=f825308ac5df56907db5835775baf3e4594526f127cb8d9bca70b435d596d424",
-        "jwt.exp=3600000"
-})
+@ExtendWith(MockitoExtension.class)
 class AuthServiceTest {
-
-    @Autowired
+    @InjectMocks
     private AuthService authService;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
-    @Autowired
-    private UserJpaRepository userJpaRepository; // mock
-
-    @Autowired
-    private JwtProvider jwtProvider;
-
-    @Autowired
+    @Mock
     private AuthenticationManager authenticationManager;
+
+    @Mock
+    private JwtProvider jwtProvider;
 
     @Test
     @DisplayName("[AuthService] Login success")
-    void loginTestSuccess() {
-        String rawPassword = "test1234";
-
-        LoginRequest request = LoginRequest.builder()
-                .email("user@example.com")
-                .password(rawPassword)
-                .build();
-
-        UserJpaEntity principal = UserJpaEntity.builder()
-                .id(UUID.randomUUID())
-                .email(request.getEmail())
-                .build();
-
-        Authentication mockAuth = Mockito.mock(Authentication.class);
-
+    void loginSuccess() {
         // given
-        Mockito.when(authenticationManager.authenticate(Mockito.any(UsernamePasswordAuthenticationToken.class)))
-                .thenReturn(mockAuth);
-        Mockito.when(mockAuth.getPrincipal())
-                .thenReturn(principal);
+        LoginRequest request = new LoginRequest("test@test.com", "password123!");
+        AuthUser authUser = mock(AuthUser.class);
+        Authentication authentication = mock(Authentication.class);
+        String expectedToken = "testToken";
+
+        given(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
+                .willReturn(authentication);
+        given(authentication.getPrincipal()).willReturn(authUser);
+        given(authUser.getId()).willReturn(UUID.randomUUID());
+        given(authUser.getRole()).willReturn("USER");
+        given(jwtProvider.generateToken(any(UUID.class), any(String.class))).willReturn(expectedToken);
 
         // when
-        String token = authService.login(request).getAccessToken();
+        LoginResponse response = authService.login(request);
 
         // then
-        assertEquals(principal.getId(), jwtProvider.getIdFromToken(token));
-        assertThat(jwtProvider.validateToken(token));
+        assertEquals(expectedToken, response.getAccessToken());
     }
 
     @Test
-    @DisplayName("[AuthService] Login failed")
-    void loginTestFail() {
-        String rawPassword = "test1234";
-
-        LoginRequest request = LoginRequest.builder()
-                .email("user@example.com")
-                .password(rawPassword)
-                .build();
-
+    @DisplayName("[AuthService] Login fail - Bad credentials")
+    void loginFail() {
         // given
-        Mockito.when(authenticationManager.authenticate(Mockito.any(UsernamePasswordAuthenticationToken.class)))
-                .thenThrow(BadCredentialsException.class);
+        LoginRequest request = new LoginRequest("test@test.com", "wrongPassword");
+        given(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
+                .willThrow(new BadCredentialsException("Invalid password"));
 
-        //when
-        Throwable e = assertThrows(Exception.class, () -> authService.login(request));
-
-        // then
-        assertEquals(e.getMessage(), e.getMessage());
+        // when & then
+        assertThrows(BadCredentialsException.class, () -> authService.login(request));
     }
 }

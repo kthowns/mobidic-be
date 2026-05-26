@@ -1,183 +1,92 @@
 package com.kthowns.mobidic.api.service;
 
-import com.kthowns.mobidic.api.config.ServiceTestConfig;
 import com.kthowns.mobidic.domain.definition.model.Definition;
-import com.kthowns.mobidic.domain.word.model.WordDetail;
-import com.kthowns.mobidic.domain.definition.service.DefinitionService;
-import com.kthowns.mobidic.domain.vocabulary.service.VocabularyService;
-import com.kthowns.mobidic.domain.word.service.WordService;
 import com.kthowns.mobidic.domain.definition.model.PartOfSpeech;
-import com.kthowns.mobidic.api.quiz.dto.response.QuizResponse;
-import com.kthowns.mobidic.api.quiz.dto.request.QuizRateRequest;
-import com.kthowns.mobidic.api.quiz.dto.response.QuizRateResponse;
-import com.kthowns.mobidic.domain.quiz.service.CryptoService;
+import com.kthowns.mobidic.domain.quiz.implementation.*;
+import com.kthowns.mobidic.domain.quiz.model.QuizInfo;
+import com.kthowns.mobidic.domain.quiz.model.QuizResult;
 import com.kthowns.mobidic.domain.quiz.service.QuizService;
-import com.kthowns.mobidic.storage.user.jpaentity.UserJpaEntity;
+import com.kthowns.mobidic.domain.statistic.service.StatisticService;
+import com.kthowns.mobidic.domain.word.model.WordDetail;
+import com.kthowns.mobidic.domain.word.service.WordService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.ValueOperations;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.ArrayList;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verify;
 
-@ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {QuizService.class, ServiceTestConfig.class})
-@ActiveProfiles("test")
-@TestPropertySource(properties = {
-        "jwt.secret=f825308ac5df56907db5835775baf3e4594526f127cb8d9bca70b435d596d424",
-        "jwt.exp=3600000"
-})
-public class QuizServiceTest {
-    @Autowired
+@ExtendWith(MockitoExtension.class)
+class QuizServiceTest {
+    @InjectMocks
     private QuizService quizService;
 
-    @Autowired
-    private VocabularyService vocabularyService;
-
-    @Autowired
-    private DefinitionService definitionService;
-
-    @Autowired
-    private CryptoService cryptoService;
-
-    @Autowired
+    @Mock
     private WordService wordService;
+    @Mock
+    private StatisticService statisticService;
+    @Mock
+    private QuizAppender quizAppender;
+    @Mock
+    private QuizReader quizReader;
+    @Mock
+    private QuizRemover quizRemover;
+    @Mock
+    private QuizValidator quizValidator;
+    @Mock
+    private QuizProcessor quizProcessor;
 
-    @Autowired
-    private ValueOperations<String, Object> valueOperations;
-
-    @Autowired
-    private RedisTemplate<String, Object> redisTemplate;
-
-    private final UserJpaEntity testUserJpaEntity = UserJpaEntity.builder()
-            .id(UUID.randomUUID())
-            .build();
-
-    List<WordDetail> wordDetails = List.of(
-            WordDetail.builder()
-                    .id(UUID.randomUUID())
-                    .expression("Apple")
-                    .definitions(List.of(
-                                    new Definition(UUID.randomUUID(), "사과", PartOfSpeech.NOUN)
-                            )
-                    ).build(),
-            WordDetail.builder()
-                    .id(UUID.randomUUID())
-                    .expression("Hello")
-                    .definitions(List.of(
-                                    new Definition(UUID.randomUUID(), "안녕", PartOfSpeech.INTERJECTION)
-                            )
-                    ).build(),
-            WordDetail.builder()
-                    .id(UUID.randomUUID())
-                    .expression("Run")
-                    .definitions(List.of(
-                                    new Definition(UUID.randomUUID(), "뛰다", PartOfSpeech.VERB)
-                            )
-                    ).build(),
-            WordDetail.builder()
-                    .id(UUID.randomUUID())
-                    .expression("Idiot")
-                    .definitions(List.of(
-                                    new Definition(UUID.randomUUID(), "바보", PartOfSpeech.NOUN)
-                            )
-                    ).build(), WordDetail.builder()
-                    .id(UUID.randomUUID())
-                    .expression("Media")
-                    .definitions(List.of(
-                                    new Definition(UUID.randomUUID(), "매체", PartOfSpeech.NOUN)
-                            )
-                    ).build());
+    private final UUID userId = UUID.randomUUID();
+    private final UUID vocabId = UUID.randomUUID();
+    private final UUID wordId = UUID.randomUUID();
 
     @Test
-    @DisplayName("[QuizService] Generate OX quiz test")
-    void generateOxQuizTest() {
-        //given
-        given(wordService.getWordDetailsByVocabularyId(any(UserJpaEntity.class), any(UUID.class)))
-                .willReturn(wordDetails);
-        given(redisTemplate.opsForValue())
-                .willReturn(valueOperations);
+    @DisplayName("[QuizService] Get OX quizzes success")
+    void getOXQuizzesSuccess() {
+        // given
+        List<WordDetail> wordDetails = List.of(
+                new WordDetail(wordId, "Apple", 0, 0, false, List.of(new Definition(UUID.randomUUID(), wordId, "사과", PartOfSpeech.NOUN)), LocalDateTime.now())
+        );
+        given(wordService.getWordDetailsNotLearnedByVocabularyId(userId, vocabId)).willReturn(wordDetails);
+        given(quizProcessor.encryptKey(anyString())).willReturn("encryptedKey");
 
-        int epoch = 10;
-        int assertCnt = 0;
+        // when
+        List<QuizInfo> result = quizService.getOXQuizzes(userId, vocabId);
 
-        for (int i = 0; i < epoch; i++) {
-            //when
-            List<QuizResponse> result = quizService.getOXQuizzes(testUserJpaEntity, UUID.randomUUID());
-
-            //then
-            int matchCnt = 0;
-            for (QuizResponse question : result) {
-                for (WordDetail wordDetails : wordDetails) {
-                    if (question.getStem().equals(wordDetails.expression())
-                            && question.getOptions().getFirst().equals(wordDetails.definitions().getFirst().getMeaning())) {
-                        matchCnt++;
-                        break;
-                    }
-                }
-            }
-
-            if (matchCnt < (wordDetails.size() / 2) + 1) {
-                assertCnt++;
-            }
-        }
-
-        assertEquals(epoch, assertCnt);
+        // then
+        assertEquals(1, result.size());
+        verify(quizAppender).saveAnswer(anyString(), anyString(), anyLong());
     }
 
     @Test
-    @DisplayName("[QuizService] Rate ox quiz test")
-    void rateOxQuizTest() {
-        //given
-        List<String> tokens = new ArrayList<>();
-        // quiz:{userId}:{wordId}:{quizId}
-        for (WordDetail wordDetails : wordDetails) {
-            String token = "quiz"
-                    + ":" + testUserJpaEntity.getId()
-                    + ":" + wordDetails.id();
-            tokens.add(cryptoService.encrypt(token));
-        }
-        List<String> correctAnswers = new ArrayList<>();
-        for (WordDetail wordDetails : wordDetails) {
-            correctAnswers.add(wordDetails.definitions().getFirst().getMeaning());
-        }
-        List<QuizRateRequest> quizRateRequests = new ArrayList<>();
-        for (int i = 0; i < wordDetails.size(); i++) {
-            QuizRateRequest quizRateRequest = QuizRateRequest.builder()
-                    .answer(correctAnswers.get(i))
-                    .token(tokens.get(i))
-                    .build();
+    @DisplayName("[QuizService] Rate quiz success")
+    void rateQuizSuccess() {
+        // given
+        String token = "testToken";
+        String answer = "사과";
+        String key = "quiz:" + userId + ":" + wordId + ":quizId";
+        
+        given(quizProcessor.decryptKey(token)).willReturn(key);
+        given(quizReader.readAnswer(key)).willReturn(answer);
 
-            quizRateRequests.add(quizRateRequest);
-        }
+        // when
+        QuizResult result = quizService.rateQuiz(userId, token, answer);
 
-        given(redisTemplate.opsForValue())
-                .willReturn(valueOperations);
-        given(redisTemplate.hasKey(anyString()))
-                .willReturn(true);
-        given(valueOperations.get(anyString()))
-                .willReturn(correctAnswers.get(0), correctAnswers.get(1), correctAnswers.get(2), correctAnswers.get(3), correctAnswers.get(4));
-
-        for (int i = 0; i < wordDetails.size(); i++) {
-            //when
-            QuizRateResponse quizRateResponse = quizService.rateQuiz(testUserJpaEntity, quizRateRequests.get(i));
-
-            //then
-            assertTrue(quizRateResponse.getIsCorrect());
-        }
+        // then
+        assertTrue(result.isCorrect());
+        assertEquals(answer, result.correctAnswer());
+        verify(quizValidator).validateQuizKey(key);
+        verify(quizRemover).removeAnswer(key);
+        verify(statisticService).increaseCorrectCount(userId, wordId);
     }
 }

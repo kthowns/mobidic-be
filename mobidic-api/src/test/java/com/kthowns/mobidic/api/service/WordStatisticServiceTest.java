@@ -1,142 +1,136 @@
 package com.kthowns.mobidic.api.service;
 
-import com.kthowns.mobidic.api.config.ServiceTestConfig;
-import com.kthowns.mobidic.storage.vocabulary.jpaentity.VocabularyJpaEntity;
-import com.kthowns.mobidic.storage.word.jpaentity.WordJpaEntity;
-import com.kthowns.mobidic.storage.vocabulary.jparepository.VocabularyJpaRepository;
-import com.kthowns.mobidic.storage.word.jparepository.WordJpaRepository;
+import com.kthowns.mobidic.domain.statistic.implementation.StatisticReader;
+import com.kthowns.mobidic.domain.statistic.implementation.StatisticUpdater;
 import com.kthowns.mobidic.domain.statistic.model.WordStatistic;
-import com.kthowns.mobidic.storage.statistic.jpaentity.WordStatisticJpaEntity;
-import com.kthowns.mobidic.storage.statistic.jparepository.WordStatisticJpaRepository;
 import com.kthowns.mobidic.domain.statistic.service.StatisticService;
-import com.kthowns.mobidic.storage.user.jpaentity.UserJpaEntity;
+import com.kthowns.mobidic.domain.vocabulary.implementation.VocabularyReader;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Optional;
+import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
 
-@ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {StatisticService.class, ServiceTestConfig.class})
-@ActiveProfiles("test")
-@TestPropertySource(properties = {
-        "jwt.secret=f825308ac5df56907db5835775baf3e4594526f127cb8d9bca70b435d596d424",
-        "jwt.exp=3600000"
-})
+@ExtendWith(MockitoExtension.class)
 class WordStatisticServiceTest {
-    @Autowired
-    private WordStatisticJpaRepository wordStatisticRepository;
-
-    @Autowired
-    private WordJpaRepository wordRepository;
-
-    @Autowired
-    private VocabularyJpaRepository vocabularyRepository;
-
-    @Autowired
+    @InjectMocks
     private StatisticService statisticService;
 
-    private final UserJpaEntity testUserJpaEntity = UserJpaEntity.builder()
-            .id(UUID.randomUUID())
-            .build();
+    @Mock
+    private StatisticReader statisticReader;
+
+    @Mock
+    private StatisticUpdater statisticUpdater;
+
+    @Mock
+    private VocabularyReader vocabularyReader;
+
+    private final UUID userId = UUID.randomUUID();
+    private final UUID wordId = UUID.randomUUID();
+    private final UUID vocabId = UUID.randomUUID();
 
     @Test
-    @DisplayName("[StatisticService] Get rate by word id success")
-    void getRateByWordIdSuccess() {
-        resetMock();
+    @DisplayName("[StatService] Get word statistic by id success")
+    void getWordStatisticByIdSuccess() {
+        // given
+        WordStatistic stat = new WordStatistic(wordId, 3L, 5L, true, 0.6, 0.375);
+        given(statisticReader.readByWordIdAndUserId(wordId, userId)).willReturn(stat);
 
-        UUID wordId = UUID.randomUUID();
-
-        WordStatisticJpaEntity defaultWordStatistic = WordStatisticJpaEntity.builder()
-                .word(mock(WordJpaEntity.class))
-                .wordId(wordId)
-                .correctCount(3L)
-                .incorrectCount(5L)
-                .isLearned(true)
-                .build();
-
-        //given
-        given(wordStatisticRepository.findByWordIdAndWord_Vocabulary_User_Id(any(UUID.class), any(UUID.class)))
-                .willReturn(Optional.of(defaultWordStatistic));
-
-        //when
-        WordStatistic response = statisticService.getWordStatisticById(testUserJpaEntity, UUID.randomUUID());
-
-        //then
-        assertEquals(defaultWordStatistic.getWordId(), response.getWordId());
-        assertEquals(defaultWordStatistic.isLearned(), response.isLearned());
-        assertEquals(defaultWordStatistic.getCorrectCount(), response.getCorrectCount());
-        assertEquals(defaultWordStatistic.getIncorrectCount(), response.getIncorrectCount());
-    }
-
-    @Test
-    @DisplayName("[StatisticService] Get vocab learning rate success")
-    public void getVocabLearningRateSuccess() {
-        resetMock();
-
-        UUID vocabularyId = UUID.randomUUID();
-        Double learningRate = 0.8;
-
-        //given
-        given(wordStatisticRepository.getVocabularyLearningRate(any(VocabularyJpaEntity.class)))
-                .willReturn(Optional.of(learningRate));
-        given(vocabularyRepository.findByIdAndUser_Id(any(UUID.class), any(UUID.class)))
-                .willReturn(Optional.of(Mockito.mock(VocabularyJpaEntity.class)));
-        given(wordRepository.countByVocabulary(any(VocabularyJpaEntity.class)))
-                .willReturn(1L);
-
-        //when
-        Double foundLearningRate = statisticService.getVocabLearningRate(testUserJpaEntity, vocabularyId);
-
-        //then
-        assertEquals(learningRate, foundLearningRate);
-    }
-
-    @Test
-    @DisplayName("[StatisticService] toggle rate success")
-    void toggleRateSuccess() {
-        resetMock();
-
-        UUID wordId = UUID.randomUUID();
-
-        WordStatisticJpaEntity defaultStatistic = WordStatisticJpaEntity.builder()
-                .wordId(wordId)
-                .word(Mockito.mock(WordJpaEntity.class))
-                .correctCount(3L)
-                .isLearned(true)
-                .incorrectCount(4L)
-                .build();
-
-        //given
-        given(wordRepository.findById(any(UUID.class)))
-                .willReturn(Optional.of(Mockito.mock(WordJpaEntity.class)));
-        given(wordStatisticRepository.findForUpdate(any(UUID.class), any(UUID.class)))
-                .willReturn(Optional.of(defaultStatistic));
-        given(wordStatisticRepository.save(any(WordStatisticJpaEntity.class)))
-                .willReturn(Mockito.mock(WordStatisticJpaEntity.class));
-
-        //when
-        statisticService.toggleLearnedByWordId(testUserJpaEntity, wordId);
+        // when
+        WordStatistic response = statisticService.getWordStatisticById(userId, wordId);
 
         // then
-        assertFalse(defaultStatistic.isLearned());
-        verify(wordStatisticRepository, times(1)).findForUpdate(wordId, testUserJpaEntity.getId());
-        verify(wordStatisticRepository, never()).save(any());
+        assertEquals(wordId, response.wordId());
+        assertEquals(3L, response.correctCount());
+        assertEquals(5L, response.incorrectCount());
+        assertEquals(true, response.isLearned());
     }
 
-    private void resetMock() {
-        Mockito.reset(wordStatisticRepository, wordRepository);
+    @Test
+    @DisplayName("[StatService] Get vocab learning rate success")
+    void getVocabLearningRateSuccess() {
+        // given
+        Double learningRate = 0.8;
+        given(vocabularyReader.existsByIdAndUser(vocabId, userId)).willReturn(true);
+        given(statisticReader.readVocabLearningRate(vocabId, userId)).willReturn(learningRate);
+
+        // when
+        Double result = statisticService.getVocabLearningRate(userId, vocabId);
+
+        // then
+        assertEquals(learningRate, result);
+    }
+
+    @Test
+    @DisplayName("[StatService] Toggle learned success")
+    void toggleLearnedSuccess() {
+        // when
+        statisticService.toggleLearnedByWordId(userId, wordId);
+
+        // then
+        verify(statisticUpdater).toggleLearned(userId, wordId);
+    }
+
+    @Test
+    @DisplayName("[StatService] Increase correct count success")
+    void increaseCorrectCountSuccess() {
+        // when
+        statisticService.increaseCorrectCount(userId, wordId);
+
+        // then
+        verify(statisticUpdater).increaseCorrectCount(userId, wordId);
+    }
+
+    @Test
+    @DisplayName("[StatService] Increase incorrect count success")
+    void increaseIncorrectCountSuccess() {
+        // when
+        statisticService.increaseIncorrectCount(userId, wordId);
+
+        // then
+        verify(statisticUpdater).increaseIncorrectCount(userId, wordId);
+    }
+
+    @Test
+    @DisplayName("[StatService] Get avg accuracy by vocab success")
+    void getAvgAccuracyByVocabSuccess() {
+        // given
+        List<WordStatistic> wordStatistics = List.of(
+                new WordStatistic(UUID.randomUUID(), 10L, 0L, true, 0.1, 1.0),
+                new WordStatistic(UUID.randomUUID(), 5L, 5L, true, 0.5, 0.5)
+        );
+        given(vocabularyReader.existsByIdAndUser(vocabId, userId)).willReturn(true);
+        given(statisticReader.readByVocabularyId(vocabId)).willReturn(wordStatistics);
+
+        // when
+        double result = statisticService.getAvgAccuracyByVocab(userId, vocabId);
+
+        // then
+        assertEquals(0.75, result);
+    }
+
+    @Test
+    @DisplayName("[StatService] Get total avg accuracy success")
+    void getTotalAvgAccuracySuccess() {
+        // given
+        List<WordStatistic> wordStatistics = List.of(
+                new WordStatistic(UUID.randomUUID(), 10L, 0L, true, 0.1, 1.0),
+                new WordStatistic(UUID.randomUUID(), 5L, 5L, true, 0.5, 0.5)
+        );
+        given(statisticReader.readByUserId(userId)).willReturn(wordStatistics);
+
+        // when
+        double result = statisticService.getTotalAvgAccuracy(userId);
+
+        // then
+        assertEquals(0.75, result);
     }
 }

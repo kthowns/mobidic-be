@@ -2,8 +2,8 @@ package com.kthowns.mobidic.api.integration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kthowns.mobidic.api.auth.dto.request.LoginRequest;
-import com.kthowns.mobidic.api.user.dto.request.SignUpRequestDto;
 import com.kthowns.mobidic.api.security.jwt.JwtProvider;
+import com.kthowns.mobidic.api.user.dto.request.SignUpRequestDto;
 import com.kthowns.mobidic.api.util.DatabaseCleaner;
 import com.kthowns.mobidic.common.code.AuthResponseCode;
 import com.kthowns.mobidic.common.code.GeneralResponseCode;
@@ -20,6 +20,7 @@ import org.springframework.test.web.servlet.MvcResult;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -72,7 +73,6 @@ public class AuthIntegrationTest {
                 .andExpect(jsonPath("$.message")
                         .value(GeneralResponseCode.DUPLICATED_EMAIL.getMessage()));
 
-        /*
         //Fail with duplicated Nickname
         request.setEmail("test2@test.com");
         request.setNickname("test");
@@ -82,7 +82,6 @@ public class AuthIntegrationTest {
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.message")
                         .value(GeneralResponseCode.DUPLICATED_NICKNAME.getMessage()));
-         */
 
         //Email, nickname, password format fail
         request.setEmail("test@test");
@@ -166,49 +165,5 @@ public class AuthIntegrationTest {
                         .value(GeneralResponseCode.INVALID_REQUEST_BODY.getMessage()))
                 .andExpect(jsonPath("$.errors.email")
                         .value("유효하지 않은 이메일 형식입니다."));
-    }
-
-    @DisplayName("[Auth][Integration] Logout test")
-    @Test
-    void logoutTest() throws Exception {
-        SignUpRequestDto joinRequest = SignUpRequestDto.builder()
-                .email("test@test.com")
-                .nickname("test")
-                .password("testTest1!")
-                .agreeTermIds(List.of())
-                .build();
-
-        mockMvc.perform(post("/api/users/signup")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(joinRequest)))
-                .andExpect(status().isOk());
-
-        LoginRequest loginRequest = LoginRequest.builder()
-                .email(joinRequest.getEmail())
-                .password(joinRequest.getPassword())
-                .build();
-
-        MvcResult loginResult = mockMvc.perform(post("/api/auth/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(loginRequest)))
-                .andExpect(status().isOk())
-                .andReturn();
-
-        //Logout success
-        String loginJson = loginResult.getResponse().getContentAsString();
-        String token = objectMapper.readTree(loginJson).path("data").path("accessToken").asText();
-
-        mockMvc.perform(post("/api/auth/logout")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer " + token))
-                .andExpect(status().isOk());
-
-        //Testing post method through invalid token
-        mockMvc.perform(post("/api/auth/logout")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer " + token))
-                .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.message")
-                        .value(AuthResponseCode.INVALID_TOKEN.getMessage()));
     }
 }

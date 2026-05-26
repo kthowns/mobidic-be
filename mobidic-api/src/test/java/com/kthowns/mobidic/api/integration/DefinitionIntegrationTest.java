@@ -96,7 +96,7 @@ public class DefinitionIntegrationTest {
         //Fail with unauthorized token
         mockMvc.perform(post("/api/words/" + wordId + "/definition")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer " + jwtProvider.generateToken(UUID.randomUUID()))
+                        .header("Authorization", "Bearer " + jwtProvider.generateToken(UUID.randomUUID(), "USER"))
                         .content(objectMapper.writeValueAsString(addDefRequest)))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.message")
@@ -165,7 +165,7 @@ public class DefinitionIntegrationTest {
         //Fail with unauthorized token
         mockMvc.perform(get("/api/words/" + wordId + "/definitions")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer " + jwtProvider.generateToken(UUID.randomUUID())))
+                        .header("Authorization", "Bearer " + jwtProvider.generateToken(UUID.randomUUID(), "USER")))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.message")
                         .value(AuthResponseCode.UNAUTHORIZED.getMessage()));
@@ -261,7 +261,7 @@ public class DefinitionIntegrationTest {
         //Fail with unauthorized token
         mockMvc.perform(patch("/api/definitions/" + defId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer " + jwtProvider.generateToken(UUID.randomUUID()))
+                        .header("Authorization", "Bearer " + jwtProvider.generateToken(UUID.randomUUID(), "USER"))
                         .content(objectMapper.writeValueAsString(addDefRequest)))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.message")
@@ -335,7 +335,7 @@ public class DefinitionIntegrationTest {
         //Fail with unauthorized token
         mockMvc.perform(delete("/api/definitions/" + defId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer " + jwtProvider.generateToken(UUID.randomUUID())))
+                        .header("Authorization", "Bearer " + jwtProvider.generateToken(UUID.randomUUID(), "USER")))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.message")
                         .value(AuthResponseCode.UNAUTHORIZED.getMessage()));

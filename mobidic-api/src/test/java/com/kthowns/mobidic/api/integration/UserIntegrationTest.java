@@ -79,17 +79,7 @@ public class UserIntegrationTest {
         //Fail with unauthorized token
         mockMvc.perform(get("/api/users/me")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer " + jwtProvider.generateToken(UUID.randomUUID()))
-                        .param("uId", userId.toString()))
-                .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.message")
-                        .value(AuthResponseCode.UNAUTHORIZED.getMessage()));
-
-        //Fail with no resource
-        mockMvc.perform(get("/api/users/me")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer " + jwtProvider.generateToken(UUID.randomUUID()))
-                        .param("uId", UUID.randomUUID().toString()))
+                        .header("Authorization", "Bearer " + jwtProvider.generateToken(UUID.randomUUID(), "USER")))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.message")
                         .value(AuthResponseCode.UNAUTHORIZED.getMessage()));
@@ -106,22 +96,11 @@ public class UserIntegrationTest {
         String email2 = "test2@test.com";
         String nickname2 = "test2";
         String token2 = loginAndGetToken(email2, nickname2);
-        UUID userId2 = jwtProvider.getIdFromToken(token2);
 
         //Success
         UpdateUserRequestDto updateNicknameRequest = UpdateUserRequestDto.builder()
                 .nickname(nickname + "test")
                 .build();
-
-        mockMvc.perform(patch("/api/users/me")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer " + token)
-                        .content(objectMapper.writeValueAsString(updateNicknameRequest)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.id")
-                        .value(userId.toString()))
-                .andExpect(jsonPath("$.data.nickname")
-                        .value(updateNicknameRequest.getNickname()));
 
         mockMvc.perform(patch("/api/users/me")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -160,14 +139,14 @@ public class UserIntegrationTest {
         //Fail with unauthorized token
         mockMvc.perform(patch("/api/users/me")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer " + jwtProvider.generateToken(UUID.randomUUID()))
+                        .header("Authorization", "Bearer " + jwtProvider.generateToken(UUID.randomUUID(), "USER"))
                         .content(objectMapper.writeValueAsString(updateNicknameRequest)))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.message")
                         .value(AuthResponseCode.UNAUTHORIZED.getMessage()));
 
         //Fail with invalid nickname pattern
-        updateNicknameRequest.setNickname(nickname + "testqweqweqqq");
+        updateNicknameRequest.setNickname("1");
         mockMvc.perform(patch("/api/users/me")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + token)
@@ -176,7 +155,7 @@ public class UserIntegrationTest {
                 .andExpect(jsonPath("$.message")
                         .value(GeneralResponseCode.INVALID_REQUEST_BODY.getMessage()))
                 .andExpect(jsonPath("$.errors.nickname")
-                        .value("유효하지 않은 닉네임 형식 입니다."));
+                        .value("닉네임은 2~16자의 한글, 영문 소문자, 숫자, -, _ 만 사용할 수 있습니다."));
 
     }
 
@@ -203,13 +182,13 @@ public class UserIntegrationTest {
         //Fail with unauthorized token
         mockMvc.perform(patch("/api/users/me")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer " + jwtProvider.generateToken(UUID.randomUUID()))
+                        .header("Authorization", "Bearer " + jwtProvider.generateToken(UUID.randomUUID(), "USER"))
                         .content(objectMapper.writeValueAsString(updatePasswordRequest)))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.message")
                         .value(AuthResponseCode.UNAUTHORIZED.getMessage()));
 
-        //Fail with invalid nickname pattern
+        //Fail with invalid pattern
         updatePasswordRequest.setPassword("test");
         mockMvc.perform(patch("/api/users/me")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -219,9 +198,9 @@ public class UserIntegrationTest {
                 .andExpect(jsonPath("$.message")
                         .value(GeneralResponseCode.INVALID_REQUEST_BODY.getMessage()))
                 .andExpect(jsonPath("$.errors.password")
-                        .value("비밀번호는 8자 이상, 영문자와 숫자를 포함해야 합니다."));
+                        .value("비밀번호는 8~128자이며 영문자, 숫자, 특수문자(@$!%*?&)를 각각 1개 이상 포함해야 합니다."));
 
-        updatePasswordRequest.setPassword("testTest2");
+        updatePasswordRequest.setPassword("testTest2!");
 
         //Success
         mockMvc.perform(patch("/api/users/me")
@@ -230,13 +209,22 @@ public class UserIntegrationTest {
                         .content(objectMapper.writeValueAsString(updatePasswordRequest)))
                 .andExpect(status().isOk());
 
-        mockMvc.perform(get("/api/users/me")
+        //Old password should fail login
+        LoginRequest loginRequest = LoginRequest.builder()
+                .email(email)
+                .password("testTest1!")
+                .build();
+        mockMvc.perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer " + token)
-                        .param("uId", userId.toString()))
-                .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.message")
-                        .value(AuthResponseCode.UNAUTHORIZED.getMessage()));
+                        .content(objectMapper.writeValueAsString(loginRequest)))
+                .andExpect(status().isUnauthorized());
+
+        //New password should success
+        loginRequest.setPassword("testTest2!");
+        mockMvc.perform(post("/api/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(loginRequest)))
+                .andExpect(status().isOk());
     }
 
     private String loginAndGetToken(String email, String nickname) throws Exception {
@@ -267,14 +255,3 @@ public class UserIntegrationTest {
         return objectMapper.readTree(json).path("data").path("accessToken").asText();
     }
 }
-// Resource api integration test convention
-//Success
-// -> OK
-//Fail without token
-// -> UNAUTHORIZED
-//Fail with unauthorized token
-// -> UNAUTHORIZED
-//Fail with no resource
-// -> UNAUTHORIZED
-//Fail with invalid pattern
-// -> INVALID_REQUEST_BODY

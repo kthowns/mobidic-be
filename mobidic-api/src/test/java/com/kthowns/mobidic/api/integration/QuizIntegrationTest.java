@@ -58,7 +58,7 @@ public class QuizIntegrationTest {
     @Test
     @DisplayName("[Quiz][Integration] Ox quiz generate test")
     void oxQuizGenerateTest() throws Exception {
-        String token = loginAndGetToken("email@test.com", "password1");
+        String token = loginAndGetToken("email@test.com", "password123!");
         UUID vocabId = addVocabAndGetId(token);
 
         String[] sampleWords = {"Hello", "Apple", "Run", "Edit", "Amazing"};
@@ -83,7 +83,7 @@ public class QuizIntegrationTest {
     @Test
     @DisplayName("[Quiz][Integration] Ox quiz rate test")
     void oxQuizRateTest() throws Exception {
-        String token = loginAndGetToken("email@test.com", "password1");
+        String token = loginAndGetToken("email@test.com", "password123!");
         UUID vocabId = addVocabAndGetId(token);
 
         String[] sampleWords = {"Hello", "Apple", "Run", "Edit", "Amazing"};
@@ -111,7 +111,7 @@ public class QuizIntegrationTest {
 
         for (int i = 0; i < savedWords.size(); i++) {
             String correctAnswer = findCorrectAnswer(quizzesResponse.get(i), sampleWords, sampleDefs);
-            boolean answer = correctAnswer.equals(quizzesResponse.get(i).getOptions().getFirst());
+            boolean answer = correctAnswer.equals(quizzesResponse.get(i).getOptions().get(0));
 
             QuizRateRequest quizRateRequest = QuizRateRequest.builder()
                     .token(quizzesResponse.get(i).getToken())
@@ -146,7 +146,7 @@ public class QuizIntegrationTest {
     @Test
     @DisplayName("[Quiz][Integration] Blank quiz generate test")
     void blankQuizGenerateTest() throws Exception {
-        String token = loginAndGetToken("email@test.com", "password1");
+        String token = loginAndGetToken("email@test.com", "password123!");
         UUID vocabId = addVocabAndGetId(token);
 
         String[] sampleWords = {"Hello", "Apple", "Run", "Edit", "Amazing"};
@@ -181,7 +181,7 @@ public class QuizIntegrationTest {
     @Test
     @DisplayName("[Quiz][Integration] Blank quiz rate test")
     void blankQuizRateTest() throws Exception {
-        String token = loginAndGetToken("email@test.com", "password1");
+        String token = loginAndGetToken("email@test.com", "password123!");
         UUID vocabId = addVocabAndGetId(token);
 
         String[] sampleWords = {"Hello", "Apple", "Run", "Edit", "Amazing"};
@@ -240,7 +240,7 @@ public class QuizIntegrationTest {
                                                    PartOfSpeech[] sampleParts, UUID vocabId, String token) throws Exception {
         for (int i = 0; i < sampleWords.length; i++) {
             UUID wordId = addWordAndGetId(vocabId, token, sampleWords[i]);
-            UUID defId = addDefAndGetId(wordId, token, sampleDefs[i], sampleParts[i]);
+            addDefAndGetId(wordId, token, sampleDefs[i], sampleParts[i]);
         }
 
         MvcResult wordsResult = mockMvc.perform(get("/api/vocabularies/" + vocabId + "/words")
@@ -268,10 +268,10 @@ public class QuizIntegrationTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        String vocabId = objectMapper.readTree(result.getResponse().getContentAsString())
+        String vocabIdStr = objectMapper.readTree(result.getResponse().getContentAsString())
                 .path("data").path("id").asText();
 
-        return UUID.fromString(vocabId);
+        return UUID.fromString(vocabIdStr);
     }
 
     private UUID addWordAndGetId(UUID vocabId, String token, String exp) throws Exception {
@@ -286,10 +286,10 @@ public class QuizIntegrationTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        String wordId = objectMapper.readTree(wordResult.getResponse().getContentAsString())
+        String wordIdStr = objectMapper.readTree(wordResult.getResponse().getContentAsString())
                 .path("data").path("id").asText();
 
-        return UUID.fromString(wordId);
+        return UUID.fromString(wordIdStr);
     }
 
     private UUID addDefAndGetId(UUID wordId, String token, String def, PartOfSpeech part) throws Exception {
@@ -305,23 +305,24 @@ public class QuizIntegrationTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        String defId = objectMapper.readTree(defResult.getResponse().getContentAsString())
+        String defIdStr = objectMapper.readTree(defResult.getResponse().getContentAsString())
                 .path("data").path("id").asText();
 
-        return UUID.fromString(defId);
+        return UUID.fromString(defIdStr);
     }
 
-    private String loginAndGetToken(String email, String nickname) throws Exception {
+    private String loginAndGetToken(String email, String password) throws Exception {
+        String nickname = "user" + UUID.randomUUID().toString().substring(0, 8);
         SignUpRequestDto joinRequest = SignUpRequestDto.builder()
                 .email(email)
                 .nickname(nickname)
-                .password("testTest1!")
+                .password(password)
                 .agreeTermIds(List.of())
                 .build();
 
         LoginRequest loginRequest = LoginRequest.builder()
-                .email(joinRequest.getEmail())
-                .password(joinRequest.getPassword())
+                .email(email)
+                .password(password)
                 .build();
 
         mockMvc.perform(post("/api/users/signup")
