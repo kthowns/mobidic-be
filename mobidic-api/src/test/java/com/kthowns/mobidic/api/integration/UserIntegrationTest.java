@@ -2,9 +2,9 @@ package com.kthowns.mobidic.api.integration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kthowns.mobidic.api.auth.dto.request.LoginRequest;
+import com.kthowns.mobidic.api.security.jwt.JwtProvider;
 import com.kthowns.mobidic.api.user.dto.request.SignUpRequestDto;
 import com.kthowns.mobidic.api.user.dto.request.UpdateUserRequestDto;
-import com.kthowns.mobidic.api.security.jwt.JwtProvider;
 import com.kthowns.mobidic.api.util.DatabaseCleaner;
 import com.kthowns.mobidic.common.code.AuthResponseCode;
 import com.kthowns.mobidic.common.code.GeneralResponseCode;
@@ -79,7 +79,7 @@ public class UserIntegrationTest {
         //Fail with unauthorized token
         mockMvc.perform(get("/api/users/me")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer " + jwtProvider.generateToken(UUID.randomUUID(), "USER")))
+                        .header("Authorization", "Bearer " + UUID.randomUUID()))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.message")
                         .value(AuthResponseCode.UNAUTHORIZED.getMessage()));
@@ -139,7 +139,7 @@ public class UserIntegrationTest {
         //Fail with unauthorized token
         mockMvc.perform(patch("/api/users/me")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer " + jwtProvider.generateToken(UUID.randomUUID(), "USER"))
+                        .header("Authorization", "Bearer " + UUID.randomUUID())
                         .content(objectMapper.writeValueAsString(updateNicknameRequest)))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.message")
@@ -165,7 +165,6 @@ public class UserIntegrationTest {
         String email = "test@test.com";
         String nickname = "test";
         String token = loginAndGetToken(email, nickname);
-        UUID userId = jwtProvider.getIdFromToken(token);
 
         UpdateUserRequestDto updatePasswordRequest = UpdateUserRequestDto.builder()
                 .password("testTest2@")
@@ -182,7 +181,7 @@ public class UserIntegrationTest {
         //Fail with unauthorized token
         mockMvc.perform(patch("/api/users/me")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer " + jwtProvider.generateToken(UUID.randomUUID(), "USER"))
+                        .header("Authorization", "Bearer " + UUID.randomUUID(), "USER")
                         .content(objectMapper.writeValueAsString(updatePasswordRequest)))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.message")

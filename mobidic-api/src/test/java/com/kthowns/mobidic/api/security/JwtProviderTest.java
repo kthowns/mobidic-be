@@ -18,6 +18,7 @@ import java.util.UUID;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 
 @ExtendWith(MockitoExtension.class)
@@ -44,7 +45,7 @@ class JwtProviderTest {
                 .willReturn(Keys.hmacShaKeyFor(testKey.getBytes(StandardCharsets.UTF_8)));
 
         //when
-        String token = jwtProvider.generateToken(uid);
+        String token = jwtProvider.generateToken(uid, anyString());
         Claims claims = Jwts.parser()
                 .verifyWith(jwtProperties.getSecretKey())
                 .build()
@@ -65,7 +66,7 @@ class JwtProviderTest {
                 .willReturn(testExp);
         given(jwtProperties.getSecretKey())
                 .willReturn(Keys.hmacShaKeyFor(testKey.getBytes(StandardCharsets.UTF_8)));
-        String token = jwtProvider.generateToken(uid);
+        String token = jwtProvider.generateToken(uid, anyString());
         //when
         boolean isValid = jwtProvider.validateToken(token);
         //then
@@ -82,7 +83,7 @@ class JwtProviderTest {
                 .willReturn(1L);
         given(jwtProperties.getSecretKey())
                 .willReturn(Keys.hmacShaKeyFor(testKey.getBytes(StandardCharsets.UTF_8)));
-        String token = jwtProvider.generateToken(uid);
+        String token = jwtProvider.generateToken(uid, anyString());
 
         //when
         boolean isValid = jwtProvider.validateToken(token);
@@ -94,19 +95,19 @@ class JwtProviderTest {
     @DisplayName("[Security][JWT] Get id from Token Success")
     @Test
     void getIdFromTokenTestSuccess() {
-        UUID uuid = UUID.randomUUID();
+        UUID uid = UUID.randomUUID();
 
         //given
         given(jwtProperties.getJwtExp())
                 .willReturn(testExp);
         given(jwtProperties.getSecretKey())
                 .willReturn(Keys.hmacShaKeyFor(testKey.getBytes(StandardCharsets.UTF_8)));
-        String token = jwtProvider.generateToken(uuid);
+        String token = jwtProvider.generateToken(uid, anyString());
 
         //when
         UUID resultId = jwtProvider.getIdFromToken(token);
 
         //then
-        assertEquals(uuid, resultId);
+        assertEquals(uid, resultId);
     }
 }

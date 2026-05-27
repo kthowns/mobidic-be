@@ -1,6 +1,5 @@
 package com.kthowns.mobidic.domain.user.service;
 
-import com.kthowns.mobidic.domain.user.client.PasswordEncoderClient;
 import com.kthowns.mobidic.domain.user.implementation.*;
 import com.kthowns.mobidic.domain.user.model.User;
 import com.kthowns.mobidic.domain.user.model.UserRole;
@@ -21,17 +20,13 @@ public class UserService {
     private final UserRemover userRemover;
     private final UserValidator userValidator;
 
-    private final PasswordEncoderClient passwordEncoderClient;
-
     @Transactional
     public User registerUser(String email, String nickname, String password) {
         userValidator.validateEmailDuplication(email);
         userValidator.validateNicknameDuplication(nickname);
         userValidator.validatePassword(password);
 
-        String encodedPassword = passwordEncoderClient.encode(password);
-
-        return userAppender.append(email, nickname, encodedPassword, UserRole.USER);
+        return userAppender.append(email, nickname, password, UserRole.USER);
     }
 
     @Transactional
@@ -41,19 +36,21 @@ public class UserService {
                 kakaoId,
                 email,
                 nickname,
-                passwordEncoderClient.encode(UUID.randomUUID().toString()),
+                UUID.randomUUID().toString(),
                 UserRole.USER
         );
     }
 
     @Transactional
     public User updateUser(UUID userId, String nickname, String password) {
-        userValidator.validateNicknameUpdateDuplication(nickname, userId);
-        userValidator.validatePassword(password);
+        if (nickname != null && !nickname.isEmpty()) {
+            userValidator.validateNicknameUpdateDuplication(nickname, userId);
+        }
+        if (password != null && !password.isEmpty()) {
+            userValidator.validatePassword(password);
+        }
 
-        String encodedPassword = passwordEncoderClient.encode(password);
-
-        return userUpdater.update(userId, nickname, encodedPassword);
+        return userUpdater.update(userId, nickname, password);
     }
 
     @Transactional

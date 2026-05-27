@@ -44,6 +44,18 @@ public record User(
         );
     }
 
+    public User updateProfile(String nickname, String password) {
+        User user = this;
+        if (nickname != null && !nickname.isBlank()) {
+            user = user.changeNickname(nickname);
+        }
+        if (password != null && !password.isBlank()) {
+            user = user.changePassword(password);
+        }
+
+        return user;
+    }
+
     public User changeNickname(String newNickname) {
         return new User(
                 this.id,
