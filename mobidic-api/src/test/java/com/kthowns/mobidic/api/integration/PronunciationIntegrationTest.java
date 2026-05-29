@@ -1,35 +1,49 @@
 package com.kthowns.mobidic.api.integration;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.kthowns.mobidic.api.auth.dto.request.LoginRequest;
-import com.kthowns.mobidic.api.vocabulary.dto.request.AddVocabularyRequestDto;
-import com.kthowns.mobidic.api.word.dto.request.AddWordRequestDto;
-import com.kthowns.mobidic.api.user.dto.request.SignUpRequestDto;
 import com.kthowns.mobidic.api.security.jwt.JwtProvider;
 import com.kthowns.mobidic.api.util.DatabaseCleaner;
+import com.kthowns.mobidic.common.code.AuthResponseCode;
+import com.kthowns.mobidic.common.code.GeneralResponseCode;
+import com.kthowns.mobidic.domain.pronunciation.client.SpeechToTextClient;
+import com.kthowns.mobidic.domain.user.model.UserRole;
+import com.kthowns.mobidic.storage.user.jpaentity.UserJpaEntity;
+import com.kthowns.mobidic.storage.user.jparepository.UserJpaRepository;
+import com.kthowns.mobidic.storage.vocabulary.jpaentity.VocabularyJpaEntity;
+import com.kthowns.mobidic.storage.vocabulary.jparepository.VocabularyJpaRepository;
+import com.kthowns.mobidic.storage.word.jpaentity.WordJpaEntity;
+import com.kthowns.mobidic.storage.word.jparepository.WordJpaRepository;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+/**
+ * 발음 평가 관련 통합 테스트
+ */
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
+@Transactional
 public class PronunciationIntegrationTest {
-    @Autowired
-    private MockMvc mockMvc;
 
     @Autowired
-    private ObjectMapper objectMapper;
+    private MockMvc mockMvc;
 
     @Autowired
     private JwtProvider jwtProvider;
@@ -37,166 +51,125 @@ public class PronunciationIntegrationTest {
     @Autowired
     private DatabaseCleaner databaseCleaner;
 
+    @Autowired
+    private UserJpaRepository userJpaRepository;
+
+    @Autowired
+    private VocabularyJpaRepository vocabularyJpaRepository;
+
+    @Autowired
+    private WordJpaRepository wordJpaRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @MockitoBean
+    private SpeechToTextClient speechToTextClient;
+
+    private UserJpaEntity testUser;
+    private String userToken;
+    private WordJpaEntity testWord;
+
     @BeforeEach
-    void tearDown() {
+    void setUp() {
         databaseCleaner.execute();
+
+        testUser = userJpaRepository.save(UserJpaEntity.builder()
+                .email("test@test.com")
+                .nickname("test")
+                .password(passwordEncoder.encode("password123!"))
+                .role(UserRole.USER)
+                .build());
+
+        userToken = jwtProvider.generateToken(testUser.getId(), testUser.getRole().name());
+
+        VocabularyJpaEntity vocabulary = vocabularyJpaRepository.save(VocabularyJpaEntity.builder()
+                .user(testUser)
+                .title("테스트 단어장")
+                .build());
+
+        testWord = wordJpaRepository.save(WordJpaEntity.builder()
+                .vocabulary(vocabulary)
+                .expression("apple")
+                .build());
     }
 
-    /*
-        @Test
-        @DisplayName("[Pronunciation][Integration] Rate pronunciation test")
-        void ratePronunciationTest() throws Exception {
-            String token = loginAndGetToken("test@test.com", "test");
-            UUID vocabId = addVocabAndGetId(token);
-            UUID wordId = addWordAndGetId(vocabId, token, "hello");
+    @Test
+    @DisplayName("발음 평가 성공")
+    void evaluatePronunciationSuccess() throws Exception {
+        // Given: STT 클라이언트가 단어와 일치하는 텍스트를 반환하도록 설정
+        given(speechToTextClient.transcribe(any())).willReturn("apple");
 
-            MockMultipartFile file = new MockMultipartFile(
-                    "file", // 파일 파라미터 이름
-                    "hello.m4a", // 파일 이름
-                    "audio/m4a", // 파일 MIME 타입
-                    new FileInputStream(Paths.get("src/test/resources/hello.m4a").toFile()) // 상대 경로
-            );
+        MockMultipartFile file = new MockMultipartFile(
+                "file", "test.m4a", "audio/m4a", "dummy audio content".getBytes());
 
-            MockMultipartFile largeFile = new MockMultipartFile(
-                    "file", // 파일 파라미터 이름
-                    "napal.mp3", // 파일 이름
-                    "audio/mp3", // 파일 MIME 타입
-                    new FileInputStream(Paths.get("src/test/resources/napal.mp3").toFile()) // 상대 경로
-            );
-
-            //Success high rate
-            MvcResult result = mockMvc.perform(multipart("/api/words/" + wordId + "/pronunciation")
-                            .file(file) // 파일 파라미터 추가
-                            .header("Authorization", "Bearer " + token)) // 문자열 파라미터 추가
-                    .andExpect(status().isOk()) // 응답 상태 200
-                    .andExpect(jsonPath("$.data")
-                            .isNotEmpty())
-                    .andReturn();
-
-            String json = result.getResponse().getContentAsString();
-            double rate = Double.parseDouble(objectMapper.readTree(json).path("data").asText());
-
-            assertTrue(rate > 0.8);
-
-            //Success low rate
-            UUID wordId2 = addWordAndGetId(vocabId, token, "yellow");
-
-            result = mockMvc.perform(multipart("/api/words/" + wordId2 + "/pronunciation")
-                            .file(file)
-                            .header("Authorization", "Bearer " + token))
-                    .andExpect(status().isOk())
-                    .andReturn();
-
-            json = result.getResponse().getContentAsString();
-            rate = Double.parseDouble(objectMapper.readTree(json).path("data").asText());
-
-            assertTrue(rate < 0.8);
-
-            //Fail with too big file
-            mockMvc.perform(multipart("/api/words/" + wordId + "/pronunciation")
-                            .file(largeFile)
-                            .header("Authorization", "Bearer " + token))
-                    .andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("$.message")
-                            .value(TOO_BIG_FILE_SIZE.getMessage()));
-
-            //Fail without token
-            mockMvc.perform(multipart("/api/words/" + wordId + "/pronunciation")
-                            .file(largeFile))
-                    .andExpect(status().isUnauthorized())
-                    .andExpect(jsonPath("$.message")
-                            .value(AuthResponseCode.UNAUTHORIZED.getMessage()));
-
-            //Fail with unauthorized token
-            mockMvc.perform(multipart("/api/words/" + wordId + "/pronunciation")
-                            .file(largeFile)
-                            .header("Authorization", "Bearer " + jwtProvider.generateToken(UUID.randomUUID())))
-                    .andExpect(status().isUnauthorized())
-                    .andExpect(jsonPath("$.message")
-                            .value(AuthResponseCode.UNAUTHORIZED.getMessage()));
-
-            //Fail with no resource
-            mockMvc.perform(multipart("/api/words/" + UUID.randomUUID() + "/pronunciation")
-                            .file(file)
-                            .header("Authorization", "Bearer " + token))
-                    .andExpect(status().isNotFound())
-                    .andExpect(jsonPath("$.message")
-                            .value(GeneralResponseCode.NO_WORD.getMessage()));
-        }
-    */
-    private UUID addVocabAndGetId(String token) throws Exception {
-        AddVocabularyRequestDto addVocabRequest = AddVocabularyRequestDto.builder()
-                .title("title")
-                .description("description")
-                .build();
-
-        MvcResult result = mockMvc.perform(post("/api/vocabularies")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(addVocabRequest))
-                        .header("Authorization", "Bearer " + token))
+        // When
+        mockMvc.perform(multipart("/api/words/" + testWord.getId() + "/pronunciation")
+                        .file(file)
+                        .header("Authorization", "Bearer " + userToken))
+                // Then
                 .andExpect(status().isOk())
-                .andReturn();
-
-        String vocabId = objectMapper.readTree(result.getResponse().getContentAsString())
-                .path("data").path("id").asText();
-
-        return UUID.fromString(vocabId);
+                .andExpect(jsonPath("$.data").value(1.0)); // 정확히 일치하므로 점수 1.0
     }
 
-    private UUID addWordAndGetId(UUID vocabId, String token, String exp) throws Exception {
-        AddWordRequestDto addWordRequest = AddWordRequestDto.builder()
-                .expression(exp)
-                .build();
+    @Test
+    @DisplayName("발음 평가 실패 - 너무 큰 파일")
+    void evaluatePronunciationFailFileSizeExceeded() throws Exception {
+        // Given: 500KB를 초과하는 더미 파일 (501KB)
+        byte[] largeContent = new byte[501 * 1024];
+        MockMultipartFile largeFile = new MockMultipartFile(
+                "file", "large.m4a", "audio/m4a", largeContent);
 
-        MvcResult wordResult = mockMvc.perform(post("/api/vocabularies/" + vocabId + "/word")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer " + token)
-                        .content(objectMapper.writeValueAsString(addWordRequest)))
-                .andExpect(status().isOk())
-                .andReturn();
-
-        String wordId = objectMapper.readTree(wordResult.getResponse().getContentAsString())
-                .path("data").path("id").asText();
-
-        return UUID.fromString(wordId);
+        // When
+        mockMvc.perform(multipart("/api/words/" + testWord.getId() + "/pronunciation")
+                        .file(largeFile)
+                        .header("Authorization", "Bearer " + userToken))
+                // Then
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value(GeneralResponseCode.TOO_BIG_FILE_SIZE.getMessage()));
     }
 
-    private String loginAndGetToken(String email, String nickname) throws Exception {
-        SignUpRequestDto joinRequest = SignUpRequestDto.builder()
-                .email(email)
-                .nickname(nickname)
-                .password("testTest1")
-                .build();
+    @Test
+    @DisplayName("발음 평가 실패 - 존재하지 않는 단어")
+    void evaluatePronunciationFailNoWord() throws Exception {
+        // Given
+        UUID randomId = UUID.randomUUID();
+        MockMultipartFile file = new MockMultipartFile(
+                "file", "test.m4a", "audio/m4a", "dummy content".getBytes());
 
-        LoginRequest loginRequest = LoginRequest.builder()
-                .email(joinRequest.getEmail())
-                .password(joinRequest.getPassword())
-                .build();
+        // When
+        mockMvc.perform(multipart("/api/words/" + randomId + "/pronunciation")
+                        .file(file)
+                        .header("Authorization", "Bearer " + userToken))
+                // Then
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value(GeneralResponseCode.NO_WORD.getMessage()));
+    }
 
-        mockMvc.perform(post("/api/users/signup")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(joinRequest)))
-                .andExpect(status().isOk());
+    @Test
+    @DisplayName("보안 테스트 - 인증 토큰 없이 요청 시 실패")
+    void securityFailNoToken() throws Exception {
+        MockMultipartFile file = new MockMultipartFile(
+                "file", "test.m4a", "audio/m4a", "dummy content".getBytes());
 
-        MvcResult loginResult = mockMvc.perform(post("/api/auth/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(loginRequest)))
-                .andExpect(status().isOk())
-                .andReturn();
+        // When & Then
+        mockMvc.perform(multipart("/api/words/" + testWord.getId() + "/pronunciation")
+                        .file(file))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.message").value(AuthResponseCode.UNAUTHORIZED.getMessage()));
+    }
 
-        String json = loginResult.getResponse().getContentAsString();
-        return objectMapper.readTree(json).path("data").path("accessToken").asText();
+    @Test
+    @DisplayName("보안 테스트 - 잘못된 토큰으로 요청 시 실패")
+    void securityFailInvalidToken() throws Exception {
+        MockMultipartFile file = new MockMultipartFile(
+                "file", "test.m4a", "audio/m4a", "dummy content".getBytes());
+
+        // When & Then
+        mockMvc.perform(multipart("/api/words/" + testWord.getId() + "/pronunciation")
+                        .file(file)
+                        .header("Authorization", "Bearer invalid-token"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.message").value(AuthResponseCode.UNAUTHORIZED.getMessage()));
     }
 }
-
-// Resource api integration test convention
-//Success
-// -> OK
-//Fail without token
-// -> UNAUTHORIZED
-//Fail with unauthorized token
-// -> UNAUTHORIZED
-//Fail with no resource
-// -> UNAUTHORIZED
-//Fail with invalid pattern
-// -> INVALID_REQUEST_BODY

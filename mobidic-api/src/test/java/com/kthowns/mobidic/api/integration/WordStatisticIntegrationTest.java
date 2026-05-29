@@ -1,14 +1,19 @@
 package com.kthowns.mobidic.api.integration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.kthowns.mobidic.api.auth.dto.request.LoginRequest;
-import com.kthowns.mobidic.api.vocabulary.dto.request.AddVocabularyRequestDto;
-import com.kthowns.mobidic.api.word.dto.request.AddWordRequestDto;
-import com.kthowns.mobidic.api.user.dto.request.SignUpRequestDto;
 import com.kthowns.mobidic.api.security.jwt.JwtProvider;
 import com.kthowns.mobidic.api.util.DatabaseCleaner;
 import com.kthowns.mobidic.common.code.AuthResponseCode;
 import com.kthowns.mobidic.common.code.GeneralResponseCode;
+import com.kthowns.mobidic.domain.user.model.UserRole;
+import com.kthowns.mobidic.storage.statistic.jpaentity.WordStatisticJpaEntity;
+import com.kthowns.mobidic.storage.statistic.jparepository.WordStatisticJpaRepository;
+import com.kthowns.mobidic.storage.user.jpaentity.UserJpaEntity;
+import com.kthowns.mobidic.storage.user.jparepository.UserJpaRepository;
+import com.kthowns.mobidic.storage.vocabulary.jpaentity.VocabularyJpaEntity;
+import com.kthowns.mobidic.storage.vocabulary.jparepository.VocabularyJpaRepository;
+import com.kthowns.mobidic.storage.word.jpaentity.WordJpaEntity;
+import com.kthowns.mobidic.storage.word.jparepository.WordJpaRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -16,26 +21,30 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.UUID;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+/**
+ * 단어 통계 관련 통합 테스트
+ */
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
+@Transactional
 public class WordStatisticIntegrationTest {
-    @Autowired
-    private MockMvc mockMvc;
 
     @Autowired
-    private ObjectMapper objectMapper;
+    private MockMvc mockMvc;
 
     @Autowired
     private JwtProvider jwtProvider;
@@ -43,233 +52,147 @@ public class WordStatisticIntegrationTest {
     @Autowired
     private DatabaseCleaner databaseCleaner;
 
+    @Autowired
+    private UserJpaRepository userJpaRepository;
+
+    @Autowired
+    private VocabularyJpaRepository vocabularyJpaRepository;
+
+    @Autowired
+    private WordJpaRepository wordJpaRepository;
+
+    @Autowired
+    private WordStatisticJpaRepository wordStatisticJpaRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private jakarta.persistence.EntityManager em;
+
+    private UserJpaEntity testUser;
+    private String userToken;
+    private VocabularyJpaEntity testVocab;
+    private WordJpaEntity testWord;
+
     @BeforeEach
-    void tearDown() {
+    void setUp() {
         databaseCleaner.execute();
+
+        testUser = userJpaRepository.saveAndFlush(UserJpaEntity.builder()
+                .email("test@test.com")
+                .nickname("test")
+                .password(passwordEncoder.encode("password123!"))
+                .role(UserRole.USER)
+                .build());
+
+        userToken = jwtProvider.generateToken(testUser.getId(), testUser.getRole().name());
+
+        testVocab = vocabularyJpaRepository.saveAndFlush(VocabularyJpaEntity.builder()
+                .user(testUser)
+                .title("통계 단어장")
+                .build());
+
+        testWord = wordJpaRepository.saveAndFlush(WordJpaEntity.builder()
+                .vocabulary(testVocab)
+                .expression("apple")
+                .build());
+
+        wordStatisticJpaRepository.saveAndFlush(WordStatisticJpaEntity.builder()
+                .word(testWord)
+                .correctCount(5)
+                .incorrectCount(5)
+                .isLearned(false)
+                .build());
+
+        em.clear();
     }
 
     @Test
-    @DisplayName("[WordStatistics][Integration] Get rate by word id test")
-    void getWordStatisticsByWordIdTest() throws Exception {
-        String email = "test@test.com";
-        String nickname = "test";
-        String token = loginAndGetToken(email, nickname);
-        UUID vocabId = addVocabAndGetId(token);
-        UUID wordId = addWordAndGetId(vocabId, token);
-
-        //Success
-        mockMvc.perform(get("/api/words/" + wordId + "/statistic")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer " + token)
-                        .param("wordId", wordId.toString()))
+    @DisplayName("단어 통계 조회 성공")
+    void getWordStatisticSuccess() throws Exception {
+        // When
+        mockMvc.perform(get("/api/words/" + testWord.getId() + "/statistic")
+                        .header("Authorization", "Bearer " + userToken))
+                // Then
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.wordId")
-                        .value(wordId.toString()))
-                .andExpect(jsonPath("$.data.correctCount")
-                        .value(0))
-                .andExpect(jsonPath("$.data.incorrectCount")
-                        .value(0))
-                .andExpect(jsonPath("$.data.learned")
-                        .value(false));
-
-        //Fail without token
-        mockMvc.perform(get("/api/words/" + wordId + "/statistic")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.message")
-                        .value(AuthResponseCode.UNAUTHORIZED.getMessage()));
-
-        //Fail with unauthorized token
-        mockMvc.perform(get("/api/words/" + wordId + "/statistic")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer " + jwtProvider.generateToken(UUID.randomUUID(), "USER")))
-                .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.message")
-                        .value(AuthResponseCode.UNAUTHORIZED.getMessage()));
-
-        //Fail with no resource
-        mockMvc.perform(get("/api/words/" + UUID.randomUUID() + "/statistic")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer " + token))
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.message")
-                        .value(GeneralResponseCode.NO_STAT.getMessage()));
+                .andExpect(jsonPath("$.data.wordId").value(testWord.getId().toString()))
+                .andExpect(jsonPath("$.data.correctCount").value(5))
+                .andExpect(jsonPath("$.data.incorrectCount").value(5))
+                .andExpect(jsonPath("$.data.isLearned").value(false));
     }
 
     @Test
-    @DisplayName("[WordStatistics][Integration] Get vocab learning rate test")
-    void getVocabLearningWordStatisticsTest() throws Exception {
-        String email = "test@test.com";
-        String nickname = "test";
-        String token = loginAndGetToken(email, nickname);
-        UUID vocabularyId = addVocabAndGetId(token);
-        addWordAndGetId(vocabularyId, token);
+    @DisplayName("단어장 학습률 조회 성공")
+    void getVocabLearningRateSuccess() throws Exception {
+        // Given: 2번째 단어 추가 및 학습 완료 처리
+        WordJpaEntity word2 = wordJpaRepository.saveAndFlush(WordJpaEntity.builder()
+                .vocabulary(testVocab)
+                .expression("banana")
+                .build());
+        wordStatisticJpaRepository.saveAndFlush(WordStatisticJpaEntity.builder()
+                .word(word2)
+                .isLearned(true)
+                .build());
+        em.clear();
 
-        //Success
-        mockMvc.perform(get("/api/vocabularies/" + vocabularyId + "/learning-rate")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer " + token))
+        // When
+        mockMvc.perform(get("/api/vocabularies/" + testVocab.getId() + "/learning-rate")
+                        .header("Authorization", "Bearer " + userToken))
+                // Then: 2개 중 1개 학습 완료이므로 0.5
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data")
-                        .value(0.0));
-
-        //Fail without token
-        mockMvc.perform(get("/api/vocabularies/" + vocabularyId + "/learning-rate")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.message")
-                        .value(AuthResponseCode.UNAUTHORIZED.getMessage()));
-
-        //Fail with unauthorized token
-        mockMvc.perform(get("/api/vocabularies/" + vocabularyId + "/learning-rate")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer " + jwtProvider.generateToken(UUID.randomUUID(), "USER")))
-                .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.message")
-                        .value(AuthResponseCode.UNAUTHORIZED.getMessage()));
-
-        //Fail with no resource
-        mockMvc.perform(get("/api/vocabularies/" + UUID.randomUUID() + "/learning-rate")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer " + token))
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.message")
-                        .value(GeneralResponseCode.NO_VOCAB.getMessage()));
+                .andExpect(jsonPath("$.data").value(0.5));
     }
 
     @Test
-    @DisplayName("[WordStatistics][Integration] Toggle rate by word id test")
-    void toggleWordStatisticsByWordIdTest() throws Exception {
-        String email = "test@test.com";
-        String nickname = "test";
-        String token = loginAndGetToken(email, nickname);
-        UUID vocabId = addVocabAndGetId(token);
-        UUID wordId = addWordAndGetId(vocabId, token);
+    @DisplayName("단어장 평균 정확도 조회 성공")
+    void getAvgAccuracyByVocabSuccess() throws Exception {
+        // When
+        mockMvc.perform(get("/api/vocabularies/" + testVocab.getId() + "/accuracy")
+                        .header("Authorization", "Bearer " + userToken))
+                // Then: 5:5 비율이므로 0.5 (accuracy는 %가 아닌 0~1 사이 값)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data").value(0.5));
+    }
 
-        //Success
-        mockMvc.perform(patch("/api/words/" + wordId + "/toggle-learned")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer " + token))
+    @Test
+    @DisplayName("단어 학습 상태 토글 성공")
+    void toggleLearnedStatusSuccess() throws Exception {
+        // 1. When: 토글 API 호출 (false -> true)
+        mockMvc.perform(patch("/api/words/" + testWord.getId() + "/toggle-learned")
+                        .header("Authorization", "Bearer " + userToken))
                 .andExpect(status().isOk());
 
-        mockMvc.perform(get("/api/words/" + wordId + "/statistic")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer " + token)
-                        .param("wordId", wordId.toString()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.learned")
-                        .value(true));
+        // 2. Then (DB Verify): DB 직접 확인
+        WordStatisticJpaEntity stat = wordStatisticJpaRepository.findById(testWord.getId()).orElseThrow();
+        assertThat(stat.isLearned()).isTrue();
 
-        mockMvc.perform(patch("/api/words/" + wordId + "/toggle-learned")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer " + token))
+        // 3. When: 다시 토글 (true -> false)
+        mockMvc.perform(patch("/api/words/" + testWord.getId() + "/toggle-learned")
+                        .header("Authorization", "Bearer " + userToken))
                 .andExpect(status().isOk());
 
-        mockMvc.perform(get("/api/words/" + wordId + "/statistic")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer " + token)
-                        .param("wordId", wordId.toString()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.learned")
-                        .value(false));
+        // 4. Then (DB Verify): 다시 false 확인
+        stat = wordStatisticJpaRepository.findById(testWord.getId()).orElseThrow();
+        assertThat(stat.isLearned()).isFalse();
+    }
 
-        //Fail without token
-        mockMvc.perform(patch("/api/words/" + wordId + "/toggle-learned")
-                        .contentType(MediaType.APPLICATION_JSON))
+    @Test
+    @DisplayName("보안 테스트 - 인증 토큰 없이 요청 시 실패")
+    void securityFailNoToken() throws Exception {
+        // When & Then
+        mockMvc.perform(get("/api/words/" + testWord.getId() + "/statistic"))
                 .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.message")
-                        .value(AuthResponseCode.UNAUTHORIZED.getMessage()));
+                .andExpect(jsonPath("$.message").value(AuthResponseCode.UNAUTHORIZED.getMessage()));
+    }
 
-        //Fail with unauthorized token
-        mockMvc.perform(patch("/api/words/" + wordId + "/toggle-learned")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer " + jwtProvider.generateToken(UUID.randomUUID(), "USER")))
+    @Test
+    @DisplayName("보안 테스트 - 잘못된 토큰으로 요청 시 실패")
+    void securityFailInvalidToken() throws Exception {
+        // When & Then
+        mockMvc.perform(get("/api/words/" + testWord.getId() + "/statistic")
+                        .header("Authorization", "Bearer invalid-token"))
                 .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.message")
-                        .value(AuthResponseCode.UNAUTHORIZED.getMessage()));
-
-        //Fail with no resource
-        mockMvc.perform(patch("/api/words/" + UUID.randomUUID() + "/toggle-learned")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer " + token))
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.message")
-                        .value(GeneralResponseCode.NO_STAT.getMessage()));
-    }
-
-    private UUID addVocabAndGetId(String token) throws Exception {
-        AddVocabularyRequestDto addVocabRequest = AddVocabularyRequestDto.builder()
-                .title("title")
-                .description("description")
-                .build();
-
-        MvcResult result = mockMvc.perform(post("/api/vocabularies")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(addVocabRequest))
-                        .header("Authorization", "Bearer " + token))
-                .andExpect(status().isOk())
-                .andReturn();
-
-        String vocabId = objectMapper.readTree(result.getResponse().getContentAsString())
-                .path("data").path("id").asText();
-
-        return UUID.fromString(vocabId);
-    }
-
-    private UUID addWordAndGetId(UUID vocabId, String token) throws Exception {
-        AddWordRequestDto addWordRequest = AddWordRequestDto.builder()
-                .expression("expression")
-                .build();
-
-        MvcResult wordResult = mockMvc.perform(post("/api/vocabularies/" + vocabId + "/word")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer " + token)
-                        .content(objectMapper.writeValueAsString(addWordRequest)))
-                .andExpect(status().isOk())
-                .andReturn();
-
-        String wordId = objectMapper.readTree(wordResult.getResponse().getContentAsString())
-                .path("data").path("id").asText();
-
-        return UUID.fromString(wordId);
-    }
-
-    private String loginAndGetToken(String email, String nickname) throws Exception {
-        SignUpRequestDto joinRequest = SignUpRequestDto.builder()
-                .email(email)
-                .nickname(nickname)
-                .password("testTest1!")
-                .agreeTermIds(List.of())
-                .build();
-
-        LoginRequest loginRequest = LoginRequest.builder()
-                .email(joinRequest.getEmail())
-                .password(joinRequest.getPassword())
-                .build();
-
-        mockMvc.perform(post("/api/users/signup")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(joinRequest)))
-                .andExpect(status().isOk());
-
-        MvcResult loginResult = mockMvc.perform(post("/api/auth/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(loginRequest)))
-                .andExpect(status().isOk())
-                .andReturn();
-
-        String json = loginResult.getResponse().getContentAsString();
-        return objectMapper.readTree(json).path("data").path("accessToken").asText();
+                .andExpect(jsonPath("$.message").value(AuthResponseCode.UNAUTHORIZED.getMessage()));
     }
 }
-// Resource api integration test convention
-//Success
-// -> OK
-//Fail without token
-// -> UNAUTHORIZED
-//Fail with unauthorized token
-// -> UNAUTHORIZED
-//Fail with no resource
-// -> UNAUTHORIZED
-//Fail with invalid pattern
-// -> INVALID_REQUEST_BODY

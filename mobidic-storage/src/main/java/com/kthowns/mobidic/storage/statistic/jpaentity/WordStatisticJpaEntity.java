@@ -58,7 +58,7 @@ public class WordStatisticJpaEntity {
 
     public static WordStatisticJpaEntity fromModel(WordStatistic wordStatistic, WordJpaEntity word) {
         return new WordStatisticJpaEntity(
-                wordStatistic.wordId(),
+                null,
                 word,
                 wordStatistic.correctCount(),
                 wordStatistic.incorrectCount(),

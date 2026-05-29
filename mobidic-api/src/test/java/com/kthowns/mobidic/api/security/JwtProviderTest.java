@@ -2,6 +2,7 @@ package com.kthowns.mobidic.api.security;
 
 import com.kthowns.mobidic.api.security.jwt.JwtProperties;
 import com.kthowns.mobidic.api.security.jwt.JwtProvider;
+import com.kthowns.mobidic.domain.user.model.UserRole;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -45,7 +46,7 @@ class JwtProviderTest {
                 .willReturn(Keys.hmacShaKeyFor(testKey.getBytes(StandardCharsets.UTF_8)));
 
         //when
-        String token = jwtProvider.generateToken(uid, anyString());
+        String token = jwtProvider.generateToken(uid, UserRole.USER.name());
         Claims claims = Jwts.parser()
                 .verifyWith(jwtProperties.getSecretKey())
                 .build()
@@ -66,7 +67,7 @@ class JwtProviderTest {
                 .willReturn(testExp);
         given(jwtProperties.getSecretKey())
                 .willReturn(Keys.hmacShaKeyFor(testKey.getBytes(StandardCharsets.UTF_8)));
-        String token = jwtProvider.generateToken(uid, anyString());
+        String token = jwtProvider.generateToken(uid, UserRole.USER.name());
         //when
         boolean isValid = jwtProvider.validateToken(token);
         //then
@@ -83,7 +84,7 @@ class JwtProviderTest {
                 .willReturn(1L);
         given(jwtProperties.getSecretKey())
                 .willReturn(Keys.hmacShaKeyFor(testKey.getBytes(StandardCharsets.UTF_8)));
-        String token = jwtProvider.generateToken(uid, anyString());
+        String token = jwtProvider.generateToken(uid, UserRole.USER.name());
 
         //when
         boolean isValid = jwtProvider.validateToken(token);
@@ -102,7 +103,7 @@ class JwtProviderTest {
                 .willReturn(testExp);
         given(jwtProperties.getSecretKey())
                 .willReturn(Keys.hmacShaKeyFor(testKey.getBytes(StandardCharsets.UTF_8)));
-        String token = jwtProvider.generateToken(uid, anyString());
+        String token = jwtProvider.generateToken(uid, UserRole.USER.name());
 
         //when
         UUID resultId = jwtProvider.getIdFromToken(token);

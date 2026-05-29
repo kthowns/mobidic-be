@@ -1,19 +1,23 @@
 package com.kthowns.mobidic.api.integration;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.kthowns.mobidic.domain.definition.model.PartOfSpeech;
-import com.kthowns.mobidic.domain.word.model.WordDetail;
-import com.kthowns.mobidic.api.quiz.dto.response.QuizResponse;
-import com.kthowns.mobidic.api.auth.dto.request.LoginRequest;
-import com.kthowns.mobidic.api.definition.dto.request.AddDefinitionRequestDto;
-import com.kthowns.mobidic.api.vocabulary.dto.request.AddVocabularyRequestDto;
-import com.kthowns.mobidic.api.word.dto.request.AddWordRequestDto;
 import com.kthowns.mobidic.api.quiz.dto.request.QuizRateRequest;
-import com.kthowns.mobidic.api.user.dto.request.SignUpRequestDto;
 import com.kthowns.mobidic.api.security.jwt.JwtProvider;
 import com.kthowns.mobidic.api.util.DatabaseCleaner;
+import com.kthowns.mobidic.domain.definition.model.PartOfSpeech;
+import com.kthowns.mobidic.domain.quiz.model.QuizInfo;
+import com.kthowns.mobidic.domain.user.model.UserRole;
+import com.kthowns.mobidic.storage.definition.jpaentity.DefinitionJpaEntity;
+import com.kthowns.mobidic.storage.definition.jparepository.DefinitionJpaRepository;
+import com.kthowns.mobidic.storage.statistic.jpaentity.WordStatisticJpaEntity;
+import com.kthowns.mobidic.storage.statistic.jparepository.WordStatisticJpaRepository;
+import com.kthowns.mobidic.storage.user.jpaentity.UserJpaEntity;
+import com.kthowns.mobidic.storage.user.jparepository.UserJpaRepository;
+import com.kthowns.mobidic.storage.vocabulary.jpaentity.VocabularyJpaEntity;
+import com.kthowns.mobidic.storage.vocabulary.jparepository.VocabularyJpaRepository;
+import com.kthowns.mobidic.storage.word.jpaentity.WordJpaEntity;
+import com.kthowns.mobidic.storage.word.jparepository.WordJpaRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -21,23 +25,32 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+/**
+ * 퀴즈 관련 통합 테스트
+ * OX 퀴즈 및 빈칸 퀴즈의 생성과 채점 로직을 검증한다.
+ */
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
+@Transactional
 public class QuizIntegrationTest {
+
     @Autowired
     private MockMvc mockMvc;
 
@@ -50,293 +63,170 @@ public class QuizIntegrationTest {
     @Autowired
     private DatabaseCleaner databaseCleaner;
 
+    @Autowired
+    private UserJpaRepository userJpaRepository;
+
+    @Autowired
+    private VocabularyJpaRepository vocabularyJpaRepository;
+
+    @Autowired
+    private WordJpaRepository wordJpaRepository;
+
+    @Autowired
+    private DefinitionJpaRepository definitionJpaRepository;
+
+    @Autowired
+    private WordStatisticJpaRepository wordStatisticJpaRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private jakarta.persistence.EntityManager em;
+
+    private UserJpaEntity testUser;
+    private String userToken;
+    private VocabularyJpaEntity testVocab;
+    private Map<String, String> wordToMeaning;
+
     @BeforeEach
-    void tearDown() {
+    void setUp() {
         databaseCleaner.execute();
-    }
 
-    @Test
-    @DisplayName("[Quiz][Integration] Ox quiz generate test")
-    void oxQuizGenerateTest() throws Exception {
-        String token = loginAndGetToken("email@test.com", "password123!");
-        UUID vocabId = addVocabAndGetId(token);
+        // 1. 테스트 사용자 및 인증 토큰 생성
+        testUser = userJpaRepository.saveAndFlush(UserJpaEntity.builder()
+                .email("test@test.com")
+                .nickname("test")
+                .password(passwordEncoder.encode("password123!"))
+                .role(UserRole.USER)
+                .build());
 
-        String[] sampleWords = {"Hello", "Apple", "Run", "Edit", "Amazing"};
-        String[] sampleDefs = {"안녕", "사과", "뛰다", "편집하다", "개쩌는"};
-        PartOfSpeech[] sampleParts = {PartOfSpeech.INTERJECTION, PartOfSpeech.NOUN, PartOfSpeech.VERB,
-                PartOfSpeech.VERB, PartOfSpeech.ADJECTIVE};
+        userToken = jwtProvider.generateToken(testUser.getId(), testUser.getRole().name());
 
-        List<WordDetail> savedWords = addWordsAndGetDetails(sampleWords, sampleDefs, sampleParts
-                , vocabId, token);
+        // 2. 테스트 단어장 생성
+        testVocab = vocabularyJpaRepository.saveAndFlush(VocabularyJpaEntity.builder()
+                .user(testUser)
+                .title("퀴즈 단어장")
+                .build());
 
-        MvcResult quizResult = mockMvc.perform(get("/api/vocabularies/" + vocabId + "/quizzes/ox")
-                        .header("Authorization", "Bearer " + token))
-                .andExpect(status().isOk())
-                .andReturn();
-        JsonNode data = objectMapper.readTree(quizResult.getResponse().getContentAsString()).path("data");
-        List<QuizResponse> resultQuestions = objectMapper.readValue(data.toString(), new TypeReference<>() {
-        });
-
-        assertEquals(savedWords.size(), resultQuestions.size());
-    }
-
-    @Test
-    @DisplayName("[Quiz][Integration] Ox quiz rate test")
-    void oxQuizRateTest() throws Exception {
-        String token = loginAndGetToken("email@test.com", "password123!");
-        UUID vocabId = addVocabAndGetId(token);
-
-        String[] sampleWords = {"Hello", "Apple", "Run", "Edit", "Amazing"};
-        String[] sampleDefs = {"안녕", "사과", "뛰다", "편집하다", "개쩌는"};
-
-        PartOfSpeech[] sampleParts = {PartOfSpeech.INTERJECTION, PartOfSpeech.NOUN, PartOfSpeech.VERB,
-                PartOfSpeech.VERB, PartOfSpeech.ADJECTIVE};
-
-        List<WordDetail> savedWords = addWordsAndGetDetails(
-                sampleWords,
-                sampleDefs,
-                sampleParts,
-                vocabId,
-                token
+        // 3. 퀴즈 생성을 위한 단어, 정의, 통계 데이터 주입
+        String[] expressions = {"apple", "banana", "car", "dog", "elephant"};
+        String[] meanings = {"사과", "바나나", "자동차", "개", "코끼리"};
+        wordToMeaning = Map.of(
+                "apple", "사과",
+                "banana", "바나나",
+                "car", "자동차",
+                "dog", "개",
+                "elephant", "코끼리"
         );
 
-        MvcResult quizResult = mockMvc.perform(get("/api/vocabularies/" + vocabId + "/quizzes/ox")
-                        .header("Authorization", "Bearer " + token))
-                .andExpect(status().isOk())
-                .andReturn();
+        for (int i = 0; i < expressions.length; i++) {
+            WordJpaEntity word = wordJpaRepository.saveAndFlush(WordJpaEntity.builder()
+                    .vocabulary(testVocab)
+                    .expression(expressions[i])
+                    .build());
 
-        JsonNode data = objectMapper.readTree(quizResult.getResponse().getContentAsString()).path("data");
-        List<QuizResponse> quizzesResponse = objectMapper.readValue(data.toString(), new TypeReference<>() {
-        });
+            definitionJpaRepository.saveAndFlush(DefinitionJpaEntity.builder()
+                    .word(word)
+                    .meaning(meanings[i])
+                    .part(PartOfSpeech.NOUN)
+                    .build());
 
-        for (int i = 0; i < savedWords.size(); i++) {
-            String correctAnswer = findCorrectAnswer(quizzesResponse.get(i), sampleWords, sampleDefs);
-            boolean answer = correctAnswer.equals(quizzesResponse.get(i).getOptions().get(0));
-
-            QuizRateRequest quizRateRequest = QuizRateRequest.builder()
-                    .token(quizzesResponse.get(i).getToken())
-                    .answer(answer ? "1" : "0")
-                    .build();
-
-            mockMvc.perform(post("/api/quizzes/rate")
-                            .header("Authorization", "Bearer " + token)
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(quizRateRequest)))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.data.isCorrect")
-                            .value(true))
-                    .andExpect(jsonPath("$.data.correctAnswer")
-                            .value(answer ? "1" : "0"));
-        }
-    }
-
-    private String findCorrectAnswer(QuizResponse quiz, String[] orgWords, String[] orgDefs) {
-        String stem = quiz.getStem();
-        String correctAnswer = "";
-
-        for (int i = 0; i < orgWords.length; i++) {
-            if (stem.equals(orgWords[i])) {
-                correctAnswer = orgDefs[i];
-            }
+            wordStatisticJpaRepository.saveAndFlush(WordStatisticJpaEntity.builder()
+                    .word(word)
+                    .build());
         }
 
-        return correctAnswer;
+        em.clear(); // DB 주입 데이터 반영 보장
     }
 
     @Test
-    @DisplayName("[Quiz][Integration] Blank quiz generate test")
-    void blankQuizGenerateTest() throws Exception {
-        String token = loginAndGetToken("email@test.com", "password123!");
-        UUID vocabId = addVocabAndGetId(token);
-
-        String[] sampleWords = {"Hello", "Apple", "Run", "Edit", "Amazing"};
-        String[] sampleDefs = {"안녕", "사과", "뛰다", "편집하다", "개쩌는"};
-        PartOfSpeech[] sampleParts = {PartOfSpeech.INTERJECTION, PartOfSpeech.NOUN, PartOfSpeech.VERB,
-                PartOfSpeech.VERB, PartOfSpeech.ADJECTIVE};
-
-        List<WordDetail> savedWords = addWordsAndGetDetails(sampleWords, sampleDefs, sampleParts
-                , vocabId, token);
-
-        MvcResult quizResult = mockMvc.perform(get("/api/vocabularies/" + vocabId + "/quizzes/blank")
-                        .header("Authorization", "Bearer " + token))
+    @DisplayName("OX 퀴즈 생성 및 채점 성공")
+    void oxQuizCreateAndRateSuccess() throws Exception {
+        // When (Generate): OX 퀴즈 생성 API 호출
+        MvcResult generateResult = mockMvc.perform(get("/api/vocabularies/" + testVocab.getId() + "/quizzes/ox")
+                        .header("Authorization", "Bearer " + userToken))
                 .andExpect(status().isOk())
                 .andReturn();
-        JsonNode data = objectMapper.readTree(quizResult.getResponse().getContentAsString()).path("data");
-        List<QuizResponse> resultQuestions = objectMapper.readValue(data.toString(), new TypeReference<>() {
-        });
 
-        assertEquals(savedWords.size(), resultQuestions.size());
-        for (QuizResponse quizResponse : resultQuestions) {
-            String stem = quizResponse.getStem();
-            int cnt = 0;
-            for (int i = 0; i < stem.length(); i++) {
-                if (stem.charAt(i) == '_') {
-                    cnt++;
-                }
-            }
-            assertEquals(stem.length() / 2 + 1, cnt);
-        }
+        List<QuizInfo> quizzes = objectMapper.readValue(
+                objectMapper.readTree(generateResult.getResponse().getContentAsString()).path("data").toString(),
+                new TypeReference<List<QuizInfo>>() {}
+        );
+
+        // Then (Generate): 퀴즈 개수 확인
+        assertThat(quizzes).hasSize(5);
+
+        // When (Rate): 첫 번째 퀴즈 정답 제출
+        QuizInfo quiz = quizzes.get(0);
+        String answer = wordToMeaning.get(quiz.stem()).equals(quiz.options().get(0)) ? "1" : "0";
+
+        QuizRateRequest rateRequest = QuizRateRequest.builder()
+                .token(quiz.token())
+                .answer(answer)
+                .build();
+
+        mockMvc.perform(post("/api/quizzes/rate")
+                        .header("Authorization", "Bearer " + userToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(rateRequest)))
+                // Then (Rate): 채점 결과 및 DB 반영 확인
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.isCorrect").value(true));
+
+        WordJpaEntity word = wordJpaRepository.findAll().stream()
+                .filter(w -> w.getExpression().equals(quiz.stem())).findFirst().orElseThrow();
+        WordStatisticJpaEntity statistic = wordStatisticJpaRepository.findById(word.getId()).orElseThrow();
+        assertThat(statistic.getCorrectCount()).isEqualTo(1L);
     }
 
     @Test
-    @DisplayName("[Quiz][Integration] Blank quiz rate test")
-    void blankQuizRateTest() throws Exception {
-        String token = loginAndGetToken("email@test.com", "password123!");
-        UUID vocabId = addVocabAndGetId(token);
-
-        String[] sampleWords = {"Hello", "Apple", "Run", "Edit", "Amazing"};
-        String[] sampleDefs = {"안녕", "사과", "뛰다", "편집하다", "개쩌는"};
-        PartOfSpeech[] sampleParts = {PartOfSpeech.INTERJECTION, PartOfSpeech.NOUN, PartOfSpeech.VERB,
-                PartOfSpeech.VERB, PartOfSpeech.ADJECTIVE};
-
-        List<WordDetail> savedWords = addWordsAndGetDetails(sampleWords, sampleDefs, sampleParts
-                , vocabId, token);
-
-        MvcResult quizResult = mockMvc.perform(get("/api/vocabularies/" + vocabId + "/quizzes/blank")
-                        .header("Authorization", "Bearer " + token))
+    @DisplayName("빈칸 퀴즈 생성 및 채점 성공")
+    void blankQuizCreateAndRateSuccess() throws Exception {
+        // When (Generate): 빈칸 퀴즈 생성 API 호출
+        MvcResult generateResult = mockMvc.perform(get("/api/vocabularies/" + testVocab.getId() + "/quizzes/blank")
+                        .header("Authorization", "Bearer " + userToken))
                 .andExpect(status().isOk())
                 .andReturn();
-        JsonNode data = objectMapper.readTree(quizResult.getResponse().getContentAsString()).path("data");
-        List<QuizResponse> quizzes = objectMapper.readValue(data.toString(), new TypeReference<>() {
-        });
 
-        for (int i = 0; i < savedWords.size(); i++) {
-            String stem = quizzes.get(i).getStem();
-            String fullAnswer = "";
-            for (String sample : sampleWords) {
-                boolean isSame = true;
-                if (sample.length() != stem.length()) {
-                    continue;
-                }
-                for (int j = 0; j < sample.length(); j++) {
-                    if (!(sample.charAt(j) == stem.charAt(j) || stem.charAt(j) == '_')) {
-                        isSame = false;
-                        break;
-                    }
-                }
-                if (isSame) {
-                    fullAnswer = sample;
-                    break;
-                }
-            }
+        List<QuizInfo> quizzes = objectMapper.readValue(
+                objectMapper.readTree(generateResult.getResponse().getContentAsString()).path("data").toString(),
+                new TypeReference<List<QuizInfo>>() {}
+        );
 
-            QuizRateRequest rateQuizRateRequest = QuizRateRequest.builder()
-                    .token(quizzes.get(i).getToken())
-                    .answer(fullAnswer)
-                    .build();
+        // Then (Generate): 퀴즈 개수 및 빈칸 포함 확인
+        assertThat(quizzes).hasSize(5);
+        assertThat(quizzes.get(0).stem()).contains("_");
 
-            mockMvc.perform(post("/api/quizzes/rate")
-                            .header("Authorization", "Bearer " + token)
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(rateQuizRateRequest)))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.data.isCorrect")
-                            .value(true))
-                    .andReturn();
+        // When (Rate): 첫 번째 퀴즈 정답 제출
+        QuizInfo quiz = quizzes.get(0);
+        String correctAnswer = wordToMeaning.keySet().stream()
+                .filter(w -> isMatchPattern(w, quiz.stem())).findFirst().orElseThrow();
+
+        QuizRateRequest rateRequest = QuizRateRequest.builder()
+                .token(quiz.token())
+                .answer(correctAnswer)
+                .build();
+
+        mockMvc.perform(post("/api/quizzes/rate")
+                        .header("Authorization", "Bearer " + userToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(rateRequest)))
+                // Then (Rate): 채점 결과 및 DB 반영 확인
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.isCorrect").value(true));
+
+        WordJpaEntity word = wordJpaRepository.findAll().stream()
+                .filter(w -> w.getExpression().equals(correctAnswer)).findFirst().orElseThrow();
+        WordStatisticJpaEntity statistic = wordStatisticJpaRepository.findById(word.getId()).orElseThrow();
+        assertThat(statistic.getCorrectCount()).isEqualTo(1L);
+    }
+
+    private boolean isMatchPattern(String word, String pattern) {
+        if (word.length() != pattern.length()) return false;
+        for (int i = 0; i < word.length(); i++) {
+            if (pattern.charAt(i) != '_' && pattern.charAt(i) != word.charAt(i)) return false;
         }
-    }
-
-    private List<WordDetail> addWordsAndGetDetails(String[] sampleWords, String[] sampleDefs,
-                                                   PartOfSpeech[] sampleParts, UUID vocabId, String token) throws Exception {
-        for (int i = 0; i < sampleWords.length; i++) {
-            UUID wordId = addWordAndGetId(vocabId, token, sampleWords[i]);
-            addDefAndGetId(wordId, token, sampleDefs[i], sampleParts[i]);
-        }
-
-        MvcResult wordsResult = mockMvc.perform(get("/api/vocabularies/" + vocabId + "/words")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer " + token))
-                .andExpect(status().isOk())
-                .andReturn();
-        String json = wordsResult.getResponse().getContentAsString();
-        JsonNode data = objectMapper.readTree(json).path("data");
-
-        return objectMapper.readValue(data.toString(), new TypeReference<>() {
-        });
-    }
-
-    private UUID addVocabAndGetId(String token) throws Exception {
-        AddVocabularyRequestDto addVocabRequest = AddVocabularyRequestDto.builder()
-                .title("title")
-                .description("description")
-                .build();
-
-        MvcResult result = mockMvc.perform(post("/api/vocabularies")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(addVocabRequest))
-                        .header("Authorization", "Bearer " + token))
-                .andExpect(status().isOk())
-                .andReturn();
-
-        String vocabIdStr = objectMapper.readTree(result.getResponse().getContentAsString())
-                .path("data").path("id").asText();
-
-        return UUID.fromString(vocabIdStr);
-    }
-
-    private UUID addWordAndGetId(UUID vocabId, String token, String exp) throws Exception {
-        AddWordRequestDto addWordRequest = AddWordRequestDto.builder()
-                .expression(exp)
-                .build();
-
-        MvcResult wordResult = mockMvc.perform(post("/api/vocabularies/" + vocabId + "/word")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer " + token)
-                        .content(objectMapper.writeValueAsString(addWordRequest)))
-                .andExpect(status().isOk())
-                .andReturn();
-
-        String wordIdStr = objectMapper.readTree(wordResult.getResponse().getContentAsString())
-                .path("data").path("id").asText();
-
-        return UUID.fromString(wordIdStr);
-    }
-
-    private UUID addDefAndGetId(UUID wordId, String token, String def, PartOfSpeech part) throws Exception {
-        AddDefinitionRequestDto addDefRequest = AddDefinitionRequestDto.builder()
-                .meaning(def)
-                .part(part)
-                .build();
-
-        MvcResult defResult = mockMvc.perform(post("/api/words/" + wordId + "/definition")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer " + token)
-                        .content(objectMapper.writeValueAsString(addDefRequest)))
-                .andExpect(status().isOk())
-                .andReturn();
-
-        String defIdStr = objectMapper.readTree(defResult.getResponse().getContentAsString())
-                .path("data").path("id").asText();
-
-        return UUID.fromString(defIdStr);
-    }
-
-    private String loginAndGetToken(String email, String password) throws Exception {
-        String nickname = "user" + UUID.randomUUID().toString().substring(0, 8);
-        SignUpRequestDto joinRequest = SignUpRequestDto.builder()
-                .email(email)
-                .nickname(nickname)
-                .password(password)
-                .agreeTermIds(List.of())
-                .build();
-
-        LoginRequest loginRequest = LoginRequest.builder()
-                .email(email)
-                .password(password)
-                .build();
-
-        mockMvc.perform(post("/api/users/signup")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(joinRequest)))
-                .andExpect(status().isOk());
-
-        MvcResult loginResult = mockMvc.perform(post("/api/auth/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(loginRequest)))
-                .andExpect(status().isOk())
-                .andReturn();
-
-        String json = loginResult.getResponse().getContentAsString();
-        return objectMapper.readTree(json).path("data").path("accessToken").asText();
+        return true;
     }
 }

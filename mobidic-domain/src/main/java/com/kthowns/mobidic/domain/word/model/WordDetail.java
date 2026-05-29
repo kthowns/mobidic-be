@@ -9,8 +9,8 @@ import java.util.UUID;
 public record WordDetail(
         UUID id,
         String expression,
-        long difficulty,
-        long accuracy,
+        double difficulty,
+        double accuracy,
         boolean isLearned,
         List<Definition> definitions,
         LocalDateTime createdAt

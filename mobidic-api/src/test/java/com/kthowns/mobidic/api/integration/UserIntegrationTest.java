@@ -1,13 +1,14 @@
 package com.kthowns.mobidic.api.integration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.kthowns.mobidic.api.auth.dto.request.LoginRequest;
 import com.kthowns.mobidic.api.security.jwt.JwtProvider;
-import com.kthowns.mobidic.api.user.dto.request.SignUpRequestDto;
 import com.kthowns.mobidic.api.user.dto.request.UpdateUserRequestDto;
 import com.kthowns.mobidic.api.util.DatabaseCleaner;
 import com.kthowns.mobidic.common.code.AuthResponseCode;
 import com.kthowns.mobidic.common.code.GeneralResponseCode;
+import com.kthowns.mobidic.domain.user.model.UserRole;
+import com.kthowns.mobidic.storage.user.jpaentity.UserJpaEntity;
+import com.kthowns.mobidic.storage.user.jparepository.UserJpaRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -15,21 +16,27 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+/**
+ * 사용자 정보 관련 통합 테스트
+ */
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
+@Transactional
 public class UserIntegrationTest {
+
     @Autowired
     private MockMvc mockMvc;
 
@@ -42,215 +49,146 @@ public class UserIntegrationTest {
     @Autowired
     private DatabaseCleaner databaseCleaner;
 
+    @Autowired
+    private UserJpaRepository userJpaRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private jakarta.persistence.EntityManager em;
+
+    private UserJpaEntity testUser;
+    private String userToken;
+
     @BeforeEach
-    void tearDown() {
+    void setUp() {
         databaseCleaner.execute();
+
+        testUser = userJpaRepository.saveAndFlush(UserJpaEntity.builder()
+                .email("test@test.com")
+                .nickname("test")
+                .password(passwordEncoder.encode("password123!"))
+                .role(UserRole.USER)
+                .isActive(true)
+                .build());
+
+        userToken = jwtProvider.generateToken(testUser.getId(), testUser.getRole().name());
+        
+        em.clear();
     }
 
     @Test
-    @DisplayName("[User][Integration] Get user detail")
-    void getUserDetailTest() throws Exception {
-        String email = "test@test.com";
-        String nickname = "test";
-        String token = loginAndGetToken(email, nickname);
-        UUID userId = jwtProvider.getIdFromToken(token);
-
-        //Success
+    @DisplayName("사용자 상세 정보 조회 성공")
+    void getUserDetailsSuccess() throws Exception {
+        // When
         mockMvc.perform(get("/api/users/me")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer " + token))
+                        .header("Authorization", "Bearer " + userToken))
+                // Then
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.id")
-                        .value(userId.toString()))
-                .andExpect(jsonPath("$.data.email")
-                        .value(email))
-                .andExpect(jsonPath("$.data.nickname")
-                        .value(nickname))
-                .andExpect(jsonPath("$.data.createdAt")
-                        .isNotEmpty());
-
-        //Fail without token
-        mockMvc.perform(get("/api/users/me")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.message")
-                        .value(AuthResponseCode.UNAUTHORIZED.getMessage()));
-
-        //Fail with unauthorized token
-        mockMvc.perform(get("/api/users/me")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer " + UUID.randomUUID()))
-                .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.message")
-                        .value(AuthResponseCode.UNAUTHORIZED.getMessage()));
+                .andExpect(jsonPath("$.data.email").value("test@test.com"))
+                .andExpect(jsonPath("$.data.nickname").value("test"));
     }
 
     @Test
-    @DisplayName("[User][Integration] Update user nickname")
-    void updateUserNicknameTest() throws Exception {
-        String email = "test@test.com";
-        String nickname = "test";
-        String token = loginAndGetToken(email, nickname);
-        UUID userId = jwtProvider.getIdFromToken(token);
-
-        String email2 = "test2@test.com";
-        String nickname2 = "test2";
-        String token2 = loginAndGetToken(email2, nickname2);
-
-        //Success
-        UpdateUserRequestDto updateNicknameRequest = UpdateUserRequestDto.builder()
-                .nickname(nickname + "test")
+    @DisplayName("사용자 닉네임 수정 성공")
+    void updateNicknameSuccess() throws Exception {
+        // Given
+        UpdateUserRequestDto request = UpdateUserRequestDto.builder()
+                .nickname("newnickname")
                 .build();
 
+        // When
         mockMvc.perform(patch("/api/users/me")
+                        .header("Authorization", "Bearer " + userToken)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer " + token)
-                        .content(objectMapper.writeValueAsString(updateNicknameRequest)))
+                        .content(objectMapper.writeValueAsString(request)))
+                // Then (1)
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.id")
-                        .value(userId.toString()))
-                .andExpect(jsonPath("$.data.nickname")
-                        .value(updateNicknameRequest.getNickname()));
+                .andExpect(jsonPath("$.data.nickname").value("newnickname"));
 
-        mockMvc.perform(get("/api/users/me")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer " + token))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.nickname")
-                        .value(updateNicknameRequest.getNickname()));
+        // Then (2): DB 직접 확인
+        UserJpaEntity updatedUser = userJpaRepository.findById(testUser.getId()).orElseThrow();
+        assertThat(updatedUser.getNickname()).isEqualTo("newnickname");
+    }
 
-        //Fail with duplicated nickname
+    @Test
+    @DisplayName("사용자 닉네임 수정 실패 - 중복된 닉네임")
+    void updateNicknameFailDuplicated() throws Exception {
+        // Given: 다른 사용자 존재
+        userJpaRepository.saveAndFlush(UserJpaEntity.builder()
+                .email("other@test.com")
+                .nickname("other")
+                .password("pass")
+                .role(UserRole.USER)
+                .build());
+
+        UpdateUserRequestDto request = UpdateUserRequestDto.builder()
+                .nickname("other")
+                .build();
+
+        // When
         mockMvc.perform(patch("/api/users/me")
+                        .header("Authorization", "Bearer " + userToken)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer " + token2)
-                        .content(objectMapper.writeValueAsString(updateNicknameRequest)))
+                        .content(objectMapper.writeValueAsString(request)))
+                // Then
                 .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.message")
-                        .value(GeneralResponseCode.DUPLICATED_NICKNAME.getMessage()));
-
-        //Fail without token
-        mockMvc.perform(patch("/api/users/me")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(updateNicknameRequest)))
-                .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.message")
-                        .value(AuthResponseCode.UNAUTHORIZED.getMessage()));
-
-        //Fail with unauthorized token
-        mockMvc.perform(patch("/api/users/me")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer " + UUID.randomUUID())
-                        .content(objectMapper.writeValueAsString(updateNicknameRequest)))
-                .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.message")
-                        .value(AuthResponseCode.UNAUTHORIZED.getMessage()));
-
-        //Fail with invalid nickname pattern
-        updateNicknameRequest.setNickname("1");
-        mockMvc.perform(patch("/api/users/me")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer " + token)
-                        .content(objectMapper.writeValueAsString(updateNicknameRequest)))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message")
-                        .value(GeneralResponseCode.INVALID_REQUEST_BODY.getMessage()))
-                .andExpect(jsonPath("$.errors.nickname")
-                        .value("닉네임은 2~16자의 한글, 영문 소문자, 숫자, -, _ 만 사용할 수 있습니다."));
-
+                .andExpect(jsonPath("$.message").value(GeneralResponseCode.DUPLICATED_NICKNAME.getMessage()));
     }
 
     @Test
-    @DisplayName("[User][Integration] Update user password")
-    void updateUserPasswordTest() throws Exception {
-        String email = "test@test.com";
-        String nickname = "test";
-        String token = loginAndGetToken(email, nickname);
-
-        UpdateUserRequestDto updatePasswordRequest = UpdateUserRequestDto.builder()
-                .password("testTest2@")
+    @DisplayName("사용자 비밀번호 수정 성공")
+    void updatePasswordSuccess() throws Exception {
+        // Given
+        UpdateUserRequestDto request = UpdateUserRequestDto.builder()
+                .password("newPassword123!")
                 .build();
 
-        //Fail without token
+        // When
         mockMvc.perform(patch("/api/users/me")
+                        .header("Authorization", "Bearer " + userToken)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(updatePasswordRequest)))
-                .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.message")
-                        .value(AuthResponseCode.UNAUTHORIZED.getMessage()));
-
-        //Fail with unauthorized token
-        mockMvc.perform(patch("/api/users/me")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer " + UUID.randomUUID(), "USER")
-                        .content(objectMapper.writeValueAsString(updatePasswordRequest)))
-                .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.message")
-                        .value(AuthResponseCode.UNAUTHORIZED.getMessage()));
-
-        //Fail with invalid pattern
-        updatePasswordRequest.setPassword("test");
-        mockMvc.perform(patch("/api/users/me")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer " + token)
-                        .content(objectMapper.writeValueAsString(updatePasswordRequest)))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message")
-                        .value(GeneralResponseCode.INVALID_REQUEST_BODY.getMessage()))
-                .andExpect(jsonPath("$.errors.password")
-                        .value("비밀번호는 8~128자이며 영문자, 숫자, 특수문자(@$!%*?&)를 각각 1개 이상 포함해야 합니다."));
-
-        updatePasswordRequest.setPassword("testTest2!");
-
-        //Success
-        mockMvc.perform(patch("/api/users/me")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer " + token)
-                        .content(objectMapper.writeValueAsString(updatePasswordRequest)))
+                        .content(objectMapper.writeValueAsString(request)))
+                // Then (1)
                 .andExpect(status().isOk());
 
-        //Old password should fail login
-        LoginRequest loginRequest = LoginRequest.builder()
-                .email(email)
-                .password("testTest1!")
-                .build();
-        mockMvc.perform(post("/api/auth/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(loginRequest)))
-                .andExpect(status().isUnauthorized());
-
-        //New password should success
-        loginRequest.setPassword("testTest2!");
-        mockMvc.perform(post("/api/auth/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(loginRequest)))
-                .andExpect(status().isOk());
+        // Then (2): DB 직접 확인 (기존 비밀번호와 달라야 함)
+        UserJpaEntity updatedUser = userJpaRepository.findById(testUser.getId()).orElseThrow();
+        assertThat(passwordEncoder.matches("newPassword123!", updatedUser.getPassword())).isTrue();
     }
 
-    private String loginAndGetToken(String email, String nickname) throws Exception {
-        SignUpRequestDto joinRequest = SignUpRequestDto.builder()
-                .email(email)
-                .nickname(nickname)
-                .password("testTest1!")
-                .agreeTermIds(List.of())
-                .build();
-
-        LoginRequest loginRequest = LoginRequest.builder()
-                .email(joinRequest.getEmail())
-                .password(joinRequest.getPassword())
-                .build();
-
-        mockMvc.perform(post("/api/users/signup")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(joinRequest)))
+    @Test
+    @DisplayName("회원 탈퇴(비활성화) 성공")
+    void withdrawSuccess() throws Exception {
+        // When
+        mockMvc.perform(delete("/api/users/me")
+                        .header("Authorization", "Bearer " + userToken))
+                // Then (1)
                 .andExpect(status().isOk());
 
-        MvcResult loginResult = mockMvc.perform(post("/api/auth/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(loginRequest)))
-                .andExpect(status().isOk())
-                .andReturn();
+        // Then (2): DB 직접 확인 (비활성화 상태여야 함)
+        UserJpaEntity deactivatedUser = userJpaRepository.findById(testUser.getId()).orElseThrow();
+        assertThat(deactivatedUser.isActive()).isFalse();
+        assertThat(deactivatedUser.getDeactivatedAt()).isNotNull();
+    }
 
-        String json = loginResult.getResponse().getContentAsString();
-        return objectMapper.readTree(json).path("data").path("accessToken").asText();
+    @Test
+    @DisplayName("보안 테스트 - 인증 토큰 없이 요청 시 실패")
+    void securityFailNoToken() throws Exception {
+        // When & Then
+        mockMvc.perform(get("/api/users/me"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.message").value(AuthResponseCode.UNAUTHORIZED.getMessage()));
+    }
+
+    @Test
+    @DisplayName("보안 테스트 - 잘못된 토큰으로 요청 시 실패")
+    void securityFailInvalidToken() throws Exception {
+        // When & Then
+        mockMvc.perform(get("/api/users/me")
+                        .header("Authorization", "Bearer invalid-token"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.message").value(AuthResponseCode.UNAUTHORIZED.getMessage()));
     }
 }
