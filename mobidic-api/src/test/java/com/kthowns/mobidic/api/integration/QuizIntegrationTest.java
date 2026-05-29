@@ -231,6 +231,51 @@ public class QuizIntegrationTest {
         WordStatisticJpaEntity statistic = wordStatisticJpaRepository.findById(word.getId()).orElseThrow();
         assertThat(statistic.getCorrectCount()).isEqualTo(1L);
     }
+    @Test
+    @DisplayName("퀴즈 생성 무작위성 검증")
+    void quizGenerationRandomness() throws Exception {
+        // 1. 기준이 되는 첫 번째 퀴즈 생성
+        List<QuizInfo> baseQuizzes = getQuizzes();
+        assertThat(baseQuizzes).hasSize(5);
+
+        boolean existsDifferentOrder = false;
+
+        // 2. 20번 반복 호출하면서 단 한 번이라도 순서나 구성이 달라지는지 확인
+        for (int i = 0; i < 20; i++) {
+            List<QuizInfo> currentQuizzes = getQuizzes();
+
+            if (!isExactlySameList(baseQuizzes, currentQuizzes)) {
+                existsDifferentOrder = true;
+                break; // 단 한 번이라도 다르면 무작위성이 존재하므로 성공!
+            }
+        }
+
+        // 3. 20번 중 단 한 번은 무조건 달라야 함 (셔플이 안 돌면 무조건 실패)
+        assertThat(existsDifferentOrder).isTrue();
+    }
+
+    // 헬퍼 메서드: 두 리스트의 순서와 내용이 완벽히 일치하는지 확인
+    private boolean isExactlySameList(List<QuizInfo> list1, List<QuizInfo> list2) {
+        if (list1.size() != list2.size()) return false;
+        for (int i = 0; i < list1.size(); i++) {
+            if (!list1.get(i).stem().equals(list2.get(i).stem())) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    // HTTP 요청 중복 코드 제거용 헬퍼
+    private List<QuizInfo> getQuizzes() throws Exception {
+        MvcResult result = mockMvc.perform(get("/api/vocabularies/" + testVocab.getId() + "/quizzes/ox")
+                        .header("Authorization", "Bearer " + userToken))
+                .andExpect(status().isOk())
+                .andReturn();
+        return objectMapper.readValue(
+                objectMapper.readTree(result.getResponse().getContentAsString()).path("data").toString(),
+                new TypeReference<List<QuizInfo>>() {}
+        );
+    }
 
     @Test
     @DisplayName("퀴즈 생성 실패 - 존재하지 않는 단어장")

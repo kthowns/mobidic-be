@@ -1,6 +1,5 @@
 package com.kthowns.mobidic.api.integration;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kthowns.mobidic.api.security.jwt.JwtProvider;
 import com.kthowns.mobidic.api.util.DatabaseCleaner;
 import com.kthowns.mobidic.common.code.AuthResponseCode;
@@ -21,7 +20,6 @@ import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -185,6 +183,45 @@ public class WordStatisticIntegrationTest {
         // 4. Then (DB Verify): 다시 false 확인
         stat = wordStatisticJpaRepository.findById(testWord.getId()).orElseThrow();
         assertThat(stat.isLearned()).isFalse();
+    }
+
+    @Test
+    @DisplayName("동시성 테스트 - 단어 학습 상태 동시 토글")
+    void toggleLearnedStatusConcurrency() throws Exception {
+        int threadCount = 10;
+        java.util.concurrent.ExecutorService executorService = java.util.concurrent.Executors.newFixedThreadPool(threadCount);
+        java.util.concurrent.CountDownLatch latch = new java.util.concurrent.CountDownLatch(threadCount);
+        java.util.concurrent.atomic.AtomicInteger successCount = new java.util.concurrent.atomic.AtomicInteger(0);
+
+        for (int i = 0; i < threadCount; i++) {
+            executorService.submit(() -> {
+                try {
+                    org.springframework.test.web.servlet.MvcResult result = mockMvc.perform(patch("/api/words/" + testWord.getId() + "/toggle-learned")
+                            .header("Authorization", "Bearer " + userToken))
+                            .andReturn();
+                    
+                    if (result.getResponse().getStatus() == 200) {
+                        successCount.incrementAndGet();
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                } finally {
+                    latch.countDown();
+                }
+            });
+        }
+
+        latch.await();
+        executorService.shutdown();
+
+        // 갱신된 데이터를 읽기 위해 영속성 컨텍스트 초기화
+        em.clear();
+
+        // 논리적 기대값: 초기 상태가 false이므로, 성공한 토글 횟수가 홀수이면 true, 짝수이면 false여야 함.
+        // 만약 동시성 제어(Lost Update 방지)가 실패했다면 성공 횟수와 최종 상태의 정합성이 어긋남.
+        WordStatisticJpaEntity stat = wordStatisticJpaRepository.findById(testWord.getId()).orElseThrow();
+        boolean expectedState = (successCount.get() % 2 != 0);
+        assertThat(stat.isLearned()).isEqualTo(expectedState);
     }
 
     @Test
