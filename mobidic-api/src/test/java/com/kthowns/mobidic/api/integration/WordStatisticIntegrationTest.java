@@ -188,6 +188,62 @@ public class WordStatisticIntegrationTest {
     }
 
     @Test
+    @DisplayName("단어 통계 조회 실패 - 존재하지 않는 단어")
+    void getWordStatisticFailNoWord() throws Exception {
+        // Given
+        UUID randomId = UUID.randomUUID();
+
+        // When
+        mockMvc.perform(get("/api/words/" + randomId + "/statistic")
+                        .header("Authorization", "Bearer " + userToken))
+                // Then
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value(GeneralResponseCode.NO_STAT.getMessage()));
+    }
+
+    @Test
+    @DisplayName("단어장 학습률 조회 실패 - 존재하지 않는 단어장")
+    void getVocabLearningRateFailNoVocab() throws Exception {
+        // Given
+        UUID randomId = UUID.randomUUID();
+
+        // When
+        mockMvc.perform(get("/api/vocabularies/" + randomId + "/learning-rate")
+                        .header("Authorization", "Bearer " + userToken))
+                // Then
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value(GeneralResponseCode.NO_VOCAB.getMessage()));
+    }
+
+    @Test
+    @DisplayName("단어장 평균 정확도 조회 실패 - 존재하지 않는 단어장")
+    void getAvgAccuracyByVocabFailNoVocab() throws Exception {
+        // Given
+        UUID randomId = UUID.randomUUID();
+
+        // When
+        mockMvc.perform(get("/api/vocabularies/" + randomId + "/accuracy")
+                        .header("Authorization", "Bearer " + userToken))
+                // Then
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value(GeneralResponseCode.NO_VOCAB.getMessage()));
+    }
+
+    @Test
+    @DisplayName("단어 학습 상태 토글 실패 - 존재하지 않는 단어")
+    void toggleLearnedStatusFailNoWord() throws Exception {
+        // Given
+        UUID randomId = UUID.randomUUID();
+
+        // When
+        mockMvc.perform(patch("/api/words/" + randomId + "/toggle-learned")
+                        .header("Authorization", "Bearer " + userToken))
+                // Then
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value(GeneralResponseCode.NO_STAT.getMessage()));
+    }
+
+    @Test
     @DisplayName("보안 테스트 - 인증 토큰 없이 요청 시 실패")
     void securityFailNoToken() throws Exception {
         // When & Then

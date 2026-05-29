@@ -252,6 +252,40 @@ public class DefinitionIntegrationTest {
     }
 
     @Test
+    @DisplayName("정의 수정 실패 - 존재하지 않는 정의")
+    void updateDefinitionFailNoDef() throws Exception {
+        // Given
+        UUID randomId = UUID.randomUUID();
+        AddDefinitionRequestDto updateRequest = AddDefinitionRequestDto.builder()
+                .meaning("꿀사과")
+                .part(PartOfSpeech.NOUN)
+                .build();
+
+        // When
+        mockMvc.perform(patch("/api/definitions/" + randomId)
+                        .header("Authorization", "Bearer " + userToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updateRequest)))
+                // Then
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value(GeneralResponseCode.NO_DEF.getMessage()));
+    }
+
+    @Test
+    @DisplayName("정의 삭제 실패 - 존재하지 않는 정의")
+    void deleteDefinitionFailNoDef() throws Exception {
+        // Given
+        UUID randomId = UUID.randomUUID();
+
+        // When
+        mockMvc.perform(delete("/api/definitions/" + randomId)
+                        .header("Authorization", "Bearer " + userToken))
+                // Then
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value(GeneralResponseCode.NO_DEF.getMessage()));
+    }
+
+    @Test
     @DisplayName("보안 테스트 - 인증 토큰 없이 요청 시 실패")
     void securityFailNoToken() throws Exception {
         // When & Then

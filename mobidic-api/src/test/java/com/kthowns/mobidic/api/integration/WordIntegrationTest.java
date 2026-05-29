@@ -33,6 +33,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.List;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -243,6 +244,53 @@ public class WordIntegrationTest {
 
         // Then (2): DB 직접 확인
         assertThat(wordJpaRepository.findById(word.getId())).isEmpty();
+    }
+
+    @Test
+    @DisplayName("단어장별 단어 목록 조회 실패 - 존재하지 않는 단어장")
+    void getWordsFailNoVocab() throws Exception {
+        // Given
+        UUID randomId = UUID.randomUUID();
+
+        // When
+        mockMvc.perform(get("/api/vocabularies/" + randomId + "/words")
+                        .header("Authorization", "Bearer " + userToken))
+                // Then
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value(GeneralResponseCode.NO_VOCAB.getMessage()));
+    }
+
+    @Test
+    @DisplayName("단어 수정 실패 - 존재하지 않는 단어")
+    void updateWordFailNoWord() throws Exception {
+        // Given
+        UUID randomId = UUID.randomUUID();
+        AddWordRequestDto request = AddWordRequestDto.builder()
+                .expression("banana")
+                .build();
+
+        // When
+        mockMvc.perform(patch("/api/words/" + randomId)
+                        .header("Authorization", "Bearer " + userToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                // Then
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value(GeneralResponseCode.NO_WORD.getMessage()));
+    }
+
+    @Test
+    @DisplayName("단어 삭제 실패 - 존재하지 않는 단어")
+    void deleteWordFailNoWord() throws Exception {
+        // Given
+        UUID randomId = UUID.randomUUID();
+
+        // When
+        mockMvc.perform(delete("/api/words/" + randomId)
+                        .header("Authorization", "Bearer " + userToken))
+                // Then
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value(GeneralResponseCode.NO_WORD.getMessage()));
     }
 
     @Test

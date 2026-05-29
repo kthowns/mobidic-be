@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kthowns.mobidic.api.quiz.dto.request.QuizRateRequest;
 import com.kthowns.mobidic.api.security.jwt.JwtProvider;
 import com.kthowns.mobidic.api.util.DatabaseCleaner;
+import com.kthowns.mobidic.common.code.GeneralResponseCode;
 import com.kthowns.mobidic.domain.definition.model.PartOfSpeech;
 import com.kthowns.mobidic.domain.quiz.model.QuizInfo;
 import com.kthowns.mobidic.domain.user.model.UserRole;
@@ -229,6 +230,20 @@ public class QuizIntegrationTest {
                 .filter(w -> w.getExpression().equals(correctAnswer)).findFirst().orElseThrow();
         WordStatisticJpaEntity statistic = wordStatisticJpaRepository.findById(word.getId()).orElseThrow();
         assertThat(statistic.getCorrectCount()).isEqualTo(1L);
+    }
+
+    @Test
+    @DisplayName("퀴즈 생성 실패 - 존재하지 않는 단어장")
+    void quizCreateFailNoVocab() throws Exception {
+        // Given
+        UUID randomId = UUID.randomUUID();
+
+        // When
+        mockMvc.perform(get("/api/vocabularies/" + randomId + "/quizzes/ox")
+                        .header("Authorization", "Bearer " + userToken))
+                // Then
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value(GeneralResponseCode.NO_VOCAB.getMessage()));
     }
 
     private boolean isMatchPattern(String word, String pattern) {

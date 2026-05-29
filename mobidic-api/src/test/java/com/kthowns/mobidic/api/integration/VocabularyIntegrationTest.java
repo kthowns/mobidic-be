@@ -247,6 +247,53 @@ public class VocabularyIntegrationTest {
     }
 
     @Test
+    @DisplayName("단어장 상세 조회 실패 - 존재하지 않는 단어장")
+    void getVocabularyDetailsFailNoVocab() throws Exception {
+        // Given
+        UUID randomId = UUID.randomUUID();
+
+        // When
+        mockMvc.perform(get("/api/vocabularies/" + randomId)
+                        .header("Authorization", "Bearer " + userToken))
+                // Then
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value(GeneralResponseCode.NO_VOCAB.getMessage()));
+    }
+
+    @Test
+    @DisplayName("단어장 수정 실패 - 존재하지 않는 단어장")
+    void updateVocabularyFailNoVocab() throws Exception {
+        // Given
+        UUID randomId = UUID.randomUUID();
+        AddVocabularyRequestDto request = AddVocabularyRequestDto.builder()
+                .title("수정 시도")
+                .build();
+
+        // When
+        mockMvc.perform(patch("/api/vocabularies/" + randomId)
+                        .header("Authorization", "Bearer " + userToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                // Then
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value(GeneralResponseCode.NO_VOCAB.getMessage()));
+    }
+
+    @Test
+    @DisplayName("단어장 삭제 실패 - 존재하지 않는 단어장")
+    void deleteVocabularyFailNoVocab() throws Exception {
+        // Given
+        UUID randomId = UUID.randomUUID();
+
+        // When
+        mockMvc.perform(delete("/api/vocabularies/" + randomId)
+                        .header("Authorization", "Bearer " + userToken))
+                // Then
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value(GeneralResponseCode.NO_VOCAB.getMessage()));
+    }
+
+    @Test
     @DisplayName("보안 테스트 - 인증 토큰 없이 요청 시 실패")
     void securityFailNoToken() throws Exception {
         // When & Then
