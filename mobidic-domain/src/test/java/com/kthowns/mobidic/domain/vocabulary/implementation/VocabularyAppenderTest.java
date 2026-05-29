@@ -1,27 +1,21 @@
 package com.kthowns.mobidic.domain.vocabulary.implementation;
 
+import com.kthowns.mobidic.domain.vocabulary.model.Vocabulary;
+import com.kthowns.mobidic.domain.vocabulary.repository.VocabularyRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.UUID;
-import com.kthowns.mobidic.domain.definition.repository.*;
-import com.kthowns.mobidic.domain.preset.repository.*;
-import com.kthowns.mobidic.domain.quiz.repository.*;
-import com.kthowns.mobidic.domain.statistic.repository.*;
-import com.kthowns.mobidic.domain.term.repository.*;
-import com.kthowns.mobidic.domain.user.repository.*;
-import com.kthowns.mobidic.domain.vocabulary.repository.*;
-import com.kthowns.mobidic.domain.word.repository.*;
-import com.kthowns.mobidic.domain.user.client.*;
-import com.kthowns.mobidic.domain.pronunciation.client.*;
-import com.kthowns.mobidic.domain.quiz.client.*;
 
-import static org.mockito.Mockito.*;
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.verify;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.ArgumentMatchers.any;
 
 @ExtendWith(MockitoExtension.class)
 class VocabularyAppenderTest {
@@ -33,11 +27,28 @@ class VocabularyAppenderTest {
     private VocabularyAppender target;
 
     @Test
-    @DisplayName("append 테스트")
+    @DisplayName("append 테스트 - 단어장 생성 성공")
     void appendTest() {
         // Given
-        // When
-        // Then
-    }
+        UUID userId = UUID.randomUUID();
+        String title = "단어장 제목";
+        String description = "단어장 설명";
+        
+        Vocabulary expectedVocab = new Vocabulary(UUID.randomUUID(), userId, title, description, 0, null);
+        given(vocabularyRepository.append(any(Vocabulary.class))).willReturn(expectedVocab);
 
+        // When
+        Vocabulary actualVocab = target.append(title, description, userId);
+
+        // Then
+        ArgumentCaptor<Vocabulary> captor = ArgumentCaptor.forClass(Vocabulary.class);
+        verify(vocabularyRepository).append(captor.capture());
+        
+        Vocabulary capturedVocab = captor.getValue();
+        assertThat(capturedVocab.userId()).isEqualTo(userId);
+        assertThat(capturedVocab.title()).isEqualTo(title);
+        assertThat(capturedVocab.description()).isEqualTo(description);
+        
+        assertThat(actualVocab).isEqualTo(expectedVocab);
+    }
 }

@@ -1,5 +1,6 @@
 package com.kthowns.mobidic.domain.vocabulary.implementation;
 
+import com.kthowns.mobidic.domain.vocabulary.repository.VocabularyRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -8,20 +9,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.UUID;
-import com.kthowns.mobidic.domain.definition.repository.*;
-import com.kthowns.mobidic.domain.preset.repository.*;
-import com.kthowns.mobidic.domain.quiz.repository.*;
-import com.kthowns.mobidic.domain.statistic.repository.*;
-import com.kthowns.mobidic.domain.term.repository.*;
-import com.kthowns.mobidic.domain.user.repository.*;
-import com.kthowns.mobidic.domain.vocabulary.repository.*;
-import com.kthowns.mobidic.domain.word.repository.*;
-import com.kthowns.mobidic.domain.user.client.*;
-import com.kthowns.mobidic.domain.pronunciation.client.*;
-import com.kthowns.mobidic.domain.quiz.client.*;
 
-import static org.mockito.Mockito.*;
-import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class VocabularyRemoverTest {
@@ -33,11 +22,16 @@ class VocabularyRemoverTest {
     private VocabularyRemover target;
 
     @Test
-    @DisplayName("remove 테스트")
+    @DisplayName("remove 테스트 - 단어장 삭제 성공")
     void removeTest() {
         // Given
-        // When
-        // Then
-    }
+        UUID vocabularyId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
 
+        // When
+        target.remove(vocabularyId, userId);
+
+        // Then
+        verify(vocabularyRepository).delete(vocabularyId, userId);
+    }
 }

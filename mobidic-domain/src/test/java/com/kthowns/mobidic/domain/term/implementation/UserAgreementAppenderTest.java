@@ -1,5 +1,6 @@
 package com.kthowns.mobidic.domain.term.implementation;
 
+import com.kthowns.mobidic.domain.term.repository.UserAgreementRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -7,21 +8,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
 import java.util.UUID;
-import com.kthowns.mobidic.domain.definition.repository.*;
-import com.kthowns.mobidic.domain.preset.repository.*;
-import com.kthowns.mobidic.domain.quiz.repository.*;
-import com.kthowns.mobidic.domain.statistic.repository.*;
-import com.kthowns.mobidic.domain.term.repository.*;
-import com.kthowns.mobidic.domain.user.repository.*;
-import com.kthowns.mobidic.domain.vocabulary.repository.*;
-import com.kthowns.mobidic.domain.word.repository.*;
-import com.kthowns.mobidic.domain.user.client.*;
-import com.kthowns.mobidic.domain.pronunciation.client.*;
-import com.kthowns.mobidic.domain.quiz.client.*;
 
-import static org.mockito.Mockito.*;
-import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class UserAgreementAppenderTest {
@@ -33,11 +23,16 @@ class UserAgreementAppenderTest {
     private UserAgreementAppender target;
 
     @Test
-    @DisplayName("appendAgreements 테스트")
+    @DisplayName("appendAgreements 테스트 - 사용자 동의 저장 성공")
     void appendAgreementsTest() {
         // Given
-        // When
-        // Then
-    }
+        UUID userId = UUID.randomUUID();
+        List<Long> agreeTermIds = List.of(1L, 2L, 3L);
 
+        // When
+        target.appendAgreements(userId, agreeTermIds);
+
+        // Then
+        verify(userAgreementRepository).appendAgreements(userId, agreeTermIds);
+    }
 }

@@ -1,5 +1,6 @@
 package com.kthowns.mobidic.domain.quiz.implementation;
 
+import com.kthowns.mobidic.domain.quiz.repository.QuizRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -7,21 +8,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.UUID;
-import com.kthowns.mobidic.domain.definition.repository.*;
-import com.kthowns.mobidic.domain.preset.repository.*;
-import com.kthowns.mobidic.domain.quiz.repository.*;
-import com.kthowns.mobidic.domain.statistic.repository.*;
-import com.kthowns.mobidic.domain.term.repository.*;
-import com.kthowns.mobidic.domain.user.repository.*;
-import com.kthowns.mobidic.domain.vocabulary.repository.*;
-import com.kthowns.mobidic.domain.word.repository.*;
-import com.kthowns.mobidic.domain.user.client.*;
-import com.kthowns.mobidic.domain.pronunciation.client.*;
-import com.kthowns.mobidic.domain.quiz.client.*;
-
-import static org.mockito.Mockito.*;
-import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class QuizAppenderTest {
@@ -33,11 +20,17 @@ class QuizAppenderTest {
     private QuizAppender target;
 
     @Test
-    @DisplayName("saveAnswer 테스트")
+    @DisplayName("saveAnswer 테스트 - 정답 저장 성공")
     void saveAnswerTest() {
         // Given
-        // When
-        // Then
-    }
+        String key = "quiz:123";
+        String answer = "apple";
+        long expMillis = 60000L;
 
+        // When
+        target.saveAnswer(key, answer, expMillis);
+
+        // Then
+        verify(quizRepository).appendAnswer(key, answer, expMillis);
+    }
 }

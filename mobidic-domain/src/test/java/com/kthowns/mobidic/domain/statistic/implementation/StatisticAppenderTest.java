@@ -1,5 +1,7 @@
 package com.kthowns.mobidic.domain.statistic.implementation;
 
+import com.kthowns.mobidic.domain.statistic.model.WordStatistic;
+import com.kthowns.mobidic.domain.statistic.repository.WordStatisticRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -8,20 +10,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.UUID;
-import com.kthowns.mobidic.domain.definition.repository.*;
-import com.kthowns.mobidic.domain.preset.repository.*;
-import com.kthowns.mobidic.domain.quiz.repository.*;
-import com.kthowns.mobidic.domain.statistic.repository.*;
-import com.kthowns.mobidic.domain.term.repository.*;
-import com.kthowns.mobidic.domain.user.repository.*;
-import com.kthowns.mobidic.domain.vocabulary.repository.*;
-import com.kthowns.mobidic.domain.word.repository.*;
-import com.kthowns.mobidic.domain.user.client.*;
-import com.kthowns.mobidic.domain.pronunciation.client.*;
-import com.kthowns.mobidic.domain.quiz.client.*;
 
-import static org.mockito.Mockito.*;
-import static org.assertj.core.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class StatisticAppenderTest {
@@ -33,11 +24,15 @@ class StatisticAppenderTest {
     private StatisticAppender target;
 
     @Test
-    @DisplayName("append 테스트")
+    @DisplayName("append 테스트 - 통계 생성 성공")
     void appendTest() {
         // Given
-        // When
-        // Then
-    }
+        UUID wordId = UUID.randomUUID();
 
+        // When
+        target.append(wordId);
+
+        // Then
+        verify(wordStatisticRepository).append(any(WordStatistic.class));
+    }
 }

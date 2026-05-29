@@ -1,5 +1,6 @@
 package com.kthowns.mobidic.domain.quiz.implementation;
 
+import com.kthowns.mobidic.domain.quiz.client.CryptoClient;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -7,21 +8,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.UUID;
-import com.kthowns.mobidic.domain.definition.repository.*;
-import com.kthowns.mobidic.domain.preset.repository.*;
-import com.kthowns.mobidic.domain.quiz.repository.*;
-import com.kthowns.mobidic.domain.statistic.repository.*;
-import com.kthowns.mobidic.domain.term.repository.*;
-import com.kthowns.mobidic.domain.user.repository.*;
-import com.kthowns.mobidic.domain.vocabulary.repository.*;
-import com.kthowns.mobidic.domain.word.repository.*;
-import com.kthowns.mobidic.domain.user.client.*;
-import com.kthowns.mobidic.domain.pronunciation.client.*;
-import com.kthowns.mobidic.domain.quiz.client.*;
-
-import static org.mockito.Mockito.*;
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.BDDMockito.given;
 
 @ExtendWith(MockitoExtension.class)
 class QuizProcessorTest {
@@ -33,19 +21,32 @@ class QuizProcessorTest {
     private QuizProcessor target;
 
     @Test
-    @DisplayName("encryptKey 테스트")
+    @DisplayName("encryptKey 테스트 - 키 암호화 성공")
     void encryptKeyTest() {
         // Given
+        String key = "quiz:123";
+        String encryptedToken = "encrypted_token";
+        given(cryptoClient.encrypt(key)).willReturn(encryptedToken);
+
         // When
+        String result = target.encryptKey(key);
+
         // Then
+        assertThat(result).isEqualTo(encryptedToken);
     }
 
     @Test
-    @DisplayName("decryptKey 테스트")
+    @DisplayName("decryptKey 테스트 - 토큰 복호화 성공")
     void decryptKeyTest() {
         // Given
-        // When
-        // Then
-    }
+        String token = "encrypted_token";
+        String decryptedKey = "quiz:123";
+        given(cryptoClient.decrypt(token)).willReturn(decryptedKey);
 
+        // When
+        String result = target.decryptKey(token);
+
+        // Then
+        assertThat(result).isEqualTo(decryptedKey);
+    }
 }
