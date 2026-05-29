@@ -14,9 +14,10 @@ import com.kthowns.mobidic.storage.vocabulary.jpaentity.VocabularyJpaEntity;
 import com.kthowns.mobidic.storage.vocabulary.jparepository.VocabularyJpaRepository;
 import com.kthowns.mobidic.storage.word.jpaentity.WordJpaEntity;
 import com.kthowns.mobidic.storage.word.jparepository.WordJpaRepository;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -25,6 +26,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.UUID;
 
@@ -41,6 +43,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @Transactional
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class WordStatisticIntegrationTest {
 
     @Autowired
@@ -70,40 +73,46 @@ public class WordStatisticIntegrationTest {
     @Autowired
     private jakarta.persistence.EntityManager em;
 
+    @Autowired
+    private TransactionTemplate transactionTemplate;
+
     private UserJpaEntity testUser;
     private String userToken;
     private VocabularyJpaEntity testVocab;
     private WordJpaEntity testWord;
 
-    @BeforeEach
-    void setUp() {
-        databaseCleaner.execute();
+    @BeforeAll
+    void cleanAndSetup() {
+        transactionTemplate.execute(status -> {
+            databaseCleaner.execute();
 
-        testUser = userJpaRepository.saveAndFlush(UserJpaEntity.builder()
-                .email("test@test.com")
-                .nickname("test")
-                .password(passwordEncoder.encode("password123!"))
-                .role(UserRole.USER)
-                .build());
+            testUser = userJpaRepository.save(UserJpaEntity.builder()
+                    .email("test@test.com")
+                    .nickname("test")
+                    .password(passwordEncoder.encode("password123!"))
+                    .role(UserRole.USER)
+                    .build());
 
-        userToken = jwtProvider.generateToken(testUser.getId(), testUser.getRole().name());
+            userToken = jwtProvider.generateToken(testUser.getId(), testUser.getRole().name());
 
-        testVocab = vocabularyJpaRepository.saveAndFlush(VocabularyJpaEntity.builder()
-                .user(testUser)
-                .title("통계 단어장")
-                .build());
+            testVocab = vocabularyJpaRepository.save(VocabularyJpaEntity.builder()
+                    .user(testUser)
+                    .title("통계 단어장")
+                    .build());
 
-        testWord = wordJpaRepository.saveAndFlush(WordJpaEntity.builder()
-                .vocabulary(testVocab)
-                .expression("apple")
-                .build());
+            testWord = wordJpaRepository.save(WordJpaEntity.builder()
+                    .vocabulary(testVocab)
+                    .expression("apple")
+                    .build());
 
-        wordStatisticJpaRepository.saveAndFlush(WordStatisticJpaEntity.builder()
-                .word(testWord)
-                .correctCount(5)
-                .incorrectCount(5)
-                .isLearned(false)
-                .build());
+            wordStatisticJpaRepository.save(WordStatisticJpaEntity.builder()
+                    .word(testWord)
+                    .correctCount(5)
+                    .incorrectCount(5)
+                    .isLearned(false)
+                    .build());
+            return null;
+        });
 
         em.clear();
     }
@@ -126,6 +135,7 @@ public class WordStatisticIntegrationTest {
     @DisplayName("단어장 학습률 조회 성공")
     void getVocabLearningRateSuccess() throws Exception {
         // Given: 2번째 단어 추가 및 학습 완료 처리
+        // Note: 이 작업은 @Test 레벨의 트랜잭션에서 수행되므로 다른 테스트에 영향을 주지 않음
         WordJpaEntity word2 = wordJpaRepository.saveAndFlush(WordJpaEntity.builder()
                 .vocabulary(testVocab)
                 .expression("banana")

@@ -18,9 +18,10 @@ import com.kthowns.mobidic.storage.vocabulary.jpaentity.VocabularyJpaEntity;
 import com.kthowns.mobidic.storage.vocabulary.jparepository.VocabularyJpaRepository;
 import com.kthowns.mobidic.storage.word.jpaentity.WordJpaEntity;
 import com.kthowns.mobidic.storage.word.jparepository.WordJpaRepository;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -30,6 +31,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.List;
 import java.util.Map;
@@ -49,6 +51,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @Transactional
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class QuizIntegrationTest {
 
     @Autowired
@@ -84,58 +87,64 @@ public class QuizIntegrationTest {
     @Autowired
     private jakarta.persistence.EntityManager em;
 
+    @Autowired
+    private TransactionTemplate transactionTemplate;
+
     private UserJpaEntity testUser;
     private String userToken;
     private VocabularyJpaEntity testVocab;
     private Map<String, String> wordToMeaning;
 
-    @BeforeEach
-    void setUp() {
-        databaseCleaner.execute();
+    @BeforeAll
+    void cleanAndSetup() {
+        transactionTemplate.execute(status -> {
+            databaseCleaner.execute();
 
-        // 1. 테스트 사용자 및 인증 토큰 생성
-        testUser = userJpaRepository.saveAndFlush(UserJpaEntity.builder()
-                .email("test@test.com")
-                .nickname("test")
-                .password(passwordEncoder.encode("password123!"))
-                .role(UserRole.USER)
-                .build());
-
-        userToken = jwtProvider.generateToken(testUser.getId(), testUser.getRole().name());
-
-        // 2. 테스트 단어장 생성
-        testVocab = vocabularyJpaRepository.saveAndFlush(VocabularyJpaEntity.builder()
-                .user(testUser)
-                .title("퀴즈 단어장")
-                .build());
-
-        // 3. 퀴즈 생성을 위한 단어, 정의, 통계 데이터 주입
-        String[] expressions = {"apple", "banana", "car", "dog", "elephant"};
-        String[] meanings = {"사과", "바나나", "자동차", "개", "코끼리"};
-        wordToMeaning = Map.of(
-                "apple", "사과",
-                "banana", "바나나",
-                "car", "자동차",
-                "dog", "개",
-                "elephant", "코끼리"
-        );
-
-        for (int i = 0; i < expressions.length; i++) {
-            WordJpaEntity word = wordJpaRepository.saveAndFlush(WordJpaEntity.builder()
-                    .vocabulary(testVocab)
-                    .expression(expressions[i])
+            // 1. 테스트 사용자 및 인증 토큰 생성
+            testUser = userJpaRepository.save(UserJpaEntity.builder()
+                    .email("test@test.com")
+                    .nickname("test")
+                    .password(passwordEncoder.encode("password123!"))
+                    .role(UserRole.USER)
                     .build());
 
-            definitionJpaRepository.saveAndFlush(DefinitionJpaEntity.builder()
-                    .word(word)
-                    .meaning(meanings[i])
-                    .part(PartOfSpeech.NOUN)
+            userToken = jwtProvider.generateToken(testUser.getId(), testUser.getRole().name());
+
+            // 2. 테스트 단어장 생성
+            testVocab = vocabularyJpaRepository.save(VocabularyJpaEntity.builder()
+                    .user(testUser)
+                    .title("퀴즈 단어장")
                     .build());
 
-            wordStatisticJpaRepository.saveAndFlush(WordStatisticJpaEntity.builder()
-                    .word(word)
-                    .build());
-        }
+            // 3. 퀴즈 생성을 위한 단어, 정의, 통계 데이터 주입
+            String[] expressions = {"apple", "banana", "car", "dog", "elephant"};
+            String[] meanings = {"사과", "바나나", "자동차", "개", "코끼리"};
+            wordToMeaning = Map.of(
+                    "apple", "사과",
+                    "banana", "바나나",
+                    "car", "자동차",
+                    "dog", "개",
+                    "elephant", "코끼리"
+            );
+
+            for (int i = 0; i < expressions.length; i++) {
+                WordJpaEntity word = wordJpaRepository.save(WordJpaEntity.builder()
+                        .vocabulary(testVocab)
+                        .expression(expressions[i])
+                        .build());
+
+                definitionJpaRepository.save(DefinitionJpaEntity.builder()
+                        .word(word)
+                        .meaning(meanings[i])
+                        .part(PartOfSpeech.NOUN)
+                        .build());
+
+                wordStatisticJpaRepository.save(WordStatisticJpaEntity.builder()
+                        .word(word)
+                        .build());
+            }
+            return null;
+        });
 
         em.clear(); // DB 주입 데이터 반영 보장
     }

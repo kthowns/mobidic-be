@@ -30,6 +30,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.List;
 
@@ -82,28 +83,33 @@ public class WordIntegrationTest {
     @Autowired
     private jakarta.persistence.EntityManager em;
 
+    @Autowired
+    private TransactionTemplate transactionTemplate;
+
     private UserJpaEntity testUser;
     private String userToken;
     private VocabularyJpaEntity testVocab;
 
     @BeforeAll
-    void setUp() {
-        databaseCleaner.execute();
+    void cleanAndSetup() {
+        transactionTemplate.execute(status -> {
+            databaseCleaner.execute();
 
-        testUser = userJpaRepository.saveAndFlush(UserJpaEntity.builder()
-                .email("test@test.com")
-                .nickname("test")
-                .password(passwordEncoder.encode("password123!"))
-                .role(UserRole.USER)
-                .build());
+            testUser = userJpaRepository.save(UserJpaEntity.builder()
+                    .email("test@test.com")
+                    .nickname("test")
+                    .password(passwordEncoder.encode("password123!"))
+                    .role(UserRole.USER)
+                    .build());
 
-        userToken = jwtProvider.generateToken(testUser.getId(), testUser.getRole().name());
+            userToken = jwtProvider.generateToken(testUser.getId(), testUser.getRole().name());
 
-        testVocab = vocabularyJpaRepository.saveAndFlush(VocabularyJpaEntity.builder()
-                .user(testUser)
-                .title("테스트 단어장")
-                .build());
-
+            testVocab = vocabularyJpaRepository.save(VocabularyJpaEntity.builder()
+                    .user(testUser)
+                    .title("테스트 단어장")
+                    .build());
+            return null;
+        });
         em.clear();
     }
 

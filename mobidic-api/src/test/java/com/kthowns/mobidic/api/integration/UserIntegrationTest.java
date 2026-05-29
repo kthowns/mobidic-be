@@ -9,9 +9,10 @@ import com.kthowns.mobidic.common.code.GeneralResponseCode;
 import com.kthowns.mobidic.domain.user.model.UserRole;
 import com.kthowns.mobidic.storage.user.jpaentity.UserJpaEntity;
 import com.kthowns.mobidic.storage.user.jparepository.UserJpaRepository;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -20,6 +21,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.UUID;
 
@@ -35,6 +37,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @Transactional
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class UserIntegrationTest {
 
     @Autowired
@@ -58,23 +61,28 @@ public class UserIntegrationTest {
     @Autowired
     private jakarta.persistence.EntityManager em;
 
+    @Autowired
+    private TransactionTemplate transactionTemplate;
+
     private UserJpaEntity testUser;
     private String userToken;
 
-    @BeforeEach
-    void setUp() {
-        databaseCleaner.execute();
+    @BeforeAll
+    void cleanAndSetup() {
+        transactionTemplate.execute(status -> {
+            databaseCleaner.execute();
 
-        testUser = userJpaRepository.saveAndFlush(UserJpaEntity.builder()
-                .email("test@test.com")
-                .nickname("test")
-                .password(passwordEncoder.encode("password123!"))
-                .role(UserRole.USER)
-                .isActive(true)
-                .build());
+            testUser = userJpaRepository.save(UserJpaEntity.builder()
+                    .email("test@test.com")
+                    .nickname("test")
+                    .password(passwordEncoder.encode("password123!"))
+                    .role(UserRole.USER)
+                    .isActive(true)
+                    .build());
 
-        userToken = jwtProvider.generateToken(testUser.getId(), testUser.getRole().name());
-        
+            userToken = jwtProvider.generateToken(testUser.getId(), testUser.getRole().name());
+            return null;
+        });
         em.clear();
     }
 

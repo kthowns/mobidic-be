@@ -12,9 +12,10 @@ import com.kthowns.mobidic.storage.vocabulary.jpaentity.VocabularyJpaEntity;
 import com.kthowns.mobidic.storage.vocabulary.jparepository.VocabularyJpaRepository;
 import com.kthowns.mobidic.storage.word.jpaentity.WordJpaEntity;
 import com.kthowns.mobidic.storage.word.jparepository.WordJpaRepository;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -24,6 +25,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.UUID;
 
@@ -40,6 +42,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @Transactional
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class PronunciationIntegrationTest {
 
     @Autowired
@@ -63,6 +66,12 @@ public class PronunciationIntegrationTest {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private jakarta.persistence.EntityManager em;
+
+    @Autowired
+    private TransactionTemplate transactionTemplate;
+
     @MockitoBean
     private SpeechToTextClient speechToTextClient;
 
@@ -70,28 +79,32 @@ public class PronunciationIntegrationTest {
     private String userToken;
     private WordJpaEntity testWord;
 
-    @BeforeEach
-    void setUp() {
-        databaseCleaner.execute();
+    @BeforeAll
+    void cleanAndSetup() {
+        transactionTemplate.execute(status -> {
+            databaseCleaner.execute();
 
-        testUser = userJpaRepository.save(UserJpaEntity.builder()
-                .email("test@test.com")
-                .nickname("test")
-                .password(passwordEncoder.encode("password123!"))
-                .role(UserRole.USER)
-                .build());
+            testUser = userJpaRepository.save(UserJpaEntity.builder()
+                    .email("test@test.com")
+                    .nickname("test")
+                    .password(passwordEncoder.encode("password123!"))
+                    .role(UserRole.USER)
+                    .build());
 
-        userToken = jwtProvider.generateToken(testUser.getId(), testUser.getRole().name());
+            userToken = jwtProvider.generateToken(testUser.getId(), testUser.getRole().name());
 
-        VocabularyJpaEntity vocabulary = vocabularyJpaRepository.save(VocabularyJpaEntity.builder()
-                .user(testUser)
-                .title("테스트 단어장")
-                .build());
+            VocabularyJpaEntity vocabulary = vocabularyJpaRepository.save(VocabularyJpaEntity.builder()
+                    .user(testUser)
+                    .title("테스트 단어장")
+                    .build());
 
-        testWord = wordJpaRepository.save(WordJpaEntity.builder()
-                .vocabulary(vocabulary)
-                .expression("apple")
-                .build());
+            testWord = wordJpaRepository.save(WordJpaEntity.builder()
+                    .vocabulary(vocabulary)
+                    .expression("apple")
+                    .build());
+            return null;
+        });
+        em.clear();
     }
 
     @Test
