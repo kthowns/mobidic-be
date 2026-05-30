@@ -240,6 +240,6 @@ public class UserIntegrationTest {
         // 현재 프로덕션 코드에 탈퇴자 방어 로직이 없어 테스트가 실패하더라도, 테스트 코드는 정상적으로 작성된 것입니다.
         mockMvc.perform(get("/api/users/me")
                         .header("Authorization", "Bearer " + userToken))
-                .andExpect(status().isUnauthorized()); 
+                .andExpect(status().isUnauthorized());
     }
 }

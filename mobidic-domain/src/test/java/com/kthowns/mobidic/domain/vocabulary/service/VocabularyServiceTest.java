@@ -1,9 +1,8 @@
-package com.kthowns.mobidic.api.service;
+package com.kthowns.mobidic.domain.vocabulary.service;
 
 import com.kthowns.mobidic.domain.vocabulary.implementation.*;
 import com.kthowns.mobidic.domain.vocabulary.model.Vocabulary;
 import com.kthowns.mobidic.domain.vocabulary.model.VocabularyDetail;
-import com.kthowns.mobidic.domain.vocabulary.service.VocabularyService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

@@ -1,4 +1,4 @@
-package com.kthowns.mobidic.api.service;
+package com.kthowns.mobidic.domain.word.service;
 
 import com.kthowns.mobidic.domain.statistic.implementation.StatisticAppender;
 import com.kthowns.mobidic.domain.vocabulary.implementation.VocabularyUpdater;
@@ -6,7 +6,6 @@ import com.kthowns.mobidic.domain.vocabulary.implementation.VocabularyReader;
 import com.kthowns.mobidic.domain.word.implementation.*;
 import com.kthowns.mobidic.domain.word.model.Word;
 import com.kthowns.mobidic.domain.word.model.WordDetail;
-import com.kthowns.mobidic.domain.word.service.WordService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

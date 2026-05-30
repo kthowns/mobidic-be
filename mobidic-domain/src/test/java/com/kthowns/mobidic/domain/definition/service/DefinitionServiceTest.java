@@ -1,9 +1,8 @@
-package com.kthowns.mobidic.api.service;
+package com.kthowns.mobidic.domain.definition.service;
 
 import com.kthowns.mobidic.domain.definition.implementation.*;
 import com.kthowns.mobidic.domain.definition.model.Definition;
 import com.kthowns.mobidic.domain.definition.model.PartOfSpeech;
-import com.kthowns.mobidic.domain.definition.service.DefinitionService;
 import com.kthowns.mobidic.domain.word.implementation.WordReader;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

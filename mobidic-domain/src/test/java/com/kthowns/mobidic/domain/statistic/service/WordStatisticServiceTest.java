@@ -1,9 +1,8 @@
-package com.kthowns.mobidic.api.service;
+package com.kthowns.mobidic.domain.statistic.service;
 
 import com.kthowns.mobidic.domain.statistic.implementation.StatisticReader;
 import com.kthowns.mobidic.domain.statistic.implementation.StatisticUpdater;
 import com.kthowns.mobidic.domain.statistic.model.WordStatistic;
-import com.kthowns.mobidic.domain.statistic.service.StatisticService;
 import com.kthowns.mobidic.domain.vocabulary.implementation.VocabularyReader;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

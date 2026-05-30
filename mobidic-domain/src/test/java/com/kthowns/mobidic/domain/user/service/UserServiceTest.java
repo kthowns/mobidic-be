@@ -1,9 +1,8 @@
-package com.kthowns.mobidic.api.service;
+package com.kthowns.mobidic.domain.user.service;
 
 import com.kthowns.mobidic.domain.user.implementation.*;
 import com.kthowns.mobidic.domain.user.model.User;
 import com.kthowns.mobidic.domain.user.model.UserRole;
-import com.kthowns.mobidic.domain.user.service.UserService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

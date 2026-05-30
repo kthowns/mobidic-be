@@ -1,4 +1,4 @@
-package com.kthowns.mobidic.api.security;
+package com.kthowns.mobidic.api.service;
 
 import com.kthowns.mobidic.api.security.jwt.JwtProperties;
 import com.kthowns.mobidic.api.security.jwt.JwtProvider;
@@ -19,7 +19,6 @@ import java.util.UUID;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 
 @ExtendWith(MockitoExtension.class)
