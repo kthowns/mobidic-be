@@ -7,64 +7,55 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 
 abstract class QuizGenerator {
     public abstract List<Quiz> generate(UUID memberId, List<WordDetail> wordDetails);
 
     protected <T> void partialShuffle(int n, List<T> list) {
+        if (list == null || list.size() < 2 || n < 2) {
+            return;
+        }
+
         List<Integer> nums = new ArrayList<>();
         for (int i = 0; i < list.size(); i++) {
             nums.add(i);
         }
-        derange(nums);
+        Collections.shuffle(nums);
 
-        ArrayList<Integer> indices = new ArrayList<>();
-        for (int i = 0; i < n; i++) {
-            indices.add(nums.get(i));
-        }
+        int shuffleSize = Math.min(n, list.size());
+        List<Integer> indices = nums.subList(0, shuffleSize);
 
-        ArrayList<T> selectedValues = new ArrayList<>();
+        List<T> selectedValues = new ArrayList<>();
         for (Integer idx : indices) {
             selectedValues.add(list.get(idx));
         }
-        derange(selectedValues);
 
-        for (int i = 0; i < indices.size(); i++) {
-            list.set(indices.get(i), selectedValues.get(i));
+        if (derange(selectedValues)) {
+            for (int i = 0; i < indices.size(); i++) {
+                list.set(indices.get(i), selectedValues.get(i));
+            }
         }
     }
 
-    protected <T> void derange(List<T> list) {
+    protected <T> boolean derange(List<T> list) {
         if (list == null || list.size() < 2) {
-            return;
+            return false;
         }
 
         for (T item : list) {
             if (item == null) {
-                return;
+                return false;
             }
         }
 
-        List<T> orgList = new ArrayList<>(list);
-
-        int epoch = 30;
-        int cnt = 0;
-        while (true) { //complete derangement
-            if (epoch < cnt) {
-                return;
-            }
-            Collections.shuffle(list);
-            boolean isDerangement = true;
-            cnt++;
-            for (int i = 0; i < list.size(); i++) {
-                if (list.get(i).equals(orgList.get(i))) {
-                    isDerangement = false;
-                    break;
-                }
-            }
-            if (isDerangement) {
-                return;
-            }
+        // Sattolo's algorithm: Generates a random cyclic permutation (guaranteed derangement) in O(n)
+        ThreadLocalRandom rnd = ThreadLocalRandom.current();
+        for (int i = list.size() - 1; i > 0; i--) {
+            int j = rnd.nextInt(i);
+            Collections.swap(list, i, j);
         }
+
+        return true;
     }
 }

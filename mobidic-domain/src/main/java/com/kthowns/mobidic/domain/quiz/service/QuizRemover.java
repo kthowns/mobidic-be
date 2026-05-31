@@ -1,15 +1,16 @@
 package com.kthowns.mobidic.domain.quiz.service;
 
-import com.kthowns.mobidic.domain.quiz.repository.QuizRepository;
+import com.kthowns.mobidic.domain.quiz.repository.QuizAnswerRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
 class QuizRemover {
-    private final QuizRepository quizRepository;
+    private final QuizAnswerRepository quizAnswerRepository;
 
-    public void removeAnswer(String key) {
-        quizRepository.deleteAnswer(key);
+    public void remove(String token) {
+        String key = QuizRedisKey.QUIZ + ":" + token;
+        quizAnswerRepository.remove(key);
     }
 }

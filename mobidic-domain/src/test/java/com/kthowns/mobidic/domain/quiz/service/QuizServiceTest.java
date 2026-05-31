@@ -1,7 +1,7 @@
 package com.kthowns.mobidic.domain.quiz.service;
 
-import com.kthowns.mobidic.domain.definition.model.Definition;
-import com.kthowns.mobidic.domain.definition.model.PartOfSpeech;
+import com.kthowns.mobidic.domain.quiz.model.Quiz;
+import com.kthowns.mobidic.domain.quiz.model.QuizAnswer;
 import com.kthowns.mobidic.domain.quiz.model.QuizInfo;
 import com.kthowns.mobidic.domain.quiz.model.QuizResult;
 import com.kthowns.mobidic.domain.statistic.service.StatisticService;
@@ -14,15 +14,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
@@ -35,6 +34,9 @@ class QuizServiceTest {
     @Mock
     private StatisticService statisticService;
     @Mock
+    private QuizProperties quizProperties;
+
+    @Mock
     private QuizAppender quizAppender;
     @Mock
     private QuizReader quizReader;
@@ -42,8 +44,6 @@ class QuizServiceTest {
     private QuizRemover quizRemover;
     @Mock
     private QuizValidator quizValidator;
-    @Mock
-    private QuizProcessor quizProcessor;
 
     private final UUID userId = UUID.randomUUID();
     private final UUID vocabId = UUID.randomUUID();
@@ -54,38 +54,39 @@ class QuizServiceTest {
     void getOXQuizzesSuccess() {
         // given
         List<WordDetail> wordDetails = List.of(
-                new WordDetail(wordId, "Apple", 0, 0, false, List.of(new Definition(UUID.randomUUID(), wordId, "사과", PartOfSpeech.NOUN)), LocalDateTime.now())
+                new WordDetail(wordId, "apple", 0.5, 0.0, false, List.of(), null),
+                new WordDetail(UUID.randomUUID(), "banana", 0.5, 0.0, false, List.of(), null)
         );
         given(wordService.getWordDetailsNotLearnedByVocabularyId(userId, vocabId)).willReturn(wordDetails);
-        given(quizProcessor.encryptKey(anyString())).willReturn("encryptedKey");
+        given(quizProperties.getExpPerQuiz()).willReturn(15000L);
+        given(quizAppender.append(any(UUID.class), any(Quiz.class), anyLong())).willReturn("token");
 
         // when
         List<QuizInfo> result = quizService.getOXQuizzes(userId, vocabId);
 
         // then
-        assertEquals(1, result.size());
-        verify(quizAppender).saveAnswer(anyString(), anyString(), anyLong());
+        assertEquals(2, result.size());
+        verify(quizAppender, times(2)).append(eq(userId), any(Quiz.class), anyLong());
     }
 
     @Test
-    @DisplayName("[QuizService] Rate quiz success")
-    void rateQuizSuccess() {
+    @DisplayName("[QuizService] Rate quiz success - Correct answer")
+    void rateQuizCorrect() {
         // given
-        String token = "testToken";
-        String answer = "사과";
-        String key = "quiz:" + userId + ":" + wordId + ":quizId";
+        String token = "token";
+        String answer = "1";
+        QuizAnswer quizAnswer = new QuizAnswer(userId, wordId, UUID.randomUUID(), "1");
 
-        given(quizProcessor.decryptKey(token)).willReturn(key);
-        given(quizReader.readAnswer(key)).willReturn(answer);
+        given(quizReader.read(token)).willReturn(quizAnswer);
 
         // when
         QuizResult result = quizService.rateQuiz(userId, token, answer);
 
         // then
         assertTrue(result.isCorrect());
-        assertEquals(answer, result.correctAnswer());
-        verify(quizValidator).validateQuizKey(key);
-        verify(quizRemover).removeAnswer(key);
+        assertEquals("1", result.correctAnswer());
+        verify(quizValidator).validateOwnership(quizAnswer, userId);
+        verify(quizRemover).remove(token);
         verify(statisticService).increaseCorrectCount(userId, wordId);
     }
 }

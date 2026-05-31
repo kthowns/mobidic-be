@@ -1,6 +1,7 @@
 package com.kthowns.mobidic.domain.quiz.service;
 
-import com.kthowns.mobidic.domain.quiz.repository.QuizRepository;
+import com.kthowns.mobidic.domain.quiz.model.Quiz;
+import com.kthowns.mobidic.domain.quiz.repository.QuizAnswerRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -8,29 +9,38 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.UUID;
+
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class QuizAppenderTest {
 
     @Mock
-    private QuizRepository quizRepository;
+    private QuizAnswerRepository quizAnswerRepository;
 
     @InjectMocks
     private QuizAppender quizAppender;
 
     @Test
-    @DisplayName("saveAnswer 테스트 - 정답 저장 성공")
-    void saveAnswerTest() {
+    @DisplayName("append 테스트 - 퀴즈 정답 저장 및 토큰 반환 성공")
+    void append_Success() {
         // Given
-        String key = "quiz:123";
-        String answer = "apple";
-        long expMillis = 60000L;
+        UUID userId = UUID.randomUUID();
+        Quiz quiz = Quiz.builder()
+                .id(UUID.randomUUID())
+                .wordId(UUID.randomUUID())
+                .answer("apple")
+                .build();
+        long expMillis = 15000L;
 
         // When
-        quizAppender.saveAnswer(key, answer, expMillis);
+        String token = quizAppender.append(userId, quiz, expMillis);
 
         // Then
-        verify(quizRepository).appendAnswer(key, answer, expMillis);
+        assertNotNull(token);
+        verify(quizAnswerRepository).append(anyString(), any(), eq(expMillis));
     }
 }

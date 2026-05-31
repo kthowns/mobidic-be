@@ -1,8 +1,7 @@
 package com.kthowns.mobidic.domain.quiz.service;
 
-import com.kthowns.mobidic.common.code.GeneralResponseCode;
-import com.kthowns.mobidic.common.exception.ApiException;
 import com.kthowns.mobidic.domain.quiz.model.Quiz;
+import com.kthowns.mobidic.domain.quiz.model.QuizAnswer;
 import com.kthowns.mobidic.domain.quiz.model.QuizInfo;
 import com.kthowns.mobidic.domain.quiz.model.QuizResult;
 import com.kthowns.mobidic.domain.quiz.model.QuizType;
@@ -24,14 +23,12 @@ import java.util.UUID;
 public class QuizService {
     private final WordService wordService;
     private final StatisticService statisticService;
+    private final QuizProperties quizProperties;
 
     private final QuizAppender quizAppender;
     private final QuizReader quizReader;
     private final QuizRemover quizRemover;
     private final QuizValidator quizValidator;
-    private final QuizProcessor quizProcessor;
-
-    private static final Long expPerQuiz = 15000L;
 
     @Transactional(readOnly = true)
     public List<QuizInfo> getOXQuizzes(UUID userId, UUID vocabularyId) {
@@ -45,31 +42,23 @@ public class QuizService {
 
     @Transactional
     public QuizResult rateQuiz(UUID userId, String token, String answer) {
-        String key = quizProcessor.decryptKey(token);
-        quizValidator.validateQuizKey(key);
+        QuizAnswer quizAnswer = quizReader.read(token);
 
-        String[] parts = key.split(":");
-        UUID tokenUserId = UUID.fromString(parts[1]);
-        UUID wordId = UUID.fromString(parts[2]);
+        quizValidator.validateOwnership(quizAnswer, userId);
 
-        if (!tokenUserId.equals(userId)) {
-            throw new ApiException(GeneralResponseCode.NO_QUIZ);
-        }
+        quizRemover.remove(token);
 
-        String correctAnswer = quizReader.readAnswer(key);
-        quizRemover.removeAnswer(key);
-
-        boolean isCorrect = answer.equalsIgnoreCase(correctAnswer);
+        boolean isCorrect = answer.equalsIgnoreCase(quizAnswer.answer());
 
         if (isCorrect) {
-            statisticService.increaseCorrectCount(userId, wordId);
+            statisticService.increaseCorrectCount(userId, quizAnswer.wordId());
         } else {
-            statisticService.increaseIncorrectCount(userId, wordId);
+            statisticService.increaseIncorrectCount(userId, quizAnswer.wordId());
         }
 
         return QuizResult.builder()
                 .isCorrect(isCorrect)
-                .correctAnswer(correctAnswer)
+                .correctAnswer(quizAnswer.answer())
                 .build();
     }
 
@@ -84,17 +73,16 @@ public class QuizService {
         List<Quiz> quizzes = quizGenerator.generate(userId, wordDetails);
         List<QuizInfo> quizInfos = new ArrayList<>();
 
-        long expSec = expPerQuiz * quizzes.size();
+        long expMillis = quizProperties.getExpPerQuiz() * quizzes.size();
 
         for (Quiz quiz : quizzes) {
-            String key = QuizRedisKey.QUIZ + ":" + quiz.userId() + ":" + quiz.wordId() + ":" + quiz.id();
-            quizAppender.saveAnswer(key, quiz.answer(), expSec);
+            String token = quizAppender.append(userId, quiz, expMillis);
 
             quizInfos.add(QuizInfo.builder()
-                    .token(quizProcessor.encryptKey(key))
+                    .token(token)
                     .options(quiz.options())
                     .stem(quiz.stem())
-                    .expMil(expSec)
+                    .expMil(expMillis)
                     .build());
         }
 

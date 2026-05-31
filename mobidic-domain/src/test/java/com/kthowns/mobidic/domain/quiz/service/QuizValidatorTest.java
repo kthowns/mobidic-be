@@ -2,73 +2,47 @@ package com.kthowns.mobidic.domain.quiz.service;
 
 import com.kthowns.mobidic.common.code.GeneralResponseCode;
 import com.kthowns.mobidic.common.exception.ApiException;
-import com.kthowns.mobidic.domain.quiz.repository.QuizRepository;
+import com.kthowns.mobidic.domain.quiz.model.QuizAnswer;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.BDDMockito.given;
 
 @ExtendWith(MockitoExtension.class)
 class QuizValidatorTest {
-
-    @Mock
-    private QuizRepository quizRepository;
 
     @InjectMocks
     private QuizValidator quizValidator;
 
     @Test
-    @DisplayName("validateQuizKey 테스트 - 유효한 키 (통과)")
-    void validateQuizKeyTest_Success() {
+    @DisplayName("validateOwnership 테스트 - 소유자 일치 (통과)")
+    void validateOwnership_Success() {
         // Given
-        String key = "quiz:123";
-        given(quizRepository.exists(key)).willReturn(true);
+        UUID userId = UUID.randomUUID();
+        QuizAnswer quizAnswer = QuizAnswer.of(userId, null, null, null);
 
         // When & Then
-        assertThatCode(() -> quizValidator.validateQuizKey(key))
+        assertThatCode(() -> quizValidator.validateOwnership(quizAnswer, userId))
                 .doesNotThrowAnyException();
     }
 
     @Test
-    @DisplayName("validateQuizKey 테스트 - 키가 null인 경우 (예외)")
-    void validateQuizKeyTest_Fail_NullKey() {
+    @DisplayName("validateOwnership 테스트 - 소유자 불일치 (예외)")
+    void validateOwnership_Fail() {
         // Given
-        String key = null;
+        UUID userId = UUID.randomUUID();
+        UUID otherUserId = UUID.randomUUID();
+        QuizAnswer quizAnswer = QuizAnswer.of(otherUserId, null, null, null);
 
         // When & Then
-        assertThatThrownBy(() -> quizValidator.validateQuizKey(key))
+        assertThatThrownBy(() -> quizValidator.validateOwnership(quizAnswer, userId))
                 .isInstanceOf(ApiException.class)
-                .hasMessageContaining(GeneralResponseCode.INVALID_REQUEST.getMessage());
-    }
-
-    @Test
-    @DisplayName("validateQuizKey 테스트 - 접두사가 잘못된 경우 (예외)")
-    void validateQuizKeyTest_Fail_InvalidPrefix() {
-        // Given
-        String key = "wrong:123";
-
-        // When & Then
-        assertThatThrownBy(() -> quizValidator.validateQuizKey(key))
-                .isInstanceOf(ApiException.class)
-                .hasMessageContaining(GeneralResponseCode.INVALID_REQUEST.getMessage());
-    }
-
-    @Test
-    @DisplayName("validateQuizKey 테스트 - 존재하지 않는 키 (타임아웃 예외)")
-    void validateQuizKeyTest_Fail_NotExists() {
-        // Given
-        String key = "quiz:123";
-        given(quizRepository.exists(key)).willReturn(false);
-
-        // When & Then
-        assertThatThrownBy(() -> quizValidator.validateQuizKey(key))
-                .isInstanceOf(ApiException.class)
-                .hasMessageContaining(GeneralResponseCode.REQUEST_TIMEOUT.getMessage());
+                .hasMessageContaining(GeneralResponseCode.NO_QUIZ.getMessage());
     }
 }

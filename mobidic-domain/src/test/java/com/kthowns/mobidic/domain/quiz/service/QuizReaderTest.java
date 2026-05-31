@@ -1,8 +1,8 @@
 package com.kthowns.mobidic.domain.quiz.service;
 
-import com.kthowns.mobidic.common.code.GeneralResponseCode;
 import com.kthowns.mobidic.common.exception.ApiException;
-import com.kthowns.mobidic.domain.quiz.repository.QuizRepository;
+import com.kthowns.mobidic.domain.quiz.model.QuizAnswer;
+import com.kthowns.mobidic.domain.quiz.repository.QuizAnswerRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -10,44 +10,45 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import java.util.Optional;
+import java.util.UUID;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 
 @ExtendWith(MockitoExtension.class)
 class QuizReaderTest {
 
     @Mock
-    private QuizRepository quizRepository;
+    private QuizAnswerRepository quizAnswerRepository;
 
     @InjectMocks
     private QuizReader quizReader;
 
     @Test
-    @DisplayName("readAnswer 테스트 - 정답 조회 성공")
-    void readAnswerTest_Success() {
+    @DisplayName("read 테스트 - 존재하는 토큰 조회 성공")
+    void read_Success() {
         // Given
-        String key = "quiz:123";
-        String expectedAnswer = "apple";
-        given(quizRepository.getAnswer(key)).willReturn(expectedAnswer);
+        String token = "token";
+        QuizAnswer quizAnswer = new QuizAnswer(UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(), "1");
+        given(quizAnswerRepository.read(anyString())).willReturn(Optional.of(quizAnswer));
 
         // When
-        String actualAnswer = quizReader.readAnswer(key);
+        QuizAnswer result = quizReader.read(token);
 
         // Then
-        assertThat(actualAnswer).isEqualTo(expectedAnswer);
+        assertEquals(quizAnswer, result);
     }
 
     @Test
-    @DisplayName("readAnswer 테스트 - 정답 없음 (타임아웃 예외 발생)")
-    void readAnswerTest_Fail_Timeout() {
+    @DisplayName("read 테스트 - 존재하지 않거나 만료된 토큰 조회 실패 (예외)")
+    void read_Fail() {
         // Given
-        String key = "quiz:123";
-        given(quizRepository.getAnswer(key)).willReturn(null);
+        given(quizAnswerRepository.read(anyString())).willReturn(Optional.empty());
 
         // When & Then
-        assertThatThrownBy(() -> quizReader.readAnswer(key))
-                .isInstanceOf(ApiException.class)
-                .hasMessageContaining(GeneralResponseCode.REQUEST_TIMEOUT.getMessage());
+        assertThrows(ApiException.class, () -> quizReader.read("expired"));
     }
 }
