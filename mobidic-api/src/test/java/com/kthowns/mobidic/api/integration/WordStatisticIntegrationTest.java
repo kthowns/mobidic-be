@@ -197,9 +197,9 @@ public class WordStatisticIntegrationTest {
             executorService.submit(() -> {
                 try {
                     org.springframework.test.web.servlet.MvcResult result = mockMvc.perform(patch("/api/words/" + testWord.getId() + "/toggle-learned")
-                            .header("Authorization", "Bearer " + userToken))
+                                    .header("Authorization", "Bearer " + userToken))
                             .andReturn();
-                    
+
                     if (result.getResponse().getStatus() == 200) {
                         successCount.incrementAndGet();
                     }

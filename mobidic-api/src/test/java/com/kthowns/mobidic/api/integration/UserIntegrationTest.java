@@ -23,8 +23,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import java.util.UUID;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -219,7 +217,7 @@ public class UserIntegrationTest {
         mockMvc.perform(get("/api/users/me")
                         .header("Authorization", "Bearer " + expiredToken))
                 .andExpect(status().isUnauthorized());
-                // 프로덕션 코드에서 만료된 토큰에 대한 구체적인 에러 메시지가 다를 수 있으므로 상태 코드만 검증
+        // 프로덕션 코드에서 만료된 토큰에 대한 구체적인 에러 메시지가 다를 수 있으므로 상태 코드만 검증
     }
 
     @Test
@@ -229,8 +227,8 @@ public class UserIntegrationTest {
         transactionTemplate.execute(status -> {
             UserJpaEntity user = userJpaRepository.findById(testUser.getId()).orElseThrow();
             em.createQuery("update UserJpaEntity u set u.isActive = false where u.id = :id")
-              .setParameter("id", user.getId())
-              .executeUpdate();
+                    .setParameter("id", user.getId())
+                    .executeUpdate();
             return null;
         });
         em.clear();

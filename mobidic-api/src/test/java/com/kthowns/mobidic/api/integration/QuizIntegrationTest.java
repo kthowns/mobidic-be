@@ -161,7 +161,8 @@ public class QuizIntegrationTest {
 
         List<QuizInfo> quizzes = objectMapper.readValue(
                 objectMapper.readTree(generateResult.getResponse().getContentAsString()).path("data").toString(),
-                new TypeReference<List<QuizInfo>>() {}
+                new TypeReference<List<QuizInfo>>() {
+                }
         );
 
         // Then (Generate): 퀴즈 개수 확인
@@ -201,7 +202,8 @@ public class QuizIntegrationTest {
 
         List<QuizInfo> quizzes = objectMapper.readValue(
                 objectMapper.readTree(generateResult.getResponse().getContentAsString()).path("data").toString(),
-                new TypeReference<List<QuizInfo>>() {}
+                new TypeReference<List<QuizInfo>>() {
+                }
         );
 
         // Then (Generate): 퀴즈 개수 및 빈칸 포함 확인
@@ -231,6 +233,7 @@ public class QuizIntegrationTest {
         WordStatisticJpaEntity statistic = wordStatisticJpaRepository.findById(word.getId()).orElseThrow();
         assertThat(statistic.getCorrectCount()).isEqualTo(1L);
     }
+
     @Test
     @DisplayName("퀴즈 생성 무작위성 검증")
     void quizGenerationRandomness() throws Exception {
@@ -273,7 +276,8 @@ public class QuizIntegrationTest {
                 .andReturn();
         return objectMapper.readValue(
                 objectMapper.readTree(result.getResponse().getContentAsString()).path("data").toString(),
-                new TypeReference<List<QuizInfo>>() {}
+                new TypeReference<List<QuizInfo>>() {
+                }
         );
     }
 

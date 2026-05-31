@@ -1,9 +1,7 @@
 package com.kthowns.mobidic.domain.statistic.service;
 
-import com.kthowns.mobidic.domain.statistic.implementation.StatisticReader;
-import com.kthowns.mobidic.domain.statistic.implementation.StatisticUpdater;
 import com.kthowns.mobidic.domain.statistic.model.WordStatistic;
-import com.kthowns.mobidic.domain.vocabulary.implementation.VocabularyReader;
+import com.kthowns.mobidic.domain.vocabulary.service.VocabularyService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,7 +28,7 @@ class WordStatisticServiceTest {
     private StatisticUpdater statisticUpdater;
 
     @Mock
-    private VocabularyReader vocabularyReader;
+    private VocabularyService vocabularyService;
 
     private final UUID userId = UUID.randomUUID();
     private final UUID wordId = UUID.randomUUID();
@@ -58,7 +56,7 @@ class WordStatisticServiceTest {
     void getVocabLearningRateSuccess() {
         // given
         Double learningRate = 0.8;
-        given(vocabularyReader.existsByIdAndUser(vocabId, userId)).willReturn(true);
+        given(vocabularyService.existsByIdAndUser(vocabId, userId)).willReturn(true);
         given(statisticReader.readVocabLearningRate(vocabId, userId)).willReturn(learningRate);
 
         // when
@@ -106,7 +104,7 @@ class WordStatisticServiceTest {
                 new WordStatistic(UUID.randomUUID(), 10L, 0L, true, 0.1, 1.0),
                 new WordStatistic(UUID.randomUUID(), 5L, 5L, true, 0.5, 0.5)
         );
-        given(vocabularyReader.existsByIdAndUser(vocabId, userId)).willReturn(true);
+        given(vocabularyService.existsByIdAndUser(vocabId, userId)).willReturn(true);
         given(statisticReader.readByVocabularyId(vocabId)).willReturn(wordStatistics);
 
         // when

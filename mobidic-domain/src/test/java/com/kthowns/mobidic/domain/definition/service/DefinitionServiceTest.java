@@ -1,9 +1,10 @@
 package com.kthowns.mobidic.domain.definition.service;
 
-import com.kthowns.mobidic.domain.definition.implementation.*;
+import com.kthowns.mobidic.common.code.GeneralResponseCode;
+import com.kthowns.mobidic.common.exception.ApiException;
 import com.kthowns.mobidic.domain.definition.model.Definition;
 import com.kthowns.mobidic.domain.definition.model.PartOfSpeech;
-import com.kthowns.mobidic.domain.word.implementation.WordReader;
+import com.kthowns.mobidic.domain.word.service.WordService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,7 +16,11 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
@@ -35,7 +40,7 @@ class DefinitionServiceTest {
     private DefinitionValidator definitionValidator;
 
     @Mock
-    private WordReader wordReader;
+    private WordService wordService;
 
     private final UUID userId = UUID.randomUUID();
     private final UUID wordId = UUID.randomUUID();
@@ -52,9 +57,28 @@ class DefinitionServiceTest {
         definitionService.addDefinition(userId, wordId, meaning, part);
 
         // then
-        verify(wordReader).readByIdAndUserId(wordId, userId);
+        verify(wordService).getWordById(userId, wordId);
         verify(definitionValidator).validateMeaningDuplication(meaning, wordId);
         verify(definitionAppender).append(wordId, meaning, part);
+    }
+
+    @Test
+    @DisplayName("[DefService] Add def fail - User does not own word (Security check)")
+    void addDefinitionSecurityFail() {
+        // given
+        String meaning = "meaning";
+        PartOfSpeech part = PartOfSpeech.NOUN;
+        given(wordService.getWordById(userId, wordId))
+                .willThrow(new ApiException(GeneralResponseCode.NO_WORD));
+
+        // when
+        ApiException exception = assertThrows(ApiException.class, () ->
+                definitionService.addDefinition(userId, wordId, meaning, part));
+
+        // then
+        assertEquals(GeneralResponseCode.NO_WORD, exception.getResponseCode());
+        verify(definitionValidator, never()).validateMeaningDuplication(anyString(), any(UUID.class));
+        verify(definitionAppender, never()).append(any(UUID.class), anyString(), any(PartOfSpeech.class));
     }
 
     @Test
@@ -70,7 +94,7 @@ class DefinitionServiceTest {
         List<Definition> result = definitionService.getDefinitionsByWordId(userId, wordId);
 
         // then
-        verify(wordReader).readByIdAndUserId(wordId, userId);
+        verify(wordService).getWordById(userId, wordId);
         assertEquals(definitions, result);
     }
 

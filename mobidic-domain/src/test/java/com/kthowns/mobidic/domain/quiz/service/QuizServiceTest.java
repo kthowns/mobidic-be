@@ -2,7 +2,6 @@ package com.kthowns.mobidic.domain.quiz.service;
 
 import com.kthowns.mobidic.domain.definition.model.Definition;
 import com.kthowns.mobidic.domain.definition.model.PartOfSpeech;
-import com.kthowns.mobidic.domain.quiz.implementation.*;
 import com.kthowns.mobidic.domain.quiz.model.QuizInfo;
 import com.kthowns.mobidic.domain.quiz.model.QuizResult;
 import com.kthowns.mobidic.domain.statistic.service.StatisticService;
@@ -21,7 +20,8 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
@@ -74,7 +74,7 @@ class QuizServiceTest {
         String token = "testToken";
         String answer = "사과";
         String key = "quiz:" + userId + ":" + wordId + ":quizId";
-        
+
         given(quizProcessor.decryptKey(token)).willReturn(key);
         given(quizReader.readAnswer(key)).willReturn(answer);
 

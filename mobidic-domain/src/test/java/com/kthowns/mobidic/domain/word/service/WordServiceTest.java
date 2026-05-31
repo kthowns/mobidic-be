@@ -1,9 +1,7 @@
 package com.kthowns.mobidic.domain.word.service;
 
-import com.kthowns.mobidic.domain.statistic.implementation.StatisticAppender;
-import com.kthowns.mobidic.domain.vocabulary.implementation.VocabularyUpdater;
-import com.kthowns.mobidic.domain.vocabulary.implementation.VocabularyReader;
-import com.kthowns.mobidic.domain.word.implementation.*;
+import com.kthowns.mobidic.domain.statistic.service.StatisticService;
+import com.kthowns.mobidic.domain.vocabulary.service.VocabularyService;
 import com.kthowns.mobidic.domain.word.model.Word;
 import com.kthowns.mobidic.domain.word.model.WordDetail;
 import org.junit.jupiter.api.DisplayName;
@@ -37,11 +35,9 @@ class WordServiceTest {
     private WordValidator wordValidator;
 
     @Mock
-    private VocabularyReader vocabularyReader;
+    private VocabularyService vocabularyService;
     @Mock
-    private VocabularyUpdater vocabularyUpdater;
-    @Mock
-    private StatisticAppender statisticAppender;
+    private StatisticService statisticService;
 
     private final UUID userId = UUID.randomUUID();
     private final UUID vocabId = UUID.randomUUID();
@@ -54,7 +50,7 @@ class WordServiceTest {
         String expression = "testWord";
         Word word = new Word(wordId, vocabId, expression, null);
 
-        given(vocabularyReader.existsByIdAndUser(vocabId, userId)).willReturn(true);
+        given(vocabularyService.existsByIdAndUser(vocabId, userId)).willReturn(true);
         given(wordAppender.append(expression, vocabId)).willReturn(word);
 
         // when
@@ -62,8 +58,8 @@ class WordServiceTest {
 
         // then
         verify(wordValidator).validateExpressionDuplication(expression, vocabId);
-        verify(statisticAppender).append(wordId);
-        verify(vocabularyUpdater).increaseWordCount(vocabId);
+        verify(statisticService).append(wordId);
+        verify(vocabularyService).increaseWordCount(vocabId);
         assertEquals(word, result);
     }
 
@@ -88,7 +84,7 @@ class WordServiceTest {
         List<WordDetail> wordDetails = List.of(
                 new WordDetail(wordId, "expression", 0, 0, false, List.of(), null)
         );
-        given(vocabularyReader.existsByIdAndUser(vocabId, userId)).willReturn(true);
+        given(vocabularyService.existsByIdAndUser(vocabId, userId)).willReturn(true);
         given(wordReader.readDetailsByVocabularyId(userId, vocabId, false)).willReturn(wordDetails);
 
         // when
@@ -126,6 +122,6 @@ class WordServiceTest {
 
         // then
         verify(wordRemover).remove(wordId, userId);
-        verify(vocabularyUpdater).decreaseWordCount(vocabId);
+        verify(vocabularyService).decreaseWordCount(vocabId);
     }
 }

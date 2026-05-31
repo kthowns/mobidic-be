@@ -1,6 +1,7 @@
 package com.kthowns.mobidic.domain.user.service;
 
-import com.kthowns.mobidic.domain.user.implementation.*;
+import com.kthowns.mobidic.common.code.AuthResponseCode;
+import com.kthowns.mobidic.common.exception.ApiException;
 import com.kthowns.mobidic.domain.user.model.User;
 import com.kthowns.mobidic.domain.user.model.UserRole;
 import org.junit.jupiter.api.DisplayName;
@@ -14,7 +15,11 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
@@ -81,8 +86,7 @@ class UserServiceTest {
         // given
         String newNickname = "newNick";
         String newPassword = "newPassword123!";
-        String encodedPassword = "encodedNewPassword";
-        User user = new User(userId, null, "test@test.com", newNickname, encodedPassword, UserRole.USER, true, LocalDateTime.now(), null);
+        User user = new User(userId, null, "test@test.com", newNickname, "encodedNewPassword", UserRole.USER, true, LocalDateTime.now(), null);
 
         given(userUpdater.update(userId, newNickname, newPassword)).willReturn(user);
 
@@ -93,6 +97,25 @@ class UserServiceTest {
         verify(userValidator).validateNicknameUpdateDuplication(newNickname, userId);
         verify(userValidator).validatePassword(newPassword);
         assertEquals(user, result);
+    }
+
+    @Test
+    @DisplayName("[UserService] Update user success - some fields empty (Validators skipped)")
+    void updateUserSomeFieldsEmptySuccess() {
+        // given
+        String newNickname = ""; // empty
+        String newPassword = null; // null
+        User user = new User(userId, null, "test@test.com", "original", "pw", UserRole.USER, true, LocalDateTime.now(), null);
+
+        given(userUpdater.update(userId, newNickname, newPassword)).willReturn(user);
+
+        // when
+        userService.updateUser(userId, newNickname, newPassword);
+
+        // then
+        verify(userValidator, never()).validateNicknameUpdateDuplication(anyString(), any(UUID.class));
+        verify(userValidator, never()).validatePassword(anyString());
+        verify(userUpdater).update(userId, newNickname, newPassword);
     }
 
     @Test
@@ -121,5 +144,18 @@ class UserServiceTest {
 
         // then
         assertEquals(user, result);
+    }
+
+    @Test
+    @DisplayName("[UserService] Get user by id - user not found (Error code check)")
+    void getUserByIdNotFound() {
+        // given
+        given(userReader.readById(userId)).willThrow(new ApiException(AuthResponseCode.NO_USER));
+
+        // when
+        ApiException exception = assertThrows(ApiException.class, () -> userService.getUserById(userId));
+
+        // then
+        assertEquals(AuthResponseCode.NO_USER, exception.getResponseCode());
     }
 }
