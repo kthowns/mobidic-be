@@ -37,6 +37,8 @@ class UserServiceTest {
     private UserRemover userRemover;
     @Mock
     private UserValidator userValidator;
+    @Mock
+    private UserBlackListService userBlackListService;
 
     private final UUID userId = UUID.randomUUID();
 
@@ -122,13 +124,15 @@ class UserServiceTest {
     @DisplayName("[UserService] Deactivate user success")
     void deactivateUserSuccess() {
         // given
+        long ttlMillis = 3600000L;
         User user = new User(userId, null, "test@test.com", "nick", "pw", UserRole.USER, false, LocalDateTime.now(), LocalDateTime.now());
         given(userRemover.deactivate(userId)).willReturn(user);
 
         // when
-        User result = userService.deactivateUser(userId);
+        User result = userService.deactivateUser(userId, ttlMillis);
 
         // then
+        verify(userBlackListService).registerDeactivatedUser(userId, ttlMillis);
         assertEquals(user, result);
     }
 

@@ -10,10 +10,9 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 class QuizValidator {
     private final QuizRepository quizRepository;
-    private static final String QUIZ_PREFIX = "quiz";
 
     public void validateQuizKey(String key) {
-        if (key == null || !key.startsWith(QUIZ_PREFIX)) {
+        if (key == null || !key.startsWith(QuizRedisKey.QUIZ.getPrefix())) {
             throw new ApiException(GeneralResponseCode.INVALID_REQUEST);
         }
         if (!quizRepository.exists(key)) {

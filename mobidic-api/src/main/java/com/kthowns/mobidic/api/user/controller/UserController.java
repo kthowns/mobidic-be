@@ -1,6 +1,7 @@
 package com.kthowns.mobidic.api.user.controller;
 
 import com.kthowns.mobidic.api.auth.model.AuthUser;
+import com.kthowns.mobidic.api.security.jwt.JwtProperties;
 import com.kthowns.mobidic.api.user.dto.request.SignUpRequestDto;
 import com.kthowns.mobidic.api.user.dto.request.UpdateUserRequestDto;
 import com.kthowns.mobidic.common.dto.ErrorResponse;
@@ -32,6 +33,7 @@ import static com.kthowns.mobidic.common.code.GeneralResponseCode.OK;
 public class UserController {
     private final UserService userService;
     private final UserFacade userFacade;
+    private final JwtProperties jwtProperties;
 
     @Operation(
             summary = "현재사용자 정보 조회",
@@ -103,7 +105,7 @@ public class UserController {
             @AuthenticationPrincipal AuthUser authUser
     ) {
         return GeneralResponse.toResponseEntity(OK,
-                userService.deactivateUser(authUser.getId()));
+                userService.deactivateUser(authUser.getId(), jwtProperties.getJwtAccessExp()));
     }
 
     @Operation(

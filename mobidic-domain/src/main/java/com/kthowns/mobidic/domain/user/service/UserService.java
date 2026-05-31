@@ -18,6 +18,7 @@ public class UserService {
     private final UserUpdater userUpdater;
     private final UserRemover userRemover;
     private final UserValidator userValidator;
+    private final UserBlackListService userBlackListService;
 
     @Transactional
     public User registerUser(String email, String nickname, String password) {
@@ -53,8 +54,10 @@ public class UserService {
     }
 
     @Transactional
-    public User deactivateUser(UUID userId) {
-        return userRemover.deactivate(userId);
+    public User deactivateUser(UUID userId, long ttlMillis) {
+        User user = userRemover.deactivate(userId);
+        userBlackListService.registerDeactivatedUser(userId, ttlMillis);
+        return user;
     }
 
     @Transactional(readOnly = true)

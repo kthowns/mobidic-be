@@ -1,11 +1,14 @@
 package com.kthowns.mobidic.api.security.jwt;
 
+import com.kthowns.mobidic.api.auth.model.AuthUser;
+import com.kthowns.mobidic.domain.user.service.UserBlackListService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -16,7 +19,6 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
-
 @Component
 @Slf4j
 @RequiredArgsConstructor
@@ -25,6 +27,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     public static final String BEARER_PREFIX = "Bearer ";
 
     private final JwtProvider jwtProvider;
+    private final UserBlackListService userBlackListService;
     private final AuthenticationEntryPoint authenticationEntryPoint;
 
     @Override
@@ -37,6 +40,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     && jwtProvider.validateToken(jwt)
             ) {
                 Authentication authentication = jwtProvider.getAuthentication(jwt);
+                AuthUser authUser = (AuthUser) authentication.getPrincipal();
+
+                if (userBlackListService.isDeactivatedUser(authUser.getId())) {
+                    throw new DisabledException("Deactivated user");
+                }
+
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
         } catch (AuthenticationException e) {

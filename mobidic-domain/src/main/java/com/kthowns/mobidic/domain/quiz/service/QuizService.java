@@ -31,7 +31,6 @@ public class QuizService {
     private final QuizValidator quizValidator;
     private final QuizProcessor quizProcessor;
 
-    private static final String QUIZ_PREFIX = "quiz";
     private static final Long expPerQuiz = 15000L;
 
     @Transactional(readOnly = true)
@@ -88,7 +87,7 @@ public class QuizService {
         long expSec = expPerQuiz * quizzes.size();
 
         for (Quiz quiz : quizzes) {
-            String key = QUIZ_PREFIX + ":" + quiz.userId() + ":" + quiz.wordId() + ":" + quiz.id();
+            String key = QuizRedisKey.QUIZ + ":" + quiz.userId() + ":" + quiz.wordId() + ":" + quiz.id();
             quizAppender.saveAnswer(key, quiz.answer(), expSec);
 
             quizInfos.add(QuizInfo.builder()

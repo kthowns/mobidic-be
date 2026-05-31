@@ -7,6 +7,7 @@ import com.kthowns.mobidic.api.util.DatabaseCleaner;
 import com.kthowns.mobidic.common.code.AuthResponseCode;
 import com.kthowns.mobidic.common.code.GeneralResponseCode;
 import com.kthowns.mobidic.domain.user.model.UserRole;
+import com.kthowns.mobidic.domain.user.service.UserBlackListService;
 import com.kthowns.mobidic.storage.user.jpaentity.UserJpaEntity;
 import com.kthowns.mobidic.storage.user.jparepository.UserJpaRepository;
 import org.junit.jupiter.api.BeforeAll;
@@ -19,11 +20,13 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -61,6 +64,9 @@ public class UserIntegrationTest {
 
     @Autowired
     private TransactionTemplate transactionTemplate;
+
+    @MockitoBean
+    private UserBlackListService userBlackListService;
 
     private UserJpaEntity testUser;
     private String userToken;
@@ -114,6 +120,8 @@ public class UserIntegrationTest {
                 .andExpect(jsonPath("$.data.nickname").value("newnickname"));
 
         // Then (2): DB 직접 확인
+        em.flush();
+        em.clear();
         UserJpaEntity updatedUser = userJpaRepository.findById(testUser.getId()).orElseThrow();
         assertThat(updatedUser.getNickname()).isEqualTo("newnickname");
     }
@@ -160,6 +168,8 @@ public class UserIntegrationTest {
                 .andExpect(status().isOk());
 
         // Then (2): DB 직접 확인 (기존 비밀번호와 달라야 함)
+        em.flush();
+        em.clear();
         UserJpaEntity updatedUser = userJpaRepository.findById(testUser.getId()).orElseThrow();
         assertThat(passwordEncoder.matches("newPassword123!", updatedUser.getPassword())).isTrue();
     }
@@ -174,6 +184,8 @@ public class UserIntegrationTest {
                 .andExpect(status().isOk());
 
         // Then (2): DB 직접 확인 (비활성화 상태여야 함)
+        em.flush();
+        em.clear();
         UserJpaEntity deactivatedUser = userJpaRepository.findById(testUser.getId()).orElseThrow();
         assertThat(deactivatedUser.isActive()).isFalse();
         assertThat(deactivatedUser.getDeactivatedAt()).isNotNull();
@@ -223,19 +235,23 @@ public class UserIntegrationTest {
     @Test
     @DisplayName("보안 테스트 - 탈퇴한(비활성화된) 사용자 토큰으로 요청 시 실패")
     void securityFailDeactivatedUser() throws Exception {
-        // Given: 사용자 비활성화
+        // Given: 사용자 비활성화 및 블랙리스트 등록 시뮬레이션
         transactionTemplate.execute(status -> {
             UserJpaEntity user = userJpaRepository.findById(testUser.getId()).orElseThrow();
+
+            // DB 상태 변경 (Soft Delete)
             em.createQuery("update UserJpaEntity u set u.isActive = false where u.id = :id")
                     .setParameter("id", user.getId())
                     .executeUpdate();
+
             return null;
         });
         em.clear();
 
+        // Mock 설정: 해당 유저 ID 조회 시 블랙리스트에 있다고 가정
+        given(userBlackListService.isDeactivatedUser(testUser.getId())).willReturn(true);
+
         // When & Then: 비활성화된 사용자의 토큰으로 API 호출
-        // 올바른 논리적 기대값은 인증/인가 실패(401 또는 403)입니다.
-        // 현재 프로덕션 코드에 탈퇴자 방어 로직이 없어 테스트가 실패하더라도, 테스트 코드는 정상적으로 작성된 것입니다.
         mockMvc.perform(get("/api/users/me")
                         .header("Authorization", "Bearer " + userToken))
                 .andExpect(status().isUnauthorized());

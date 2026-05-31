@@ -18,4 +18,6 @@ public interface UserJpaRepository extends JpaRepository<UserJpaEntity, UUID> {
     boolean existsByNicknameAndIdNot(String nickname, UUID id);
 
     Optional<UserJpaEntity> findByKakaoId(Long kakaoId);
+
+    boolean existsByIdAndIsActiveFalse(UUID id);
 }
