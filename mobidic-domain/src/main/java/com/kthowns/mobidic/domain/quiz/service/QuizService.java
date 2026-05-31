@@ -2,13 +2,10 @@ package com.kthowns.mobidic.domain.quiz.service;
 
 import com.kthowns.mobidic.common.code.GeneralResponseCode;
 import com.kthowns.mobidic.common.exception.ApiException;
-import com.kthowns.mobidic.domain.quiz.implementation.*;
 import com.kthowns.mobidic.domain.quiz.model.Quiz;
 import com.kthowns.mobidic.domain.quiz.model.QuizInfo;
 import com.kthowns.mobidic.domain.quiz.model.QuizResult;
 import com.kthowns.mobidic.domain.quiz.model.QuizType;
-import com.kthowns.mobidic.domain.quiz.util.QuizGenerator;
-import com.kthowns.mobidic.domain.quiz.util.QuizGeneratorFactory;
 import com.kthowns.mobidic.domain.statistic.service.StatisticService;
 import com.kthowns.mobidic.domain.word.model.WordDetail;
 import com.kthowns.mobidic.domain.word.service.WordService;

@@ -1,7 +1,6 @@
 package com.kthowns.mobidic.domain.preset.service;
 
-import com.kthowns.mobidic.domain.preset.implementation.PresetAppender;
-import com.kthowns.mobidic.domain.vocabulary.implementation.VocabularyReader;
+import com.kthowns.mobidic.domain.vocabulary.service.VocabularyService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -14,14 +13,14 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class PresetVocabularyService {
     private final PresetAppender presetAppender;
-    private final VocabularyReader vocabularyReader;
+    private final VocabularyService vocabularyService;
 
     @Transactional
     public void copyAllPresetToUser(UUID userId) {
-        if (vocabularyReader.existsByUser(userId)) {
+        if (vocabularyService.existsByUser(userId)) {
             return;
         }
-        
+
         presetAppender.copyAllPresetsToUser(userId);
     }
 }

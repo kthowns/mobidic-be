@@ -1,11 +1,8 @@
 package com.kthowns.mobidic.domain.definition.service;
 
-import com.kthowns.mobidic.common.code.GeneralResponseCode;
-import com.kthowns.mobidic.common.exception.ApiException;
-import com.kthowns.mobidic.domain.definition.implementation.*;
 import com.kthowns.mobidic.domain.definition.model.Definition;
 import com.kthowns.mobidic.domain.definition.model.PartOfSpeech;
-import com.kthowns.mobidic.domain.word.implementation.WordReader;
+import com.kthowns.mobidic.domain.word.service.WordService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -24,7 +21,7 @@ public class DefinitionService {
     private final DefinitionRemover definitionRemover;
     private final DefinitionValidator definitionValidator;
 
-    private final WordReader wordReader;
+    private final WordService wordService;
 
     @Transactional
     public void addDefinition(
@@ -33,7 +30,7 @@ public class DefinitionService {
             String meaning,
             PartOfSpeech part
     ) {
-        wordReader.readByIdAndUserId(wordId, userId);
+        wordService.getWordById(userId, wordId);
 
         definitionValidator.validateMeaningDuplication(meaning, wordId);
 
@@ -42,7 +39,7 @@ public class DefinitionService {
 
     @Transactional(readOnly = true)
     public List<Definition> getDefinitionsByWordId(UUID userId, UUID wordId) {
-        wordReader.readByIdAndUserId(wordId, userId);
+        wordService.getWordById(userId, wordId);
 
         return definitionReader.readByWordId(wordId);
     }

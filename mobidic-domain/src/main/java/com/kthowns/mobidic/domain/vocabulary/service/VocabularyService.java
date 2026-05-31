@@ -1,6 +1,5 @@
 package com.kthowns.mobidic.domain.vocabulary.service;
 
-import com.kthowns.mobidic.domain.vocabulary.implementation.*;
 import com.kthowns.mobidic.domain.vocabulary.model.Vocabulary;
 import com.kthowns.mobidic.domain.vocabulary.model.VocabularyDetail;
 import lombok.RequiredArgsConstructor;
@@ -59,5 +58,25 @@ public class VocabularyService {
             UUID vocabularyId
     ) {
         vocabularyRemover.remove(vocabularyId, userId);
+    }
+
+    @Transactional(readOnly = true)
+    public boolean existsByIdAndUser(UUID vocabularyId, UUID userId) {
+        return vocabularyReader.existsByIdAndUser(vocabularyId, userId);
+    }
+
+    @Transactional(readOnly = true)
+    public boolean existsByUser(UUID userId) {
+        return vocabularyReader.existsByUser(userId);
+    }
+
+    @Transactional
+    public void increaseWordCount(UUID vocabularyId) {
+        vocabularyUpdater.increaseWordCount(vocabularyId);
+    }
+
+    @Transactional
+    public void decreaseWordCount(UUID vocabularyId) {
+        vocabularyUpdater.decreaseWordCount(vocabularyId);
     }
 }

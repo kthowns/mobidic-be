@@ -1,7 +1,6 @@
 package com.kthowns.mobidic.domain.pronunciation.service;
 
 import com.kthowns.mobidic.domain.pronunciation.client.SpeechToTextClient;
-import com.kthowns.mobidic.domain.pronunciation.implementation.PronunciationCalculator;
 import com.kthowns.mobidic.domain.word.model.Word;
 import com.kthowns.mobidic.domain.word.service.WordService;
 import lombok.RequiredArgsConstructor;

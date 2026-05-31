@@ -1,9 +1,5 @@
 package com.kthowns.mobidic.domain.term.service;
 
-import com.kthowns.mobidic.domain.term.implementation.TermAppender;
-import com.kthowns.mobidic.domain.term.implementation.TermReader;
-import com.kthowns.mobidic.domain.term.implementation.TermValidator;
-import com.kthowns.mobidic.domain.term.implementation.UserAgreementAppender;
 import com.kthowns.mobidic.domain.term.model.SimpleTerm;
 import com.kthowns.mobidic.domain.term.model.Term;
 import com.kthowns.mobidic.domain.term.model.TermType;

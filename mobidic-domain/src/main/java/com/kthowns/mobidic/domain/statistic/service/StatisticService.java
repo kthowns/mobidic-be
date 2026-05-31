@@ -1,11 +1,9 @@
 package com.kthowns.mobidic.domain.statistic.service;
 
-import com.kthowns.mobidic.domain.statistic.implementation.StatisticReader;
-import com.kthowns.mobidic.domain.statistic.implementation.StatisticUpdater;
-import com.kthowns.mobidic.domain.statistic.model.WordStatistic;
-import com.kthowns.mobidic.domain.vocabulary.implementation.VocabularyReader;
 import com.kthowns.mobidic.common.code.GeneralResponseCode;
 import com.kthowns.mobidic.common.exception.ApiException;
+import com.kthowns.mobidic.domain.statistic.model.WordStatistic;
+import com.kthowns.mobidic.domain.vocabulary.service.VocabularyService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -20,7 +18,13 @@ import java.util.UUID;
 public class StatisticService {
     private final StatisticReader statisticReader;
     private final StatisticUpdater statisticUpdater;
-    private final VocabularyReader vocabularyReader;
+    private final StatisticAppender statisticAppender;
+    private final VocabularyService vocabularyService;
+
+    @Transactional
+    public void append(UUID wordId) {
+        statisticAppender.append(wordId);
+    }
 
     @Transactional(readOnly = true)
     public WordStatistic getWordStatisticById(UUID userId, UUID wordId) {
@@ -29,7 +33,7 @@ public class StatisticService {
 
     @Transactional(readOnly = true)
     public Double getVocabLearningRate(UUID userId, UUID vocabId) {
-        if (!vocabularyReader.existsByIdAndUser(vocabId, userId)) {
+        if (!vocabularyService.existsByIdAndUser(vocabId, userId)) {
             throw new ApiException(GeneralResponseCode.NO_VOCAB);
         }
 
@@ -53,7 +57,7 @@ public class StatisticService {
 
     @Transactional(readOnly = true)
     public double getAvgAccuracyByVocab(UUID userId, UUID vocabularyId) {
-        if (!vocabularyReader.existsByIdAndUser(vocabularyId, userId)) {
+        if (!vocabularyService.existsByIdAndUser(vocabularyId, userId)) {
             throw new ApiException(GeneralResponseCode.NO_VOCAB);
         }
 
