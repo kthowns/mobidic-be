@@ -6,7 +6,6 @@ import com.kthowns.mobidic.domain.word.model.Word;
 import com.kthowns.mobidic.domain.word.model.WordDetail;
 import com.kthowns.mobidic.domain.word.repository.WordRepository;
 import com.kthowns.mobidic.storage.vocabulary.jpaentity.VocabularyJpaEntity;
-import com.kthowns.mobidic.storage.vocabulary.jparepository.VocabularyJpaRepository;
 import com.kthowns.mobidic.storage.word.jpaentity.WordJpaEntity;
 import com.kthowns.mobidic.storage.word.jparepository.WordJpaRepository;
 import jakarta.persistence.EntityManager;
@@ -46,7 +45,7 @@ public class WordRepositoryImpl implements WordRepository {
     public void update(Word word) {
         WordJpaEntity wordJpaEntity = wordJpaRepository.findById(word.id())
                 .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_WORD));
-        
+
         wordJpaEntity.updateFromModel(word);
     }
 

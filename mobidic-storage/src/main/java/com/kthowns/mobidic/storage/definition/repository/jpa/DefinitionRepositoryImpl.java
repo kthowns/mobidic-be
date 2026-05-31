@@ -47,7 +47,7 @@ public class DefinitionRepositoryImpl implements DefinitionRepository {
     public void update(Definition definition) {
         DefinitionJpaEntity definitionJpaEntity = definitionJpaRepository.findById(definition.id())
                 .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_DEF));
-        
+
         definitionJpaEntity.updateFromModel(definition);
     }
 

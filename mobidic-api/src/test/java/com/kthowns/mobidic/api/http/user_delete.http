@@ -3,6 +3,6 @@ Content-Type: application/json
 Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiI5Yzg1NzQyMi0zZTZkLTRmNjYtYTMzZS01YTE2YmRkM2I4YjgiLCJpYXQiOjE3NDM4NTI2MDgsImV4cCI6MTc0MzkzOTAwOH0.UvMBcRv5s6spd4HxBUICAxchH2S6ZoRuuEF1kPkXaGQ45n4ylaLqGAr2yQyHs7Z1ZAPhjA5qyETefU6kii2WbA
 
 {
-  "email" : "testMember2@email.com",
+  "email": "testMember2@email.com",
   "password": "testMember1"
 }

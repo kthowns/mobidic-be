@@ -16,13 +16,13 @@ public class GeneralResponse<T> {
     private String message;
     private T data;
 
-    public static <T> ResponseEntity<GeneralResponse<T>> toResponseEntity(ApiResponseCode responseCode, T data){
+    public static <T> ResponseEntity<GeneralResponse<T>> toResponseEntity(ApiResponseCode responseCode, T data) {
         return ResponseEntity.status(responseCode.getStatus())
                 .body(GeneralResponse.fromData(
                         responseCode, data));
     }
 
-    private static <T> GeneralResponse<T> fromData(ApiResponseCode responseCode, T data){
+    private static <T> GeneralResponse<T> fromData(ApiResponseCode responseCode, T data) {
         return GeneralResponse.<T>builder()
                 .data(data)
                 .message(responseCode.getMessage())

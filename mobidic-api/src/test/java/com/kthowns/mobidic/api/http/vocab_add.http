@@ -3,6 +3,6 @@ Content-Type: application/json
 Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIxNTg1ZjJiNy01MWQ5LTRjZWUtYjJlNi1hMDdmMmZmNmIwMWYiLCJpYXQiOjE3NDY2ODQzMzksImV4cCI6MTc0Njc3MDczOX0.TzEucUGazE9NIWu52oEmXg9VBWxk0HfRYCdkIz471XTNRaECAACB0Azk1f4O0d9yYEUlOtBsaIdVRDKlbtmp8w
 
 {
-  "title" : "testvocab2",
-  "description" : "description2"
+  "title": "testvocab2",
+  "description": "description2"
 }

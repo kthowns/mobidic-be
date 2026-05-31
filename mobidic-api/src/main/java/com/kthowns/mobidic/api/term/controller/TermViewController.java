@@ -1,8 +1,8 @@
 package com.kthowns.mobidic.api.term.controller;
 
 import com.kthowns.mobidic.domain.term.model.Term;
-import com.kthowns.mobidic.domain.term.service.TermService;
 import com.kthowns.mobidic.domain.term.model.TermType;
+import com.kthowns.mobidic.domain.term.service.TermService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;

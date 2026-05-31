@@ -2,11 +2,11 @@ package com.kthowns.mobidic.api.user.controller;
 
 import com.kthowns.mobidic.api.auth.model.AuthUser;
 import com.kthowns.mobidic.api.user.dto.request.SignUpRequestDto;
+import com.kthowns.mobidic.api.user.dto.request.UpdateUserRequestDto;
 import com.kthowns.mobidic.common.dto.ErrorResponse;
 import com.kthowns.mobidic.common.dto.GeneralResponse;
-import com.kthowns.mobidic.api.user.dto.request.UpdateUserRequestDto;
-import com.kthowns.mobidic.domain.user.model.User;
 import com.kthowns.mobidic.domain.user.facade.UserFacade;
+import com.kthowns.mobidic.domain.user.model.User;
 import com.kthowns.mobidic.domain.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;

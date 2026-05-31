@@ -12,7 +12,7 @@ public enum AuthResponseCode implements ApiResponseCode {
     INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "유효하지 않은 토큰 입니다."),
     FORBIDDEN(HttpStatus.FORBIDDEN, "인가되지 않은 요청 입니다."),
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "인증되지 않은 요청 입니다."),
-    
+
     LOGIN_OK(HttpStatus.OK, "로그인에 성공했습니다.");
 
     private final HttpStatus status;

@@ -1,7 +1,6 @@
 package com.kthowns.mobidic.storage.definition.jparepository;
 
 import com.kthowns.mobidic.storage.definition.jpaentity.DefinitionJpaEntity;
-import com.kthowns.mobidic.storage.word.jpaentity.WordJpaEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

@@ -3,7 +3,7 @@ POST http://127.0.0.1:8080/api/auth/signup
 Content-Type: application/json
 
 {
-  "email" : "testMember2@email.com",
+  "email": "testMember2@email.com",
   "nickname": "testmember1",
   "password": "testmember1"
 }
