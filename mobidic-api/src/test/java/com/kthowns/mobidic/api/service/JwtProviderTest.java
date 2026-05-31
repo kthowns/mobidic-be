@@ -39,7 +39,7 @@ class JwtProviderTest {
         UUID uid = UUID.randomUUID();
 
         //given
-        given(jwtProperties.getJwtExp())
+        given(jwtProperties.getJwtAccessExp())
                 .willReturn(testExp);
         given(jwtProperties.getSecretKey())
                 .willReturn(Keys.hmacShaKeyFor(testKey.getBytes(StandardCharsets.UTF_8)));
@@ -62,7 +62,7 @@ class JwtProviderTest {
         UUID uid = UUID.randomUUID();
 
         //given
-        given(jwtProperties.getJwtExp())
+        given(jwtProperties.getJwtAccessExp())
                 .willReturn(testExp);
         given(jwtProperties.getSecretKey())
                 .willReturn(Keys.hmacShaKeyFor(testKey.getBytes(StandardCharsets.UTF_8)));
@@ -79,7 +79,7 @@ class JwtProviderTest {
         UUID uid = UUID.randomUUID();
 
         //given
-        given(jwtProperties.getJwtExp())
+        given(jwtProperties.getJwtAccessExp())
                 .willReturn(1L);
         given(jwtProperties.getSecretKey())
                 .willReturn(Keys.hmacShaKeyFor(testKey.getBytes(StandardCharsets.UTF_8)));
@@ -98,7 +98,7 @@ class JwtProviderTest {
         UUID uid = UUID.randomUUID();
 
         //given
-        given(jwtProperties.getJwtExp())
+        given(jwtProperties.getJwtAccessExp())
                 .willReturn(testExp);
         given(jwtProperties.getSecretKey())
                 .willReturn(Keys.hmacShaKeyFor(testKey.getBytes(StandardCharsets.UTF_8)));

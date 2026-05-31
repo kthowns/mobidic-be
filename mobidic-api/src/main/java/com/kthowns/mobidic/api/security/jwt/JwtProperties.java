@@ -12,13 +12,13 @@ public class JwtProperties {
     @Value("${jwt.secret}")
     private String JWT_SECRET;
     @Value("${jwt.exp}")
-    private Long JWT_EXP;
+    private Long JWT_ACCESS_EXP;
 
     public SecretKey getSecretKey() {
         return Keys.hmacShaKeyFor(JWT_SECRET.getBytes(StandardCharsets.UTF_8));
     }
 
-    public long getJwtExp() {
-        return JWT_EXP;
+    public long getJwtAccessExp() {
+        return JWT_ACCESS_EXP;
     }
 }

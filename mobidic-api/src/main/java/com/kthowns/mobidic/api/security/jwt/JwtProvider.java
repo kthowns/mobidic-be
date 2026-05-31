@@ -23,7 +23,7 @@ public class JwtProvider {
                 .subject(userId.toString())
                 .claim("role", userRole)
                 .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + jwtProperties.getJwtExp()))
+                .expiration(new Date(System.currentTimeMillis() + jwtProperties.getJwtAccessExp()))
                 .signWith(jwtProperties.getSecretKey())
                 .compact();
     }
