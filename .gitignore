@@ -134,6 +134,9 @@ gradle-app.setting
 # Cache of project
 .gradletasknamecache
 
+# QueryDSL Generated
+**/generated/*
+
 # Eclipse Gradle plugin generated files
 # Eclipse Core
 .project
