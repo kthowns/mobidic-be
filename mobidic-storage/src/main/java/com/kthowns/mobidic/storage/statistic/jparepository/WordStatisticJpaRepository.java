@@ -12,12 +12,12 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface WordStatisticJpaRepository extends JpaRepository<WordStatisticJpaEntity, UUID> {
-    @Query("select (1.0 * sum(" +
+    @Query("SELECT COALESCE((1.0 * SUM(" +
             "case when ws.isLearned = true then 1 else 0 end" +
-            ")) / count(ws)" +
+            ")) / count(ws), 0.0)" +
             " from WordStatisticJpaEntity ws" +
             " where ws.word.vocabulary.id = :vocabularyId and ws.word.vocabulary.user.id = :userId")
-    Optional<Double> getVocabularyLearningRate(@Param("vocabularyId") UUID vocabularyId, @Param("userId") UUID userId);
+    double getVocabularyLearningRate(@Param("vocabularyId") UUID vocabularyId, @Param("userId") UUID userId);
 
     List<WordStatisticJpaEntity> findByWord_Vocabulary_User_Id(UUID userId);
 

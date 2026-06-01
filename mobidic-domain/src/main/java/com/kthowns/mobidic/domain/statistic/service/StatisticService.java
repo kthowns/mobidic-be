@@ -32,7 +32,7 @@ public class StatisticService {
     }
 
     @Transactional(readOnly = true)
-    public Double getVocabLearningRate(UUID userId, UUID vocabId) {
+    public double getVocabLearningRate(UUID userId, UUID vocabId) {
         if (!vocabularyService.existsByIdAndUser(vocabId, userId)) {
             throw new ApiException(GeneralResponseCode.NO_VOCAB);
         }

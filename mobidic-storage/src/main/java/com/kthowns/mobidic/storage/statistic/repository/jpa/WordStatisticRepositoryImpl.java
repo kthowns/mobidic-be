@@ -65,7 +65,7 @@ public class WordStatisticRepositoryImpl implements WordStatisticRepository {
     }
 
     @Override
-    public Optional<Double> calculateVocabularyLearningRate(UUID vocabularyId, UUID userId) {
+    public double calculateVocabularyLearningRate(UUID vocabularyId, UUID userId) {
         return wordStatisticJpaRepository.getVocabularyLearningRate(vocabularyId, userId);
     }
 }

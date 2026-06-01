@@ -98,26 +98,12 @@ class StatisticReaderTest {
         // Given
         UUID vocabularyId = UUID.randomUUID();
         UUID userId = UUID.randomUUID();
-        given(wordStatisticRepository.calculateVocabularyLearningRate(vocabularyId, userId)).willReturn(Optional.of(0.75));
+        given(wordStatisticRepository.calculateVocabularyLearningRate(vocabularyId, userId)).willReturn(0.75);
 
         // When
         Double result = statisticReader.readVocabLearningRate(vocabularyId, userId);
 
         // Then
         assertThat(result).isEqualTo(0.75);
-    }
-
-    @Test
-    @DisplayName("readVocabLearningRate 테스트 - 조회 실패 (예외 발생)")
-    void readVocabLearningRateTest_Fail() {
-        // Given
-        UUID vocabularyId = UUID.randomUUID();
-        UUID userId = UUID.randomUUID();
-        given(wordStatisticRepository.calculateVocabularyLearningRate(vocabularyId, userId)).willReturn(Optional.empty());
-
-        // When & Then
-        assertThatThrownBy(() -> statisticReader.readVocabLearningRate(vocabularyId, userId))
-                .isInstanceOf(ApiException.class)
-                .hasMessageContaining(GeneralResponseCode.INTERNAL_SERVER_ERROR.getMessage());
     }
 }

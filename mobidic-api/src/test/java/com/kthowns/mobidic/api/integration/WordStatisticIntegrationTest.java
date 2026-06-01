@@ -153,6 +153,25 @@ public class WordStatisticIntegrationTest {
     }
 
     @Test
+    @DisplayName("단어장 학습률 조회 성공 - 단어가 0개인 경우 0.0 반환")
+    void getVocabLearningRateEmptyVocabSuccess() throws Exception {
+        // Given: 단어가 하나도 없는 새 단어장 생성
+        VocabularyJpaEntity emptyVocab = vocabularyJpaRepository.save(VocabularyJpaEntity.builder()
+                .user(testUser)
+                .title("빈 단어장")
+                .build());
+
+        em.flush();
+        em.clear();
+
+        // When & Then: 단어가 없으므로 0.0 반환 확인
+        mockMvc.perform(get("/api/vocabularies/" + emptyVocab.getId() + "/learning-rate")
+                        .header("Authorization", "Bearer " + userToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data").value(0.0));
+    }
+
+    @Test
     @DisplayName("단어장 평균 정확도 조회 성공")
     void getAvgAccuracyByVocabSuccess() throws Exception {
         // When

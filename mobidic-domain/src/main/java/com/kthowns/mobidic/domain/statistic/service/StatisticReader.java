@@ -28,8 +28,7 @@ class StatisticReader {
         return wordStatisticRepository.readByUserId(userId);
     }
 
-    public Double readVocabLearningRate(UUID vocabularyId, UUID userId) {
-        return wordStatisticRepository.calculateVocabularyLearningRate(vocabularyId, userId)
-                .orElseThrow(() -> new ApiException(GeneralResponseCode.INTERNAL_SERVER_ERROR));
+    public double readVocabLearningRate(UUID vocabularyId, UUID userId) {
+        return wordStatisticRepository.calculateVocabularyLearningRate(vocabularyId, userId);
     }
 }

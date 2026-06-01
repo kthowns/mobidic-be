@@ -19,5 +19,5 @@ public interface WordStatisticRepository {
 
     List<WordStatistic> readByUserId(UUID userId);
 
-    Optional<Double> calculateVocabularyLearningRate(UUID vocabularyId, UUID userId);
+    double calculateVocabularyLearningRate(UUID vocabularyId, UUID userId);
 }
