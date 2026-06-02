@@ -15,8 +15,8 @@ import java.util.UUID;
 class DefinitionReader {
     private final DefinitionRepository definitionRepository;
 
-    public List<Definition> readByWordId(UUID wordId) {
-        return definitionRepository.readByWordId(wordId);
+    public List<Definition> readByWordId(UUID wordId, UUID userId) {
+        return definitionRepository.readByWordId(wordId, userId);
     }
 
     public Definition readByIdAndUserId(UUID definitionId, UUID userId) {

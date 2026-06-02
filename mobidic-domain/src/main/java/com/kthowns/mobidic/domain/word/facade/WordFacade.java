@@ -36,7 +36,7 @@ public class WordFacade {
         statisticService.append(word.id());
 
         // Vocabulary 단어 수 원자적 업데이트
-        vocabularyService.increaseWordCount(addWordCommand.vocabId());
+        vocabularyService.increaseWordCount(addWordCommand.vocabId(), addWordCommand.userId());
     }
 
 }

@@ -28,7 +28,7 @@ public class WordService {
     @Transactional
     public Word addWord(UUID userId, UUID vocabId, String expression) {
         validateVocabularyExist(vocabId, userId);
-        wordValidator.validateExpressionDuplication(expression, vocabId);
+        wordValidator.validateExpressionDuplication(expression, vocabId, userId);
 
         return wordAppender.append(expression, vocabId);
     }
@@ -56,7 +56,7 @@ public class WordService {
     public void updateWord(UUID userId, UUID wordId, String expression) {
         Word word = wordReader.readByIdAndUserId(wordId, userId);
 
-        wordValidator.validateExpressionUpdateDuplication(expression, word.vocabularyId(), wordId);
+        wordValidator.validateExpressionUpdateDuplication(expression, word.vocabularyId(), wordId, userId);
 
         wordUpdater.update(userId, wordId, expression);
     }
@@ -68,7 +68,7 @@ public class WordService {
         wordRemover.remove(wordId, userId);
 
         // Vocabulary 단어 수 원자적 업데이트
-        vocabularyService.decreaseWordCount(word.vocabularyId());
+        vocabularyService.decreaseWordCount(word.vocabularyId(), userId);
     }
 
     private void validateVocabularyExist(UUID vocabularyId, UUID userId) {

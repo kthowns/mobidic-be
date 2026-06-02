@@ -71,12 +71,11 @@ public class VocabularyService {
     }
 
     @Transactional
-    public void increaseWordCount(UUID vocabularyId) {
-        vocabularyUpdater.increaseWordCount(vocabularyId);
+    public void increaseWordCount(UUID vocabularyId, UUID userId) {
+        vocabularyUpdater.increaseWordCount(vocabularyId, userId);
     }
 
-    @Transactional
-    public void decreaseWordCount(UUID vocabularyId) {
-        vocabularyUpdater.decreaseWordCount(vocabularyId);
+    public void decreaseWordCount(UUID vocabularyId, UUID userId) {
+        vocabularyUpdater.decreaseWordCount(vocabularyId, userId);
     }
 }

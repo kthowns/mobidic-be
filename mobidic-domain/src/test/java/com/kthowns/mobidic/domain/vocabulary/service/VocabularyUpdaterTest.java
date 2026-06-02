@@ -57,12 +57,13 @@ class VocabularyUpdaterTest {
     void increaseWordCountTest() {
         // Given
         UUID vocabId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
 
         // When
-        vocabularyUpdater.increaseWordCount(vocabId);
+        vocabularyUpdater.increaseWordCount(vocabId, userId);
 
         // Then
-        verify(vocabularyRepository).increaseWordCount(vocabId);
+        verify(vocabularyRepository).increaseWordCount(vocabId, userId);
     }
 
     @Test
@@ -70,11 +71,12 @@ class VocabularyUpdaterTest {
     void decreaseWordCountTest() {
         // Given
         UUID vocabId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
 
         // When
-        vocabularyUpdater.decreaseWordCount(vocabId);
+        vocabularyUpdater.decreaseWordCount(vocabId, userId);
 
         // Then
-        verify(vocabularyRepository).decreaseWordCount(vocabId);
+        verify(vocabularyRepository).decreaseWordCount(vocabId, userId);
     }
 }

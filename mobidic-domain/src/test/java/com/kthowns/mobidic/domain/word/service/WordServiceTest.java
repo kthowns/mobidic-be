@@ -55,7 +55,7 @@ class WordServiceTest {
 
         // then
         verify(wordAppender).append(expression, vocabId);
-        verify(wordValidator).validateExpressionDuplication(expression, vocabId);
+        verify(wordValidator).validateExpressionDuplication(expression, vocabId, userId);
         assertEquals(word, result);
     }
 
@@ -102,7 +102,7 @@ class WordServiceTest {
         wordService.updateWord(userId, wordId, newExpression);
 
         // then
-        verify(wordValidator).validateExpressionUpdateDuplication(newExpression, vocabId, wordId);
+        verify(wordValidator).validateExpressionUpdateDuplication(newExpression, vocabId, wordId, userId);
         verify(wordUpdater).update(userId, wordId, newExpression);
     }
 
@@ -118,6 +118,6 @@ class WordServiceTest {
 
         // then
         verify(wordRemover).remove(wordId, userId);
-        verify(vocabularyService).decreaseWordCount(vocabId);
+        verify(vocabularyService).decreaseWordCount(vocabId, userId);
     }
 }

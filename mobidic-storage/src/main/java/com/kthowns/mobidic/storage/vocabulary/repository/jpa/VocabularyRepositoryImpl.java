@@ -58,13 +58,13 @@ public class VocabularyRepositoryImpl implements VocabularyRepository {
     }
 
     @Override
-    public void increaseWordCount(UUID vocabularyId) {
-        vocabularyJpaRepository.increaseWordCount(vocabularyId);
+    public void increaseWordCount(UUID vocabularyId, UUID userId) {
+        vocabularyJpaRepository.increaseWordCount(vocabularyId, userId);
     }
 
     @Override
-    public void decreaseWordCount(UUID vocabularyId) {
-        vocabularyJpaRepository.decreaseWordCount(vocabularyId);
+    public void decreaseWordCount(UUID vocabularyId, UUID userId) {
+        vocabularyJpaRepository.decreaseWordCount(vocabularyId, userId);
     }
 
     @Override

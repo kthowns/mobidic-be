@@ -35,7 +35,7 @@ public class DefinitionService {
     ) {
         wordService.getWordById(userId, wordId);
 
-        definitionValidator.validateMeaningDuplication(meaning, wordId);
+        definitionValidator.validateMeaningDuplication(meaning, wordId, userId);
 
         definitionAppender.append(wordId, meaning, part);
     }
@@ -44,7 +44,7 @@ public class DefinitionService {
     public List<Definition> getDefinitionsByWordId(UUID userId, UUID wordId) {
         wordService.getWordById(userId, wordId);
 
-        return definitionReader.readByWordId(wordId);
+        return definitionReader.readByWordId(wordId, userId);
     }
 
     @Transactional
@@ -56,7 +56,7 @@ public class DefinitionService {
     ) {
         Definition definition = definitionReader.readByIdAndUserId(defId, userId);
 
-        definitionValidator.validateMeaningUpdateDuplication(meaning, definition.wordId(), defId);
+        definitionValidator.validateMeaningUpdateDuplication(meaning, definition.wordId(), defId, userId);
 
         definitionUpdater.update(userId, defId, meaning, part);
     }
@@ -87,7 +87,7 @@ public class DefinitionService {
         }
 
         List<Definition> definitions = commands.stream()
-                .peek(command -> definitionValidator.validateMeaningDuplication(command.meaning(), wordId))
+                .peek(command -> definitionValidator.validateMeaningDuplication(command.meaning(), wordId, userId))
                 .map(command -> Definition.create(wordId, command.meaning(), command.part()))
                 .toList();
 

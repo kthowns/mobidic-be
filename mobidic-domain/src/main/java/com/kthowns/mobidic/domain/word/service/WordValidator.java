@@ -13,14 +13,14 @@ import java.util.UUID;
 class WordValidator {
     private final WordRepository wordRepository;
 
-    public void validateExpressionDuplication(String expression, UUID vocabularyId) {
-        if (wordRepository.existsByExpressionAndVocabularyId(expression, vocabularyId)) {
+    public void validateExpressionDuplication(String expression, UUID vocabularyId, UUID userId) {
+        if (wordRepository.existsByExpressionAndVocabularyId(expression, vocabularyId, userId)) {
             throw new ApiException(GeneralResponseCode.DUPLICATED_WORD);
         }
     }
 
-    public void validateExpressionUpdateDuplication(String expression, UUID vocabularyId, UUID wordId) {
-        if (wordRepository.existsByExpressionAndVocabularyIdAndIdNot(expression, vocabularyId, wordId)) {
+    public void validateExpressionUpdateDuplication(String expression, UUID vocabularyId, UUID wordId, UUID userId) {
+        if (wordRepository.existsByExpressionAndVocabularyIdAndIdNot(expression, vocabularyId, wordId, userId)) {
             throw new ApiException(GeneralResponseCode.DUPLICATED_WORD);
         }
     }

@@ -29,11 +29,12 @@ class DefinitionValidatorTest {
     void validateMeaningDuplicationTest_Success() {
         // Given
         UUID wordId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
         String meaning = "의미";
-        given(definitionRepository.existsByMeaningAndWordId(meaning, wordId)).willReturn(false);
+        given(definitionRepository.existsByMeaningAndWordId(meaning, wordId, userId)).willReturn(false);
 
         // When & Then
-        assertThatCode(() -> definitionValidator.validateMeaningDuplication(meaning, wordId))
+        assertThatCode(() -> definitionValidator.validateMeaningDuplication(meaning, wordId, userId))
                 .doesNotThrowAnyException();
     }
 
@@ -42,11 +43,12 @@ class DefinitionValidatorTest {
     void validateMeaningDuplicationTest_Fail() {
         // Given
         UUID wordId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
         String meaning = "의미";
-        given(definitionRepository.existsByMeaningAndWordId(meaning, wordId)).willReturn(true);
+        given(definitionRepository.existsByMeaningAndWordId(meaning, wordId, userId)).willReturn(true);
 
         // When & Then
-        assertThatThrownBy(() -> definitionValidator.validateMeaningDuplication(meaning, wordId))
+        assertThatThrownBy(() -> definitionValidator.validateMeaningDuplication(meaning, wordId, userId))
                 .isInstanceOf(ApiException.class)
                 .hasMessageContaining(com.kthowns.mobidic.common.code.GeneralResponseCode.DUPLICATED_DEFINITION.getMessage());
     }
@@ -56,12 +58,13 @@ class DefinitionValidatorTest {
     void validateMeaningUpdateDuplicationWithIdTest_Success() {
         // Given
         UUID wordId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
         String meaning = "의미";
         UUID definitionId = UUID.randomUUID();
-        given(definitionRepository.existsByMeaningAndWordIdAndIdNot(meaning, wordId, definitionId)).willReturn(false);
+        given(definitionRepository.existsByMeaningAndWordIdAndIdNot(meaning, wordId, definitionId, userId)).willReturn(false);
 
         // When & Then
-        assertThatCode(() -> definitionValidator.validateMeaningUpdateDuplication(meaning, wordId, definitionId))
+        assertThatCode(() -> definitionValidator.validateMeaningUpdateDuplication(meaning, wordId, definitionId, userId))
                 .doesNotThrowAnyException();
     }
 
@@ -70,12 +73,13 @@ class DefinitionValidatorTest {
     void validateMeaningUpdateDuplicationWithIdTest_Fail() {
         // Given
         UUID wordId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
         String meaning = "의미";
         UUID definitionId = UUID.randomUUID();
-        given(definitionRepository.existsByMeaningAndWordIdAndIdNot(meaning, wordId, definitionId)).willReturn(true);
+        given(definitionRepository.existsByMeaningAndWordIdAndIdNot(meaning, wordId, definitionId, userId)).willReturn(true);
 
         // When & Then
-        assertThatThrownBy(() -> definitionValidator.validateMeaningUpdateDuplication(meaning, wordId, definitionId))
+        assertThatThrownBy(() -> definitionValidator.validateMeaningUpdateDuplication(meaning, wordId, definitionId, userId))
                 .isInstanceOf(ApiException.class)
                 .hasMessageContaining(com.kthowns.mobidic.common.code.GeneralResponseCode.DUPLICATED_DEFINITION.getMessage());
     }

@@ -105,7 +105,7 @@ class WordStatisticServiceTest {
                 new WordStatistic(UUID.randomUUID(), 5L, 5L, true, 0.5, 0.5)
         );
         given(vocabularyService.existsByIdAndUser(vocabId, userId)).willReturn(true);
-        given(statisticReader.readByVocabularyId(vocabId)).willReturn(wordStatistics);
+        given(statisticReader.readByVocabularyId(vocabId, userId)).willReturn(wordStatistics);
 
         // when
         double result = statisticService.getAvgAccuracyByVocab(userId, vocabId);

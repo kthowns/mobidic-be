@@ -53,15 +53,15 @@ public class DefinitionRepositoryImpl implements DefinitionRepository {
     }
 
     @Override
-    public List<Definition> readByWordId(UUID wordId) {
-        return definitionJpaRepository.findByWord_Id(wordId).stream()
+    public List<Definition> readByWordId(UUID wordId, UUID userId) {
+        return definitionJpaRepository.findByWord_IdAndWord_Vocabulary_User_Id(wordId, userId).stream()
                 .map(DefinitionJpaEntity::toModel)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public void update(Definition definition) {
-        DefinitionJpaEntity definitionJpaEntity = definitionJpaRepository.findById(definition.id())
+    public void update(Definition definition, UUID userId) {
+        DefinitionJpaEntity definitionJpaEntity = definitionJpaRepository.findByIdAndWord_Vocabulary_User_Id(definition.id(), userId)
                 .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_DEF));
 
         definitionJpaEntity.updateFromModel(definition);
@@ -75,12 +75,12 @@ public class DefinitionRepositoryImpl implements DefinitionRepository {
     }
 
     @Override
-    public boolean existsByMeaningAndWordId(String meaning, UUID wordId) {
-        return definitionJpaRepository.existsByMeaningAndWord_Id(meaning, wordId);
+    public boolean existsByMeaningAndWordId(String meaning, UUID wordId, UUID userId) {
+        return definitionJpaRepository.existsByMeaningAndWord_IdAndWord_Vocabulary_User_Id(meaning, wordId, userId);
     }
 
     @Override
-    public boolean existsByMeaningAndWordIdAndIdNot(String meaning, UUID wordId, UUID definitionId) {
-        return definitionJpaRepository.existsByMeaningAndWord_IdAndIdNot(meaning, wordId, definitionId);
+    public boolean existsByMeaningAndWordIdAndIdNot(String meaning, UUID wordId, UUID definitionId, UUID userId) {
+        return definitionJpaRepository.existsByMeaningAndWord_IdAndIdNotAndWord_Vocabulary_User_Id(meaning, wordId, definitionId, userId);
     }
 }

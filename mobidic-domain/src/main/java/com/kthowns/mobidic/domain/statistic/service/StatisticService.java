@@ -61,7 +61,7 @@ public class StatisticService {
             throw new ApiException(GeneralResponseCode.NO_VOCAB);
         }
 
-        List<WordStatistic> wordStatistics = statisticReader.readByVocabularyId(vocabularyId);
+        List<WordStatistic> wordStatistics = statisticReader.readByVocabularyId(vocabularyId, userId);
         return calcAvgRate(wordStatistics);
     }
 

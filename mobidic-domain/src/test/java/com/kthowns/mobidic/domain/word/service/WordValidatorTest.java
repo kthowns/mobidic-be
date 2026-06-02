@@ -31,10 +31,11 @@ class WordValidatorTest {
         // Given
         String expression = "apple";
         UUID vocabularyId = UUID.randomUUID();
-        given(wordRepository.existsByExpressionAndVocabularyId(expression, vocabularyId)).willReturn(false);
+        UUID userId = UUID.randomUUID();
+        given(wordRepository.existsByExpressionAndVocabularyId(expression, vocabularyId, userId)).willReturn(false);
 
         // When & Then
-        assertThatCode(() -> wordValidator.validateExpressionDuplication(expression, vocabularyId))
+        assertThatCode(() -> wordValidator.validateExpressionDuplication(expression, vocabularyId, userId))
                 .doesNotThrowAnyException();
     }
 
@@ -44,10 +45,11 @@ class WordValidatorTest {
         // Given
         String expression = "apple";
         UUID vocabularyId = UUID.randomUUID();
-        given(wordRepository.existsByExpressionAndVocabularyId(expression, vocabularyId)).willReturn(true);
+        UUID userId = UUID.randomUUID();
+        given(wordRepository.existsByExpressionAndVocabularyId(expression, vocabularyId, userId)).willReturn(true);
 
         // When & Then
-        assertThatThrownBy(() -> wordValidator.validateExpressionDuplication(expression, vocabularyId))
+        assertThatThrownBy(() -> wordValidator.validateExpressionDuplication(expression, vocabularyId, userId))
                 .isInstanceOf(ApiException.class)
                 .hasMessageContaining(GeneralResponseCode.DUPLICATED_WORD.getMessage());
     }
@@ -59,10 +61,11 @@ class WordValidatorTest {
         String expression = "banana";
         UUID vocabularyId = UUID.randomUUID();
         UUID wordId = UUID.randomUUID();
-        given(wordRepository.existsByExpressionAndVocabularyIdAndIdNot(expression, vocabularyId, wordId)).willReturn(false);
+        UUID userId = UUID.randomUUID();
+        given(wordRepository.existsByExpressionAndVocabularyIdAndIdNot(expression, vocabularyId, wordId, userId)).willReturn(false);
 
         // When & Then
-        assertThatCode(() -> wordValidator.validateExpressionUpdateDuplication(expression, vocabularyId, wordId))
+        assertThatCode(() -> wordValidator.validateExpressionUpdateDuplication(expression, vocabularyId, wordId, userId))
                 .doesNotThrowAnyException();
     }
 
@@ -73,10 +76,11 @@ class WordValidatorTest {
         String expression = "banana";
         UUID vocabularyId = UUID.randomUUID();
         UUID wordId = UUID.randomUUID();
-        given(wordRepository.existsByExpressionAndVocabularyIdAndIdNot(expression, vocabularyId, wordId)).willReturn(true);
+        UUID userId = UUID.randomUUID();
+        given(wordRepository.existsByExpressionAndVocabularyIdAndIdNot(expression, vocabularyId, wordId, userId)).willReturn(true);
 
         // When & Then
-        assertThatThrownBy(() -> wordValidator.validateExpressionUpdateDuplication(expression, vocabularyId, wordId))
+        assertThatThrownBy(() -> wordValidator.validateExpressionUpdateDuplication(expression, vocabularyId, wordId, userId))
                 .isInstanceOf(ApiException.class)
                 .hasMessageContaining(GeneralResponseCode.DUPLICATED_WORD.getMessage());
     }

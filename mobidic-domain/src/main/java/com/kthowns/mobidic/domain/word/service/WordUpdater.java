@@ -15,6 +15,6 @@ class WordUpdater {
 
     public void update(UUID userId, UUID wordId, String expression) {
         Word word = wordReader.readByIdAndUserId(wordId, userId);
-        wordRepository.update(word.updateExpression(expression));
+        wordRepository.update(word.updateExpression(expression), userId);
     }
 }

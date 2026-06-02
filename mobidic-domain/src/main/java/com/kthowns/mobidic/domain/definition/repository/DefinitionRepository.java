@@ -13,13 +13,13 @@ public interface DefinitionRepository {
 
     Optional<Definition> readByIdAndUserId(UUID definitionId, UUID userId);
 
-    List<Definition> readByWordId(UUID wordId);
+    List<Definition> readByWordId(UUID wordId, UUID userId);
 
-    void update(Definition definition);
+    void update(Definition definition, UUID userId);
 
     void delete(UUID definitionId, UUID userId);
 
-    boolean existsByMeaningAndWordId(String meaning, UUID wordId);
+    boolean existsByMeaningAndWordId(String meaning, UUID wordId, UUID userId);
 
-    boolean existsByMeaningAndWordIdAndIdNot(String meaning, UUID wordId, UUID definitionId);
+    boolean existsByMeaningAndWordIdAndIdNot(String meaning, UUID wordId, UUID definitionId, UUID userId);
 }

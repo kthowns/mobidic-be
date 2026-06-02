@@ -63,13 +63,14 @@ class StatisticReaderTest {
     void readByVocabularyIdTest() {
         // Given
         UUID vocabularyId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
         List<WordStatistic> expectedStats = List.of(
                 new WordStatistic(UUID.randomUUID(), 1, 0, true, 0.0, 1.0)
         );
-        given(wordStatisticRepository.readByVocabularyId(vocabularyId)).willReturn(expectedStats);
+        given(wordStatisticRepository.readByVocabularyId(vocabularyId, userId)).willReturn(expectedStats);
 
         // When
-        List<WordStatistic> actualStats = statisticReader.readByVocabularyId(vocabularyId);
+        List<WordStatistic> actualStats = statisticReader.readByVocabularyId(vocabularyId, userId);
 
         // Then
         assertThat(actualStats).isEqualTo(expectedStats);

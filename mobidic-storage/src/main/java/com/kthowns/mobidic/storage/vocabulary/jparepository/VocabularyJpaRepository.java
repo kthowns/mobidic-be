@@ -29,10 +29,10 @@ public interface VocabularyJpaRepository extends JpaRepository<VocabularyJpaEnti
     boolean existsByUser_Id(UUID userId);
 
     @Modifying
-    @Query("update VocabularyJpaEntity v set v.wordCount = v.wordCount + 1 where v.id = :vocabularyId")
-    void increaseWordCount(@Param("vocabularyId") UUID vocabularyId);
+    @Query("update VocabularyJpaEntity v set v.wordCount = v.wordCount + 1 where v.id = :vocabularyId and v.user.id = :userId")
+    void increaseWordCount(@Param("vocabularyId") UUID vocabularyId, @Param("userId") UUID userId);
 
     @Modifying
-    @Query("update VocabularyJpaEntity v set v.wordCount = v.wordCount - 1 where v.id = :vocabularyId and v.wordCount > 0")
-    void decreaseWordCount(@Param("vocabularyId") UUID vocabularyId);
+    @Query("update VocabularyJpaEntity v set v.wordCount = v.wordCount - 1 where v.id = :vocabularyId and v.user.id = :userId and v.wordCount > 0")
+    void decreaseWordCount(@Param("vocabularyId") UUID vocabularyId, @Param("userId") UUID userId);
 }

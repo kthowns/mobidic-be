@@ -9,13 +9,13 @@ import java.util.UUID;
 public interface WordStatisticRepository {
     void append(WordStatistic wordStatistic);
 
-    void update(WordStatistic wordStatistic);
+    void update(WordStatistic wordStatistic, UUID userId);
 
     Optional<WordStatistic> readByWordIdAndUserId(UUID wordId, UUID userId);
 
     Optional<WordStatistic> readForUpdate(UUID wordId, UUID userId);
 
-    List<WordStatistic> readByVocabularyId(UUID vocabularyId);
+    List<WordStatistic> readByVocabularyId(UUID vocabularyId, UUID userId);
 
     List<WordStatistic> readByUserId(UUID userId);
 

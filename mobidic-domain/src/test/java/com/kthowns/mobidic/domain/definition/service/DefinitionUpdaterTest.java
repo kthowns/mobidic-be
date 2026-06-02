@@ -13,6 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
@@ -44,7 +45,7 @@ class DefinitionUpdaterTest {
         definitionUpdater.update(userId, defId, meaning, part);
 
         // Then
-        verify(definitionRepository).update(any(Definition.class));
+        verify(definitionRepository).update(any(Definition.class), eq(userId));
     }
 }
 

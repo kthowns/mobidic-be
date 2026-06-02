@@ -16,6 +16,6 @@ class DefinitionUpdater {
 
     public void update(UUID userId, UUID defId, String meaning, PartOfSpeech part) {
         Definition definition = definitionReader.readByIdAndUserId(defId, userId);
-        definitionRepository.update(definition.update(meaning, part));
+        definitionRepository.update(definition.update(meaning, part), userId);
     }
 }

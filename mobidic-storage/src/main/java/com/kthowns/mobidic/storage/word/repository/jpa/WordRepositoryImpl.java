@@ -42,8 +42,8 @@ public class WordRepositoryImpl implements WordRepository {
     }
 
     @Override
-    public void update(Word word) {
-        WordJpaEntity wordJpaEntity = wordJpaRepository.findById(word.id())
+    public void update(Word word, UUID userId) {
+        WordJpaEntity wordJpaEntity = wordJpaRepository.findByIdAndVocabulary_User_Id(word.id(), userId)
                 .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_WORD));
 
         wordJpaEntity.updateFromModel(word);
@@ -57,12 +57,12 @@ public class WordRepositoryImpl implements WordRepository {
     }
 
     @Override
-    public boolean existsByExpressionAndVocabularyId(String expression, UUID vocabularyId) {
-        return wordJpaRepository.existsByExpressionAndVocabulary_Id(expression, vocabularyId);
+    public boolean existsByExpressionAndVocabularyId(String expression, UUID vocabularyId, UUID userId) {
+        return wordJpaRepository.existsByExpressionAndVocabulary_IdAndVocabulary_User_Id(expression, vocabularyId, userId);
     }
 
     @Override
-    public boolean existsByExpressionAndVocabularyIdAndIdNot(String expression, UUID vocabularyId, UUID wordId) {
-        return wordJpaRepository.existsByExpressionAndVocabulary_IdAndIdNot(expression, vocabularyId, wordId);
+    public boolean existsByExpressionAndVocabularyIdAndIdNot(String expression, UUID vocabularyId, UUID wordId, UUID userId) {
+        return wordJpaRepository.existsByExpressionAndVocabulary_IdAndIdNotAndVocabulary_User_Id(expression, vocabularyId, wordId, userId);
     }
 }

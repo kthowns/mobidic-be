@@ -21,7 +21,7 @@ public interface WordStatisticJpaRepository extends JpaRepository<WordStatisticJ
 
     List<WordStatisticJpaEntity> findByWord_Vocabulary_User_Id(UUID userId);
 
-    List<WordStatisticJpaEntity> findByWord_Vocabulary_Id(UUID vocabularyId);
+    List<WordStatisticJpaEntity> findByWord_Vocabulary_IdAndWord_Vocabulary_User_Id(UUID vocabularyId, UUID userId);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select ws from WordStatisticJpaEntity ws where ws.word.id = :wordId and ws.word.vocabulary.user.id = :userId")

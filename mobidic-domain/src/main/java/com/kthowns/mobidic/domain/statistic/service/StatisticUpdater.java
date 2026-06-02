@@ -18,20 +18,20 @@ class StatisticUpdater {
         WordStatistic wordStatistic = wordStatisticRepository.readForUpdate(wordId, userId)
                 .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_STAT));
 
-        wordStatisticRepository.update(wordStatistic.toggleLearned());
+        wordStatisticRepository.update(wordStatistic.toggleLearned(), userId);
     }
 
     public void increaseCorrectCount(UUID userId, UUID wordId) {
         WordStatistic wordStatistic = wordStatisticRepository.readForUpdate(wordId, userId)
                 .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_STAT));
 
-        wordStatisticRepository.update(wordStatistic.increaseCorrectCount());
+        wordStatisticRepository.update(wordStatistic.increaseCorrectCount(), userId);
     }
 
     public void increaseIncorrectCount(UUID userId, UUID wordId) {
         WordStatistic wordStatistic = wordStatisticRepository.readForUpdate(wordId, userId)
                 .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_STAT));
 
-        wordStatisticRepository.update(wordStatistic.increaseIncorrectCount());
+        wordStatisticRepository.update(wordStatistic.increaseIncorrectCount(), userId);
     }
 }

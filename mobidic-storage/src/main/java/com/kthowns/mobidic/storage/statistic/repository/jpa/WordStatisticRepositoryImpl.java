@@ -31,8 +31,8 @@ public class WordStatisticRepositoryImpl implements WordStatisticRepository {
     }
 
     @Override
-    public void update(WordStatistic wordStatistic) {
-        WordStatisticJpaEntity wordStatisticJpaEntity = wordStatisticJpaRepository.findById(wordStatistic.wordId())
+    public void update(WordStatistic wordStatistic, UUID userId) {
+        WordStatisticJpaEntity wordStatisticJpaEntity = wordStatisticJpaRepository.findByWordIdAndWord_Vocabulary_User_Id(wordStatistic.wordId(), userId)
                 .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_STAT));
 
         wordStatisticJpaEntity.updateFromModel(wordStatistic);
@@ -51,8 +51,8 @@ public class WordStatisticRepositoryImpl implements WordStatisticRepository {
     }
 
     @Override
-    public List<WordStatistic> readByVocabularyId(UUID vocabularyId) {
-        return wordStatisticJpaRepository.findByWord_Vocabulary_Id(vocabularyId).stream()
+    public List<WordStatistic> readByVocabularyId(UUID vocabularyId, UUID userId) {
+        return wordStatisticJpaRepository.findByWord_Vocabulary_IdAndWord_Vocabulary_User_Id(vocabularyId, userId).stream()
                 .map(WordStatisticJpaEntity::toModel)
                 .collect(Collectors.toList());
     }

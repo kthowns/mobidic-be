@@ -13,14 +13,14 @@ import java.util.UUID;
 class DefinitionValidator {
     private final DefinitionRepository definitionRepository;
 
-    public void validateMeaningDuplication(String meaning, UUID wordId) {
-        if (definitionRepository.existsByMeaningAndWordId(meaning, wordId)) {
+    public void validateMeaningDuplication(String meaning, UUID wordId, UUID userId) {
+        if (definitionRepository.existsByMeaningAndWordId(meaning, wordId, userId)) {
             throw new ApiException(GeneralResponseCode.DUPLICATED_DEFINITION);
         }
     }
 
-    public void validateMeaningUpdateDuplication(String meaning, UUID wordId, UUID definitionId) {
-        if (definitionRepository.existsByMeaningAndWordIdAndIdNot(meaning, wordId, definitionId)) {
+    public void validateMeaningUpdateDuplication(String meaning, UUID wordId, UUID definitionId, UUID userId) {
+        if (definitionRepository.existsByMeaningAndWordIdAndIdNot(meaning, wordId, definitionId, userId)) {
             throw new ApiException(GeneralResponseCode.DUPLICATED_DEFINITION);
         }
     }

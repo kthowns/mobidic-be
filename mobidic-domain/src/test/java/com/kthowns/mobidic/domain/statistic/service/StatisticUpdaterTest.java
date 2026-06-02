@@ -17,6 +17,7 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
@@ -43,7 +44,7 @@ class StatisticUpdaterTest {
 
         // Then
         ArgumentCaptor<WordStatistic> captor = ArgumentCaptor.forClass(WordStatistic.class);
-        verify(wordStatisticRepository).update(captor.capture());
+        verify(wordStatisticRepository).update(captor.capture(), eq(userId));
         assertThat(captor.getValue().isLearned()).isTrue();
     }
 
@@ -75,7 +76,7 @@ class StatisticUpdaterTest {
 
         // Then
         ArgumentCaptor<WordStatistic> captor = ArgumentCaptor.forClass(WordStatistic.class);
-        verify(wordStatisticRepository).update(captor.capture());
+        verify(wordStatisticRepository).update(captor.capture(), eq(userId));
         assertThat(captor.getValue().correctCount()).isEqualTo(1);
     }
 
@@ -107,7 +108,7 @@ class StatisticUpdaterTest {
 
         // Then
         ArgumentCaptor<WordStatistic> captor = ArgumentCaptor.forClass(WordStatistic.class);
-        verify(wordStatisticRepository).update(captor.capture());
+        verify(wordStatisticRepository).update(captor.capture(), eq(userId));
         assertThat(captor.getValue().incorrectCount()).isEqualTo(1);
     }
 

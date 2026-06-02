@@ -14,11 +14,11 @@ public interface WordRepository {
 
     List<WordDetail> readDetailsByVocabularyId(UUID userId, UUID vocabularyId, boolean onlyNotLearned);
 
-    void update(Word word);
+    void update(Word word, UUID userId);
 
     void delete(UUID wordId, UUID userId);
 
-    boolean existsByExpressionAndVocabularyId(String expression, UUID vocabularyId);
+    boolean existsByExpressionAndVocabularyId(String expression, UUID vocabularyId, UUID userId);
 
-    boolean existsByExpressionAndVocabularyIdAndIdNot(String expression, UUID vocabularyId, UUID wordId);
+    boolean existsByExpressionAndVocabularyIdAndIdNot(String expression, UUID vocabularyId, UUID wordId, UUID userId);
 }

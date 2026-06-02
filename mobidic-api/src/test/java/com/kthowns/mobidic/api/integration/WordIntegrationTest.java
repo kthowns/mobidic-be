@@ -12,7 +12,6 @@ import com.kthowns.mobidic.domain.definition.model.PartOfSpeech;
 import com.kthowns.mobidic.domain.user.model.UserRole;
 import com.kthowns.mobidic.storage.definition.jpaentity.DefinitionJpaEntity;
 import com.kthowns.mobidic.storage.definition.jparepository.DefinitionJpaRepository;
-import com.kthowns.mobidic.storage.statistic.jpaentity.WordStatisticJpaEntity;
 import com.kthowns.mobidic.storage.statistic.jparepository.WordStatisticJpaRepository;
 import com.kthowns.mobidic.storage.user.jpaentity.UserJpaEntity;
 import com.kthowns.mobidic.storage.user.jparepository.UserJpaRepository;
@@ -130,7 +129,7 @@ public class WordIntegrationTest {
                 .filter(w -> w.getExpression().equals("apple"))
                 .findFirst().orElseThrow();
 
-        List<DefinitionJpaEntity> definitions = definitionJpaRepository.findByWord_Id(savedWord.getId());
+        List<DefinitionJpaEntity> definitions = definitionJpaRepository.findByWord_IdAndWord_Vocabulary_User_Id(savedWord.getId(), testUser.getId());
         assertThat(definitions).hasSize(2);
     }
 

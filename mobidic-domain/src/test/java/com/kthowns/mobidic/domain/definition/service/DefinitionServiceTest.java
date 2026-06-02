@@ -58,7 +58,7 @@ class DefinitionServiceTest {
 
         // then
         verify(wordService).getWordById(userId, wordId);
-        verify(definitionValidator).validateMeaningDuplication(meaning, wordId);
+        verify(definitionValidator).validateMeaningDuplication(meaning, wordId, userId);
         verify(definitionAppender).append(wordId, meaning, part);
     }
 
@@ -77,7 +77,7 @@ class DefinitionServiceTest {
 
         // then
         assertEquals(GeneralResponseCode.NO_WORD, exception.getResponseCode());
-        verify(definitionValidator, never()).validateMeaningDuplication(anyString(), any(UUID.class));
+        verify(definitionValidator, never()).validateMeaningDuplication(anyString(), any(UUID.class), any(UUID.class));
         verify(definitionAppender, never()).append(any(UUID.class), anyString(), any(PartOfSpeech.class));
     }
 
@@ -94,7 +94,7 @@ class DefinitionServiceTest {
         definitionService.addDefinitions(userId, wordId, commands);
 
         // then
-        verify(definitionValidator, times(2)).validateMeaningDuplication(anyString(), eq(wordId));
+        verify(definitionValidator, times(2)).validateMeaningDuplication(anyString(), eq(wordId), eq(userId));
         verify(definitionAppender).appendAll(anyList());
     }
 
@@ -105,7 +105,7 @@ class DefinitionServiceTest {
         definitionService.addDefinitions(userId, wordId, Collections.emptyList());
 
         // then
-        verify(definitionValidator, never()).validateMeaningDuplication(anyString(), any(UUID.class));
+        verify(definitionValidator, never()).validateMeaningDuplication(anyString(), any(UUID.class), any(UUID.class));
         verify(definitionAppender, never()).appendAll(anyList());
     }
 
@@ -117,7 +117,7 @@ class DefinitionServiceTest {
                 AddDefinitionCommand.of("duplicate", PartOfSpeech.NOUN)
         );
         doThrow(new ApiException(GeneralResponseCode.DUPLICATED_DEFINITION))
-                .when(definitionValidator).validateMeaningDuplication("duplicate", wordId);
+                .when(definitionValidator).validateMeaningDuplication("duplicate", wordId, userId);
 
         // when & then
         ApiException exception = assertThrows(ApiException.class, () ->
@@ -134,7 +134,7 @@ class DefinitionServiceTest {
         List<Definition> definitions = List.of(
                 new Definition(defId, wordId, "meaning", PartOfSpeech.NOUN)
         );
-        given(definitionReader.readByWordId(wordId)).willReturn(definitions);
+        given(definitionReader.readByWordId(wordId, userId)).willReturn(definitions);
 
         // when
         List<Definition> result = definitionService.getDefinitionsByWordId(userId, wordId);
@@ -157,7 +157,7 @@ class DefinitionServiceTest {
         definitionService.updateDefinition(userId, defId, newMeaning, newPart);
 
         // then
-        verify(definitionValidator).validateMeaningUpdateDuplication(newMeaning, wordId, defId);
+        verify(definitionValidator).validateMeaningUpdateDuplication(newMeaning, wordId, defId, userId);
         verify(definitionUpdater).update(userId, defId, newMeaning, newPart);
     }
 

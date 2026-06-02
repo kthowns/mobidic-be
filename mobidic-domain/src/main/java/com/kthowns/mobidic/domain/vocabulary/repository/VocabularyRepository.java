@@ -19,9 +19,9 @@ public interface VocabularyRepository {
 
     boolean existsByIdAndUser_Id(UUID vocabularyId, UUID userId);
 
-    void increaseWordCount(UUID vocabularyId);
+    void increaseWordCount(UUID vocabularyId, UUID userId);
 
-    void decreaseWordCount(UUID vocabularyId);
+    void decreaseWordCount(UUID vocabularyId, UUID userId);
 
     void delete(UUID vocabularyId, UUID userId);
 

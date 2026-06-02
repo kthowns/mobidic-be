@@ -19,11 +19,11 @@ class VocabularyUpdater {
         vocabularyRepository.update(vocabulary.updateInfo(title, description));
     }
 
-    public void increaseWordCount(UUID vocabularyId) {
-        vocabularyRepository.increaseWordCount(vocabularyId);
+    public void increaseWordCount(UUID vocabularyId, UUID userId) {
+        vocabularyRepository.increaseWordCount(vocabularyId, userId);
     }
 
-    public void decreaseWordCount(UUID vocabularyId) {
-        vocabularyRepository.decreaseWordCount(vocabularyId);
+    public void decreaseWordCount(UUID vocabularyId, UUID userId) {
+        vocabularyRepository.decreaseWordCount(vocabularyId, userId);
     }
 }

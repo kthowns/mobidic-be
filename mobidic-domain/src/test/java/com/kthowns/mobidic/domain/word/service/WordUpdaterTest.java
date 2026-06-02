@@ -13,6 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
@@ -44,7 +45,7 @@ class WordUpdaterTest {
 
         // Then
         ArgumentCaptor<Word> captor = ArgumentCaptor.forClass(Word.class);
-        verify(wordRepository).update(captor.capture());
+        verify(wordRepository).update(captor.capture(), eq(userId));
 
         Word updatedWord = captor.getValue();
         assertThat(updatedWord.expression()).isEqualTo(newExpression);

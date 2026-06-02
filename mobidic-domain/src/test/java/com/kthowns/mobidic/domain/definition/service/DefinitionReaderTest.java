@@ -34,14 +34,15 @@ class DefinitionReaderTest {
     void readByWordIdTest() {
         // Given
         UUID wordId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
         List<Definition> expectedDefinitions = List.of(
                 new Definition(UUID.randomUUID(), wordId, "의미1", PartOfSpeech.NOUN),
                 new Definition(UUID.randomUUID(), wordId, "의미2", PartOfSpeech.VERB)
         );
-        given(definitionRepository.readByWordId(wordId)).willReturn(expectedDefinitions);
+        given(definitionRepository.readByWordId(wordId, userId)).willReturn(expectedDefinitions);
 
         // When
-        List<Definition> actualDefinitions = definitionReader.readByWordId(wordId);
+        List<Definition> actualDefinitions = definitionReader.readByWordId(wordId, userId);
 
         // Then
         assertThat(actualDefinitions).isEqualTo(expectedDefinitions);
