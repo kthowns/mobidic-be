@@ -2,6 +2,7 @@ package com.kthowns.mobidic.domain.definition.service;
 
 import com.kthowns.mobidic.common.code.GeneralResponseCode;
 import com.kthowns.mobidic.common.exception.ApiException;
+import com.kthowns.mobidic.domain.definition.command.AddDefinitionCommand;
 import com.kthowns.mobidic.domain.definition.model.Definition;
 import com.kthowns.mobidic.domain.definition.model.PartOfSpeech;
 import com.kthowns.mobidic.domain.word.service.WordService;
@@ -12,16 +13,15 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class DefinitionServiceTest {
@@ -79,6 +79,54 @@ class DefinitionServiceTest {
         assertEquals(GeneralResponseCode.NO_WORD, exception.getResponseCode());
         verify(definitionValidator, never()).validateMeaningDuplication(anyString(), any(UUID.class));
         verify(definitionAppender, never()).append(any(UUID.class), anyString(), any(PartOfSpeech.class));
+    }
+
+    @Test
+    @DisplayName("[DefService] Add definitions (batch) success")
+    void addDefinitionsBatchSuccess() {
+        // given
+        List<AddDefinitionCommand> commands = List.of(
+                AddDefinitionCommand.of("meaning1", PartOfSpeech.NOUN),
+                AddDefinitionCommand.of("meaning2", PartOfSpeech.VERB)
+        );
+
+        // when
+        definitionService.addDefinitions(userId, wordId, commands);
+
+        // then
+        verify(wordService).getWordById(userId, wordId);
+        verify(definitionValidator, times(2)).validateMeaningDuplication(anyString(), eq(wordId));
+        verify(definitionAppender).appendAll(anyList());
+    }
+
+    @Test
+    @DisplayName("[DefService] Add definitions (batch) success - empty list")
+    void addDefinitionsBatchEmptySuccess() {
+        // when
+        definitionService.addDefinitions(userId, wordId, Collections.emptyList());
+
+        // then
+        verify(wordService).getWordById(userId, wordId);
+        verify(definitionValidator, never()).validateMeaningDuplication(anyString(), any(UUID.class));
+        verify(definitionAppender, never()).appendAll(anyList());
+    }
+
+    @Test
+    @DisplayName("[DefService] Add definitions (batch) fail - duplication error")
+    void addDefinitionsBatchDuplicationFail() {
+        // given
+        List<AddDefinitionCommand> commands = List.of(
+                AddDefinitionCommand.of("duplicate", PartOfSpeech.NOUN)
+        );
+        doThrow(new ApiException(GeneralResponseCode.DUPLICATED_DEFINITION))
+                .when(definitionValidator).validateMeaningDuplication("duplicate", wordId);
+
+        // when & then
+        ApiException exception = assertThrows(ApiException.class, () ->
+                definitionService.addDefinitions(userId, wordId, commands));
+
+        assertEquals(GeneralResponseCode.DUPLICATED_DEFINITION, exception.getResponseCode());
+        verify(definitionAppender, never()).appendAll(anyList());
     }
 
     @Test

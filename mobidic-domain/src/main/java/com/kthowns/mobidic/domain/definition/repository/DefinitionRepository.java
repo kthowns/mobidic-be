@@ -9,6 +9,8 @@ import java.util.UUID;
 public interface DefinitionRepository {
     void append(Definition definition);
 
+    void appendAll(List<Definition> definitions);
+
     Optional<Definition> readByIdAndUserId(UUID definitionId, UUID userId);
 
     List<Definition> readByWordId(UUID wordId);

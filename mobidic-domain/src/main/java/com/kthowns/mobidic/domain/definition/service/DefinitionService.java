@@ -1,5 +1,7 @@
 package com.kthowns.mobidic.domain.definition.service;
 
+import com.kthowns.mobidic.common.code.GeneralResponseCode;
+import com.kthowns.mobidic.common.exception.ApiException;
 import com.kthowns.mobidic.domain.definition.command.AddDefinitionCommand;
 import com.kthowns.mobidic.domain.definition.model.Definition;
 import com.kthowns.mobidic.domain.definition.model.PartOfSpeech;
@@ -70,12 +72,25 @@ public class DefinitionService {
     }
 
     @Transactional
-    public void addDefinitions(UUID userId, UUID wordId, List<AddDefinitionCommand> definitions) {
-        wordService.getWordById(userId, wordId);
-
-        for (AddDefinitionCommand command : definitions) {
-            definitionValidator.validateMeaningDuplication(command.meaning(), wordId);
-            definitionAppender.append(wordId, command.meaning(), command.part());
+    public void addDefinitions(UUID userId, UUID wordId, List<AddDefinitionCommand> commands) {
+        if (commands == null || commands.isEmpty()) {
+            return;
         }
+
+        // 중복 정의 체크 (요청 리스트 내 중복)
+        long distinctCount = commands.stream()
+                .map(AddDefinitionCommand::meaning)
+                .distinct()
+                .count();
+        if (distinctCount != commands.size()) {
+            throw new ApiException(GeneralResponseCode.DUPLICATED_DEFINITION);
+        }
+
+        List<Definition> definitions = commands.stream()
+                .peek(command -> definitionValidator.validateMeaningDuplication(command.meaning(), wordId))
+                .map(command -> Definition.create(wordId, command.meaning(), command.part()))
+                .toList();
+
+        definitionAppender.appendAll(definitions);
     }
 }

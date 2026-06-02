@@ -31,6 +31,22 @@ public class DefinitionRepositoryImpl implements DefinitionRepository {
     }
 
     @Override
+    public void appendAll(List<Definition> definitions) {
+        if (definitions == null || definitions.isEmpty()) {
+            return;
+        }
+
+        List<DefinitionJpaEntity> entities = definitions.stream()
+                .map(def -> {
+                    WordJpaEntity word = em.getReference(WordJpaEntity.class, def.wordId());
+                    return DefinitionJpaEntity.createFromModel(def, word);
+                })
+                .toList();
+
+        definitionJpaRepository.saveAll(entities);
+    }
+
+    @Override
     public Optional<Definition> readByIdAndUserId(UUID definitionId, UUID userId) {
         return definitionJpaRepository.findByIdAndWord_Vocabulary_User_Id(definitionId, userId)
                 .map(DefinitionJpaEntity::toModel);
