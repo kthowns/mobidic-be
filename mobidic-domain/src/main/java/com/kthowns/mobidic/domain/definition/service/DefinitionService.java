@@ -1,5 +1,6 @@
 package com.kthowns.mobidic.domain.definition.service;
 
+import com.kthowns.mobidic.domain.definition.command.AddDefinitionCommand;
 import com.kthowns.mobidic.domain.definition.model.Definition;
 import com.kthowns.mobidic.domain.definition.model.PartOfSpeech;
 import com.kthowns.mobidic.domain.word.service.WordService;
@@ -66,5 +67,15 @@ public class DefinitionService {
         definitionReader.readByIdAndUserId(defId, userId);
 
         definitionRemover.remove(defId, userId);
+    }
+
+    @Transactional
+    public void addDefinitions(UUID userId, UUID wordId, List<AddDefinitionCommand> definitions) {
+        wordService.getWordById(userId, wordId);
+
+        for (AddDefinitionCommand command : definitions) {
+            definitionValidator.validateMeaningDuplication(command.meaning(), wordId);
+            definitionAppender.append(wordId, command.meaning(), command.part());
+        }
     }
 }

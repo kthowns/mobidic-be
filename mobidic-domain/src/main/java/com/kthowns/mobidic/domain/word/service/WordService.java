@@ -2,7 +2,6 @@ package com.kthowns.mobidic.domain.word.service;
 
 import com.kthowns.mobidic.common.code.GeneralResponseCode;
 import com.kthowns.mobidic.common.exception.ApiException;
-import com.kthowns.mobidic.domain.statistic.service.StatisticService;
 import com.kthowns.mobidic.domain.vocabulary.service.VocabularyService;
 import com.kthowns.mobidic.domain.word.model.Word;
 import com.kthowns.mobidic.domain.word.model.WordDetail;
@@ -25,23 +24,13 @@ public class WordService {
     private final WordValidator wordValidator;
 
     private final VocabularyService vocabularyService;
-    private final StatisticService statisticService;
 
     @Transactional
     public Word addWord(UUID userId, UUID vocabId, String expression) {
         validateVocabularyExist(vocabId, userId);
-
         wordValidator.validateExpressionDuplication(expression, vocabId);
 
-        Word word = wordAppender.append(expression, vocabId);
-
-        // WordStatistic 생성 로직
-        statisticService.append(word.id());
-
-        // Vocabulary 단어 수 원자적 업데이트
-        vocabularyService.increaseWordCount(vocabId);
-
-        return word;
+        return wordAppender.append(expression, vocabId);
     }
 
     @Transactional(readOnly = true)

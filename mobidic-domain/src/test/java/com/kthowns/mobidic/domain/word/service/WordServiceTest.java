@@ -1,6 +1,5 @@
 package com.kthowns.mobidic.domain.word.service;
 
-import com.kthowns.mobidic.domain.statistic.service.StatisticService;
 import com.kthowns.mobidic.domain.vocabulary.service.VocabularyService;
 import com.kthowns.mobidic.domain.word.model.Word;
 import com.kthowns.mobidic.domain.word.model.WordDetail;
@@ -36,8 +35,6 @@ class WordServiceTest {
 
     @Mock
     private VocabularyService vocabularyService;
-    @Mock
-    private StatisticService statisticService;
 
     private final UUID userId = UUID.randomUUID();
     private final UUID vocabId = UUID.randomUUID();
@@ -57,9 +54,8 @@ class WordServiceTest {
         Word result = wordService.addWord(userId, vocabId, expression);
 
         // then
+        verify(wordAppender).append(expression, vocabId);
         verify(wordValidator).validateExpressionDuplication(expression, vocabId);
-        verify(statisticService).append(wordId);
-        verify(vocabularyService).increaseWordCount(vocabId);
         assertEquals(word, result);
     }
 

@@ -2,8 +2,12 @@ package com.kthowns.mobidic.api.word.controller;
 
 import com.kthowns.mobidic.api.auth.model.AuthUser;
 import com.kthowns.mobidic.api.word.dto.request.AddWordRequestDto;
+import com.kthowns.mobidic.api.word.dto.request.UpdateWordRequestDto;
 import com.kthowns.mobidic.common.dto.ErrorResponse;
 import com.kthowns.mobidic.common.dto.GeneralResponse;
+import com.kthowns.mobidic.domain.definition.command.AddDefinitionCommand;
+import com.kthowns.mobidic.domain.word.command.AddWordCommand;
+import com.kthowns.mobidic.domain.word.facade.WordFacade;
 import com.kthowns.mobidic.domain.word.model.WordDetail;
 import com.kthowns.mobidic.domain.word.service.WordService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -32,6 +36,7 @@ import static com.kthowns.mobidic.common.code.GeneralResponseCode.OK;
 @Tag(name = "단어 관련 서비스", description = "단어장 별 단어 불러오기, 추가 등")
 public class WordController {
     private final WordService wordService;
+    private final WordFacade wordFacade;
 
     @Operation(
             summary = "단어 전체 조회",
@@ -82,7 +87,15 @@ public class WordController {
             @RequestBody @Valid AddWordRequestDto request,
             @AuthenticationPrincipal AuthUser authUser
     ) {
-        wordService.addWord(authUser.getId(), vocabularyId, request.getExpression());
+        List<AddDefinitionCommand> addDefinitionCommands = request.getDefinitions() != null ?
+                request.getDefinitions().stream()
+                        .map((d) -> AddDefinitionCommand.of(d.getMeaning(), d.getPart()))
+                        .toList()
+                : List.of();
+        AddWordCommand addWordCommand = AddWordCommand
+                .of(authUser.getId(), vocabularyId, request.getExpression());
+
+        wordFacade.addWord(addWordCommand, addDefinitionCommands);
         return GeneralResponse.toResponseEntity(OK, null);
     }
 
@@ -107,7 +120,7 @@ public class WordController {
     @PatchMapping("/words/{wordId}")
     public ResponseEntity<GeneralResponse<Void>> updateWord(
             @PathVariable UUID wordId,
-            @RequestBody @Valid AddWordRequestDto request,
+            @RequestBody @Valid UpdateWordRequestDto request,
             @AuthenticationPrincipal AuthUser authUser
     ) {
         wordService.updateWord(authUser.getId(), wordId, request.getExpression());
