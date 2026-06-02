@@ -13,10 +13,9 @@ import com.kthowns.mobidic.storage.vocabulary.jpaentity.VocabularyJpaEntity;
 import com.kthowns.mobidic.storage.vocabulary.jparepository.VocabularyJpaRepository;
 import com.kthowns.mobidic.storage.word.jpaentity.WordJpaEntity;
 import com.kthowns.mobidic.storage.word.jparepository.WordJpaRepository;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -24,7 +23,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.UUID;
 
@@ -41,7 +39,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @Transactional
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class WordStatisticIntegrationTest {
 
     @Autowired
@@ -71,47 +68,42 @@ public class WordStatisticIntegrationTest {
     @Autowired
     private jakarta.persistence.EntityManager em;
 
-    @Autowired
-    private TransactionTemplate transactionTemplate;
-
     private UserJpaEntity testUser;
     private String userToken;
     private VocabularyJpaEntity testVocab;
     private WordJpaEntity testWord;
 
-    @BeforeAll
-    void cleanAndSetup() {
-        transactionTemplate.execute(status -> {
-            databaseCleaner.execute();
+    @BeforeEach
+    void setUp() {
+        databaseCleaner.execute();
 
-            testUser = userJpaRepository.save(UserJpaEntity.builder()
-                    .email("test@test.com")
-                    .nickname("test")
-                    .password(passwordEncoder.encode("password123!"))
-                    .role(UserRole.USER)
-                    .build());
+        testUser = userJpaRepository.save(UserJpaEntity.builder()
+                .email("test@test.com")
+                .nickname("test")
+                .password(passwordEncoder.encode("password123!"))
+                .role(UserRole.USER)
+                .build());
 
-            userToken = jwtProvider.generateToken(testUser.getId(), testUser.getRole().name());
+        userToken = jwtProvider.generateToken(testUser.getId(), testUser.getRole().name());
 
-            testVocab = vocabularyJpaRepository.save(VocabularyJpaEntity.builder()
-                    .user(testUser)
-                    .title("통계 단어장")
-                    .build());
+        testVocab = vocabularyJpaRepository.save(VocabularyJpaEntity.builder()
+                .user(testUser)
+                .title("통계 단어장")
+                .build());
 
-            testWord = wordJpaRepository.save(WordJpaEntity.builder()
-                    .vocabulary(testVocab)
-                    .expression("apple")
-                    .build());
+        testWord = wordJpaRepository.save(WordJpaEntity.builder()
+                .vocabulary(testVocab)
+                .expression("apple")
+                .build());
 
-            wordStatisticJpaRepository.save(WordStatisticJpaEntity.builder()
-                    .word(testWord)
-                    .correctCount(5)
-                    .incorrectCount(5)
-                    .isLearned(false)
-                    .build());
-            return null;
-        });
+        wordStatisticJpaRepository.save(WordStatisticJpaEntity.builder()
+                .word(testWord)
+                .correctCount(5)
+                .incorrectCount(5)
+                .isLearned(false)
+                .build());
 
+        em.flush();
         em.clear();
     }
 
@@ -132,22 +124,20 @@ public class WordStatisticIntegrationTest {
     @Test
     @DisplayName("단어장 학습률 조회 성공")
     void getVocabLearningRateSuccess() throws Exception {
-        // Given: 2번째 단어 추가 및 학습 완료 처리
-        // Note: 이 작업은 @Test 레벨의 트랜잭션에서 수행되므로 다른 테스트에 영향을 주지 않음
-        WordJpaEntity word2 = wordJpaRepository.saveAndFlush(WordJpaEntity.builder()
+        // Given
+        WordJpaEntity word2 = wordJpaRepository.save(WordJpaEntity.builder()
                 .vocabulary(testVocab)
                 .expression("banana")
                 .build());
-        wordStatisticJpaRepository.saveAndFlush(WordStatisticJpaEntity.builder()
+        wordStatisticJpaRepository.save(WordStatisticJpaEntity.builder()
                 .word(word2)
                 .isLearned(true)
                 .build());
-        em.clear();
 
         // When
         mockMvc.perform(get("/api/vocabularies/" + testVocab.getId() + "/learning-rate")
                         .header("Authorization", "Bearer " + userToken))
-                // Then: 2개 중 1개 학습 완료이므로 0.5
+                // Then
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data").value(0.5));
     }
@@ -155,18 +145,16 @@ public class WordStatisticIntegrationTest {
     @Test
     @DisplayName("단어장 학습률 조회 성공 - 단어가 0개인 경우 0.0 반환")
     void getVocabLearningRateEmptyVocabSuccess() throws Exception {
-        // Given: 단어가 하나도 없는 새 단어장 생성
+        // Given
         VocabularyJpaEntity emptyVocab = vocabularyJpaRepository.save(VocabularyJpaEntity.builder()
                 .user(testUser)
                 .title("빈 단어장")
                 .build());
 
-        em.flush();
-        em.clear();
-
-        // When & Then: 단어가 없으므로 0.0 반환 확인
+        // When
         mockMvc.perform(get("/api/vocabularies/" + emptyVocab.getId() + "/learning-rate")
                         .header("Authorization", "Bearer " + userToken))
+                // Then
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data").value(0.0));
     }
@@ -177,7 +165,7 @@ public class WordStatisticIntegrationTest {
         // When
         mockMvc.perform(get("/api/vocabularies/" + testVocab.getId() + "/accuracy")
                         .header("Authorization", "Bearer " + userToken))
-                // Then: 5:5 비율이므로 0.5 (accuracy는 %가 아닌 0~1 사이 값)
+                // Then
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data").value(0.5));
     }
@@ -185,21 +173,27 @@ public class WordStatisticIntegrationTest {
     @Test
     @DisplayName("단어 학습 상태 토글 성공")
     void toggleLearnedStatusSuccess() throws Exception {
-        // 1. When: 토글 API 호출 (false -> true)
+        // When
         mockMvc.perform(patch("/api/words/" + testWord.getId() + "/toggle-learned")
                         .header("Authorization", "Bearer " + userToken))
+                // Then
                 .andExpect(status().isOk());
 
-        // 2. Then (DB Verify): DB 직접 확인
+        // Then
+        em.flush();
+        em.clear();
         WordStatisticJpaEntity stat = wordStatisticJpaRepository.findById(testWord.getId()).orElseThrow();
         assertThat(stat.isLearned()).isTrue();
 
-        // 3. When: 다시 토글 (true -> false)
+        // When
         mockMvc.perform(patch("/api/words/" + testWord.getId() + "/toggle-learned")
                         .header("Authorization", "Bearer " + userToken))
+                // Then
                 .andExpect(status().isOk());
 
-        // 4. Then (DB Verify): 다시 false 확인
+        // Then
+        em.flush();
+        em.clear();
         stat = wordStatisticJpaRepository.findById(testWord.getId()).orElseThrow();
         assertThat(stat.isLearned()).isFalse();
     }
@@ -207,11 +201,13 @@ public class WordStatisticIntegrationTest {
     @Test
     @DisplayName("동시성 테스트 - 단어 학습 상태 동시 토글")
     void toggleLearnedStatusConcurrency() throws Exception {
+        // Given
         int threadCount = 10;
         java.util.concurrent.ExecutorService executorService = java.util.concurrent.Executors.newFixedThreadPool(threadCount);
         java.util.concurrent.CountDownLatch latch = new java.util.concurrent.CountDownLatch(threadCount);
         java.util.concurrent.atomic.AtomicInteger successCount = new java.util.concurrent.atomic.AtomicInteger(0);
 
+        // When
         for (int i = 0; i < threadCount; i++) {
             executorService.submit(() -> {
                 try {
@@ -233,11 +229,10 @@ public class WordStatisticIntegrationTest {
         latch.await();
         executorService.shutdown();
 
-        // 갱신된 데이터를 읽기 위해 영속성 컨텍스트 초기화
+        // Then
+        em.flush();
         em.clear();
 
-        // 논리적 기대값: 초기 상태가 false이므로, 성공한 토글 횟수가 홀수이면 true, 짝수이면 false여야 함.
-        // 만약 동시성 제어(Lost Update 방지)가 실패했다면 성공 횟수와 최종 상태의 정합성이 어긋남.
         WordStatisticJpaEntity stat = wordStatisticJpaRepository.findById(testWord.getId()).orElseThrow();
         boolean expectedState = (successCount.get() % 2 != 0);
         assertThat(stat.isLearned()).isEqualTo(expectedState);
@@ -302,8 +297,9 @@ public class WordStatisticIntegrationTest {
     @Test
     @DisplayName("보안 테스트 - 인증 토큰 없이 요청 시 실패")
     void securityFailNoToken() throws Exception {
-        // When & Then
+        // When
         mockMvc.perform(get("/api/words/" + testWord.getId() + "/statistic"))
+                // Then
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.message").value(AuthResponseCode.UNAUTHORIZED.getMessage()));
     }
@@ -311,9 +307,10 @@ public class WordStatisticIntegrationTest {
     @Test
     @DisplayName("보안 테스트 - 잘못된 토큰으로 요청 시 실패")
     void securityFailInvalidToken() throws Exception {
-        // When & Then
+        // When
         mockMvc.perform(get("/api/words/" + testWord.getId() + "/statistic")
                         .header("Authorization", "Bearer invalid-token"))
+                // Then
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.message").value(AuthResponseCode.UNAUTHORIZED.getMessage()));
     }

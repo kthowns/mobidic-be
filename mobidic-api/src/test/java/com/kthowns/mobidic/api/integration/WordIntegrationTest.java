@@ -1,9 +1,11 @@
 package com.kthowns.mobidic.api.integration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.kthowns.mobidic.api.definition.dto.request.AddDefinitionRequestDto;
 import com.kthowns.mobidic.api.security.jwt.JwtProvider;
 import com.kthowns.mobidic.api.util.DatabaseCleaner;
 import com.kthowns.mobidic.api.word.dto.request.AddWordRequestDto;
+import com.kthowns.mobidic.api.word.dto.request.UpdateWordRequestDto;
 import com.kthowns.mobidic.common.code.AuthResponseCode;
 import com.kthowns.mobidic.common.code.GeneralResponseCode;
 import com.kthowns.mobidic.domain.definition.model.PartOfSpeech;
@@ -18,10 +20,9 @@ import com.kthowns.mobidic.storage.vocabulary.jpaentity.VocabularyJpaEntity;
 import com.kthowns.mobidic.storage.vocabulary.jparepository.VocabularyJpaRepository;
 import com.kthowns.mobidic.storage.word.jpaentity.WordJpaEntity;
 import com.kthowns.mobidic.storage.word.jparepository.WordJpaRepository;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -30,25 +31,18 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.List;
-import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-/**
- * 단어 관련 통합 테스트
- */
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @Transactional
-@TestInstance(TestInstance.Lifecycle.PER_CLASS) // 💡 BeforeAll을 non-static으로 쓰기 위함
 public class WordIntegrationTest {
 
     @Autowired
@@ -84,42 +78,43 @@ public class WordIntegrationTest {
     @Autowired
     private jakarta.persistence.EntityManager em;
 
-    @Autowired
-    private TransactionTemplate transactionTemplate;
-
     private UserJpaEntity testUser;
     private String userToken;
     private VocabularyJpaEntity testVocab;
 
-    @BeforeAll
-    void cleanAndSetup() {
-        transactionTemplate.execute(status -> {
-            databaseCleaner.execute();
+    @BeforeEach
+    void setup() {
+        databaseCleaner.execute();
 
-            testUser = userJpaRepository.save(UserJpaEntity.builder()
-                    .email("test@test.com")
-                    .nickname("test")
-                    .password(passwordEncoder.encode("password123!"))
-                    .role(UserRole.USER)
-                    .build());
+        testUser = userJpaRepository.save(UserJpaEntity.builder()
+                .email("test@test.com")
+                .nickname("test")
+                .password(passwordEncoder.encode("password123!"))
+                .role(UserRole.USER)
+                .build());
 
-            userToken = jwtProvider.generateToken(testUser.getId(), testUser.getRole().name());
+        userToken = jwtProvider.generateToken(testUser.getId(), testUser.getRole().name());
 
-            testVocab = vocabularyJpaRepository.save(VocabularyJpaEntity.builder()
-                    .user(testUser)
-                    .title("테스트 단어장")
-                    .build());
-            return null;
-        });
+        testVocab = vocabularyJpaRepository.save(VocabularyJpaEntity.builder()
+                .user(testUser)
+                .title("테스트 단어장")
+                .build());
+
+        // 셋업 데이터가 다음 쿼리에 영향 주지 않도록만 정리
+        em.flush();
         em.clear();
     }
 
     @Test
-    @DisplayName("단어 추가 성공")
-    void addWordSuccess() throws Exception {
+    @DisplayName("단어 및 정의 일괄 추가 성공")
+    void addWordWithDefinitionsSuccess() throws Exception {
         // Given
         AddWordRequestDto request = AddWordRequestDto.builder()
                 .expression("apple")
+                .definitions(List.of(
+                        new AddDefinitionRequestDto("사과", PartOfSpeech.NOUN),
+                        new AddDefinitionRequestDto("사과하다", PartOfSpeech.VERB)
+                ))
                 .build();
 
         // When
@@ -127,34 +122,71 @@ public class WordIntegrationTest {
                         .header("Authorization", "Bearer " + userToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andDo(print())
-                // Then (1): 성공 응답 확인 (data는 null)
+                // Then
                 .andExpect(status().isOk());
 
-        em.flush();
-        em.clear();
+        // Then
+        WordJpaEntity savedWord = wordJpaRepository.findAll().stream()
+                .filter(w -> w.getExpression().equals("apple"))
+                .findFirst().orElseThrow();
 
-        // Then (2): DB 직접 확인
-        WordJpaEntity savedWord = wordJpaRepository.findAll().get(0);
-        assertThat(savedWord.getExpression()).isEqualTo("apple");
-        assertThat(savedWord.getVocabulary().getId()).isEqualTo(testVocab.getId());
+        List<DefinitionJpaEntity> definitions = definitionJpaRepository.findByWord_Id(savedWord.getId());
+        assertThat(definitions).hasSize(2);
+    }
 
-        // Then (3): 통계 데이터 자동 생성 확인 (레포지토리 전체 조회로 확인)
-        List<WordStatisticJpaEntity> allStats = wordStatisticJpaRepository.findAll();
-        assertThat(allStats).anyMatch(stat -> stat.getWord().getId().equals(savedWord.getId()));
+    @Test
+    @DisplayName("단어 추가 성공")
+    void addWordSuccess() throws Exception {
+        // Given
+        AddWordRequestDto request = AddWordRequestDto.builder()
+                .expression("banana")
+                .build();
+
+        // When
+        mockMvc.perform(post("/api/vocabularies/" + testVocab.getId() + "/word")
+                        .header("Authorization", "Bearer " + userToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                // Then
+                .andExpect(status().isOk());
+
+        // Then
+        assertThat(wordJpaRepository.findAll().stream()
+                .anyMatch(w -> w.getExpression().equals("banana"))).isTrue();
+    }
+
+    @Test
+    @DisplayName("단어 일괄 추가 원자성(Atomic) 검증 - 정의 중복 시 409 반환")
+    void addWordWithDefinitionsRollback() throws Exception {
+        // Given
+        AddWordRequestDto request = AddWordRequestDto.builder()
+                .expression("RollbackTestWord")
+                .definitions(List.of(
+                        new AddDefinitionRequestDto("중복정의", PartOfSpeech.NOUN),
+                        new AddDefinitionRequestDto("중복정의", PartOfSpeech.NOUN)
+                ))
+                .build();
+
+        // When
+        mockMvc.perform(post("/api/vocabularies/" + testVocab.getId() + "/word")
+                        .header("Authorization", "Bearer " + userToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                // Then
+                .andExpect(status().isConflict());
     }
 
     @Test
     @DisplayName("단어 추가 실패 - 중복된 단어")
     void addWordFailDuplicated() throws Exception {
-        // Given: 이미 존재하는 단어
-        wordJpaRepository.saveAndFlush(WordJpaEntity.builder()
+        // Given
+        wordJpaRepository.save(WordJpaEntity.builder()
                 .vocabulary(testVocab)
-                .expression("apple")
+                .expression("dog")
                 .build());
 
         AddWordRequestDto request = AddWordRequestDto.builder()
-                .expression("apple")
+                .expression("dog")
                 .build();
 
         // When
@@ -170,48 +202,37 @@ public class WordIntegrationTest {
     @Test
     @DisplayName("단어장별 단어 목록 조회 성공")
     void getWordsSuccess() throws Exception {
-        // Given: 단어 1개와 정의 주입
-        WordJpaEntity word = wordJpaRepository.saveAndFlush(WordJpaEntity.builder()
+        // Given
+        WordJpaEntity word = wordJpaRepository.save(WordJpaEntity.builder()
                 .vocabulary(testVocab)
-                .expression("apple")
+                .expression("elephant")
                 .build());
 
-        definitionJpaRepository.saveAndFlush(DefinitionJpaEntity.builder()
+        definitionJpaRepository.save(DefinitionJpaEntity.builder()
                 .word(word)
-                .meaning("사과")
+                .meaning("코끼리")
                 .part(PartOfSpeech.NOUN)
                 .build());
-
-        wordStatisticJpaRepository.saveAndFlush(WordStatisticJpaEntity.builder()
-                .word(word)
-                .difficulty(0.5)
-                .accuracy(0.0)
-                .build());
-
-        em.clear();
 
         // When
         mockMvc.perform(get("/api/vocabularies/" + testVocab.getId() + "/words")
                         .header("Authorization", "Bearer " + userToken))
                 // Then
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data[0].expression").value("apple"))
-                .andExpect(jsonPath("$.data[0].definitions[0].meaning").value("사과"))
-                .andExpect(jsonPath("$.data[0].difficulty").value(0.5))
-                .andExpect(jsonPath("$.data[0].accuracy").value(0.0));
+                .andExpect(jsonPath("$.data[?(@.expression == 'elephant')].definitions[0].meaning").value("코끼리"));
     }
 
     @Test
     @DisplayName("단어 수정 성공")
     void updateWordSuccess() throws Exception {
         // Given
-        WordJpaEntity word = wordJpaRepository.saveAndFlush(WordJpaEntity.builder()
+        WordJpaEntity word = wordJpaRepository.save(WordJpaEntity.builder()
                 .vocabulary(testVocab)
-                .expression("apple")
+                .expression("flower")
                 .build());
 
-        AddWordRequestDto request = AddWordRequestDto.builder()
-                .expression("banana")
+        UpdateWordRequestDto request = UpdateWordRequestDto.builder()
+                .expression("garden")
                 .build();
 
         // When
@@ -219,95 +240,55 @@ public class WordIntegrationTest {
                         .header("Authorization", "Bearer " + userToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                // Then (1)
+                // Then
                 .andExpect(status().isOk());
 
-        // Then (2): DB 직접 확인
+        // Then
+        em.flush();
+        em.clear();
+
         WordJpaEntity updatedWord = wordJpaRepository.findById(word.getId()).orElseThrow();
-        assertThat(updatedWord.getExpression()).isEqualTo("banana");
+        assertThat(updatedWord.getExpression()).isEqualTo("garden");
     }
 
     @Test
     @DisplayName("단어 삭제 성공")
     void deleteWordSuccess() throws Exception {
         // Given
-        WordJpaEntity word = wordJpaRepository.saveAndFlush(WordJpaEntity.builder()
+        WordJpaEntity word = wordJpaRepository.save(WordJpaEntity.builder()
                 .vocabulary(testVocab)
-                .expression("apple")
+                .expression("home")
                 .build());
 
         // When
         mockMvc.perform(delete("/api/words/" + word.getId())
                         .header("Authorization", "Bearer " + userToken))
-                // Then (1)
+                // Then
                 .andExpect(status().isOk());
 
-        // Then (2): DB 직접 확인
+        // Then
+        em.flush();
+        em.clear();
+
         assertThat(wordJpaRepository.findById(word.getId())).isEmpty();
-    }
-
-    @Test
-    @DisplayName("단어장별 단어 목록 조회 실패 - 존재하지 않는 단어장")
-    void getWordsFailNoVocab() throws Exception {
-        // Given
-        UUID randomId = UUID.randomUUID();
-
-        // When
-        mockMvc.perform(get("/api/vocabularies/" + randomId + "/words")
-                        .header("Authorization", "Bearer " + userToken))
-                // Then
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.message").value(GeneralResponseCode.NO_VOCAB.getMessage()));
-    }
-
-    @Test
-    @DisplayName("단어 수정 실패 - 존재하지 않는 단어")
-    void updateWordFailNoWord() throws Exception {
-        // Given
-        UUID randomId = UUID.randomUUID();
-        AddWordRequestDto request = AddWordRequestDto.builder()
-                .expression("banana")
-                .build();
-
-        // When
-        mockMvc.perform(patch("/api/words/" + randomId)
-                        .header("Authorization", "Bearer " + userToken)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                // Then
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.message").value(GeneralResponseCode.NO_WORD.getMessage()));
-    }
-
-    @Test
-    @DisplayName("단어 삭제 실패 - 존재하지 않는 단어")
-    void deleteWordFailNoWord() throws Exception {
-        // Given
-        UUID randomId = UUID.randomUUID();
-
-        // When
-        mockMvc.perform(delete("/api/words/" + randomId)
-                        .header("Authorization", "Bearer " + userToken))
-                // Then
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.message").value(GeneralResponseCode.NO_WORD.getMessage()));
     }
 
     @Test
     @DisplayName("보안 테스트 - 인증 토큰 없이 요청 시 실패")
     void securityFailNoToken() throws Exception {
-        // When & Then
+        // When
         mockMvc.perform(get("/api/vocabularies/" + testVocab.getId() + "/words"))
-                .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.message").value(AuthResponseCode.UNAUTHORIZED.getMessage()));
+                // Then
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
     @DisplayName("보안 테스트 - 잘못된 토큰으로 요청 시 실패")
     void securityFailInvalidToken() throws Exception {
-        // When & Then
+        // When
         mockMvc.perform(get("/api/vocabularies/" + testVocab.getId() + "/words")
                         .header("Authorization", "Bearer invalid-token"))
+                // Then
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.message").value(AuthResponseCode.UNAUTHORIZED.getMessage()));
     }

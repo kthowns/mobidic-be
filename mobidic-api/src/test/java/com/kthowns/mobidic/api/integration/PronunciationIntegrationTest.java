@@ -12,10 +12,9 @@ import com.kthowns.mobidic.storage.vocabulary.jpaentity.VocabularyJpaEntity;
 import com.kthowns.mobidic.storage.vocabulary.jparepository.VocabularyJpaRepository;
 import com.kthowns.mobidic.storage.word.jpaentity.WordJpaEntity;
 import com.kthowns.mobidic.storage.word.jparepository.WordJpaRepository;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -25,7 +24,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.UUID;
 
@@ -42,7 +40,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @Transactional
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class PronunciationIntegrationTest {
 
     @Autowired
@@ -66,12 +63,6 @@ public class PronunciationIntegrationTest {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    @Autowired
-    private jakarta.persistence.EntityManager em;
-
-    @Autowired
-    private TransactionTemplate transactionTemplate;
-
     @MockitoBean
     private SpeechToTextClient speechToTextClient;
 
@@ -79,38 +70,34 @@ public class PronunciationIntegrationTest {
     private String userToken;
     private WordJpaEntity testWord;
 
-    @BeforeAll
+    @BeforeEach
     void cleanAndSetup() {
-        transactionTemplate.execute(status -> {
-            databaseCleaner.execute();
+        databaseCleaner.execute();
 
-            testUser = userJpaRepository.save(UserJpaEntity.builder()
-                    .email("test@test.com")
-                    .nickname("test")
-                    .password(passwordEncoder.encode("password123!"))
-                    .role(UserRole.USER)
-                    .build());
+        testUser = userJpaRepository.save(UserJpaEntity.builder()
+                .email("test@test.com")
+                .nickname("test")
+                .password(passwordEncoder.encode("password123!"))
+                .role(UserRole.USER)
+                .build());
 
-            userToken = jwtProvider.generateToken(testUser.getId(), testUser.getRole().name());
+        userToken = jwtProvider.generateToken(testUser.getId(), testUser.getRole().name());
 
-            VocabularyJpaEntity vocabulary = vocabularyJpaRepository.save(VocabularyJpaEntity.builder()
-                    .user(testUser)
-                    .title("테스트 단어장")
-                    .build());
+        VocabularyJpaEntity vocabulary = vocabularyJpaRepository.save(VocabularyJpaEntity.builder()
+                .user(testUser)
+                .title("테스트 단어장")
+                .build());
 
-            testWord = wordJpaRepository.save(WordJpaEntity.builder()
-                    .vocabulary(vocabulary)
-                    .expression("apple")
-                    .build());
-            return null;
-        });
-        em.clear();
+        testWord = wordJpaRepository.save(WordJpaEntity.builder()
+                .vocabulary(vocabulary)
+                .expression("apple")
+                .build());
     }
 
     @Test
     @DisplayName("발음 평가 성공")
     void evaluatePronunciationSuccess() throws Exception {
-        // Given: STT 클라이언트가 단어와 일치하는 텍스트를 반환하도록 설정
+        // Given
         given(speechToTextClient.transcribe(any())).willReturn("apple");
 
         MockMultipartFile file = new MockMultipartFile(
@@ -128,7 +115,7 @@ public class PronunciationIntegrationTest {
     @Test
     @DisplayName("발음 평가 실패 - 너무 큰 파일")
     void evaluatePronunciationFailFileSizeExceeded() throws Exception {
-        // Given: 500KB를 초과하는 더미 파일 (501KB)
+        // Given
         byte[] largeContent = new byte[501 * 1024];
         MockMultipartFile largeFile = new MockMultipartFile(
                 "file", "large.m4a", "audio/m4a", largeContent);
@@ -162,12 +149,14 @@ public class PronunciationIntegrationTest {
     @Test
     @DisplayName("보안 테스트 - 인증 토큰 없이 요청 시 실패")
     void securityFailNoToken() throws Exception {
+        // Given
         MockMultipartFile file = new MockMultipartFile(
                 "file", "test.m4a", "audio/m4a", "dummy content".getBytes());
 
-        // When & Then
+        // When
         mockMvc.perform(multipart("/api/words/" + testWord.getId() + "/pronunciation")
                         .file(file))
+                // Then
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.message").value(AuthResponseCode.UNAUTHORIZED.getMessage()));
     }
@@ -175,13 +164,15 @@ public class PronunciationIntegrationTest {
     @Test
     @DisplayName("보안 테스트 - 잘못된 토큰으로 요청 시 실패")
     void securityFailInvalidToken() throws Exception {
+        // Given
         MockMultipartFile file = new MockMultipartFile(
                 "file", "test.m4a", "audio/m4a", "dummy content".getBytes());
 
-        // When & Then
+        // When
         mockMvc.perform(multipart("/api/words/" + testWord.getId() + "/pronunciation")
                         .file(file)
                         .header("Authorization", "Bearer invalid-token"))
+                // Then
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.message").value(AuthResponseCode.UNAUTHORIZED.getMessage()));
     }

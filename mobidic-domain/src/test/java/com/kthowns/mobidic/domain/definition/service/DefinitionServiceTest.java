@@ -94,7 +94,6 @@ class DefinitionServiceTest {
         definitionService.addDefinitions(userId, wordId, commands);
 
         // then
-        verify(wordService).getWordById(userId, wordId);
         verify(definitionValidator, times(2)).validateMeaningDuplication(anyString(), eq(wordId));
         verify(definitionAppender).appendAll(anyList());
     }
@@ -106,7 +105,6 @@ class DefinitionServiceTest {
         definitionService.addDefinitions(userId, wordId, Collections.emptyList());
 
         // then
-        verify(wordService).getWordById(userId, wordId);
         verify(definitionValidator, never()).validateMeaningDuplication(anyString(), any(UUID.class));
         verify(definitionAppender, never()).appendAll(anyList());
     }

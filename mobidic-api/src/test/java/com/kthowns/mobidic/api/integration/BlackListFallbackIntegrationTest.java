@@ -1,6 +1,5 @@
 package com.kthowns.mobidic.api.integration;
 
-import com.kthowns.mobidic.api.auth.model.AuthUser;
 import com.kthowns.mobidic.api.security.jwt.JwtProvider;
 import com.kthowns.mobidic.api.util.DatabaseCleaner;
 import com.kthowns.mobidic.domain.auth.repository.AuthRedisKey;
@@ -19,8 +18,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.UUID;
 
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -46,6 +43,9 @@ public class BlackListFallbackIntegrationTest {
 
     @MockitoBean
     private RedisTemplate<String, String> redisTemplate;
+
+    @Autowired
+    private jakarta.persistence.EntityManager em;
 
     private UserJpaEntity activeUser;
     private UserJpaEntity deactivatedUser;
@@ -74,31 +74,36 @@ public class BlackListFallbackIntegrationTest {
 
         activeUserToken = jwtProvider.generateToken(activeUser.getId(), activeUser.getRole().name());
         deactivatedUserToken = jwtProvider.generateToken(deactivatedUser.getId(), deactivatedUser.getRole().name());
+
+        em.flush();
+        em.clear();
     }
 
     @Test
     @DisplayName("Redis 장애 시 DB Fallback 작동 확인 - 활성 사용자 통과")
     void fallbackWithActiveUser() throws Exception {
-        // Given: Redis 조회 시 예외 발생 강제화
+        // Given
         String key = AuthRedisKey.DEACTIVATED + ":" + activeUser.getId();
         given(redisTemplate.hasKey(key)).willThrow(new RedisConnectionFailureException("Redis is down"));
 
-        // When & Then: Redis가 죽어도 DB(active=true)를 보고 200 OK를 반환해야 함
+        // When
         mockMvc.perform(get("/api/users/me")
                         .header("Authorization", "Bearer " + activeUserToken))
+                // Then
                 .andExpect(status().isOk());
     }
 
     @Test
     @DisplayName("Redis 장애 시 DB Fallback 작동 확인 - 비활성 사용자 차단")
     void fallbackWithDeactivatedUser() throws Exception {
-        // Given: Redis 조회 시 예외 발생 강제화
+        // Given
         String key = AuthRedisKey.DEACTIVATED + ":" + deactivatedUser.getId();
         given(redisTemplate.hasKey(key)).willThrow(new RedisConnectionFailureException("Redis is down"));
 
-        // When & Then: Redis가 죽어도 DB(active=false)를 보고 401 Unauthorized를 반환해야 함
+        // When
         mockMvc.perform(get("/api/users/me")
                         .header("Authorization", "Bearer " + deactivatedUserToken))
+                // Then
                 .andExpect(status().isUnauthorized());
     }
 }

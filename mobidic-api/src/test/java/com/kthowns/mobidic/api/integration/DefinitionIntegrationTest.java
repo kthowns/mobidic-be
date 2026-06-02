@@ -16,10 +16,9 @@ import com.kthowns.mobidic.storage.vocabulary.jpaentity.VocabularyJpaEntity;
 import com.kthowns.mobidic.storage.vocabulary.jparepository.VocabularyJpaRepository;
 import com.kthowns.mobidic.storage.word.jpaentity.WordJpaEntity;
 import com.kthowns.mobidic.storage.word.jparepository.WordJpaRepository;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -44,7 +43,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @Transactional
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class DefinitionIntegrationTest {
 
     @Autowired
@@ -77,40 +75,36 @@ public class DefinitionIntegrationTest {
     @Autowired
     private jakarta.persistence.EntityManager em;
 
-    @Autowired
-    private TransactionTemplate transactionTemplate;
-
     private UserJpaEntity testUser;
     private String userToken;
     private WordJpaEntity testWord;
 
-    @BeforeAll
+    @BeforeEach
     void cleanAndSetup() {
-        transactionTemplate.execute(status -> {
-            databaseCleaner.execute();
+        databaseCleaner.execute();
 
-            // 테스트 기초 데이터 생성 (사용자 -> 단어장 -> 단어)
-            testUser = userJpaRepository.save(UserJpaEntity.builder()
-                    .email("test@test.com")
-                    .nickname("test")
-                    .password(passwordEncoder.encode("password123!"))
-                    .role(UserRole.USER)
-                    .build());
+        // 테스트 기초 데이터 생성 (사용자 -> 단어장 -> 단어)
+        testUser = userJpaRepository.save(UserJpaEntity.builder()
+                .email("test@test.com")
+                .nickname("test")
+                .password(passwordEncoder.encode("password123!"))
+                .role(UserRole.USER)
+                .build());
 
-            userToken = jwtProvider.generateToken(testUser.getId(), testUser.getRole().name());
+        userToken = jwtProvider.generateToken(testUser.getId(), testUser.getRole().name());
 
-            VocabularyJpaEntity vocabulary = vocabularyJpaRepository.save(VocabularyJpaEntity.builder()
-                    .user(testUser)
-                    .title("테스트 단어장")
-                    .description("설명")
-                    .build());
+        VocabularyJpaEntity vocabulary = vocabularyJpaRepository.save(VocabularyJpaEntity.builder()
+                .user(testUser)
+                .title("테스트 단어장")
+                .description("설명")
+                .build());
 
-            testWord = wordJpaRepository.save(WordJpaEntity.builder()
-                    .vocabulary(vocabulary)
-                    .expression("apple")
-                    .build());
-            return null;
-        });
+        testWord = wordJpaRepository.save(WordJpaEntity.builder()
+                .vocabulary(vocabulary)
+                .expression("apple")
+                .build());
+
+        em.flush();
         em.clear();
     }
 
@@ -128,10 +122,10 @@ public class DefinitionIntegrationTest {
                         .header("Authorization", "Bearer " + userToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                // Then (1): 성공 응답 확인 (data는 null임)
-                .andExpect(status().isOk());
+                // Then
+        .andExpect(status().isOk());
 
-        // Then (2): 실제 DB에 데이터가 정상적으로 저장되었는지 확인
+        // Then
         DefinitionJpaEntity savedDef = definitionJpaRepository.findAll().get(0);
         assertThat(savedDef.getMeaning()).isEqualTo("사과");
         assertThat(savedDef.getPart()).isEqualTo(PartOfSpeech.NOUN);
@@ -222,10 +216,12 @@ public class DefinitionIntegrationTest {
                         .header("Authorization", "Bearer " + userToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updateRequest)))
-                // Then (1): 성공 응답 확인 (data는 null임)
+                // Then
                 .andExpect(status().isOk());
 
-        // Then (2): 실제 DB에 데이터가 수정되었는지 확인
+        // Then
+        em.flush();
+        em.clear();
         DefinitionJpaEntity updatedDef = definitionJpaRepository.findById(definition.getId()).orElseThrow();
         assertThat(updatedDef.getMeaning()).isEqualTo("꿀사과");
     }
@@ -243,10 +239,12 @@ public class DefinitionIntegrationTest {
         // When
         mockMvc.perform(delete("/api/definitions/" + definition.getId())
                         .header("Authorization", "Bearer " + userToken))
-                // Then (1): 성공 응답 확인 (data는 null임)
+                // Then
                 .andExpect(status().isOk());
 
-        // Then (2): 실제 DB에서 데이터가 삭제되었는지 확인
+        // Then
+        em.flush();
+        em.clear();
         assertThat(definitionJpaRepository.findById(definition.getId())).isEmpty();
     }
 
@@ -287,8 +285,9 @@ public class DefinitionIntegrationTest {
     @Test
     @DisplayName("보안 테스트 - 인증 토큰 없이 요청 시 실패")
     void securityFailNoToken() throws Exception {
-        // When & Then
+        // When
         mockMvc.perform(get("/api/words/" + testWord.getId() + "/definitions"))
+                // Then
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.message").value(AuthResponseCode.UNAUTHORIZED.getMessage()));
     }
@@ -296,9 +295,10 @@ public class DefinitionIntegrationTest {
     @Test
     @DisplayName("보안 테스트 - 잘못된 토큰으로 요청 시 실패")
     void securityFailInvalidToken() throws Exception {
-        // When & Then
+        // When
         mockMvc.perform(get("/api/words/" + testWord.getId() + "/definitions")
                         .header("Authorization", "Bearer invalid-token"))
+                // Then
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.message").value(AuthResponseCode.UNAUTHORIZED.getMessage()));
     }

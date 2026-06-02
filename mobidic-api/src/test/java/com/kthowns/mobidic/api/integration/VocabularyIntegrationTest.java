@@ -15,10 +15,9 @@ import com.kthowns.mobidic.storage.vocabulary.jpaentity.VocabularyJpaEntity;
 import com.kthowns.mobidic.storage.vocabulary.jparepository.VocabularyJpaRepository;
 import com.kthowns.mobidic.storage.word.jpaentity.WordJpaEntity;
 import com.kthowns.mobidic.storage.word.jparepository.WordJpaRepository;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -27,7 +26,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.UUID;
 
@@ -43,7 +41,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @Transactional
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class VocabularyIntegrationTest {
 
     @Autowired
@@ -76,27 +73,22 @@ public class VocabularyIntegrationTest {
     @Autowired
     private jakarta.persistence.EntityManager em;
 
-    @Autowired
-    private TransactionTemplate transactionTemplate;
-
     private UserJpaEntity testUser;
     private String userToken;
 
-    @BeforeAll
-    void cleanAndSetup() {
-        transactionTemplate.execute(status -> {
-            databaseCleaner.execute();
+    @BeforeEach
+    void setUp() {
+        databaseCleaner.execute();
 
-            testUser = userJpaRepository.save(UserJpaEntity.builder()
-                    .email("test@test.com")
-                    .nickname("test")
-                    .password(passwordEncoder.encode("password123!"))
-                    .role(UserRole.USER)
-                    .build());
+        testUser = userJpaRepository.save(UserJpaEntity.builder()
+                .email("test@test.com")
+                .nickname("test")
+                .password(passwordEncoder.encode("password123!"))
+                .role(UserRole.USER)
+                .build());
 
-            userToken = jwtProvider.generateToken(testUser.getId(), testUser.getRole().name());
-            return null;
-        });
+        userToken = jwtProvider.generateToken(testUser.getId(), testUser.getRole().name());
+        em.flush();
         em.clear();
     }
 
@@ -114,10 +106,10 @@ public class VocabularyIntegrationTest {
                         .header("Authorization", "Bearer " + userToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                // Then (1)
+                // Then
                 .andExpect(status().isOk());
 
-        // Then (2): DB 직접 확인
+        // Then
         VocabularyJpaEntity savedVocab = vocabularyJpaRepository.findAll().get(0);
         assertThat(savedVocab.getTitle()).isEqualTo("테스트 단어장");
         assertThat(savedVocab.getUser().getId()).isEqualTo(testUser.getId());
@@ -127,7 +119,7 @@ public class VocabularyIntegrationTest {
     @DisplayName("단어장 추가 실패 - 중복된 제목")
     void addVocabularyFailDuplicated() throws Exception {
         // Given
-        vocabularyJpaRepository.saveAndFlush(VocabularyJpaEntity.builder()
+        vocabularyJpaRepository.save(VocabularyJpaEntity.builder()
                 .user(testUser)
                 .title("중복 제목")
                 .build());
@@ -135,6 +127,9 @@ public class VocabularyIntegrationTest {
         AddVocabularyRequestDto request = AddVocabularyRequestDto.builder()
                 .title("중복 제목")
                 .build();
+
+        em.flush();
+        em.clear();
 
         // When
         mockMvc.perform(post("/api/vocabularies")
@@ -149,22 +144,23 @@ public class VocabularyIntegrationTest {
     @Test
     @DisplayName("사용자별 단어장 목록 조회 성공")
     void getVocabulariesSuccess() throws Exception {
-        // Given: 2개의 단어장과 통계 데이터 주입
-        VocabularyJpaEntity vocab = vocabularyJpaRepository.saveAndFlush(VocabularyJpaEntity.builder()
+        // Given
+        VocabularyJpaEntity vocab = vocabularyJpaRepository.save(VocabularyJpaEntity.builder()
                 .user(testUser)
                 .title("단어장1")
                 .wordCount(3L)
                 .build());
 
         // 단어 3개 및 통계 주입 (학습률 1/3, 정확도 50% 유도)
-        WordJpaEntity w1 = wordJpaRepository.saveAndFlush(WordJpaEntity.builder().vocabulary(vocab).expression("w1").build());
-        WordJpaEntity w2 = wordJpaRepository.saveAndFlush(WordJpaEntity.builder().vocabulary(vocab).expression("w2").build());
-        WordJpaEntity w3 = wordJpaRepository.saveAndFlush(WordJpaEntity.builder().vocabulary(vocab).expression("w3").build());
+        WordJpaEntity w1 = wordJpaRepository.save(WordJpaEntity.builder().vocabulary(vocab).expression("w1").build());
+        WordJpaEntity w2 = wordJpaRepository.save(WordJpaEntity.builder().vocabulary(vocab).expression("w2").build());
+        WordJpaEntity w3 = wordJpaRepository.save(WordJpaEntity.builder().vocabulary(vocab).expression("w3").build());
 
-        wordStatisticJpaRepository.saveAndFlush(WordStatisticJpaEntity.builder().word(w1).isLearned(true).build()); // 학습됨
-        wordStatisticJpaRepository.saveAndFlush(WordStatisticJpaEntity.builder().word(w2).correctCount(1).incorrectCount(1).build()); // 정확도 50%
-        wordStatisticJpaRepository.saveAndFlush(WordStatisticJpaEntity.builder().word(w3).build());
+        wordStatisticJpaRepository.save(WordStatisticJpaEntity.builder().word(w1).isLearned(true).build()); // 학습됨
+        wordStatisticJpaRepository.save(WordStatisticJpaEntity.builder().word(w2).correctCount(1).incorrectCount(1).build()); // 정확도 50%
+        wordStatisticJpaRepository.save(WordStatisticJpaEntity.builder().word(w3).build());
 
+        em.flush();
         em.clear();
 
         // When
@@ -181,11 +177,12 @@ public class VocabularyIntegrationTest {
     @DisplayName("단어장 상세 조회 성공")
     void getVocabularyDetailsSuccess() throws Exception {
         // Given
-        VocabularyJpaEntity vocab = vocabularyJpaRepository.saveAndFlush(VocabularyJpaEntity.builder()
+        VocabularyJpaEntity vocab = vocabularyJpaRepository.save(VocabularyJpaEntity.builder()
                 .user(testUser)
                 .title("상세 조회용")
                 .wordCount(10L)
                 .build());
+        em.flush();
         em.clear();
 
         // When
@@ -202,7 +199,7 @@ public class VocabularyIntegrationTest {
     @DisplayName("단어장 수정 성공")
     void updateVocabularySuccess() throws Exception {
         // Given
-        VocabularyJpaEntity vocab = vocabularyJpaRepository.saveAndFlush(VocabularyJpaEntity.builder()
+        VocabularyJpaEntity vocab = vocabularyJpaRepository.save(VocabularyJpaEntity.builder()
                 .user(testUser)
                 .title("기존 제목")
                 .build());
@@ -212,15 +209,20 @@ public class VocabularyIntegrationTest {
                 .description("수정된 설명")
                 .build();
 
+        em.flush();
+        em.clear();
+
         // When
         mockMvc.perform(patch("/api/vocabularies/" + vocab.getId())
                         .header("Authorization", "Bearer " + userToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                // Then (1)
+                // Then
                 .andExpect(status().isOk());
 
-        // Then (2): DB 직접 확인
+        // Then
+        em.flush();
+        em.clear();
         VocabularyJpaEntity updatedVocab = vocabularyJpaRepository.findById(vocab.getId()).orElseThrow();
         assertThat(updatedVocab.getTitle()).isEqualTo("수정된 제목");
         assertThat(updatedVocab.getDescription()).isEqualTo("수정된 설명");
@@ -230,18 +232,23 @@ public class VocabularyIntegrationTest {
     @DisplayName("단어장 삭제 성공")
     void deleteVocabularySuccess() throws Exception {
         // Given
-        VocabularyJpaEntity vocab = vocabularyJpaRepository.saveAndFlush(VocabularyJpaEntity.builder()
+        VocabularyJpaEntity vocab = vocabularyJpaRepository.save(VocabularyJpaEntity.builder()
                 .user(testUser)
                 .title("삭제할 단어장")
                 .build());
 
+        em.flush();
+        em.clear();
+
         // When
         mockMvc.perform(delete("/api/vocabularies/" + vocab.getId())
                         .header("Authorization", "Bearer " + userToken))
-                // Then (1)
+                // Then
                 .andExpect(status().isOk());
 
-        // Then (2): DB 직접 확인
+        // Then
+        em.flush();
+        em.clear();
         assertThat(vocabularyJpaRepository.findById(vocab.getId())).isEmpty();
     }
 
@@ -295,8 +302,9 @@ public class VocabularyIntegrationTest {
     @Test
     @DisplayName("보안 테스트 - 인증 토큰 없이 요청 시 실패")
     void securityFailNoToken() throws Exception {
-        // When & Then
+        // When
         mockMvc.perform(get("/api/vocabularies"))
+                // Then
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.message").value(AuthResponseCode.UNAUTHORIZED.getMessage()));
     }
@@ -304,9 +312,10 @@ public class VocabularyIntegrationTest {
     @Test
     @DisplayName("보안 테스트 - 잘못된 토큰으로 요청 시 실패")
     void securityFailInvalidToken() throws Exception {
-        // When & Then
+        // When
         mockMvc.perform(get("/api/vocabularies")
                         .header("Authorization", "Bearer invalid-token"))
+                // Then
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.message").value(AuthResponseCode.UNAUTHORIZED.getMessage()));
     }
