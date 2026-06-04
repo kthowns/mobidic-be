@@ -8,6 +8,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
 import java.util.UUID;
 
 import static org.mockito.Mockito.verify;
@@ -22,16 +23,17 @@ class DefinitionRemoverTest {
     private DefinitionRemover definitionRemover;
 
     @Test
-    @DisplayName("remove 테스트 - 정의 삭제 성공")
-    void removeTest() {
+    @DisplayName("removeAll 테스트 - 정의 목록 삭제 성공")
+    void removeAllTest() {
         // Given
-        UUID definitionId = UUID.randomUUID();
+        List<UUID> ids = List.of(UUID.randomUUID(), UUID.randomUUID());
+        UUID wordId = UUID.randomUUID();
         UUID userId = UUID.randomUUID();
 
         // When
-        definitionRemover.remove(definitionId, userId);
+        definitionRemover.removeAll(ids, wordId, userId);
 
         // Then
-        verify(definitionRepository).delete(definitionId, userId);
+        verify(definitionRepository).deleteAll(ids, wordId, userId);
     }
 }

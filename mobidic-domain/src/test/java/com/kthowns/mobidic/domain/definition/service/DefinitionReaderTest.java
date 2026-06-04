@@ -1,6 +1,5 @@
 package com.kthowns.mobidic.domain.definition.service;
 
-import com.kthowns.mobidic.common.code.GeneralResponseCode;
 import com.kthowns.mobidic.common.exception.ApiException;
 import com.kthowns.mobidic.domain.definition.model.Definition;
 import com.kthowns.mobidic.domain.definition.model.PartOfSpeech;
@@ -29,52 +28,71 @@ class DefinitionReaderTest {
     @InjectMocks
     private DefinitionReader definitionReader;
 
+    private final UUID userId = UUID.randomUUID();
+    private final UUID wordId = UUID.randomUUID();
+
     @Test
-    @DisplayName("readByWordId 테스트 - 단어 ID로 정의 목록 조회 성공")
+    @DisplayName("readByWordId 테스트 - 성공")
     void readByWordIdTest() {
         // Given
-        UUID wordId = UUID.randomUUID();
-        UUID userId = UUID.randomUUID();
-        List<Definition> expectedDefinitions = List.of(
-                new Definition(UUID.randomUUID(), wordId, "의미1", PartOfSpeech.NOUN),
-                new Definition(UUID.randomUUID(), wordId, "의미2", PartOfSpeech.VERB)
+        List<Definition> expected = List.of(new Definition(UUID.randomUUID(), wordId, "의미", PartOfSpeech.NOUN));
+        given(definitionRepository.readByWordId(wordId, userId)).willReturn(expected);
+
+        // When
+        List<Definition> result = definitionReader.readByWordId(wordId, userId);
+
+        // Then
+        assertThat(result).isEqualTo(expected);
+    }
+
+    @Test
+    @DisplayName("readByIdAndUserId 테스트 - 성공")
+    void readByIdAndUserIdTest() {
+        // Given
+        UUID defId = UUID.randomUUID();
+        Definition expected = new Definition(defId, wordId, "의미", PartOfSpeech.NOUN);
+        given(definitionRepository.readByIdAndUserId(defId, userId)).willReturn(Optional.of(expected));
+
+        // When
+        Definition result = definitionReader.readByIdAndUserId(defId, userId);
+
+        // Then
+        assertThat(result).isEqualTo(expected);
+    }
+
+    @Test
+    @DisplayName("readByIdsAndWordIdAndUserId 테스트 - 모든 ID 존재 시 성공")
+    void readByIdsSuccess() {
+        // Given
+        UUID id1 = UUID.randomUUID();
+        UUID id2 = UUID.randomUUID();
+        List<UUID> ids = List.of(id1, id2);
+        List<Definition> expected = List.of(
+                new Definition(id1, wordId, "의미1", PartOfSpeech.NOUN),
+                new Definition(id2, wordId, "의미2", PartOfSpeech.VERB)
         );
-        given(definitionRepository.readByWordId(wordId, userId)).willReturn(expectedDefinitions);
+        given(definitionRepository.readByIdsAndWordIdAndUserId(ids, wordId, userId)).willReturn(expected);
 
         // When
-        List<Definition> actualDefinitions = definitionReader.readByWordId(wordId, userId);
+        List<Definition> result = definitionReader.readByIdsAndWordIdAndUserId(ids, wordId, userId);
 
         // Then
-        assertThat(actualDefinitions).isEqualTo(expectedDefinitions);
+        assertThat(result).hasSize(2);
+        assertThat(result).extracting(Definition::id).containsExactlyInAnyOrder(id1, id2);
     }
 
     @Test
-    @DisplayName("readByIdAndUserId 테스트 - 정의 ID와 사용자 ID로 조회 성공")
-    void readByIdAndUserIdTest_Success() {
+    @DisplayName("readByIdsAndWordIdAndUserId 테스트 - 일부 ID 누락 시 예외 발생")
+    void readByIdsFail_MissingId() {
         // Given
-        UUID definitionId = UUID.randomUUID();
-        UUID userId = UUID.randomUUID();
-        Definition expectedDefinition = new Definition(definitionId, UUID.randomUUID(), "의미", PartOfSpeech.NOUN);
-        given(definitionRepository.readByIdAndUserId(definitionId, userId)).willReturn(Optional.of(expectedDefinition));
-
-        // When
-        Definition actualDefinition = definitionReader.readByIdAndUserId(definitionId, userId);
-
-        // Then
-        assertThat(actualDefinition).isEqualTo(expectedDefinition);
-    }
-
-    @Test
-    @DisplayName("readByIdAndUserId 테스트 - 조회 실패 (예외 발생)")
-    void readByIdAndUserIdTest_Fail() {
-        // Given
-        UUID definitionId = UUID.randomUUID();
-        UUID userId = UUID.randomUUID();
-        given(definitionRepository.readByIdAndUserId(definitionId, userId)).willReturn(Optional.empty());
+        UUID id1 = UUID.randomUUID();
+        UUID id2 = UUID.randomUUID();
+        List<UUID> ids = List.of(id1, id2);
+        List<Definition> found = List.of(new Definition(id1, wordId, "의미1", PartOfSpeech.NOUN)); // id2 누락
+        given(definitionRepository.readByIdsAndWordIdAndUserId(ids, wordId, userId)).willReturn(found);
 
         // When & Then
-        assertThatThrownBy(() -> definitionReader.readByIdAndUserId(definitionId, userId))
-                .isInstanceOf(ApiException.class)
-                .hasMessageContaining(GeneralResponseCode.NO_DEF.getMessage());
+        assertThatThrownBy(() -> definitionReader.readByIdsAndWordIdAndUserId(ids, wordId, userId))
+                .isInstanceOf(ApiException.class);
     }
 }

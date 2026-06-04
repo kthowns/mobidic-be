@@ -10,11 +10,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
 import java.util.UUID;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
@@ -23,29 +21,24 @@ class DefinitionUpdaterTest {
     @Mock
     private DefinitionRepository definitionRepository;
 
-    @Mock
-    private DefinitionReader definitionReader;
-
     @InjectMocks
     private DefinitionUpdater definitionUpdater;
 
     @Test
-    @DisplayName("update 테스트 - 정의 수정 성공")
-    void updateTest() {
+    @DisplayName("updateAll 테스트 - 정의 목록 수정 성공")
+    void updateAllTest() {
         // Given
+        UUID wordId = UUID.randomUUID();
         UUID userId = UUID.randomUUID();
-        UUID defId = UUID.randomUUID();
-        String meaning = "새로운 의미";
-        PartOfSpeech part = PartOfSpeech.VERB;
-
-        Definition existingDefinition = new Definition(defId, UUID.randomUUID(), "기존 의미", PartOfSpeech.NOUN);
-        given(definitionReader.readByIdAndUserId(defId, userId)).willReturn(existingDefinition);
+        List<Definition> definitions = List.of(
+                new Definition(UUID.randomUUID(), wordId, "의미1", PartOfSpeech.NOUN),
+                new Definition(UUID.randomUUID(), wordId, "의미2", PartOfSpeech.VERB)
+        );
 
         // When
-        definitionUpdater.update(userId, defId, meaning, part);
+        definitionUpdater.updateAll(definitions, wordId, userId);
 
         // Then
-        verify(definitionRepository).update(any(Definition.class), eq(userId));
+        verify(definitionRepository).updateAll(definitions, wordId, userId);
     }
 }
-

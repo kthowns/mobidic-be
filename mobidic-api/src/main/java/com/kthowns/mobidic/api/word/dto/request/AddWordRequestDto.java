@@ -18,11 +18,11 @@ import java.util.List;
 @Builder
 public class AddWordRequestDto {
     @NotBlank
-    @Size(min = 1, max = 45, message = "단어는 45자 미만이어야 합니다.")
+    @Size(min = 1, max = 45, message = "단어는 45자 이하여야 합니다.")
     @Pattern(regexp = "^[a-zA-Z][a-zA-Z ]*$", message = "단어는 영문자여야 합니다.")
     private String expression;
 
     @Valid
-    @Size(max = 10, message = "뜻은 10개 이하여야 합니다.")
+    @Size(min = 1, max = 10, message = "뜻은 최소 1개, 10개 이하여야 합니다.")
     private List<AddDefinitionRequestDto> definitions;
 }

@@ -1,11 +1,9 @@
 package com.kthowns.mobidic.api.integration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.kthowns.mobidic.api.definition.dto.request.AddDefinitionRequestDto;
 import com.kthowns.mobidic.api.security.jwt.JwtProvider;
 import com.kthowns.mobidic.api.util.DatabaseCleaner;
 import com.kthowns.mobidic.common.code.AuthResponseCode;
-import com.kthowns.mobidic.common.code.GeneralResponseCode;
 import com.kthowns.mobidic.domain.definition.model.PartOfSpeech;
 import com.kthowns.mobidic.domain.user.model.UserRole;
 import com.kthowns.mobidic.storage.definition.jpaentity.DefinitionJpaEntity;
@@ -22,17 +20,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionTemplate;
 
-import java.util.UUID;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -109,75 +102,6 @@ public class DefinitionIntegrationTest {
     }
 
     @Test
-    @DisplayName("정의 추가 성공")
-    void addDefinitionSuccess() throws Exception {
-        // Given
-        AddDefinitionRequestDto request = AddDefinitionRequestDto.builder()
-                .meaning("사과")
-                .part(PartOfSpeech.NOUN)
-                .build();
-
-        // When
-        mockMvc.perform(post("/api/words/" + testWord.getId() + "/definition")
-                        .header("Authorization", "Bearer " + userToken)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                // Then
-        .andExpect(status().isOk());
-
-        // Then
-        DefinitionJpaEntity savedDef = definitionJpaRepository.findAll().get(0);
-        assertThat(savedDef.getMeaning()).isEqualTo("사과");
-        assertThat(savedDef.getPart()).isEqualTo(PartOfSpeech.NOUN);
-        assertThat(savedDef.getWord().getId()).isEqualTo(testWord.getId());
-    }
-
-    @Test
-    @DisplayName("정의 추가 실패 - 중복된 정의")
-    void addDefinitionFailDuplicated() throws Exception {
-        // Given
-        definitionJpaRepository.save(DefinitionJpaEntity.builder()
-                .word(testWord)
-                .meaning("사과")
-                .part(PartOfSpeech.NOUN)
-                .build());
-
-        AddDefinitionRequestDto request = AddDefinitionRequestDto.builder()
-                .meaning("사과")
-                .part(PartOfSpeech.NOUN)
-                .build();
-
-        // When
-        mockMvc.perform(post("/api/words/" + testWord.getId() + "/definition")
-                        .header("Authorization", "Bearer " + userToken)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                // Then
-                .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.message").value(GeneralResponseCode.DUPLICATED_DEFINITION.getMessage()));
-    }
-
-    @Test
-    @DisplayName("정의 추가 실패 - 존재하지 않는 단어")
-    void addDefinitionFailNoWord() throws Exception {
-        // Given
-        UUID randomId = UUID.randomUUID();
-        AddDefinitionRequestDto request = AddDefinitionRequestDto.builder()
-                .meaning("사과")
-                .part(PartOfSpeech.NOUN)
-                .build();
-
-        // When
-        mockMvc.perform(post("/api/words/" + randomId + "/definition")
-                        .header("Authorization", "Bearer " + userToken)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                // Then
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.message").value(GeneralResponseCode.NO_WORD.getMessage()));
-    }
-
-    @Test
     @DisplayName("정의 조회 성공")
     void getDefinitionsSuccess() throws Exception {
         // Given
@@ -194,92 +118,6 @@ public class DefinitionIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data[0].meaning").value("사과"))
                 .andExpect(jsonPath("$.data[0].part").value("NOUN"));
-    }
-
-    @Test
-    @DisplayName("정의 수정 성공")
-    void updateDefinitionSuccess() throws Exception {
-        // Given
-        DefinitionJpaEntity definition = definitionJpaRepository.save(DefinitionJpaEntity.builder()
-                .word(testWord)
-                .meaning("사과")
-                .part(PartOfSpeech.NOUN)
-                .build());
-
-        AddDefinitionRequestDto updateRequest = AddDefinitionRequestDto.builder()
-                .meaning("꿀사과")
-                .part(PartOfSpeech.NOUN)
-                .build();
-
-        // When
-        mockMvc.perform(patch("/api/definitions/" + definition.getId())
-                        .header("Authorization", "Bearer " + userToken)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(updateRequest)))
-                // Then
-                .andExpect(status().isOk());
-
-        // Then
-        em.flush();
-        em.clear();
-        DefinitionJpaEntity updatedDef = definitionJpaRepository.findById(definition.getId()).orElseThrow();
-        assertThat(updatedDef.getMeaning()).isEqualTo("꿀사과");
-    }
-
-    @Test
-    @DisplayName("정의 삭제 성공")
-    void deleteDefinitionSuccess() throws Exception {
-        // Given
-        DefinitionJpaEntity definition = definitionJpaRepository.save(DefinitionJpaEntity.builder()
-                .word(testWord)
-                .meaning("사과")
-                .part(PartOfSpeech.NOUN)
-                .build());
-
-        // When
-        mockMvc.perform(delete("/api/definitions/" + definition.getId())
-                        .header("Authorization", "Bearer " + userToken))
-                // Then
-                .andExpect(status().isOk());
-
-        // Then
-        em.flush();
-        em.clear();
-        assertThat(definitionJpaRepository.findById(definition.getId())).isEmpty();
-    }
-
-    @Test
-    @DisplayName("정의 수정 실패 - 존재하지 않는 정의")
-    void updateDefinitionFailNoDef() throws Exception {
-        // Given
-        UUID randomId = UUID.randomUUID();
-        AddDefinitionRequestDto updateRequest = AddDefinitionRequestDto.builder()
-                .meaning("꿀사과")
-                .part(PartOfSpeech.NOUN)
-                .build();
-
-        // When
-        mockMvc.perform(patch("/api/definitions/" + randomId)
-                        .header("Authorization", "Bearer " + userToken)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(updateRequest)))
-                // Then
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.message").value(GeneralResponseCode.NO_DEF.getMessage()));
-    }
-
-    @Test
-    @DisplayName("정의 삭제 실패 - 존재하지 않는 정의")
-    void deleteDefinitionFailNoDef() throws Exception {
-        // Given
-        UUID randomId = UUID.randomUUID();
-
-        // When
-        mockMvc.perform(delete("/api/definitions/" + randomId)
-                        .header("Authorization", "Bearer " + userToken))
-                // Then
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.message").value(GeneralResponseCode.NO_DEF.getMessage()));
     }
 
     @Test

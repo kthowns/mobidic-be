@@ -14,7 +14,6 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
@@ -22,9 +21,6 @@ class WordUpdaterTest {
 
     @Mock
     private WordRepository wordRepository;
-
-    @Mock
-    private WordReader wordReader;
 
     @InjectMocks
     private WordUpdater wordUpdater;
@@ -38,10 +34,9 @@ class WordUpdaterTest {
         String newExpression = "banana";
 
         Word existingWord = new Word(wordId, UUID.randomUUID(), "apple", null);
-        given(wordReader.readByIdAndUserId(wordId, userId)).willReturn(existingWord);
 
         // When
-        wordUpdater.update(userId, wordId, newExpression);
+        wordUpdater.update(userId, existingWord, newExpression);
 
         // Then
         ArgumentCaptor<Word> captor = ArgumentCaptor.forClass(Word.class);

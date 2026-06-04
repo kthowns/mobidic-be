@@ -61,12 +61,11 @@ public class DefinitionService {
         }
 
         // 존재하는 Definition Batch 조회
-        List<Definition> existing =
-                definitionReader.readByIdsAndWordIdAndUserId(
-                        commands.stream().map(UpdateDefinitionCommand::id).toList(),
-                        wordId,
-                        userId
-                );
+        List<Definition> existing = definitionReader.readByIdsAndWordIdAndUserId(
+                commands.stream().map(UpdateDefinitionCommand::id).toList(),
+                wordId,
+                userId
+        );
 
         // Model 객체 상태 변경 (Update)
         List<Definition> updated = definitionMapper.mapToUpdated(existing, commands);

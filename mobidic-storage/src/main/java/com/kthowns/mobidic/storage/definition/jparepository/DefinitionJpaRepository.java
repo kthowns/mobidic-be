@@ -18,6 +18,4 @@ public interface DefinitionJpaRepository extends JpaRepository<DefinitionJpaEnti
     boolean existsByMeaningInAndIdNotInAndWord_IdAndWord_Vocabulary_User_Id(List<String> meanings, List<UUID> ids, UUID wordId, UUID userId);
 
     List<DefinitionJpaEntity> findByIdInAndWord_IdAndWord_Vocabulary_User_Id(Collection<UUID> ids, UUID wordId, UUID wordVocabularyUserId);
-
-    Optional<DefinitionJpaEntity> findByIdAndWord_IdAndWord_Vocabulary_User_Id(UUID id, UUID wordId, UUID wordVocabularyUserId);
 }

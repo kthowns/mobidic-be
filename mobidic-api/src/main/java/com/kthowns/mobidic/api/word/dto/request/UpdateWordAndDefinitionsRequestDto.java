@@ -32,4 +32,16 @@ public class UpdateWordAndDefinitionsRequestDto {
     List<AddDefinitionRequestDto> addingDefinitions;
 
     List<UUID> deletingDefinitions;
+
+    public List<UpdateDefinitionRequestDto> getUpdatingDefinitions() {
+        return updatingDefinitions != null ? updatingDefinitions : List.of();
+    }
+
+    public List<AddDefinitionRequestDto> getAddingDefinitions() {
+        return addingDefinitions != null ? addingDefinitions : List.of();
+    }
+
+    public List<UUID> getDeletingDefinitions() {
+        return deletingDefinitions != null ? deletingDefinitions : List.of();
+    }
 }
