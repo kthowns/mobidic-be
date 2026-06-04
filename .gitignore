@@ -115,7 +115,7 @@ fabric.properties
 hs_err_pid*
 replay_pid*
 
-application-*.yml
+application*dev*.yml
 
 ### Gradle ###
 .gradle
@@ -134,6 +134,9 @@ gradle-app.setting
 # Cache of project
 .gradletasknamecache
 
+# QueryDSL Generated
+**/generated/*
+
 # Eclipse Gradle plugin generated files
 # Eclipse Core
 .project
@@ -143,5 +146,8 @@ gradle-app.setting
 ### Gradle Patch ###
 # Java heap dump
 *.hprof
+
+### Custom ###
+document
 
 # End of https://www.toptal.com/developers/gitignore/api/gradle,intellij+all,java

@@ -1,0 +1,12 @@
+spring:
+  config:
+    import:
+      - optional:classpath:application-storage-test.yml
+      - optional:classpath:application-external-test.yml
+
+server:
+  port: 8080
+
+jwt:
+  secret: f825308ac5df56907db5835775baf3e4594526f127cb8d9bca70b435d596d424
+  exp: 86400000

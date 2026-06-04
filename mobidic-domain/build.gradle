@@ -1,0 +1,16 @@
+dependencies {
+    implementation project(':mobidic-common')
+
+    // Transactional
+    implementation 'org.springframework:spring-tx'
+
+    // Test
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+
+}
+
+test {
+    useJUnitPlatform()
+}

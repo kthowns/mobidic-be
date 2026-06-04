@@ -1,1 +1,6 @@
 rootProject.name = 'mobidic'
+include 'mobidic-api'
+include 'mobidic-common'
+include 'mobidic-domain'
+include 'mobidic-external'
+include 'mobidic-storage'
