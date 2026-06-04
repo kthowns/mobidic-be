@@ -56,9 +56,14 @@ public class WordService {
     public void updateWord(UUID userId, UUID wordId, String expression) {
         Word word = wordReader.readByIdAndUserId(wordId, userId);
 
-        wordValidator.validateExpressionUpdateDuplication(expression, word.vocabularyId(), wordId, userId);
+        wordValidator.validateExpressionDuplicationForUpdate(
+                expression,
+                word.vocabularyId(),
+                word.id(),
+                userId
+        );
 
-        wordUpdater.update(userId, wordId, expression);
+        wordUpdater.update(userId, word, expression);
     }
 
     @Transactional

@@ -19,7 +19,7 @@ class WordValidator {
         }
     }
 
-    public void validateExpressionUpdateDuplication(String expression, UUID vocabularyId, UUID wordId, UUID userId) {
+    public void validateExpressionDuplicationForUpdate(String expression, UUID vocabularyId, UUID wordId, UUID userId) {
         if (wordRepository.existsByExpressionAndVocabularyIdAndIdNot(expression, vocabularyId, wordId, userId)) {
             throw new ApiException(GeneralResponseCode.DUPLICATED_WORD);
         }

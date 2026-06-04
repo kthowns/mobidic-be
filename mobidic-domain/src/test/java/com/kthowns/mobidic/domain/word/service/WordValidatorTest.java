@@ -56,7 +56,7 @@ class WordValidatorTest {
 
     @Test
     @DisplayName("validateExpressionUpdateDuplication 테스트 - 중복 없음 (통과)")
-    void validateExpressionUpdateDuplicationTest_Success() {
+    void validateExpressionDuplicationForUpdateTest_Success() {
         // Given
         String expression = "banana";
         UUID vocabularyId = UUID.randomUUID();
@@ -65,13 +65,13 @@ class WordValidatorTest {
         given(wordRepository.existsByExpressionAndVocabularyIdAndIdNot(expression, vocabularyId, wordId, userId)).willReturn(false);
 
         // When & Then
-        assertThatCode(() -> wordValidator.validateExpressionUpdateDuplication(expression, vocabularyId, wordId, userId))
+        assertThatCode(() -> wordValidator.validateExpressionDuplicationForUpdate(expression, vocabularyId, wordId, userId))
                 .doesNotThrowAnyException();
     }
 
     @Test
     @DisplayName("validateExpressionUpdateDuplication 테스트 - 중복 발생 (예외)")
-    void validateExpressionUpdateDuplicationTest_Fail() {
+    void validateExpressionDuplicationForUpdateTest_Fail() {
         // Given
         String expression = "banana";
         UUID vocabularyId = UUID.randomUUID();
@@ -80,7 +80,7 @@ class WordValidatorTest {
         given(wordRepository.existsByExpressionAndVocabularyIdAndIdNot(expression, vocabularyId, wordId, userId)).willReturn(true);
 
         // When & Then
-        assertThatThrownBy(() -> wordValidator.validateExpressionUpdateDuplication(expression, vocabularyId, wordId, userId))
+        assertThatThrownBy(() -> wordValidator.validateExpressionDuplicationForUpdate(expression, vocabularyId, wordId, userId))
                 .isInstanceOf(ApiException.class)
                 .hasMessageContaining(GeneralResponseCode.DUPLICATED_WORD.getMessage());
     }

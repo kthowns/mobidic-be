@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -60,27 +61,58 @@ public class DefinitionRepositoryImpl implements DefinitionRepository {
     }
 
     @Override
-    public void update(Definition definition, UUID userId) {
-        DefinitionJpaEntity definitionJpaEntity = definitionJpaRepository.findByIdAndWord_Vocabulary_User_Id(definition.id(), userId)
-                .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_DEF));
-
+    public void update(Definition definition, UUID wordId, UUID userId) {
+        DefinitionJpaEntity definitionJpaEntity = em.find(DefinitionJpaEntity.class, definition.id());
+        if (definitionJpaEntity == null) throw new ApiException(GeneralResponseCode.NO_DEF);
         definitionJpaEntity.updateFromModel(definition);
     }
 
     @Override
-    public void delete(UUID definitionId, UUID userId) {
-        DefinitionJpaEntity definitionJpaEntity = definitionJpaRepository.findByIdAndWord_Vocabulary_User_Id(definitionId, userId)
-                .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_DEF));
-        definitionJpaRepository.delete(definitionJpaEntity);
+    public void updateAll(List<Definition> definitions, UUID wordId, UUID userId) {
+        List<UUID> ids = definitions.stream().map(Definition::id).toList();
+
+        Map<UUID, Definition> modelMap = definitions.stream()
+                .collect(Collectors.toMap(Definition::id, d -> d));
+
+        for (UUID id : ids) {
+            DefinitionJpaEntity definitionJpaEntity = em.find(DefinitionJpaEntity.class, id);
+            if (definitionJpaEntity == null) {
+                throw new ApiException(GeneralResponseCode.NO_DEF);
+            }
+            if (!definitionJpaEntity.getWord().getId().equals(wordId)) {
+                throw new ApiException(GeneralResponseCode.INVALID_REQUEST_BODY);
+            }
+            definitionJpaEntity.updateFromModel(modelMap.get(id));
+        }
     }
 
     @Override
-    public boolean existsByMeaningAndWordId(String meaning, UUID wordId, UUID userId) {
-        return definitionJpaRepository.existsByMeaningAndWord_IdAndWord_Vocabulary_User_Id(meaning, wordId, userId);
+    public boolean existsByMeaningsForAppend(List<String> meanings, UUID wordId, UUID userId) {
+        return definitionJpaRepository.existsByMeaningInAndWord_IdAndWord_Vocabulary_User_Id(meanings, wordId, userId);
     }
 
     @Override
-    public boolean existsByMeaningAndWordIdAndIdNot(String meaning, UUID wordId, UUID definitionId, UUID userId) {
-        return definitionJpaRepository.existsByMeaningAndWord_IdAndIdNotAndWord_Vocabulary_User_Id(meaning, wordId, definitionId, userId);
+    public boolean existsByMeaningsForUpdate(List<String> meanings, List<UUID> ids, UUID wordId, UUID userId) {
+        return definitionJpaRepository.existsByMeaningInAndIdNotInAndWord_IdAndWord_Vocabulary_User_Id(
+                meanings, ids, wordId, userId
+        );
+    }
+
+    @Override
+    public List<Definition> readByIdsAndWordIdAndUserId(List<UUID> definitionIds, UUID wordId, UUID userId) {
+        return definitionJpaRepository.findByIdInAndWord_IdAndWord_Vocabulary_User_Id(definitionIds, wordId, userId)
+                .stream().map(DefinitionJpaEntity::toModel).toList();
+    }
+
+    @Override
+    public void deleteAll(List<UUID> ids, UUID wordId, UUID userId) {
+        List<DefinitionJpaEntity> definitions = definitionJpaRepository.findByIdInAndWord_IdAndWord_Vocabulary_User_Id(ids, wordId, userId);
+
+        if (ids.size() != definitions.size()) {
+            throw new ApiException(GeneralResponseCode.INVALID_REQUEST_BODY);
+        }
+
+        definitionJpaRepository.deleteAllInBatch(definitions);
+        em.flush();
     }
 }

@@ -102,7 +102,7 @@ class WordServiceTest {
         wordService.updateWord(userId, wordId, newExpression);
 
         // then
-        verify(wordValidator).validateExpressionUpdateDuplication(newExpression, vocabId, wordId, userId);
+        verify(wordValidator).validateExpressionDuplicationForUpdate(newExpression, vocabId, wordId, userId);
         verify(wordUpdater).update(userId, wordId, newExpression);
     }
 

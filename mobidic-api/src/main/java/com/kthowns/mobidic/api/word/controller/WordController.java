@@ -1,12 +1,12 @@
 package com.kthowns.mobidic.api.word.controller;
 
 import com.kthowns.mobidic.api.auth.model.AuthUser;
+import com.kthowns.mobidic.api.definition.util.DefinitionCommandMapper;
 import com.kthowns.mobidic.api.word.dto.request.AddWordRequestDto;
-import com.kthowns.mobidic.api.word.dto.request.UpdateWordRequestDto;
+import com.kthowns.mobidic.api.word.dto.request.UpdateWordAndDefinitionsRequestDto;
+import com.kthowns.mobidic.api.word.util.WordCommandMapper;
 import com.kthowns.mobidic.common.dto.ErrorResponse;
 import com.kthowns.mobidic.common.dto.GeneralResponse;
-import com.kthowns.mobidic.domain.definition.command.AddDefinitionCommand;
-import com.kthowns.mobidic.domain.word.command.AddWordCommand;
 import com.kthowns.mobidic.domain.word.facade.WordFacade;
 import com.kthowns.mobidic.domain.word.model.WordDetail;
 import com.kthowns.mobidic.domain.word.service.WordService;
@@ -37,6 +37,8 @@ import static com.kthowns.mobidic.common.code.GeneralResponseCode.OK;
 public class WordController {
     private final WordService wordService;
     private final WordFacade wordFacade;
+    private final WordCommandMapper wordCommandMapper;
+    private final DefinitionCommandMapper definitionCommandMapper;
 
     @Operation(
             summary = "단어 전체 조회",
@@ -87,15 +89,12 @@ public class WordController {
             @RequestBody @Valid AddWordRequestDto request,
             @AuthenticationPrincipal AuthUser authUser
     ) {
-        List<AddDefinitionCommand> addDefinitionCommands = request.getDefinitions() != null ?
-                request.getDefinitions().stream()
-                        .map((d) -> AddDefinitionCommand.of(d.getMeaning(), d.getPart()))
-                        .toList()
-                : List.of();
-        AddWordCommand addWordCommand = AddWordCommand
-                .of(authUser.getId(), vocabularyId, request.getExpression());
-
-        wordFacade.addWord(addWordCommand, addDefinitionCommands);
+        wordFacade.addWord(
+                authUser.getId(),
+                vocabularyId,
+                wordCommandMapper.toAddWordCommand(request),
+                definitionCommandMapper.toAddDefinitionCommands(request.getDefinitions())
+        );
         return GeneralResponse.toResponseEntity(OK, null);
     }
 
@@ -120,10 +119,16 @@ public class WordController {
     @PatchMapping("/words/{wordId}")
     public ResponseEntity<GeneralResponse<Void>> updateWord(
             @PathVariable UUID wordId,
-            @RequestBody @Valid UpdateWordRequestDto request,
+            @RequestBody @Valid UpdateWordAndDefinitionsRequestDto request,
             @AuthenticationPrincipal AuthUser authUser
     ) {
-        wordService.updateWord(authUser.getId(), wordId, request.getExpression());
+        wordFacade.updateWordAndSyncDefinitions(
+                authUser.getId(),
+                wordCommandMapper.toUpdateWordCommand(request, wordId),
+                definitionCommandMapper.toUpdateDefinitionCommands(request.getUpdatingDefinitions(), wordId),
+                definitionCommandMapper.toAddDefinitionCommands(request.getAddingDefinitions()),
+                request.getDeletingDefinitions()
+        );
         return GeneralResponse.toResponseEntity(OK, null);
     }
 

@@ -5,7 +5,7 @@ import com.kthowns.mobidic.api.definition.dto.request.AddDefinitionRequestDto;
 import com.kthowns.mobidic.api.security.jwt.JwtProvider;
 import com.kthowns.mobidic.api.util.DatabaseCleaner;
 import com.kthowns.mobidic.api.word.dto.request.AddWordRequestDto;
-import com.kthowns.mobidic.api.word.dto.request.UpdateWordRequestDto;
+import com.kthowns.mobidic.api.word.dto.request.UpdateWordAndDefinitionsRequestDto;
 import com.kthowns.mobidic.common.code.AuthResponseCode;
 import com.kthowns.mobidic.common.code.GeneralResponseCode;
 import com.kthowns.mobidic.domain.definition.model.PartOfSpeech;
@@ -230,7 +230,7 @@ public class WordIntegrationTest {
                 .expression("flower")
                 .build());
 
-        UpdateWordRequestDto request = UpdateWordRequestDto.builder()
+        UpdateWordAndDefinitionsRequestDto request = UpdateWordAndDefinitionsRequestDto.builder()
                 .expression("garden")
                 .build();
 

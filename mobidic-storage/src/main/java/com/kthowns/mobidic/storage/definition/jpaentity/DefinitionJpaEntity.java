@@ -18,7 +18,8 @@ import java.util.UUID;
 @NoArgsConstructor
 @Builder
 @Entity
-@Table(name = "definitions")
+@Table(name = "definitions",
+        uniqueConstraints = @UniqueConstraint(columnNames = {"word_id", "meaning"}))
 public class DefinitionJpaEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

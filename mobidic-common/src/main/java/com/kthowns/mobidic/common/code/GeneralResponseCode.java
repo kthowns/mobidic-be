@@ -9,7 +9,7 @@ import org.springframework.http.HttpStatus;
 public enum GeneralResponseCode implements ApiResponseCode {
     OK(HttpStatus.OK, "OK"),
     NOT_FOUND(HttpStatus.NOT_FOUND, "Not found"),
-    INVALID_REQUEST(HttpStatus.BAD_REQUEST, "Invalid Request"),
+    INVALID_REQUEST(HttpStatus.BAD_REQUEST, "유효하지 않은 요청입니다."),
 
     NO_TERM(HttpStatus.NOT_FOUND, "해당하는 이용 약관을 찾을 수 없습니다."),
     NO_VOCAB(HttpStatus.NOT_FOUND, "단어장을 찾을 수 없습니다."),
