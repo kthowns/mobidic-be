@@ -1,8 +1,5 @@
 whisper:
   flask-server-url: http://localhost:5000
-jasypt:
-  encryptor:
-    password: f04f3e3f0b8c1fe1bed17faf3314ecb3d066b80439aeb13a58e7292695274119
 
 kakao:
   rest-api-key: test

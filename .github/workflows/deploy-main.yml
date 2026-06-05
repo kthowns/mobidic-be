@@ -63,7 +63,6 @@ jobs:
           echo "KAKAO_DEV_BACKEND_CALLBACK_URL=${{ secrets.KAKAO_DEV_BACKEND_CALLBACK_URL }}" >> .env
           echo "KAKAO_DEV_FRONTEND_CALLBACK_URL=${{ secrets.KAKAO_DEV_FRONTEND_CALLBACK_URL }}" >> .env
           echo "FLASK_HOST=${{ secrets.FLASK_HOST }}" >> .env
-          echo "JASYPT_SECRET=${{ secrets.JASYPT_SECRET }}" >> .env
 
       - name: Copy docker-compose.yml and .env to SERVER
         uses: appleboy/scp-action@v0.1.7

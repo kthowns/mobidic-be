@@ -1,10 +1,6 @@
 whisper:
   flask-server-url: ${FLASK_HOST}
 
-jasypt:
-  encryptor:
-    password: ${JASYPT_SECRET}
-
 kakao:
   rest-api-key: ${KAKAO_REST_API_KEY}
   client-secret: ${KAKAO_CLIENT_SECRET}
