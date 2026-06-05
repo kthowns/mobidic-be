@@ -30,8 +30,10 @@ springdoc:
   use-fqn: true
 
 oauth2:
-  kakao:
-    frontend-callback-url: ${KAKAO_FRONTEND_CALLBACK_URL}
-    android-callback-url: ${KAKAO_ANDROID_CALLBACK_URL}
-    dev:
-      frontend-callback-url: ${KAKAO_DEV_FRONTEND_CALLBACK_URL}
+  callback-url:
+    frontend:
+      kakao:
+        frontend-callback-url: ${KAKAO_FRONTEND_CALLBACK_URL}
+        android-callback-url: ${KAKAO_ANDROID_CALLBACK_URL}
+        dev:
+          frontend-callback-url: ${KAKAO_DEV_FRONTEND_CALLBACK_URL}

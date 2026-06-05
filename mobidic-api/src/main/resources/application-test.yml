@@ -12,8 +12,10 @@ jwt:
   exp: 86400000
 
 oauth2:
-  kakao:
-    frontend-callback-url: test
-    android-callback-url: test
-    dev:
-      frontend-callback-url: test
+  callback-url:
+    frontend:
+      kakao:
+        frontend-callback-url: test
+        android-callback-url: test
+        dev:
+          frontend-callback-url: test

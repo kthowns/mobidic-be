@@ -23,15 +23,15 @@ public class KakaoAuthService {
         return authUserRepository.readByKakaoId(kakaoId);
     }
 
-    public String getKakaoLoginUrl(boolean isDev, String platform) {
-        return oauthClient.getLoginUrl(isDev, platform);
+    public String getKakaoLoginUrl(boolean isDev, String platform, String serverBaseUrl) {
+        return oauthClient.getLoginUrl(isDev, platform, serverBaseUrl);
     }
 
     public OAuthUserInfo getKakaoUserInfo(String kakaoAccessToken) {
         return oauthClient.getUserInfo(kakaoAccessToken);
     }
 
-    public String getKakaoAccessToken(String code, boolean isDev, String platform) {
-        return oauthClient.getAccessToken(code, isDev, platform);
+    public String getKakaoAccessToken(String code, boolean isDev, String platform, String serverBaseUrl) {
+        return oauthClient.getAccessToken(code, isDev, platform, serverBaseUrl);
     }
 }

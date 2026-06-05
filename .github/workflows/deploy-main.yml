@@ -57,7 +57,6 @@ jobs:
           echo "REDIS_HOST=${{ secrets.REDIS_HOST }}" >> .env
           echo "KAKAO_REST_API_KEY=${{ secrets.KAKAO_REST_API_KEY }}" >> .env
           echo "KAKAO_CLIENT_SECRET=${{ secrets.KAKAO_CLIENT_SECRET }}" >> .env
-          echo "KAKAO_BACKEND_CALLBACK_URL=${{ secrets.KAKAO_BACKEND_CALLBACK_URL }}" >> .env
           echo "KAKAO_FRONTEND_CALLBACK_URL=${{ secrets.KAKAO_FRONTEND_CALLBACK_URL }}" >> .env
           echo "KAKAO_ANDROID_CALLBACK_URL=${{ secrets.KAKAO_ANDROID_CALLBACK_URL }}" >> .env
           echo "KAKAO_DEV_BACKEND_CALLBACK_URL=${{ secrets.KAKAO_DEV_BACKEND_CALLBACK_URL }}" >> .env

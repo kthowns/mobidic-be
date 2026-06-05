@@ -7,7 +7,7 @@ import com.kthowns.mobidic.domain.auth.client.OAuthClient;
 import com.kthowns.mobidic.domain.auth.model.OAuthUserInfo;
 import com.kthowns.mobidic.external.auth.dto.KakaoTokenResponse;
 import com.kthowns.mobidic.external.auth.dto.KakaoUserInfo;
-import com.kthowns.mobidic.external.auth.properties.KakaoProperties;
+import com.kthowns.mobidic.external.auth.properties.KakaoApiProperties;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -27,27 +27,27 @@ import java.util.Objects;
 @Slf4j
 public class KakaoOAuthClient implements OAuthClient {
     private final RestClient restClient;
-    private final KakaoProperties kakaoProperties;
+    private final KakaoApiProperties kakaoApiProperties;
 
     @Override
-    public String getLoginUrl(boolean isDev, String platform) {
+    public String getLoginUrl(boolean isDev, String platform, String serverBaseUrl) {
         return UriComponentsBuilder
                 .fromUriString(KakaoApiUrl.CODE.getUrl())
                 .queryParam("response_type", "code")
-                .queryParam("client_id", kakaoProperties.restApiKey())
-                .queryParam("redirect_uri", kakaoProperties.getBackendCallbackUrl(isDev, platform))
+                .queryParam("client_id", kakaoApiProperties.restApiKey())
+                .queryParam("redirect_uri", getBackendCallbackUrl(isDev, platform, serverBaseUrl))
                 .encode()
                 .toUriString();
     }
 
     @Override
-    public String getAccessToken(String authCode, boolean isDev, String platform) {
+    public String getAccessToken(String authCode, boolean isDev, String platform, String serverBaseUrl) {
         MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
         formData.add("grant_type", "authorization_code");
-        formData.add("client_id", kakaoProperties.restApiKey());
-        formData.add("redirect_uri", kakaoProperties.getBackendCallbackUrl(isDev, platform));
+        formData.add("client_id", kakaoApiProperties.restApiKey());
+        formData.add("redirect_uri", getBackendCallbackUrl(isDev, platform, serverBaseUrl));
         formData.add("code", authCode);
-        formData.add("client_secret", kakaoProperties.clientSecret());
+        formData.add("client_secret", kakaoApiProperties.clientSecret());
 
         KakaoTokenResponse tokenResponse = restClient.post()
                 .uri(KakaoApiUrl.TOKEN.getUrl())
@@ -85,5 +85,22 @@ public class KakaoOAuthClient implements OAuthClient {
                 userInfo.getKakaoAccount().getEmail(),
                 userInfo.getKakaoAccount().getProfile().getNickname()
         );
+    }
+
+    public String getBackendCallbackUrl(boolean isDev, String platform, String serverBaseUrl) {
+        UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(
+                isDev ? kakaoApiProperties.dev().backendCallbackUrl()
+                        : serverBaseUrl + "/api/auth/v1/oauth2/kakao"
+        );
+
+        if ("android".equals(platform)) {
+            builder.queryParam("platform", "android");
+        }
+
+        if (isDev) {
+            builder.queryParam("isDev", true);
+        }
+
+        return builder.toUriString();
     }
 }

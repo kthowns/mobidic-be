@@ -1,10 +1,10 @@
-package com.kthowns.mobidic.api.auth.config;
+package com.kthowns.mobidic.api.auth.properties;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.web.util.UriComponentsBuilder;
 
-@ConfigurationProperties("oauth2.kakao")
-public record OAuthKakaoProperties(
+@ConfigurationProperties("oauth2.callback-url.frontend.kakao")
+public record OAuthKakaoCallbackUrlProperties(
         String frontendCallbackUrl,
         String androidCallbackUrl,
         DevProperties dev
