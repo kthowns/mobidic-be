@@ -3,7 +3,6 @@ package com.kthowns.mobidic.api.integration;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kthowns.mobidic.api.security.jwt.JwtProvider;
 import com.kthowns.mobidic.api.user.dto.request.UpdateUserRequestDto;
-import com.kthowns.mobidic.api.util.DatabaseCleaner;
 import com.kthowns.mobidic.common.code.AuthResponseCode;
 import com.kthowns.mobidic.common.code.GeneralResponseCode;
 import com.kthowns.mobidic.domain.user.model.UserRole;
@@ -48,9 +47,6 @@ public class UserIntegrationTest {
     private JwtProvider jwtProvider;
 
     @Autowired
-    private DatabaseCleaner databaseCleaner;
-
-    @Autowired
     private UserJpaRepository userJpaRepository;
 
     @Autowired
@@ -66,9 +62,9 @@ public class UserIntegrationTest {
     private String userToken;
 
     @BeforeEach
-    void cleanAndSetup() {
-        databaseCleaner.execute();
+    void setup()
 
+    {
         testUser = userJpaRepository.save(UserJpaEntity.builder()
                 .email("test@test.com")
                 .nickname("test")

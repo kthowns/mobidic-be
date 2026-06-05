@@ -2,7 +2,6 @@ package com.kthowns.mobidic.api.integration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kthowns.mobidic.api.security.jwt.JwtProvider;
-import com.kthowns.mobidic.api.util.DatabaseCleaner;
 import com.kthowns.mobidic.api.vocabulary.dto.request.AddVocabularyRequestDto;
 import com.kthowns.mobidic.common.code.AuthResponseCode;
 import com.kthowns.mobidic.common.code.GeneralResponseCode;
@@ -53,9 +52,6 @@ public class VocabularyIntegrationTest {
     private JwtProvider jwtProvider;
 
     @Autowired
-    private DatabaseCleaner databaseCleaner;
-
-    @Autowired
     private UserJpaRepository userJpaRepository;
 
     @Autowired
@@ -78,8 +74,6 @@ public class VocabularyIntegrationTest {
 
     @BeforeEach
     void setUp() {
-        databaseCleaner.execute();
-
         testUser = userJpaRepository.save(UserJpaEntity.builder()
                 .email("test@test.com")
                 .nickname("test")

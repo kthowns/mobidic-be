@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kthowns.mobidic.api.quiz.dto.request.QuizRateRequest;
 import com.kthowns.mobidic.api.security.jwt.JwtProvider;
-import com.kthowns.mobidic.api.util.DatabaseCleaner;
 import com.kthowns.mobidic.common.code.GeneralResponseCode;
 import com.kthowns.mobidic.domain.definition.model.PartOfSpeech;
 import com.kthowns.mobidic.domain.quiz.model.QuizInfo;
@@ -31,7 +30,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.List;
 import java.util.Map;
@@ -63,9 +61,6 @@ public class QuizIntegrationTest {
     private JwtProvider jwtProvider;
 
     @Autowired
-    private DatabaseCleaner databaseCleaner;
-
-    @Autowired
     private UserJpaRepository userJpaRepository;
 
     @Autowired
@@ -92,9 +87,9 @@ public class QuizIntegrationTest {
     private Map<String, String> wordToMeaning;
 
     @BeforeEach
-    void cleanAndSetup() {
-        databaseCleaner.execute();
+    void setup()
 
+    {
         testUser = userJpaRepository.save(UserJpaEntity.builder()
                 .email("test@test.com")
                 .nickname("test")

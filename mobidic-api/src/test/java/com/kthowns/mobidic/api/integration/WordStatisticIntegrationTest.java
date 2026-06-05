@@ -1,7 +1,6 @@
 package com.kthowns.mobidic.api.integration;
 
 import com.kthowns.mobidic.api.security.jwt.JwtProvider;
-import com.kthowns.mobidic.api.util.DatabaseCleaner;
 import com.kthowns.mobidic.common.code.AuthResponseCode;
 import com.kthowns.mobidic.common.code.GeneralResponseCode;
 import com.kthowns.mobidic.domain.user.model.UserRole;
@@ -22,9 +21,14 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -46,9 +50,6 @@ public class WordStatisticIntegrationTest {
 
     @Autowired
     private JwtProvider jwtProvider;
-
-    @Autowired
-    private DatabaseCleaner databaseCleaner;
 
     @Autowired
     private UserJpaRepository userJpaRepository;
@@ -75,8 +76,6 @@ public class WordStatisticIntegrationTest {
 
     @BeforeEach
     void setUp() {
-        databaseCleaner.execute();
-
         testUser = userJpaRepository.save(UserJpaEntity.builder()
                 .email("test@test.com")
                 .nickname("test")
@@ -203,15 +202,15 @@ public class WordStatisticIntegrationTest {
     void toggleLearnedStatusConcurrency() throws Exception {
         // Given
         int threadCount = 10;
-        java.util.concurrent.ExecutorService executorService = java.util.concurrent.Executors.newFixedThreadPool(threadCount);
-        java.util.concurrent.CountDownLatch latch = new java.util.concurrent.CountDownLatch(threadCount);
-        java.util.concurrent.atomic.AtomicInteger successCount = new java.util.concurrent.atomic.AtomicInteger(0);
+        ExecutorService executorService = Executors.newFixedThreadPool(threadCount);
+        CountDownLatch latch = new CountDownLatch(threadCount);
+        AtomicInteger successCount = new AtomicInteger(0);
 
         // When
         for (int i = 0; i < threadCount; i++) {
             executorService.submit(() -> {
                 try {
-                    org.springframework.test.web.servlet.MvcResult result = mockMvc.perform(patch("/api/words/" + testWord.getId() + "/toggle-learned")
+                    MvcResult result = mockMvc.perform(patch("/api/words/" + testWord.getId() + "/toggle-learned")
                                     .header("Authorization", "Bearer " + userToken))
                             .andReturn();
 

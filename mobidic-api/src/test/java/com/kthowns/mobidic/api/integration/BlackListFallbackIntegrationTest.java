@@ -1,7 +1,6 @@
 package com.kthowns.mobidic.api.integration;
 
 import com.kthowns.mobidic.api.security.jwt.JwtProvider;
-import com.kthowns.mobidic.api.util.DatabaseCleaner;
 import com.kthowns.mobidic.domain.auth.repository.AuthRedisKey;
 import com.kthowns.mobidic.domain.user.model.UserRole;
 import com.kthowns.mobidic.storage.user.jpaentity.UserJpaEntity;
@@ -36,9 +35,6 @@ public class BlackListFallbackIntegrationTest {
     private JwtProvider jwtProvider;
 
     @Autowired
-    private DatabaseCleaner databaseCleaner;
-
-    @Autowired
     private UserJpaRepository userJpaRepository;
 
     @MockitoBean
@@ -54,8 +50,6 @@ public class BlackListFallbackIntegrationTest {
 
     @BeforeEach
     void setup() {
-        databaseCleaner.execute();
-
         activeUser = userJpaRepository.save(UserJpaEntity.builder()
                 .email("active@test.com")
                 .nickname("active")

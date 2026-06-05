@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kthowns.mobidic.api.definition.dto.request.AddDefinitionRequestDto;
 import com.kthowns.mobidic.api.definition.dto.request.UpdateDefinitionRequestDto;
 import com.kthowns.mobidic.api.security.jwt.JwtProvider;
-import com.kthowns.mobidic.api.util.DatabaseCleaner;
 import com.kthowns.mobidic.api.word.dto.request.AddWordRequestDto;
 import com.kthowns.mobidic.api.word.dto.request.UpdateWordAndDefinitionsRequestDto;
 import com.kthowns.mobidic.common.code.AuthResponseCode;
@@ -55,9 +54,6 @@ public class WordIntegrationTest {
     private JwtProvider jwtProvider;
 
     @Autowired
-    private DatabaseCleaner databaseCleaner;
-
-    @Autowired
     private UserJpaRepository userJpaRepository;
 
     @Autowired
@@ -81,8 +77,6 @@ public class WordIntegrationTest {
 
     @BeforeEach
     void setup() {
-        databaseCleaner.execute();
-
         testUser = userJpaRepository.save(UserJpaEntity.builder()
                 .email("test@test.com")
                 .nickname("test")
