@@ -3,7 +3,7 @@ package com.kthowns.mobidic.api.integration;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kthowns.mobidic.api.quiz.dto.request.QuizRateRequest;
-import com.kthowns.mobidic.api.security.jwt.JwtProvider;
+import com.kthowns.mobidic.api.security.util.JwtProvider;
 import com.kthowns.mobidic.common.code.GeneralResponseCode;
 import com.kthowns.mobidic.domain.definition.model.PartOfSpeech;
 import com.kthowns.mobidic.domain.quiz.model.QuizInfo;
@@ -87,9 +87,7 @@ public class QuizIntegrationTest {
     private Map<String, String> wordToMeaning;
 
     @BeforeEach
-    void setup()
-
-    {
+    void setup() {
         testUser = userJpaRepository.save(UserJpaEntity.builder()
                 .email("test@test.com")
                 .nickname("test")

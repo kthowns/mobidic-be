@@ -1,13 +1,13 @@
 package com.kthowns.mobidic.api.auth.controller;
 
+import com.kthowns.mobidic.api.auth.config.OAuthKakaoProperties;
 import com.kthowns.mobidic.api.auth.dto.response.KakaoLoginUrlResponse;
-import com.kthowns.mobidic.api.security.jwt.JwtProvider;
+import com.kthowns.mobidic.api.security.util.JwtProvider;
 import com.kthowns.mobidic.common.code.GeneralResponseCode;
 import com.kthowns.mobidic.common.dto.GeneralResponse;
 import com.kthowns.mobidic.domain.auth.facade.KakaoAuthFacade;
 import com.kthowns.mobidic.domain.auth.service.KakaoAuthService;
 import com.kthowns.mobidic.domain.user.model.User;
-import com.kthowns.mobidic.external.auth.util.KakaoProperties;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -23,7 +23,7 @@ import org.springframework.web.servlet.view.RedirectView;
 @RequiredArgsConstructor
 public class KakaoAuthController {
     private final KakaoAuthService kakaoAuthService;
-    private final KakaoProperties kakaoProperties;
+    private final OAuthKakaoProperties kakaoProperties;
     private final KakaoAuthFacade kakaoAuthFacade;
     private final JwtProvider jwtProvider;
 

@@ -1,6 +1,7 @@
-package com.kthowns.mobidic.api.security.jwt;
+package com.kthowns.mobidic.api.security.util;
 
 import com.kthowns.mobidic.api.auth.model.AuthUser;
+import com.kthowns.mobidic.api.security.properties.JwtProperties;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.SignatureException;
 import lombok.RequiredArgsConstructor;

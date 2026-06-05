@@ -4,6 +4,7 @@ import com.kthowns.mobidic.domain.quiz.model.Quiz;
 import com.kthowns.mobidic.domain.quiz.model.QuizAnswer;
 import com.kthowns.mobidic.domain.quiz.model.QuizInfo;
 import com.kthowns.mobidic.domain.quiz.model.QuizResult;
+import com.kthowns.mobidic.domain.quiz.properties.QuizProperties;
 import com.kthowns.mobidic.domain.statistic.service.StatisticService;
 import com.kthowns.mobidic.domain.word.model.WordDetail;
 import com.kthowns.mobidic.domain.word.service.WordService;

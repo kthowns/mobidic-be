@@ -1,7 +1,8 @@
 package com.kthowns.mobidic.api.integration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.kthowns.mobidic.api.security.jwt.JwtProvider;
+import com.kthowns.mobidic.api.security.properties.JwtProperties;
+import com.kthowns.mobidic.api.security.util.JwtProvider;
 import com.kthowns.mobidic.api.user.dto.request.UpdateUserRequestDto;
 import com.kthowns.mobidic.common.code.AuthResponseCode;
 import com.kthowns.mobidic.common.code.GeneralResponseCode;
@@ -62,9 +63,7 @@ public class UserIntegrationTest {
     private String userToken;
 
     @BeforeEach
-    void setup()
-
-    {
+    void setup() {
         testUser = userJpaRepository.save(UserJpaEntity.builder()
                 .email("test@test.com")
                 .nickname("test")
@@ -202,7 +201,7 @@ public class UserIntegrationTest {
     }
 
     @Autowired
-    private com.kthowns.mobidic.api.security.jwt.JwtProperties jwtProperties;
+    private JwtProperties jwtProperties;
 
     @Test
     @DisplayName("보안 테스트 - 만료된 토큰으로 요청 시 실패")

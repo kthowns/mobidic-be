@@ -3,7 +3,7 @@ package com.kthowns.mobidic.api.integration;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kthowns.mobidic.api.definition.dto.request.AddDefinitionRequestDto;
 import com.kthowns.mobidic.api.definition.dto.request.UpdateDefinitionRequestDto;
-import com.kthowns.mobidic.api.security.jwt.JwtProvider;
+import com.kthowns.mobidic.api.security.util.JwtProvider;
 import com.kthowns.mobidic.api.word.dto.request.AddWordRequestDto;
 import com.kthowns.mobidic.api.word.dto.request.UpdateWordAndDefinitionsRequestDto;
 import com.kthowns.mobidic.common.code.AuthResponseCode;

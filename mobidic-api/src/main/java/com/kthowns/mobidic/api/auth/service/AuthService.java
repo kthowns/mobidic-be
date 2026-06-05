@@ -3,7 +3,7 @@ package com.kthowns.mobidic.api.auth.service;
 import com.kthowns.mobidic.api.auth.dto.request.LoginRequest;
 import com.kthowns.mobidic.api.auth.dto.response.LoginResponse;
 import com.kthowns.mobidic.api.auth.model.AuthUser;
-import com.kthowns.mobidic.api.security.jwt.JwtProvider;
+import com.kthowns.mobidic.api.security.util.JwtProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;

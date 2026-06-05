@@ -7,7 +7,7 @@ import com.kthowns.mobidic.domain.auth.client.OAuthClient;
 import com.kthowns.mobidic.domain.auth.model.OAuthUserInfo;
 import com.kthowns.mobidic.external.auth.dto.KakaoTokenResponse;
 import com.kthowns.mobidic.external.auth.dto.KakaoUserInfo;
-import com.kthowns.mobidic.external.auth.util.KakaoProperties;
+import com.kthowns.mobidic.external.auth.properties.KakaoProperties;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -34,7 +34,7 @@ public class KakaoOAuthClient implements OAuthClient {
         return UriComponentsBuilder
                 .fromUriString(KakaoApiUrl.CODE.getUrl())
                 .queryParam("response_type", "code")
-                .queryParam("client_id", kakaoProperties.getClientId())
+                .queryParam("client_id", kakaoProperties.restApiKey())
                 .queryParam("redirect_uri", kakaoProperties.getBackendCallbackUrl(isDev, platform))
                 .encode()
                 .toUriString();
@@ -44,10 +44,10 @@ public class KakaoOAuthClient implements OAuthClient {
     public String getAccessToken(String authCode, boolean isDev, String platform) {
         MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
         formData.add("grant_type", "authorization_code");
-        formData.add("client_id", kakaoProperties.getClientId());
+        formData.add("client_id", kakaoProperties.restApiKey());
         formData.add("redirect_uri", kakaoProperties.getBackendCallbackUrl(isDev, platform));
         formData.add("code", authCode);
-        formData.add("client_secret", kakaoProperties.getClientSecret());
+        formData.add("client_secret", kakaoProperties.clientSecret());
 
         KakaoTokenResponse tokenResponse = restClient.post()
                 .uri(KakaoApiUrl.TOKEN.getUrl())

@@ -1,6 +1,6 @@
 package com.kthowns.mobidic.api.integration;
 
-import com.kthowns.mobidic.api.security.jwt.JwtProvider;
+import com.kthowns.mobidic.api.security.util.JwtProvider;
 import com.kthowns.mobidic.common.code.AuthResponseCode;
 import com.kthowns.mobidic.common.code.GeneralResponseCode;
 import com.kthowns.mobidic.domain.pronunciation.client.SpeechToTextClient;
@@ -67,9 +67,7 @@ public class PronunciationIntegrationTest {
     private WordJpaEntity testWord;
 
     @BeforeEach
-    void setup()
-
-    {
+    void setup() {
         testUser = userJpaRepository.save(UserJpaEntity.builder()
                 .email("test@test.com")
                 .nickname("test")
