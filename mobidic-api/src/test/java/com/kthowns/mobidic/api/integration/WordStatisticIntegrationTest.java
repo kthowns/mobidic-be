@@ -12,6 +12,7 @@ import com.kthowns.mobidic.storage.vocabulary.jpaentity.VocabularyJpaEntity;
 import com.kthowns.mobidic.storage.vocabulary.jparepository.VocabularyJpaRepository;
 import com.kthowns.mobidic.storage.word.jpaentity.WordJpaEntity;
 import com.kthowns.mobidic.storage.word.jparepository.WordJpaRepository;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -22,7 +23,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
@@ -42,7 +43,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
-@Transactional
 public class WordStatisticIntegrationTest {
 
     @Autowired
@@ -67,7 +67,7 @@ public class WordStatisticIntegrationTest {
     private PasswordEncoder passwordEncoder;
 
     @Autowired
-    private jakarta.persistence.EntityManager em;
+    private TransactionTemplate transactionTemplate;
 
     private UserJpaEntity testUser;
     private String userToken;
@@ -76,34 +76,46 @@ public class WordStatisticIntegrationTest {
 
     @BeforeEach
     void setUp() {
-        testUser = userJpaRepository.save(UserJpaEntity.builder()
-                .email("test@test.com")
-                .nickname("test")
-                .password(passwordEncoder.encode("password123!"))
-                .role(UserRole.USER)
-                .build());
+        transactionTemplate.execute(status -> {
+            testUser = userJpaRepository.save(UserJpaEntity.builder()
+                    .email("test@test.com")
+                    .nickname("test")
+                    .password(passwordEncoder.encode("password123!"))
+                    .role(UserRole.USER)
+                    .build());
+
+            testVocab = vocabularyJpaRepository.save(VocabularyJpaEntity.builder()
+                    .user(testUser)
+                    .title("통계 단어장")
+                    .build());
+
+            testWord = wordJpaRepository.save(WordJpaEntity.builder()
+                    .vocabulary(testVocab)
+                    .expression("apple")
+                    .build());
+
+            wordStatisticJpaRepository.save(WordStatisticJpaEntity.builder()
+                    .word(testWord)
+                    .correctCount(5)
+                    .incorrectCount(5)
+                    .isLearned(false)
+                    .build());
+            return null;
+        });
 
         userToken = jwtProvider.generateToken(testUser.getId(), testUser.getRole().name());
+    }
 
-        testVocab = vocabularyJpaRepository.save(VocabularyJpaEntity.builder()
-                .user(testUser)
-                .title("통계 단어장")
-                .build());
-
-        testWord = wordJpaRepository.save(WordJpaEntity.builder()
-                .vocabulary(testVocab)
-                .expression("apple")
-                .build());
-
-        wordStatisticJpaRepository.save(WordStatisticJpaEntity.builder()
-                .word(testWord)
-                .correctCount(5)
-                .incorrectCount(5)
-                .isLearned(false)
-                .build());
-
-        em.flush();
-        em.clear();
+    @AfterEach
+    void tearDown() {
+        transactionTemplate.execute(status -> {
+            // 데이터 삭제 순서: 자식 테이블부터 부모 테이블 순으로 (FK 제약 조건 고려)
+            wordStatisticJpaRepository.deleteAllInBatch();
+            wordJpaRepository.deleteAllInBatch();
+            vocabularyJpaRepository.deleteAllInBatch();
+            userJpaRepository.deleteAllInBatch();
+            return null;
+        });
     }
 
     @Test
@@ -124,14 +136,17 @@ public class WordStatisticIntegrationTest {
     @DisplayName("단어장 학습률 조회 성공")
     void getVocabLearningRateSuccess() throws Exception {
         // Given
-        WordJpaEntity word2 = wordJpaRepository.save(WordJpaEntity.builder()
-                .vocabulary(testVocab)
-                .expression("banana")
-                .build());
-        wordStatisticJpaRepository.save(WordStatisticJpaEntity.builder()
-                .word(word2)
-                .isLearned(true)
-                .build());
+        transactionTemplate.execute(status -> {
+            WordJpaEntity word2 = wordJpaRepository.save(WordJpaEntity.builder()
+                    .vocabulary(testVocab)
+                    .expression("banana")
+                    .build());
+            wordStatisticJpaRepository.save(WordStatisticJpaEntity.builder()
+                    .word(word2)
+                    .isLearned(true)
+                    .build());
+            return null;
+        });
 
         // When
         mockMvc.perform(get("/api/vocabularies/" + testVocab.getId() + "/learning-rate")
@@ -179,8 +194,6 @@ public class WordStatisticIntegrationTest {
                 .andExpect(status().isOk());
 
         // Then
-        em.flush();
-        em.clear();
         WordStatisticJpaEntity stat = wordStatisticJpaRepository.findById(testWord.getId()).orElseThrow();
         assertThat(stat.isLearned()).isTrue();
 
@@ -191,10 +204,8 @@ public class WordStatisticIntegrationTest {
                 .andExpect(status().isOk());
 
         // Then
-        em.flush();
-        em.clear();
-        stat = wordStatisticJpaRepository.findById(testWord.getId()).orElseThrow();
-        assertThat(stat.isLearned()).isFalse();
+        WordStatisticJpaEntity statAfter = wordStatisticJpaRepository.findById(testWord.getId()).orElseThrow();
+        assertThat(statAfter.isLearned()).isFalse();
     }
 
     @Test
@@ -229,12 +240,10 @@ public class WordStatisticIntegrationTest {
         executorService.shutdown();
 
         // Then
-        em.flush();
-        em.clear();
-
         WordStatisticJpaEntity stat = wordStatisticJpaRepository.findById(testWord.getId()).orElseThrow();
         boolean expectedState = (successCount.get() % 2 != 0);
         assertThat(stat.isLearned()).isEqualTo(expectedState);
+        assertThat(successCount.get()).isGreaterThan(0); // 적어도 한 번은 성공해야 데드락이 아님
     }
 
     @Test

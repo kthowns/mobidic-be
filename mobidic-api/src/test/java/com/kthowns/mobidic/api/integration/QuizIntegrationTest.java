@@ -18,6 +18,7 @@ import com.kthowns.mobidic.storage.vocabulary.jpaentity.VocabularyJpaEntity;
 import com.kthowns.mobidic.storage.vocabulary.jparepository.VocabularyJpaRepository;
 import com.kthowns.mobidic.storage.word.jpaentity.WordJpaEntity;
 import com.kthowns.mobidic.storage.word.jparepository.WordJpaRepository;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -29,7 +30,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.List;
 import java.util.Map;
@@ -48,7 +49,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
-@Transactional
 public class QuizIntegrationTest {
 
     @Autowired
@@ -79,7 +79,7 @@ public class QuizIntegrationTest {
     private PasswordEncoder passwordEncoder;
 
     @Autowired
-    private jakarta.persistence.EntityManager em;
+    private TransactionTemplate transactionTemplate;
 
     private UserJpaEntity testUser;
     private String userToken;
@@ -88,49 +88,61 @@ public class QuizIntegrationTest {
 
     @BeforeEach
     void setup() {
-        testUser = userJpaRepository.save(UserJpaEntity.builder()
-                .email("test@test.com")
-                .nickname("test")
-                .password(passwordEncoder.encode("password123!"))
-                .role(UserRole.USER)
-                .build());
+        transactionTemplate.execute(status -> {
+            testUser = userJpaRepository.save(UserJpaEntity.builder()
+                    .email("test@test.com")
+                    .nickname("test")
+                    .password(passwordEncoder.encode("password123!"))
+                    .role(UserRole.USER)
+                    .build());
+
+            testVocab = vocabularyJpaRepository.save(VocabularyJpaEntity.builder()
+                    .user(testUser)
+                    .title("퀴즈 단어장")
+                    .build());
+
+            String[] expressions = {"apple", "banana", "car", "dog", "elephant"};
+            String[] meanings = {"사과", "바나나", "자동차", "개", "코끼리"};
+            wordToMeaning = Map.of(
+                    "apple", "사과",
+                    "banana", "바나나",
+                    "car", "자동차",
+                    "dog", "개",
+                    "elephant", "코끼리"
+            );
+
+            for (int i = 0; i < expressions.length; i++) {
+                WordJpaEntity word = wordJpaRepository.save(WordJpaEntity.builder()
+                        .vocabulary(testVocab)
+                        .expression(expressions[i])
+                        .build());
+
+                definitionJpaRepository.save(DefinitionJpaEntity.builder()
+                        .word(word)
+                        .meaning(meanings[i])
+                        .part(PartOfSpeech.NOUN)
+                        .build());
+
+                wordStatisticJpaRepository.save(WordStatisticJpaEntity.builder()
+                        .word(word)
+                        .build());
+            }
+            return null;
+        });
 
         userToken = jwtProvider.generateToken(testUser.getId(), testUser.getRole().name());
+    }
 
-        testVocab = vocabularyJpaRepository.save(VocabularyJpaEntity.builder()
-                .user(testUser)
-                .title("퀴즈 단어장")
-                .build());
-
-        String[] expressions = {"apple", "banana", "car", "dog", "elephant"};
-        String[] meanings = {"사과", "바나나", "자동차", "개", "코끼리"};
-        wordToMeaning = Map.of(
-                "apple", "사과",
-                "banana", "바나나",
-                "car", "자동차",
-                "dog", "개",
-                "elephant", "코끼리"
-        );
-
-        for (int i = 0; i < expressions.length; i++) {
-            WordJpaEntity word = wordJpaRepository.save(WordJpaEntity.builder()
-                    .vocabulary(testVocab)
-                    .expression(expressions[i])
-                    .build());
-
-            definitionJpaRepository.save(DefinitionJpaEntity.builder()
-                    .word(word)
-                    .meaning(meanings[i])
-                    .part(PartOfSpeech.NOUN)
-                    .build());
-
-            wordStatisticJpaRepository.save(WordStatisticJpaEntity.builder()
-                    .word(word)
-                    .build());
-        }
-
-        em.flush();
-        em.clear();
+    @AfterEach
+    void tearDown() {
+        transactionTemplate.execute(status -> {
+            definitionJpaRepository.deleteAllInBatch();
+            wordStatisticJpaRepository.deleteAllInBatch();
+            wordJpaRepository.deleteAllInBatch();
+            vocabularyJpaRepository.deleteAllInBatch();
+            userJpaRepository.deleteAllInBatch();
+            return null;
+        });
     }
 
     @Test
@@ -169,9 +181,7 @@ public class QuizIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.isCorrect").value(true));
 
-        // Then
-        em.flush();
-        em.clear();
+        // Then (데이터 반영 확인은 별도 트랜잭션 없이 findAll로 확인 가능)
         WordJpaEntity word = wordJpaRepository.findAll().stream()
                 .filter(w -> w.getExpression().equals(quiz.stem())).findFirst().orElseThrow();
         WordStatisticJpaEntity statistic = wordStatisticJpaRepository.findById(word.getId()).orElseThrow();
@@ -217,8 +227,6 @@ public class QuizIntegrationTest {
                 .andExpect(jsonPath("$.data.isCorrect").value(true));
 
         // Then
-        em.flush();
-        em.clear();
         WordJpaEntity word = wordJpaRepository.findAll().stream()
                 .filter(w -> w.getExpression().equals(correctAnswer)).findFirst().orElseThrow();
         WordStatisticJpaEntity statistic = wordStatisticJpaRepository.findById(word.getId()).orElseThrow();

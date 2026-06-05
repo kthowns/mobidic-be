@@ -11,6 +11,7 @@ import com.kthowns.mobidic.storage.vocabulary.jpaentity.VocabularyJpaEntity;
 import com.kthowns.mobidic.storage.vocabulary.jparepository.VocabularyJpaRepository;
 import com.kthowns.mobidic.storage.word.jpaentity.WordJpaEntity;
 import com.kthowns.mobidic.storage.word.jparepository.WordJpaRepository;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -22,7 +23,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.transaction.annotation.Transactional;
+
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.UUID;
 
@@ -38,7 +40,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
-@Transactional
 public class PronunciationIntegrationTest {
 
     @Autowired
@@ -59,6 +60,9 @@ public class PronunciationIntegrationTest {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private TransactionTemplate transactionTemplate;
+
     @MockitoBean
     private SpeechToTextClient speechToTextClient;
 
@@ -68,24 +72,37 @@ public class PronunciationIntegrationTest {
 
     @BeforeEach
     void setup() {
-        testUser = userJpaRepository.save(UserJpaEntity.builder()
-                .email("test@test.com")
-                .nickname("test")
-                .password(passwordEncoder.encode("password123!"))
-                .role(UserRole.USER)
-                .build());
+        transactionTemplate.execute(status -> {
+            testUser = userJpaRepository.save(UserJpaEntity.builder()
+                    .email("test@test.com")
+                    .nickname("test")
+                    .password(passwordEncoder.encode("password123!"))
+                    .role(UserRole.USER)
+                    .build());
+
+            VocabularyJpaEntity vocabulary = vocabularyJpaRepository.save(VocabularyJpaEntity.builder()
+                    .user(testUser)
+                    .title("테스트 단어장")
+                    .build());
+
+            testWord = wordJpaRepository.save(WordJpaEntity.builder()
+                    .vocabulary(vocabulary)
+                    .expression("apple")
+                    .build());
+            return null;
+        });
 
         userToken = jwtProvider.generateToken(testUser.getId(), testUser.getRole().name());
+    }
 
-        VocabularyJpaEntity vocabulary = vocabularyJpaRepository.save(VocabularyJpaEntity.builder()
-                .user(testUser)
-                .title("테스트 단어장")
-                .build());
-
-        testWord = wordJpaRepository.save(WordJpaEntity.builder()
-                .vocabulary(vocabulary)
-                .expression("apple")
-                .build());
+    @AfterEach
+    void tearDown() {
+        transactionTemplate.execute(status -> {
+            wordJpaRepository.deleteAllInBatch();
+            vocabularyJpaRepository.deleteAllInBatch();
+            userJpaRepository.deleteAllInBatch();
+            return null;
+        });
     }
 
     @Test
