@@ -1,8 +1,8 @@
 dependencies {
     implementation project(':mobidic-domain')
-    implementation project(':mobidic-external')
     implementation project(':mobidic-common')
-    implementation project(':mobidic-storage')
+    runtimeOnly project(':mobidic-storage')
+    runtimeOnly project(':mobidic-external')
 
     // Security
     implementation 'org.springframework.boot:spring-boot-starter-security'
@@ -19,9 +19,10 @@ dependencies {
     implementation 'org.springframework:spring-tx'
 
     // Test
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     testImplementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     testImplementation 'org.springframework.boot:spring-boot-starter-data-redis'
+    testImplementation project(':mobidic-storage')
 }

@@ -1,4 +1,4 @@
-package com.kthowns.mobidic.domain.quiz.service;
+package com.kthowns.mobidic.domain.quiz.properties;
 
 import org.springframework.stereotype.Component;
 

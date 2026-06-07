@@ -1,11 +1,11 @@
-package com.kthowns.mobidic.external.pronunciation;
+package com.kthowns.mobidic.external.pronunciation.client;
 
 import com.kthowns.mobidic.common.code.GeneralResponseCode;
 import com.kthowns.mobidic.common.exception.ApiException;
 import com.kthowns.mobidic.domain.pronunciation.client.SpeechToTextClient;
 import com.kthowns.mobidic.domain.pronunciation.model.SttResponse;
+import com.kthowns.mobidic.external.pronunciation.properties.SttProperties;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.stereotype.Component;
@@ -19,9 +19,7 @@ import java.net.URI;
 @RequiredArgsConstructor
 public class WhisperSttClient implements SpeechToTextClient {
     private final RestClient restClient;
-
-    @Value("${whisper.flask-server-url}")
-    private String flaskServerBaseUrl;
+    private final SttProperties sttProperties;
 
     @Override
     public String transcribe(MultipartFile file) {
@@ -30,7 +28,7 @@ public class WhisperSttClient implements SpeechToTextClient {
 
         try {
             SttResponse sttResponse = restClient.post()
-                    .uri(URI.create(flaskServerBaseUrl + "/transcribe"))
+                    .uri(URI.create(sttProperties.flaskServerUrl() + "/transcribe"))
                     .contentType(MediaType.MULTIPART_FORM_DATA)
                     .body(builder.build())
                     .retrieve()

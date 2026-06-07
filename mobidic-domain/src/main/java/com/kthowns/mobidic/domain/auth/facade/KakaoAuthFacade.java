@@ -17,8 +17,8 @@ public class KakaoAuthFacade {
     private final PresetVocabularyService presetVocabularyService;
 
     @Transactional
-    public User kakaoLogin(String authCode, boolean isDev, String platform) {
-        String accessToken = kakaoAuthService.getKakaoAccessToken(authCode, isDev, platform);
+    public User kakaoLogin(String authCode, boolean isDev, String platform, String serverBaseUrl) {
+        String accessToken = kakaoAuthService.getKakaoAccessToken(authCode, isDev, platform, serverBaseUrl);
         OAuthUserInfo oauthUserInfo = kakaoAuthService.getKakaoUserInfo(accessToken);
 
         return getOrCreateUser(oauthUserInfo);

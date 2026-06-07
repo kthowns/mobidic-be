@@ -1,6 +1,7 @@
-package com.kthowns.mobidic.api.security.jwt;
+package com.kthowns.mobidic.api.security.config;
 
 import com.kthowns.mobidic.api.auth.model.AuthUser;
+import com.kthowns.mobidic.api.security.util.JwtProvider;
 import com.kthowns.mobidic.domain.user.service.UserBlackListService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

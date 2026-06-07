@@ -1,14 +1,17 @@
 package com.kthowns.mobidic.api.integration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.kthowns.mobidic.api.security.jwt.JwtProvider;
+import com.kthowns.mobidic.api.security.properties.JwtProperties;
+import com.kthowns.mobidic.api.security.util.JwtProvider;
 import com.kthowns.mobidic.api.user.dto.request.UpdateUserRequestDto;
 import com.kthowns.mobidic.common.code.AuthResponseCode;
 import com.kthowns.mobidic.common.code.GeneralResponseCode;
+import com.kthowns.mobidic.domain.user.model.User;
 import com.kthowns.mobidic.domain.user.model.UserRole;
 import com.kthowns.mobidic.domain.user.service.UserBlackListService;
 import com.kthowns.mobidic.storage.user.jpaentity.UserJpaEntity;
 import com.kthowns.mobidic.storage.user.jparepository.UserJpaRepository;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -20,7 +23,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
@@ -34,7 +37,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
-@Transactional
 public class UserIntegrationTest {
 
     @Autowired
@@ -53,7 +55,7 @@ public class UserIntegrationTest {
     private PasswordEncoder passwordEncoder;
 
     @Autowired
-    private jakarta.persistence.EntityManager em;
+    private TransactionTemplate transactionTemplate;
 
     @MockitoBean
     private UserBlackListService userBlackListService;
@@ -62,21 +64,27 @@ public class UserIntegrationTest {
     private String userToken;
 
     @BeforeEach
-    void setup()
-
-    {
-        testUser = userJpaRepository.save(UserJpaEntity.builder()
-                .email("test@test.com")
-                .nickname("test")
-                .password(passwordEncoder.encode("password123!"))
-                .role(UserRole.USER)
-                .isActive(true)
-                .build());
+    void setup() {
+        testUser = transactionTemplate.execute(status -> {
+            UserJpaEntity user = userJpaRepository.save(UserJpaEntity.builder()
+                    .email("test@test.com")
+                    .nickname("test")
+                    .password(passwordEncoder.encode("password123!"))
+                    .role(UserRole.USER)
+                    .isActive(true)
+                    .build());
+            return user;
+        });
 
         userToken = jwtProvider.generateToken(testUser.getId(), testUser.getRole().name());
+    }
 
-        em.flush();
-        em.clear();
+    @AfterEach
+    void tearDown() {
+        transactionTemplate.execute(status -> {
+            userJpaRepository.deleteAllInBatch();
+            return null;
+        });
     }
 
     @Test
@@ -109,8 +117,6 @@ public class UserIntegrationTest {
                 .andExpect(jsonPath("$.data.nickname").value("newnickname"));
 
         // Then
-        em.flush();
-        em.clear();
         UserJpaEntity updatedUser = userJpaRepository.findById(testUser.getId()).orElseThrow();
         assertThat(updatedUser.getNickname()).isEqualTo("newnickname");
     }
@@ -119,7 +125,7 @@ public class UserIntegrationTest {
     @DisplayName("사용자 닉네임 수정 실패 - 중복된 닉네임")
     void updateNicknameFailDuplicated() throws Exception {
         // Given
-        userJpaRepository.saveAndFlush(UserJpaEntity.builder()
+        userJpaRepository.save(UserJpaEntity.builder()
                 .email("other@test.com")
                 .nickname("other")
                 .password("pass")
@@ -157,8 +163,6 @@ public class UserIntegrationTest {
                 .andExpect(status().isOk());
 
         // Then
-        em.flush();
-        em.clear();
         UserJpaEntity updatedUser = userJpaRepository.findById(testUser.getId()).orElseThrow();
         assertThat(passwordEncoder.matches("newPassword123!", updatedUser.getPassword())).isTrue();
     }
@@ -173,8 +177,6 @@ public class UserIntegrationTest {
                 .andExpect(status().isOk());
 
         // Then
-        em.flush();
-        em.clear();
         UserJpaEntity deactivatedUser = userJpaRepository.findById(testUser.getId()).orElseThrow();
         assertThat(deactivatedUser.isActive()).isFalse();
         assertThat(deactivatedUser.getDeactivatedAt()).isNotNull();
@@ -202,7 +204,7 @@ public class UserIntegrationTest {
     }
 
     @Autowired
-    private com.kthowns.mobidic.api.security.jwt.JwtProperties jwtProperties;
+    private JwtProperties jwtProperties;
 
     @Test
     @DisplayName("보안 테스트 - 만료된 토큰으로 요청 시 실패")
@@ -221,21 +223,19 @@ public class UserIntegrationTest {
                         .header("Authorization", "Bearer " + expiredToken))
                 // Then
                 .andExpect(status().isUnauthorized());
-        // 프로덕션 코드에서 만료된 토큰에 대한 구체적인 에러 메시지가 다를 수 있으므로 상태 코드만 검증
     }
 
     @Test
     @DisplayName("보안 테스트 - 탈퇴한(비활성화된) 사용자 토큰으로 요청 시 실패")
     void securityFailDeactivatedUser() throws Exception {
         // Given
-        UserJpaEntity user = userJpaRepository.findById(testUser.getId()).orElseThrow();
-
-        // DB 상태 변경 (Soft Delete)
-        em.createQuery("update UserJpaEntity u set u.isActive = false where u.id = :id")
-                .setParameter("id", user.getId())
-                .executeUpdate();
-
-        em.clear();
+        transactionTemplate.execute(status -> {
+            UserJpaEntity user = userJpaRepository.findById(testUser.getId()).orElseThrow();
+            User deactivatedUser = user.toModel().deactivate();
+            user.updateFromModel(deactivatedUser);
+            userJpaRepository.save(user);
+            return null;
+        });
 
         // Mock 설정: 해당 유저 ID 조회 시 블랙리스트에 있다고 가정
         given(userBlackListService.isDeactivatedUser(testUser.getId())).willReturn(true);

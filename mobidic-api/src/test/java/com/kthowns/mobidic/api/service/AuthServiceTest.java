@@ -4,7 +4,7 @@ import com.kthowns.mobidic.api.auth.dto.request.LoginRequest;
 import com.kthowns.mobidic.api.auth.dto.response.LoginResponse;
 import com.kthowns.mobidic.api.auth.model.AuthUser;
 import com.kthowns.mobidic.api.auth.service.AuthService;
-import com.kthowns.mobidic.api.security.jwt.JwtProvider;
+import com.kthowns.mobidic.api.security.util.JwtProvider;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

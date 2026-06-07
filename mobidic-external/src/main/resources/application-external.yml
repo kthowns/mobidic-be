@@ -1,12 +1,10 @@
 whisper:
   flask-server-url: ${FLASK_HOST}
 
-kakao:
-  rest-api-key: ${KAKAO_REST_API_KEY}
-  client-secret: ${KAKAO_CLIENT_SECRET}
-  backend-callback-url: ${KAKAO_BACKEND_CALLBACK_URL}
-  frontend-callback-url: ${KAKAO_FRONTEND_CALLBACK_URL}
-  android-callback-url: ${KAKAO_ANDROID_CALLBACK_URL}
-  dev:
-    backend-callback-url: ${KAKAO_DEV_BACKEND_CALLBACK_URL}
-    frontend-callback-url: ${KAKAO_DEV_FRONTEND_CALLBACK_URL}
+oauth2:
+  secrets:
+    kakao:
+      rest-api-key: ${KAKAO_REST_API_KEY}
+      client-secret: ${KAKAO_CLIENT_SECRET}
+      dev:
+        backend-callback-url: ${KAKAO_DEV_BACKEND_CALLBACK_URL}

@@ -1,7 +1,7 @@
 package com.kthowns.mobidic.api.user.controller;
 
 import com.kthowns.mobidic.api.auth.model.AuthUser;
-import com.kthowns.mobidic.api.security.jwt.JwtProperties;
+import com.kthowns.mobidic.api.security.properties.JwtProperties;
 import com.kthowns.mobidic.api.user.dto.request.SignUpRequestDto;
 import com.kthowns.mobidic.api.user.dto.request.UpdateUserRequestDto;
 import com.kthowns.mobidic.common.dto.ErrorResponse;

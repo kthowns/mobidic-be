@@ -1,10 +1,11 @@
 package com.kthowns.mobidic.api.integration;
 
-import com.kthowns.mobidic.api.security.jwt.JwtProvider;
+import com.kthowns.mobidic.api.security.util.JwtProvider;
 import com.kthowns.mobidic.domain.auth.repository.AuthRedisKey;
 import com.kthowns.mobidic.domain.user.model.UserRole;
 import com.kthowns.mobidic.storage.user.jpaentity.UserJpaEntity;
 import com.kthowns.mobidic.storage.user.jparepository.UserJpaRepository;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -16,7 +17,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -25,7 +26,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
-@Transactional
 public class BlackListFallbackIntegrationTest {
 
     @Autowired
@@ -37,11 +37,11 @@ public class BlackListFallbackIntegrationTest {
     @Autowired
     private UserJpaRepository userJpaRepository;
 
+    @Autowired
+    private TransactionTemplate transactionTemplate;
+
     @MockitoBean
     private RedisTemplate<String, String> redisTemplate;
-
-    @Autowired
-    private jakarta.persistence.EntityManager em;
 
     private UserJpaEntity activeUser;
     private UserJpaEntity deactivatedUser;
@@ -50,27 +50,35 @@ public class BlackListFallbackIntegrationTest {
 
     @BeforeEach
     void setup() {
-        activeUser = userJpaRepository.save(UserJpaEntity.builder()
-                .email("active@test.com")
-                .nickname("active")
-                .password("pass")
-                .role(UserRole.USER)
-                .isActive(true)
-                .build());
+        transactionTemplate.execute(status -> {
+            activeUser = userJpaRepository.save(UserJpaEntity.builder()
+                    .email("active@test.com")
+                    .nickname("active")
+                    .password("pass")
+                    .role(UserRole.USER)
+                    .isActive(true)
+                    .build());
 
-        deactivatedUser = userJpaRepository.save(UserJpaEntity.builder()
-                .email("deactivated@test.com")
-                .nickname("deactivated")
-                .password("pass")
-                .role(UserRole.USER)
-                .isActive(false)
-                .build());
+            deactivatedUser = userJpaRepository.save(UserJpaEntity.builder()
+                    .email("deactivated@test.com")
+                    .nickname("deactivated")
+                    .password("pass")
+                    .role(UserRole.USER)
+                    .isActive(false)
+                    .build());
+            return null;
+        });
 
         activeUserToken = jwtProvider.generateToken(activeUser.getId(), activeUser.getRole().name());
         deactivatedUserToken = jwtProvider.generateToken(deactivatedUser.getId(), deactivatedUser.getRole().name());
+    }
 
-        em.flush();
-        em.clear();
+    @AfterEach
+    void tearDown() {
+        transactionTemplate.execute(status -> {
+            userJpaRepository.deleteAllInBatch();
+            return null;
+        });
     }
 
     @Test

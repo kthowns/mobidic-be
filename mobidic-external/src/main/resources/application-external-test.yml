@@ -1,12 +1,11 @@
 whisper:
   flask-server-url: http://localhost:5000
 
-kakao:
-  rest-api-key: test
-  client-secret: test
-  backend-callback-url: test
-  frontend-callback-url: test
-  android-callback-url: test
-  dev:
-    backend-callback-url: test
-    frontend-callback-url: test
+
+oauth2:
+  secrets:
+    kakao:
+      rest-api-key: test
+      client-secret: test
+      dev:
+        backend-callback-url: test

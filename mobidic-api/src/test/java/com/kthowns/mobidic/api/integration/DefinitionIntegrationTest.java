@@ -1,7 +1,7 @@
 package com.kthowns.mobidic.api.integration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.kthowns.mobidic.api.security.jwt.JwtProvider;
+import com.kthowns.mobidic.api.security.util.JwtProvider;
 import com.kthowns.mobidic.common.code.AuthResponseCode;
 import com.kthowns.mobidic.domain.definition.model.PartOfSpeech;
 import com.kthowns.mobidic.domain.user.model.UserRole;
@@ -13,6 +13,7 @@ import com.kthowns.mobidic.storage.vocabulary.jpaentity.VocabularyJpaEntity;
 import com.kthowns.mobidic.storage.vocabulary.jparepository.VocabularyJpaRepository;
 import com.kthowns.mobidic.storage.word.jpaentity.WordJpaEntity;
 import com.kthowns.mobidic.storage.word.jparepository.WordJpaRepository;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -22,7 +23,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -34,7 +35,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
-@Transactional
 public class DefinitionIntegrationTest {
 
     @Autowired
@@ -62,39 +62,48 @@ public class DefinitionIntegrationTest {
     private PasswordEncoder passwordEncoder;
 
     @Autowired
-    private jakarta.persistence.EntityManager em;
+    private TransactionTemplate transactionTemplate;
 
     private UserJpaEntity testUser;
     private String userToken;
     private WordJpaEntity testWord;
 
     @BeforeEach
-    void setup()
+    void setup() {
+        transactionTemplate.execute(status -> {
+            // 테스트 기초 데이터 생성 (사용자 -> 단어장 -> 단어)
+            testUser = userJpaRepository.save(UserJpaEntity.builder()
+                    .email("test@test.com")
+                    .nickname("test")
+                    .password(passwordEncoder.encode("password123!"))
+                    .role(UserRole.USER)
+                    .build());
 
-    {
-        // 테스트 기초 데이터 생성 (사용자 -> 단어장 -> 단어)
-        testUser = userJpaRepository.save(UserJpaEntity.builder()
-                .email("test@test.com")
-                .nickname("test")
-                .password(passwordEncoder.encode("password123!"))
-                .role(UserRole.USER)
-                .build());
+            userToken = jwtProvider.generateToken(testUser.getId(), testUser.getRole().name());
 
-        userToken = jwtProvider.generateToken(testUser.getId(), testUser.getRole().name());
+            VocabularyJpaEntity vocabulary = vocabularyJpaRepository.save(VocabularyJpaEntity.builder()
+                    .user(testUser)
+                    .title("테스트 단어장")
+                    .description("설명")
+                    .build());
 
-        VocabularyJpaEntity vocabulary = vocabularyJpaRepository.save(VocabularyJpaEntity.builder()
-                .user(testUser)
-                .title("테스트 단어장")
-                .description("설명")
-                .build());
+            testWord = wordJpaRepository.save(WordJpaEntity.builder()
+                    .vocabulary(vocabulary)
+                    .expression("apple")
+                    .build());
+            return null;
+        });
+    }
 
-        testWord = wordJpaRepository.save(WordJpaEntity.builder()
-                .vocabulary(vocabulary)
-                .expression("apple")
-                .build());
-
-        em.flush();
-        em.clear();
+    @AfterEach
+    void tearDown() {
+        transactionTemplate.execute(status -> {
+            definitionJpaRepository.deleteAllInBatch();
+            wordJpaRepository.deleteAllInBatch();
+            vocabularyJpaRepository.deleteAllInBatch();
+            userJpaRepository.deleteAllInBatch();
+            return null;
+        });
     }
 
     @Test
