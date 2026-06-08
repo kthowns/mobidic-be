@@ -62,6 +62,7 @@ public class KakaoAuthController {
         if (port != 80 && port != 443) {
             serverBaseUrl += ":" + port;
         }
+        log.info("Server Base URL : {}", serverBaseUrl);
 
         return serverBaseUrl;
     }
