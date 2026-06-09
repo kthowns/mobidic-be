@@ -2,6 +2,7 @@ package com.kthowns.mobidic.domain.quiz.service;
 
 import com.kthowns.mobidic.domain.quiz.model.Quiz;
 import com.kthowns.mobidic.domain.quiz.model.QuizAnswer;
+import com.kthowns.mobidic.domain.quiz.properties.QuizRedisKey;
 import com.kthowns.mobidic.domain.quiz.repository.QuizAnswerRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
