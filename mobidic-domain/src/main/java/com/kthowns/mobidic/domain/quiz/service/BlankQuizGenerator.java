@@ -16,7 +16,6 @@ class BlankQuizGenerator extends QuizGenerator {
         derange(wordDetails);
 
         //option은 뜻
-        ArrayList<String> options = new ArrayList<>();
         ArrayList<Quiz> quizzes = new ArrayList<>(wordDetails.size());
 
         for (WordDetail wordDetail : wordDetails) {
@@ -26,8 +25,6 @@ class BlankQuizGenerator extends QuizGenerator {
                 int randIdx = ThreadLocalRandom.current().nextInt(wordDetail.definitions().size());
                 option = wordDetail.definitions().get(randIdx).meaning();
             }
-
-            options.add(option);
 
             List<Integer> nums = new ArrayList<>();
             for (int i = 0; i < wordDetail.expression().length(); i++) {
