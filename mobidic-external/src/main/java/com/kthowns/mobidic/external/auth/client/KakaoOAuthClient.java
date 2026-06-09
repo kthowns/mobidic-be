@@ -1,13 +1,13 @@
 package com.kthowns.mobidic.external.auth.client;
 
 import com.kthowns.mobidic.common.code.GeneralResponseCode;
-import com.kthowns.mobidic.common.code.KakaoApiUrl;
 import com.kthowns.mobidic.common.exception.ApiException;
 import com.kthowns.mobidic.domain.auth.client.OAuthClient;
 import com.kthowns.mobidic.domain.auth.model.OAuthUserInfo;
 import com.kthowns.mobidic.external.auth.dto.KakaoTokenResponse;
 import com.kthowns.mobidic.external.auth.dto.KakaoUserInfo;
 import com.kthowns.mobidic.external.auth.properties.KakaoApiProperties;
+import com.kthowns.mobidic.external.auth.properties.KakaoApiUrl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;

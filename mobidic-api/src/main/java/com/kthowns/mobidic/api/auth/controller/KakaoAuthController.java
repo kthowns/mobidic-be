@@ -2,9 +2,9 @@ package com.kthowns.mobidic.api.auth.controller;
 
 import com.kthowns.mobidic.api.auth.dto.response.KakaoLoginUrlResponse;
 import com.kthowns.mobidic.api.auth.properties.OAuthKakaoCallbackUrlProperties;
+import com.kthowns.mobidic.api.global.dto.GeneralResponse;
 import com.kthowns.mobidic.api.security.util.JwtProvider;
 import com.kthowns.mobidic.common.code.GeneralResponseCode;
-import com.kthowns.mobidic.common.dto.GeneralResponse;
 import com.kthowns.mobidic.domain.auth.facade.KakaoAuthFacade;
 import com.kthowns.mobidic.domain.auth.service.KakaoAuthService;
 import com.kthowns.mobidic.domain.user.model.User;

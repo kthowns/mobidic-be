@@ -1,8 +1,8 @@
 package com.kthowns.mobidic.api.global.exception;
 
+import com.kthowns.mobidic.api.global.dto.ErrorResponse;
 import com.kthowns.mobidic.common.code.AuthResponseCode;
 import com.kthowns.mobidic.common.code.GeneralResponseCode;
-import com.kthowns.mobidic.common.dto.ErrorResponse;
 import com.kthowns.mobidic.common.exception.ApiException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;

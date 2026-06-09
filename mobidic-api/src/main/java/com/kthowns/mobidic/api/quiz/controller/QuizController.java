@@ -1,9 +1,9 @@
 package com.kthowns.mobidic.api.quiz.controller;
 
 import com.kthowns.mobidic.api.auth.model.AuthUser;
+import com.kthowns.mobidic.api.global.dto.ErrorResponse;
+import com.kthowns.mobidic.api.global.dto.GeneralResponse;
 import com.kthowns.mobidic.api.quiz.dto.request.QuizRateRequest;
-import com.kthowns.mobidic.common.dto.ErrorResponse;
-import com.kthowns.mobidic.common.dto.GeneralResponse;
 import com.kthowns.mobidic.domain.quiz.model.QuizInfo;
 import com.kthowns.mobidic.domain.quiz.model.QuizResult;
 import com.kthowns.mobidic.domain.quiz.service.QuizService;

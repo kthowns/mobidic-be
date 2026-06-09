@@ -1,7 +1,7 @@
 package com.kthowns.mobidic.api.security.exception;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.kthowns.mobidic.common.dto.ErrorResponse;
+import com.kthowns.mobidic.api.global.dto.ErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;

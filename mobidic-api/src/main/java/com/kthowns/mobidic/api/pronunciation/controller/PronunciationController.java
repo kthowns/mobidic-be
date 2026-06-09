@@ -1,9 +1,9 @@
 package com.kthowns.mobidic.api.pronunciation.controller;
 
 import com.kthowns.mobidic.api.auth.model.AuthUser;
+import com.kthowns.mobidic.api.global.dto.ErrorResponse;
+import com.kthowns.mobidic.api.global.dto.GeneralResponse;
 import com.kthowns.mobidic.common.code.GeneralResponseCode;
-import com.kthowns.mobidic.common.dto.ErrorResponse;
-import com.kthowns.mobidic.common.dto.GeneralResponse;
 import com.kthowns.mobidic.common.exception.ApiException;
 import com.kthowns.mobidic.domain.pronunciation.service.PronunciationService;
 import io.swagger.v3.oas.annotations.Operation;

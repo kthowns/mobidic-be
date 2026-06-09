@@ -1,9 +1,9 @@
 package com.kthowns.mobidic.api.definition.controller;
 
 import com.kthowns.mobidic.api.auth.model.AuthUser;
+import com.kthowns.mobidic.api.global.dto.ErrorResponse;
+import com.kthowns.mobidic.api.global.dto.GeneralResponse;
 import com.kthowns.mobidic.common.code.GeneralResponseCode;
-import com.kthowns.mobidic.common.dto.ErrorResponse;
-import com.kthowns.mobidic.common.dto.GeneralResponse;
 import com.kthowns.mobidic.domain.definition.model.Definition;
 import com.kthowns.mobidic.domain.definition.service.DefinitionService;
 import io.swagger.v3.oas.annotations.Operation;

@@ -1,4 +1,4 @@
-package com.kthowns.mobidic.common.code;
+package com.kthowns.mobidic.external.auth.properties;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

@@ -1,4 +1,4 @@
-package com.kthowns.mobidic.common.dto;
+package com.kthowns.mobidic.api.global.dto;
 
 import com.kthowns.mobidic.common.code.ApiResponseCode;
 import lombok.AllArgsConstructor;
