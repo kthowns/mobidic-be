@@ -84,12 +84,12 @@ Mobidic은 기존 단어장 서비스들의 불편함을 해소하고, 사용자
 
 ```mermaid
 graph TB
-    subgraph "Presentation Layer (mobidic-api)"
+    subgraph "Presentation Layer (app-api)"
         Controller[REST Controller]
         Security[JWT / Security]
     end
 
-    subgraph "Domain Layer (mobidic-domain)"
+    subgraph "Domain Layer (core-domain)"
         subgraph "Inbound Ports"
             Service[Domain Service]
         end
@@ -106,12 +106,12 @@ graph TB
     end
 
     subgraph "Infrastructure Layer"
-        subgraph "mobidic-storage (Persistence)"
+        subgraph "infra-storage (Persistence)"
             JPA[JPA / QueryDSL]
             Redis[Redis]
         end
 
-        subgraph "mobidic-external (External System)"
+        subgraph "infra-external (External System)"
             OAuth[OAuth Client]
             STT[Whisper STT Client]
         end
@@ -141,13 +141,13 @@ graph TB
 
 ### **2. Module Specifications**
 
-| 모듈                   | 역할                   | 핵심 기술                       |
-|:---------------------|:---------------------|:----------------------------|
-| **mobidic-api**      | 애플리케이션 진입점 및 응답 처리   | Spring MVC, Spring Security |
-| **mobidic-domain**   | 핵심 비즈니스 로직 및 도메인 모델  | Pure Java, Java Records     |
-| **mobidic-storage**  | 데이터 영속성 관리 및 데이터 액세스 | JPA, QueryDSL, Redis        |
-| **mobidic-external** | 외부 시스템 및 서드파티 API 연동 | RestClient, OAuth           |
-| **mobidic-common**   | 공통 상수, 예외 규격 및 유틸리티  | Java                        |
+| 모듈                 | 역할                   | 핵심 기술                       |
+|:-------------------|:---------------------|:----------------------------|
+| **app-api**        | 애플리케이션 진입점 및 응답 처리   | Spring MVC, Spring Security |
+| **core-domain**    | 핵심 비즈니스 로직 및 도메인 모델  | Pure Java, Java Records     |
+| **infra-storage**  | 데이터 영속성 관리 및 데이터 액세스 | JPA, QueryDSL, Redis        |
+| **infra-external** | 외부 시스템 및 서드파티 API 연동 | RestClient, OAuth           |
+| **core-common**    | 공통 상수, 예외 규격 및 유틸리티  | Java                        |
 
 ---
 

@@ -50,6 +50,6 @@ subprojects {
 }
 
 // 실행 모듈 설정
-project(':mobidic-api') {
+project(':app-api') {
     apply plugin: 'org.springframework.boot'
 }
