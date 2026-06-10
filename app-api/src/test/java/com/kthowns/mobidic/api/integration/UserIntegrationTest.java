@@ -1,16 +1,17 @@
 package com.kthowns.mobidic.api.integration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.kthowns.mobidic.api.security.properties.JwtProperties;
-import com.kthowns.mobidic.api.security.util.JwtProvider;
 import com.kthowns.mobidic.api.user.dto.request.UpdateUserRequestDto;
 import com.kthowns.mobidic.common.code.AuthResponseCode;
 import com.kthowns.mobidic.common.code.GeneralResponseCode;
 import com.kthowns.mobidic.domain.user.model.User;
 import com.kthowns.mobidic.domain.user.model.UserRole;
 import com.kthowns.mobidic.domain.user.service.UserBlackListService;
+import com.kthowns.mobidic.security.properties.JwtProperties;
+import com.kthowns.mobidic.security.util.JwtProvider;
 import com.kthowns.mobidic.storage.user.jpaentity.UserJpaEntity;
 import com.kthowns.mobidic.storage.user.jparepository.UserJpaRepository;
+import io.jsonwebtoken.Jwts;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -210,7 +211,7 @@ public class UserIntegrationTest {
     @DisplayName("보안 테스트 - 만료된 토큰으로 요청 시 실패")
     void securityFailExpiredToken() throws Exception {
         // Given
-        String expiredToken = io.jsonwebtoken.Jwts.builder()
+        String expiredToken = Jwts.builder()
                 .subject(testUser.getId().toString())
                 .claim("role", testUser.getRole().name())
                 .issuedAt(new java.util.Date(System.currentTimeMillis() - 100000))

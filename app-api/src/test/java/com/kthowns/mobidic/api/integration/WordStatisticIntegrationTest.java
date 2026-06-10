@@ -1,6 +1,6 @@
 package com.kthowns.mobidic.api.integration;
 
-import com.kthowns.mobidic.api.security.util.JwtProvider;
+import com.kthowns.mobidic.security.util.JwtProvider;
 import com.kthowns.mobidic.common.code.AuthResponseCode;
 import com.kthowns.mobidic.common.code.GeneralResponseCode;
 import com.kthowns.mobidic.domain.user.model.UserRole;

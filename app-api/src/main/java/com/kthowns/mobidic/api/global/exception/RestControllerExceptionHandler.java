@@ -1,16 +1,14 @@
 package com.kthowns.mobidic.api.global.exception;
 
 import com.kthowns.mobidic.api.global.dto.ErrorResponse;
-import com.kthowns.mobidic.common.code.AuthResponseCode;
 import com.kthowns.mobidic.common.code.GeneralResponseCode;
 import com.kthowns.mobidic.common.exception.ApiException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.annotation.Order;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -19,12 +17,12 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.HashMap;
 
-import static com.kthowns.mobidic.common.code.AuthResponseCode.LOGIN_FAILED;
 import static com.kthowns.mobidic.common.code.GeneralResponseCode.INTERNAL_SERVER_ERROR;
 
 @Slf4j
 @RestControllerAdvice(annotations = RestController.class)
-public class ApiExceptionHandler {
+@Order
+public class RestControllerExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> methodArgumentNotValidException(
             final MethodArgumentNotValidException e, final HttpServletRequest request
@@ -59,24 +57,6 @@ public class ApiExceptionHandler {
                 e, request.getRequestURI(), e.getMessage());
 
         return ErrorResponse.toResponseEntity(GeneralResponseCode.INVALID_REQUEST_BODY, null);
-    }
-
-    @ExceptionHandler(BadCredentialsException.class)
-    public ResponseEntity<ErrorResponse> badCredentials(
-            BadCredentialsException e, HttpServletRequest request
-    ) {
-        log.error("errorCode : {}, uri : {}, message : {}",
-                e, request.getRequestURI(), e.getMessage());
-        return ErrorResponse.toResponseEntity(LOGIN_FAILED, null);
-    }
-
-    @ExceptionHandler(AuthorizationDeniedException.class)
-    public ResponseEntity<ErrorResponse> authorizationDenied(
-            AuthorizationDeniedException e, HttpServletRequest request
-    ) {
-        log.error("errorCode : {}, uri : {}, message : {}",
-                e, request.getRequestURI(), e.getMessage());
-        return ErrorResponse.toResponseEntity(AuthResponseCode.UNAUTHORIZED, null);
     }
 
     @ExceptionHandler(ApiException.class)

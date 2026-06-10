@@ -1,11 +1,11 @@
 package com.kthowns.mobidic.api.vocabulary.controller;
 
-import com.kthowns.mobidic.api.auth.model.AuthUser;
 import com.kthowns.mobidic.api.global.dto.ErrorResponse;
 import com.kthowns.mobidic.api.global.dto.GeneralResponse;
 import com.kthowns.mobidic.api.vocabulary.dto.request.AddVocabularyRequestDto;
 import com.kthowns.mobidic.domain.vocabulary.model.VocabularyDetail;
 import com.kthowns.mobidic.domain.vocabulary.service.VocabularyService;
+import com.kthowns.mobidic.security.model.AuthUser;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;

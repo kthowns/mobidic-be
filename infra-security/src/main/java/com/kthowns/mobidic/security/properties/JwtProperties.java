@@ -1,4 +1,4 @@
-package com.kthowns.mobidic.api.security.properties;
+package com.kthowns.mobidic.security.properties;
 
 import io.jsonwebtoken.security.Keys;
 import org.springframework.boot.context.properties.ConfigurationProperties;

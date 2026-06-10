@@ -1,8 +1,8 @@
-package com.kthowns.mobidic.api.service;
+package com.kthowns.mobidic.security.service;
 
-import com.kthowns.mobidic.api.security.properties.JwtProperties;
-import com.kthowns.mobidic.api.security.util.JwtProvider;
 import com.kthowns.mobidic.domain.user.model.UserRole;
+import com.kthowns.mobidic.security.properties.JwtProperties;
+import com.kthowns.mobidic.security.util.JwtProvider;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;

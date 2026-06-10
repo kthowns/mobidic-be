@@ -1,6 +1,5 @@
 package com.kthowns.mobidic.api.word.controller;
 
-import com.kthowns.mobidic.api.auth.model.AuthUser;
 import com.kthowns.mobidic.api.definition.util.DefinitionCommandMapper;
 import com.kthowns.mobidic.api.global.dto.ErrorResponse;
 import com.kthowns.mobidic.api.global.dto.GeneralResponse;
@@ -10,6 +9,7 @@ import com.kthowns.mobidic.api.word.util.WordCommandMapper;
 import com.kthowns.mobidic.domain.word.facade.WordFacade;
 import com.kthowns.mobidic.domain.word.model.WordDetail;
 import com.kthowns.mobidic.domain.word.service.WordService;
+import com.kthowns.mobidic.security.model.AuthUser;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;

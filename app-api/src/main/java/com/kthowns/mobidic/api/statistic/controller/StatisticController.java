@@ -1,10 +1,10 @@
 package com.kthowns.mobidic.api.statistic.controller;
 
-import com.kthowns.mobidic.api.auth.model.AuthUser;
 import com.kthowns.mobidic.api.global.dto.ErrorResponse;
 import com.kthowns.mobidic.api.global.dto.GeneralResponse;
 import com.kthowns.mobidic.domain.statistic.model.WordStatistic;
 import com.kthowns.mobidic.domain.statistic.service.StatisticService;
+import com.kthowns.mobidic.security.model.AuthUser;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;

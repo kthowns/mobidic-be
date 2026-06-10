@@ -1,8 +1,8 @@
-package com.kthowns.mobidic.api.security.config;
+package com.kthowns.mobidic.security.config;
 
-import com.kthowns.mobidic.api.auth.model.AuthUser;
-import com.kthowns.mobidic.api.security.util.JwtProvider;
 import com.kthowns.mobidic.domain.user.service.UserBlackListService;
+import com.kthowns.mobidic.security.model.AuthUser;
+import com.kthowns.mobidic.security.util.JwtProvider;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -14,13 +14,11 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.AuthenticationEntryPoint;
-import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
-@Component
 @Slf4j
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {

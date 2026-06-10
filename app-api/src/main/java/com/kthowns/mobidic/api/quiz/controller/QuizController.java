@@ -1,12 +1,12 @@
 package com.kthowns.mobidic.api.quiz.controller;
 
-import com.kthowns.mobidic.api.auth.model.AuthUser;
 import com.kthowns.mobidic.api.global.dto.ErrorResponse;
 import com.kthowns.mobidic.api.global.dto.GeneralResponse;
 import com.kthowns.mobidic.api.quiz.dto.request.QuizRateRequest;
 import com.kthowns.mobidic.domain.quiz.model.QuizInfo;
 import com.kthowns.mobidic.domain.quiz.model.QuizResult;
 import com.kthowns.mobidic.domain.quiz.service.QuizService;
+import com.kthowns.mobidic.security.model.AuthUser;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;

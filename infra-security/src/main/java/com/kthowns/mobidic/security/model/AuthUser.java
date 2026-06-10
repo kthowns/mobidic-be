@@ -1,4 +1,4 @@
-package com.kthowns.mobidic.api.auth.model;
+package com.kthowns.mobidic.security.model;
 
 import com.kthowns.mobidic.domain.user.model.User;
 import lombok.AllArgsConstructor;

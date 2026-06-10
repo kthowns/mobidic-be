@@ -1,8 +1,10 @@
-package com.kthowns.mobidic.api.security.config;
+package com.kthowns.mobidic.security.config;
 
-import com.kthowns.mobidic.api.security.exception.AuthAccessDeniedHandler;
-import com.kthowns.mobidic.api.security.exception.AuthAuthenticationEntryPoint;
-import com.kthowns.mobidic.api.security.properties.JwtProperties;
+import com.kthowns.mobidic.domain.user.service.UserBlackListService;
+import com.kthowns.mobidic.security.exception.AuthAccessDeniedHandler;
+import com.kthowns.mobidic.security.exception.AuthAuthenticationEntryPoint;
+import com.kthowns.mobidic.security.properties.JwtProperties;
+import com.kthowns.mobidic.security.util.JwtProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -31,11 +33,13 @@ import java.util.List;
 @EnableConfigurationProperties(JwtProperties.class)
 @RequiredArgsConstructor
 public class SecurityConfig {
-    private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final AuthAuthenticationEntryPoint authAuthenticationEntryPoint;
     private final AuthAccessDeniedHandler authAccessDeniedHandler;
     private final Environment environment;
-
+    private final JwtProvider jwtProvider;
+    private final UserBlackListService userBlackListService;
+    private final AuthAuthenticationEntryPoint authenticationEntryPoint;
+    
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         List<String> profiles = List.of(environment.getActiveProfiles());
@@ -67,7 +71,7 @@ public class SecurityConfig {
                             */
                             .anyRequest().authenticated();
                 })
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(exceptionHandling -> exceptionHandling
                         .authenticationEntryPoint(authAuthenticationEntryPoint)
                         .accessDeniedHandler(authAccessDeniedHandler)
@@ -97,5 +101,10 @@ public class SecurityConfig {
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
         return authConfig.getAuthenticationManager();
+    }
+
+    @Bean
+    public JwtAuthenticationFilter jwtAuthenticationFilter() {
+        return new JwtAuthenticationFilter(jwtProvider, userBlackListService, authenticationEntryPoint);
     }
 }
