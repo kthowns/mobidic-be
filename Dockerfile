@@ -12,6 +12,7 @@ COPY core-common/build.gradle core-common/
 COPY core-domain/build.gradle core-domain/
 COPY infra-external/build.gradle infra-external/
 COPY infra-storage/build.gradle infra-storage/
+COPY infra-security/build.gradle infra-security/
 
 RUN ./gradlew --no-daemon dependencies
 
