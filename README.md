@@ -2,7 +2,7 @@
 
 **사용자 맞춤형 단어 학습 및 AI 기반 발음 체크 플랫폼**
 
-> * 이 레포지토리는 포트폴리오 제출 용도로, 실제 운영되고 있는 서비스의 일부만 포함되어 있습니다.
+> * 이 레포지토리는 실제 운영되고 있는 서비스의 일부만 포함될 수 있습니다.
 
 ---
 
@@ -144,7 +144,7 @@ graph TB
 | 모듈                 | 역할                   | 핵심 기술                       |
 |:-------------------|:---------------------|:----------------------------|
 | **app-api**        | 애플리케이션 진입점 및 응답 처리   | Spring MVC, Spring Security |
-| **core-domain**    | 핵심 비즈니스 로직 및 도메인 모델  | Pure Java, Java Records     |
+| **core-domain**    | 핵심 비즈니스 로직 및 도메인 모델  | POJO, Java Records          |
 | **infra-storage**  | 데이터 영속성 관리 및 데이터 액세스 | JPA, QueryDSL, Redis        |
 | **infra-external** | 외부 시스템 및 서드파티 API 연동 | RestClient, OAuth           |
 | **core-common**    | 공통 상수, 예외 규격 및 유틸리티  | Java                        |
