@@ -18,12 +18,17 @@ public interface WordStatisticJpaRepository extends JpaRepository<WordStatisticJ
             " from WordStatisticJpaEntity ws" +
             " join WordJpaEntity w on ws.wordId = w.id" +
             " where w.vocabulary.id = :vocabularyId and w.vocabulary.userId = :userId")
-    double getVocabularyLearningRate(@Param("vocabularyId") UUID vocabularyId, @Param("userId") UUID userId);
+    double getVocabularyLearningRate(
+            @Param("vocabularyId") UUID vocabularyId,
+            @Param("userId") UUID userId
+    );
 
     @Query("SELECT ws FROM WordStatisticJpaEntity ws" +
             " JOIN WordJpaEntity w on ws.wordId = w.id" +
             " WHERE w.vocabulary.userId = :userId")
-    List<WordStatisticJpaEntity> findByUserId(UUID userId);
+    List<WordStatisticJpaEntity> findByUserId(
+            @Param("userId") UUID userId
+    );
 
     @Query("SELECT ws FROM WordStatisticJpaEntity ws" +
             " JOIN WordJpaEntity w ON ws.wordId = w.id" +
@@ -48,5 +53,8 @@ public interface WordStatisticJpaRepository extends JpaRepository<WordStatisticJ
             " JOIN WordJpaEntity w ON ws.wordId = w.id" +
             " WHERE w.id = :wordId" +
             " AND w.vocabulary.userId = :userId")
-    Optional<WordStatisticJpaEntity> findByWordIdAndUserId(@Param("wordId") UUID wordId, @Param("userId") UUID userId);
+    Optional<WordStatisticJpaEntity> findByWordIdAndUserId(
+            @Param("wordId") UUID wordId,
+            @Param("userId") UUID userId
+    );
 }

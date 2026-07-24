@@ -20,7 +20,10 @@ public interface VocabularyJpaRepository extends JpaRepository<VocabularyJpaEnti
     @Query("SELECT v FROM VocabularyJpaEntity v" +
             " WHERE v.userId = :userId" +
             " AND v.id = :id")
-    Optional<VocabularyJpaEntity> findForUpdate(@Param("id") UUID id, @Param("userId") UUID userId);
+    Optional<VocabularyJpaEntity> findForUpdate(
+            @Param("id") UUID id,
+            @Param("userId") UUID userId
+    );
 
     boolean existsByIdAndUserId(UUID id, UUID userId);
 
@@ -34,11 +37,17 @@ public interface VocabularyJpaRepository extends JpaRepository<VocabularyJpaEnti
     @Query("UPDATE VocabularyJpaEntity v" +
             " SET v.wordCount = v.wordCount + 1" +
             " WHERE v.id = :vocabularyId AND v.userId = :userId")
-    void increaseWordCount(@Param("vocabularyId") UUID vocabularyId, @Param("userId") UUID userId);
+    void increaseWordCount(
+            @Param("vocabularyId") UUID vocabularyId,
+            @Param("userId") UUID userId
+    );
 
     @Modifying
     @Query("UPDATE VocabularyJpaEntity v" +
             " SET v.wordCount = v.wordCount - 1" +
             " WHERE v.id = :vocabularyId and v.userId = :userId and v.wordCount > 0")
-    void decreaseWordCount(@Param("vocabularyId") UUID vocabularyId, @Param("userId") UUID userId);
+    void decreaseWordCount(
+            @Param("vocabularyId") UUID vocabularyId,
+            @Param("userId") UUID userId
+    );
 }
