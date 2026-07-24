@@ -1,13 +1,16 @@
 package com.kthowns.mobidic.storage.preset.repository.jpa;
 
+import com.kthowns.mobidic.domain.definition.model.Definition;
 import com.kthowns.mobidic.domain.preset.repository.PresetRepository;
+import com.kthowns.mobidic.domain.statistic.model.WordStatistic;
+import com.kthowns.mobidic.domain.vocabulary.model.Vocabulary;
+import com.kthowns.mobidic.domain.word.model.Word;
 import com.kthowns.mobidic.storage.definition.jpaentity.DefinitionJpaEntity;
 import com.kthowns.mobidic.storage.definition.jparepository.DefinitionJpaRepository;
 import com.kthowns.mobidic.storage.preset.jpaentity.PresetVocabularyJpaEntity;
 import com.kthowns.mobidic.storage.preset.jparepository.PresetVocabularyJpaRepository;
 import com.kthowns.mobidic.storage.statistic.jpaentity.WordStatisticJpaEntity;
 import com.kthowns.mobidic.storage.statistic.jparepository.WordStatisticJpaRepository;
-import com.kthowns.mobidic.storage.user.jpaentity.UserJpaEntity;
 import com.kthowns.mobidic.storage.vocabulary.jpaentity.VocabularyJpaEntity;
 import com.kthowns.mobidic.storage.vocabulary.jparepository.VocabularyJpaRepository;
 import com.kthowns.mobidic.storage.word.jpaentity.WordJpaEntity;
@@ -30,16 +33,17 @@ public class PresetRepositoryImpl implements PresetRepository {
 
     @Override
     public void copyAllPresetsToUser(UUID userId) {
-        UserJpaEntity user = UserJpaEntity.builder().id(userId).build();
         List<PresetVocabularyJpaEntity> presetVocabs = presetVocabularyJpaRepository.findAll();
 
         List<VocabularyJpaEntity> vocabularies = presetVocabs.stream()
-                .map(pv -> VocabularyJpaEntity.builder()
-                        .user(user)
-                        .title(pv.getTitle())
-                        .description(pv.getDescription())
-                        .wordCount((long) pv.getWords().size())
-                        .build())
+                .map(pv -> VocabularyJpaEntity.createFromModel(
+                        Vocabulary.create(
+                                userId,
+                                pv.getTitle(),
+                                pv.getDescription(),
+                                pv.getWords().size()
+                        ))
+                )
                 .toList();
         vocabularyJpaRepository.saveAllAndFlush(vocabularies);
 
@@ -52,22 +56,23 @@ public class PresetRepositoryImpl implements PresetRepository {
             VocabularyJpaEntity v = vocabularies.get(i);
 
             for (var pw : pv.getWords()) {
-                WordJpaEntity w = WordJpaEntity.builder()
-                        .vocabulary(v)
-                        .expression(pw.getExpression())
-                        .build();
+                WordJpaEntity w = WordJpaEntity.createFromModel(
+                        Word.create(v.getId(), pw.getExpression()),
+                        v
+                );
                 allWords.add(w);
 
-                allWordStatistics.add(WordStatisticJpaEntity.builder()
-                        .word(w)
-                        .build());
+                allWordStatistics.add(
+                        WordStatisticJpaEntity.createFromModel(WordStatistic.create(w.getId()))
+                );
 
                 for (var pd : pw.getDefinitions()) {
-                    allDefinitions.add(DefinitionJpaEntity.builder()
-                            .word(w)
-                            .meaning(pd.getMeaning())
-                            .part(pd.getPart())
-                            .build());
+                    allDefinitions.add(
+                            DefinitionJpaEntity.createFromModel(
+                                    Definition.create(w.getId(), pd.getMeaning(), pd.getPart()),
+                                    w
+                            )
+                    );
                 }
             }
         }

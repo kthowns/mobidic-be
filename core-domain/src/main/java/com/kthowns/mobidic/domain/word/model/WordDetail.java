@@ -2,7 +2,7 @@ package com.kthowns.mobidic.domain.word.model;
 
 import com.kthowns.mobidic.domain.definition.model.Definition;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -13,6 +13,7 @@ public record WordDetail(
         double accuracy,
         boolean isLearned,
         List<Definition> definitions,
-        LocalDateTime createdAt
+        Instant createdAt,
+        Instant updatedAt
 ) {
 }

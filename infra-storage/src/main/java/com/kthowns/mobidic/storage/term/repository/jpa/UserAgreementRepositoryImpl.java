@@ -5,7 +5,6 @@ import com.kthowns.mobidic.storage.term.jpaentity.TermJpaEntity;
 import com.kthowns.mobidic.storage.term.jpaentity.UserAgreementJpaEntity;
 import com.kthowns.mobidic.storage.term.jparepository.TermJpaRepository;
 import com.kthowns.mobidic.storage.term.jparepository.UserAgreementJpaRepository;
-import com.kthowns.mobidic.storage.user.jpaentity.UserJpaEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -23,10 +22,7 @@ public class UserAgreementRepositoryImpl implements UserAgreementRepository {
         List<TermJpaEntity> terms = termJpaRepository.findByIdIn(termIds);
         List<UserAgreementJpaEntity> userAgreements = terms.stream()
                 .map(term ->
-                        UserAgreementJpaEntity.builder()
-                                .term(term)
-                                .user(UserJpaEntity.builder().id(userId).build())
-                                .build()
+                        UserAgreementJpaEntity.create(userId, term)
                 ).toList();
 
         userAgreementJpaRepository.saveAll(userAgreements);

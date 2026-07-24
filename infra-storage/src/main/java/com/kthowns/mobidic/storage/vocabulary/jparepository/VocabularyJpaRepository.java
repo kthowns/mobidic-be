@@ -14,25 +14,31 @@ import java.util.UUID;
 
 @Repository
 public interface VocabularyJpaRepository extends JpaRepository<VocabularyJpaEntity, UUID>, VocabularyDetailJpaRepositoryCustom {
-    Optional<VocabularyJpaEntity> findByIdAndUser_Id(UUID id, UUID userId);
+    Optional<VocabularyJpaEntity> findByIdAndUserId(UUID id, UUID userId);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query("select v from VocabularyJpaEntity v where v.user.id = :userId and v.id = :id")
+    @Query("SELECT v FROM VocabularyJpaEntity v" +
+            " WHERE v.userId = :userId" +
+            " AND v.id = :id")
     Optional<VocabularyJpaEntity> findForUpdate(@Param("id") UUID id, @Param("userId") UUID userId);
 
-    boolean existsByIdAndUser_Id(UUID id, UUID userId);
+    boolean existsByIdAndUserId(UUID id, UUID userId);
 
-    boolean existsByTitleAndUser_Id(String title, UUID userId);
+    boolean existsByTitleAndUserId(String title, UUID userId);
 
-    boolean existsByTitleAndIdNotAndUser_Id(String title, UUID vocabularyId, UUID userId);
+    boolean existsByTitleAndIdNotAndUserId(String title, UUID vocabularyId, UUID userId);
 
-    boolean existsByUser_Id(UUID userId);
+    boolean existsByUserId(UUID userId);
 
     @Modifying
-    @Query("update VocabularyJpaEntity v set v.wordCount = v.wordCount + 1 where v.id = :vocabularyId and v.user.id = :userId")
+    @Query("UPDATE VocabularyJpaEntity v" +
+            " SET v.wordCount = v.wordCount + 1" +
+            " WHERE v.id = :vocabularyId AND v.userId = :userId")
     void increaseWordCount(@Param("vocabularyId") UUID vocabularyId, @Param("userId") UUID userId);
 
     @Modifying
-    @Query("update VocabularyJpaEntity v set v.wordCount = v.wordCount - 1 where v.id = :vocabularyId and v.user.id = :userId and v.wordCount > 0")
+    @Query("UPDATE VocabularyJpaEntity v" +
+            " SET v.wordCount = v.wordCount - 1" +
+            " WHERE v.id = :vocabularyId and v.userId = :userId and v.wordCount > 0")
     void decreaseWordCount(@Param("vocabularyId") UUID vocabularyId, @Param("userId") UUID userId);
 }

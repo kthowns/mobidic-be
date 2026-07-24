@@ -3,8 +3,12 @@ package com.kthowns.mobidic.api.integration;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kthowns.mobidic.security.util.JwtProvider;
 import com.kthowns.mobidic.common.code.AuthResponseCode;
+import com.kthowns.mobidic.domain.definition.model.Definition;
 import com.kthowns.mobidic.domain.definition.model.PartOfSpeech;
+import com.kthowns.mobidic.domain.user.model.User;
 import com.kthowns.mobidic.domain.user.model.UserRole;
+import com.kthowns.mobidic.domain.vocabulary.model.Vocabulary;
+import com.kthowns.mobidic.domain.word.model.Word;
 import com.kthowns.mobidic.storage.definition.jpaentity.DefinitionJpaEntity;
 import com.kthowns.mobidic.storage.definition.jparepository.DefinitionJpaRepository;
 import com.kthowns.mobidic.storage.user.jpaentity.UserJpaEntity;
@@ -72,25 +76,16 @@ public class DefinitionIntegrationTest {
     void setup() {
         transactionTemplate.execute(status -> {
             // 테스트 기초 데이터 생성 (사용자 -> 단어장 -> 단어)
-            testUser = userJpaRepository.save(UserJpaEntity.builder()
-                    .email("test@test.com")
-                    .nickname("test")
-                    .password(passwordEncoder.encode("password123!"))
-                    .role(UserRole.USER)
-                    .build());
+            testUser = userJpaRepository.save(UserJpaEntity.createFromModel(
+                    User.create("test@test.com", "test", passwordEncoder.encode("password123!"), UserRole.USER)));
 
             userToken = jwtProvider.generateToken(testUser.getId(), testUser.getRole().name());
 
-            VocabularyJpaEntity vocabulary = vocabularyJpaRepository.save(VocabularyJpaEntity.builder()
-                    .user(testUser)
-                    .title("테스트 단어장")
-                    .description("설명")
-                    .build());
+            VocabularyJpaEntity vocabulary = vocabularyJpaRepository.save(VocabularyJpaEntity.createFromModel(
+                    Vocabulary.create(testUser.getId(), "테스트 단어장", "설명", 0L)));
 
-            testWord = wordJpaRepository.save(WordJpaEntity.builder()
-                    .vocabulary(vocabulary)
-                    .expression("apple")
-                    .build());
+            testWord = wordJpaRepository.save(WordJpaEntity.createFromModel(
+                    Word.create(vocabulary.getId(), "apple"), vocabulary));
             return null;
         });
     }
@@ -110,11 +105,8 @@ public class DefinitionIntegrationTest {
     @DisplayName("정의 조회 성공")
     void getDefinitionsSuccess() throws Exception {
         // Given
-        definitionJpaRepository.save(DefinitionJpaEntity.builder()
-                .word(testWord)
-                .meaning("사과")
-                .part(PartOfSpeech.NOUN)
-                .build());
+        definitionJpaRepository.save(DefinitionJpaEntity.createFromModel(
+                Definition.create(testWord.getId(), "사과", PartOfSpeech.NOUN), testWord));
 
         // When
         mockMvc.perform(get("/api/words/" + testWord.getId() + "/definitions")

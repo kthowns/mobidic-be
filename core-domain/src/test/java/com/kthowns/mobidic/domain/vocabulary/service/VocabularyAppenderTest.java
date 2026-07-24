@@ -1,5 +1,6 @@
 package com.kthowns.mobidic.domain.vocabulary.service;
 
+import com.kthowns.mobidic.domain.global.model.AuditTime;
 import com.kthowns.mobidic.domain.vocabulary.model.Vocabulary;
 import com.kthowns.mobidic.domain.vocabulary.repository.VocabularyRepository;
 import org.junit.jupiter.api.DisplayName;
@@ -34,7 +35,7 @@ class VocabularyAppenderTest {
         String title = "단어장 제목";
         String description = "단어장 설명";
 
-        Vocabulary expectedVocab = new Vocabulary(UUID.randomUUID(), userId, title, description, 0, null);
+        Vocabulary expectedVocab = new Vocabulary(UUID.randomUUID(), userId, title, description, 0, AuditTime.create());
         given(vocabularyRepository.append(any(Vocabulary.class))).willReturn(expectedVocab);
 
         // When

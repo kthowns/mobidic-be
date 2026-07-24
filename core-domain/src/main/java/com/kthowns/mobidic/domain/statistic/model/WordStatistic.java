@@ -1,5 +1,7 @@
 package com.kthowns.mobidic.domain.statistic.model;
 
+import com.kthowns.mobidic.domain.global.model.AuditTime;
+
 import java.util.UUID;
 
 public record WordStatistic(
@@ -8,7 +10,8 @@ public record WordStatistic(
         long incorrectCount,
         boolean isLearned,
         double difficulty,
-        double accuracy
+        double accuracy,
+        AuditTime auditTime
 ) {
     public static WordStatistic create(UUID wordId) {
         return new WordStatistic(
@@ -17,7 +20,8 @@ public record WordStatistic(
                 0,
                 false,
                 0.5,
-                0.0
+                0.0,
+                AuditTime.create()
         );
     }
 
@@ -29,7 +33,8 @@ public record WordStatistic(
                 this.incorrectCount,
                 this.isLearned,
                 calculateDifficulty(newCorrectCount, this.incorrectCount),
-                calculateAccuracy(newCorrectCount, this.incorrectCount)
+                calculateAccuracy(newCorrectCount, this.incorrectCount),
+                AuditTime.update(this.auditTime)
         );
     }
 
@@ -41,7 +46,8 @@ public record WordStatistic(
                 newIncorrectCount,
                 this.isLearned,
                 calculateDifficulty(this.correctCount, newIncorrectCount),
-                calculateAccuracy(this.correctCount, newIncorrectCount)
+                calculateAccuracy(this.correctCount, newIncorrectCount),
+                AuditTime.update(this.auditTime)
         );
     }
 
@@ -52,7 +58,8 @@ public record WordStatistic(
                 this.incorrectCount,
                 !this.isLearned,
                 this.difficulty,
-                this.accuracy
+                this.accuracy,
+                AuditTime.update(this.auditTime)
         );
     }
 
@@ -71,6 +78,6 @@ public record WordStatistic(
 
     private double calculateDifficulty(long correct, long incorrect) {
         double diff = (-0.045 * correct) + (0.055 * incorrect) + 0.5;
-        return Math.min(1.0, Math.max(0.0, diff));
+        return Math.clamp(diff, 0.0, 1.0);
     }
 }

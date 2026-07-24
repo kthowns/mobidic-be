@@ -1,5 +1,6 @@
 package com.kthowns.mobidic.domain.user.service;
 
+import com.kthowns.mobidic.domain.global.model.AuditTime;
 import com.kthowns.mobidic.domain.user.model.User;
 import com.kthowns.mobidic.domain.user.model.UserRole;
 import com.kthowns.mobidic.domain.user.repository.UserRepository;
@@ -11,7 +12,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -36,7 +36,7 @@ class UserRemoverTest {
     void deactivateTest() {
         // Given
         UUID userId = UUID.randomUUID();
-        User user = new User(userId, null, "test@test.com", "test", "pass", UserRole.USER, true, LocalDateTime.now(), null);
+        User user = new User(userId, null, "test@test.com", "test", "pass", UserRole.USER, true, AuditTime.create(), null);
         given(userReader.readById(userId)).willReturn(user);
 
         User deactivatedUser = user.deactivate();

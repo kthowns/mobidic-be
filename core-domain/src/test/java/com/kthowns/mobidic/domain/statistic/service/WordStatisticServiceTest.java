@@ -1,5 +1,6 @@
 package com.kthowns.mobidic.domain.statistic.service;
 
+import com.kthowns.mobidic.domain.global.model.AuditTime;
 import com.kthowns.mobidic.domain.statistic.model.WordStatistic;
 import com.kthowns.mobidic.domain.vocabulary.service.VocabularyService;
 import org.junit.jupiter.api.DisplayName;
@@ -39,7 +40,7 @@ class WordStatisticServiceTest {
     @DisplayName("[StatService] Get word statistic by id success")
     void getWordStatisticByIdSuccess() {
         // given
-        WordStatistic stat = new WordStatistic(wordId, 3L, 5L, true, 0.6, 0.375);
+        WordStatistic stat = new WordStatistic(wordId, 3L, 5L, true, 0.6, 0.375, AuditTime.create());
         given(statisticReader.readByWordIdAndUserId(wordId, userId)).willReturn(stat);
 
         // when
@@ -102,8 +103,8 @@ class WordStatisticServiceTest {
     void getAvgAccuracyByVocabSuccess() {
         // given
         List<WordStatistic> wordStatistics = List.of(
-                new WordStatistic(UUID.randomUUID(), 10L, 0L, true, 0.1, 1.0),
-                new WordStatistic(UUID.randomUUID(), 5L, 5L, true, 0.5, 0.5)
+                new WordStatistic(UUID.randomUUID(), 10L, 0L, true, 0.1, 1.0, AuditTime.create()),
+                new WordStatistic(UUID.randomUUID(), 5L, 5L, true, 0.5, 0.5, AuditTime.create())
         );
         given(vocabularyService.existsByIdAndUser(vocabId, userId)).willReturn(true);
         given(statisticReader.readByVocabularyId(vocabId, userId)).willReturn(wordStatistics);
@@ -120,8 +121,8 @@ class WordStatisticServiceTest {
     void getTotalAvgAccuracySuccess() {
         // given
         List<WordStatistic> wordStatistics = List.of(
-                new WordStatistic(UUID.randomUUID(), 10L, 0L, true, 0.1, 1.0),
-                new WordStatistic(UUID.randomUUID(), 5L, 5L, true, 0.5, 0.5)
+                new WordStatistic(UUID.randomUUID(), 10L, 0L, true, 0.1, 1.0, AuditTime.create()),
+                new WordStatistic(UUID.randomUUID(), 5L, 5L, true, 0.5, 0.5, AuditTime.create())
         );
         given(statisticReader.readByUserId(userId)).willReturn(wordStatistics);
 

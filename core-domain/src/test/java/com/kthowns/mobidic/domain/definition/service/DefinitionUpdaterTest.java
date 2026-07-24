@@ -3,6 +3,7 @@ package com.kthowns.mobidic.domain.definition.service;
 import com.kthowns.mobidic.domain.definition.model.Definition;
 import com.kthowns.mobidic.domain.definition.model.PartOfSpeech;
 import com.kthowns.mobidic.domain.definition.repository.DefinitionRepository;
+import com.kthowns.mobidic.domain.global.model.AuditTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,8 +32,8 @@ class DefinitionUpdaterTest {
         UUID wordId = UUID.randomUUID();
         UUID userId = UUID.randomUUID();
         List<Definition> definitions = List.of(
-                new Definition(UUID.randomUUID(), wordId, "의미1", PartOfSpeech.NOUN),
-                new Definition(UUID.randomUUID(), wordId, "의미2", PartOfSpeech.VERB)
+                new Definition(UUID.randomUUID(), wordId, "의미1", PartOfSpeech.NOUN, AuditTime.create()),
+                new Definition(UUID.randomUUID(), wordId, "의미2", PartOfSpeech.VERB, AuditTime.create())
         );
 
         // When

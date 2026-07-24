@@ -5,7 +5,11 @@ import com.kthowns.mobidic.security.util.JwtProvider;
 import com.kthowns.mobidic.api.vocabulary.dto.request.AddVocabularyRequestDto;
 import com.kthowns.mobidic.common.code.AuthResponseCode;
 import com.kthowns.mobidic.common.code.GeneralResponseCode;
+import com.kthowns.mobidic.domain.statistic.model.WordStatistic;
+import com.kthowns.mobidic.domain.user.model.User;
 import com.kthowns.mobidic.domain.user.model.UserRole;
+import com.kthowns.mobidic.domain.vocabulary.model.Vocabulary;
+import com.kthowns.mobidic.domain.word.model.Word;
 import com.kthowns.mobidic.storage.statistic.jpaentity.WordStatisticJpaEntity;
 import com.kthowns.mobidic.storage.statistic.jparepository.WordStatisticJpaRepository;
 import com.kthowns.mobidic.storage.user.jpaentity.UserJpaEntity;
@@ -75,12 +79,8 @@ public class VocabularyIntegrationTest {
     @BeforeEach
     void setUp() {
         transactionTemplate.execute(status -> {
-            testUser = userJpaRepository.save(UserJpaEntity.builder()
-                    .email("test@test.com")
-                    .nickname("test")
-                    .password(passwordEncoder.encode("password123!"))
-                    .role(UserRole.USER)
-                    .build());
+            testUser = userJpaRepository.save(UserJpaEntity.createFromModel(
+                    User.create("test@test.com", "test", passwordEncoder.encode("password123!"), UserRole.USER)));
             return null;
         });
 
@@ -118,17 +118,15 @@ public class VocabularyIntegrationTest {
         // Then
         VocabularyJpaEntity savedVocab = vocabularyJpaRepository.findAll().getFirst();
         assertThat(savedVocab.getTitle()).isEqualTo("테스트 단어장");
-        assertThat(savedVocab.getUser().getId()).isEqualTo(testUser.getId());
+        assertThat(savedVocab.getUserId()).isEqualTo(testUser.getId());
     }
 
     @Test
     @DisplayName("단어장 추가 실패 - 중복된 제목")
     void addVocabularyFailDuplicated() throws Exception {
         // Given
-        vocabularyJpaRepository.save(VocabularyJpaEntity.builder()
-                .user(testUser)
-                .title("중복 제목")
-                .build());
+        vocabularyJpaRepository.save(VocabularyJpaEntity.createFromModel(
+                Vocabulary.create(testUser.getId(), "중복 제목", null, 0L)));
 
         AddVocabularyRequestDto request = AddVocabularyRequestDto.builder()
                 .title("중복 제목")
@@ -149,19 +147,29 @@ public class VocabularyIntegrationTest {
     void getVocabulariesSuccess() throws Exception {
         // Given
         transactionTemplate.execute(status -> {
-            VocabularyJpaEntity vocab = vocabularyJpaRepository.save(VocabularyJpaEntity.builder()
-                    .user(testUser)
-                    .title("단어장1")
-                    .wordCount(3L)
-                    .build());
+            VocabularyJpaEntity vocab = vocabularyJpaRepository.save(VocabularyJpaEntity.createFromModel(
+                    Vocabulary.create(testUser.getId(), "단어장1", null, 3L)));
 
-            WordJpaEntity w1 = wordJpaRepository.save(WordJpaEntity.builder().vocabulary(vocab).expression("w1").build());
-            WordJpaEntity w2 = wordJpaRepository.save(WordJpaEntity.builder().vocabulary(vocab).expression("w2").build());
-            WordJpaEntity w3 = wordJpaRepository.save(WordJpaEntity.builder().vocabulary(vocab).expression("w3").build());
+            WordJpaEntity w1 = wordJpaRepository.save(WordJpaEntity.createFromModel(
+                    Word.create(vocab.getId(), "w1"), vocab));
+            WordJpaEntity w2 = wordJpaRepository.save(WordJpaEntity.createFromModel(
+                    Word.create(vocab.getId(), "w2"), vocab));
+            WordJpaEntity w3 = wordJpaRepository.save(WordJpaEntity.createFromModel(
+                    Word.create(vocab.getId(), "w3"), vocab));
 
-            wordStatisticJpaRepository.save(WordStatisticJpaEntity.builder().word(w1).isLearned(true).build());
-            wordStatisticJpaRepository.save(WordStatisticJpaEntity.builder().word(w2).correctCount(1).incorrectCount(1).build());
-            wordStatisticJpaRepository.save(WordStatisticJpaEntity.builder().word(w3).build());
+            WordStatistic stat1Model = WordStatistic.create(w1.getId()).toggleLearned();
+            WordStatisticJpaEntity stat1 = WordStatisticJpaEntity.createFromModel(stat1Model);
+            stat1.updateFromModel(stat1Model);
+            wordStatisticJpaRepository.save(stat1);
+
+            WordStatistic stat2Model = WordStatistic.create(w2.getId()).increaseCorrectCount().increaseIncorrectCount();
+            WordStatisticJpaEntity stat2 = WordStatisticJpaEntity.createFromModel(stat2Model);
+            stat2.updateFromModel(stat2Model);
+            wordStatisticJpaRepository.save(stat2);
+
+            WordStatistic stat3Model = WordStatistic.create(w3.getId());
+            WordStatisticJpaEntity stat3 = WordStatisticJpaEntity.createFromModel(stat3Model);
+            wordStatisticJpaRepository.save(stat3);
             return null;
         });
 
@@ -179,11 +187,8 @@ public class VocabularyIntegrationTest {
     @DisplayName("단어장 상세 조회 성공")
     void getVocabularyDetailsSuccess() throws Exception {
         // Given
-        VocabularyJpaEntity vocab = vocabularyJpaRepository.save(VocabularyJpaEntity.builder()
-                .user(testUser)
-                .title("상세 조회용")
-                .wordCount(10L)
-                .build());
+        VocabularyJpaEntity vocab = vocabularyJpaRepository.save(VocabularyJpaEntity.createFromModel(
+                Vocabulary.create(testUser.getId(), "상세 조회용", null, 10L)));
 
         // When
         mockMvc.perform(get("/api/vocabularies/" + vocab.getId())
@@ -199,10 +204,8 @@ public class VocabularyIntegrationTest {
     @DisplayName("단어장 수정 성공")
     void updateVocabularySuccess() throws Exception {
         // Given
-        VocabularyJpaEntity vocab = vocabularyJpaRepository.save(VocabularyJpaEntity.builder()
-                .user(testUser)
-                .title("기존 제목")
-                .build());
+        VocabularyJpaEntity vocab = vocabularyJpaRepository.save(VocabularyJpaEntity.createFromModel(
+                Vocabulary.create(testUser.getId(), "기존 제목", null, 0L)));
 
         AddVocabularyRequestDto request = AddVocabularyRequestDto.builder()
                 .title("수정된 제목")
@@ -227,10 +230,8 @@ public class VocabularyIntegrationTest {
     @DisplayName("단어장 삭제 성공")
     void deleteVocabularySuccess() throws Exception {
         // Given
-        VocabularyJpaEntity vocab = vocabularyJpaRepository.save(VocabularyJpaEntity.builder()
-                .user(testUser)
-                .title("삭제할 단어장")
-                .build());
+        VocabularyJpaEntity vocab = vocabularyJpaRepository.save(VocabularyJpaEntity.createFromModel(
+                Vocabulary.create(testUser.getId(), "삭제할 단어장", null, 0L)));
 
         // When
         mockMvc.perform(delete("/api/vocabularies/" + vocab.getId())

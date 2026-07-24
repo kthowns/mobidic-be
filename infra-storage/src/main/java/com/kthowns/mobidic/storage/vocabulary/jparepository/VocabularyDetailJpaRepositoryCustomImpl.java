@@ -1,9 +1,11 @@
 package com.kthowns.mobidic.storage.vocabulary.jparepository;
 
+import com.kthowns.mobidic.domain.global.model.AuditTime;
 import com.kthowns.mobidic.domain.vocabulary.model.Vocabulary;
 import com.kthowns.mobidic.domain.vocabulary.model.VocabularyDetail;
 import com.kthowns.mobidic.storage.statistic.jpaentity.QWordStatisticJpaEntity;
 import com.kthowns.mobidic.storage.vocabulary.jpaentity.QVocabularyJpaEntity;
+import com.kthowns.mobidic.storage.word.jpaentity.QWordJpaEntity;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -19,6 +21,7 @@ public class VocabularyDetailJpaRepositoryCustomImpl implements VocabularyDetail
 
     private final QVocabularyJpaEntity vocabulary = QVocabularyJpaEntity.vocabularyJpaEntity;
     private final QWordStatisticJpaEntity wordStatistic = QWordStatisticJpaEntity.wordStatisticJpaEntity;
+    private final QWordJpaEntity word = QWordJpaEntity.wordJpaEntity;
 
     @Override
     public List<VocabularyDetail> findVocabularyDetails(UUID userId) {
@@ -26,11 +29,14 @@ public class VocabularyDetailJpaRepositoryCustomImpl implements VocabularyDetail
                 .select(Projections.constructor(VocabularyDetail.class,
                         Projections.constructor(Vocabulary.class,
                                 vocabulary.id,
-                                vocabulary.user.id,
+                                vocabulary.userId,
                                 vocabulary.title,
                                 vocabulary.description,
                                 vocabulary.wordCount,
-                                vocabulary.createdAt
+                                Projections.constructor(AuditTime.class,
+                                        vocabulary.createdAt,
+                                        vocabulary.updatedAt
+                                )
                         ),
                         // 데이터가 없을 때를 대비해 coalesce(0.0) 추가
                         wordStatistic.isLearned.when(true).then(1.0).otherwise(0.0).avg().coalesce(0.0),
@@ -51,9 +57,10 @@ public class VocabularyDetailJpaRepositoryCustomImpl implements VocabularyDetail
                                 .coalesce(0.0)
                 ))
                 .from(vocabulary)
-                .leftJoin(wordStatistic).on(wordStatistic.word.vocabulary.id.eq(vocabulary.id))
-                .where(vocabulary.user.id.eq(userId))
-                .groupBy(vocabulary.id, vocabulary.title, vocabulary.description, vocabulary.createdAt, vocabulary.wordCount)
+                .leftJoin(word).on(word.vocabulary.id.eq(vocabulary.id))
+                .leftJoin(wordStatistic).on(wordStatistic.wordId.eq(word.id))
+                .where(vocabulary.userId.eq(userId))
+                .groupBy(vocabulary.id)
                 .fetch();
     }
 
@@ -64,11 +71,14 @@ public class VocabularyDetailJpaRepositoryCustomImpl implements VocabularyDetail
                         .select(Projections.constructor(VocabularyDetail.class,
                                 Projections.constructor(Vocabulary.class,
                                         vocabulary.id,
-                                        vocabulary.user.id,
+                                        vocabulary.userId,
                                         vocabulary.title,
                                         vocabulary.description,
                                         vocabulary.wordCount,
-                                        vocabulary.createdAt
+                                        Projections.constructor(AuditTime.class,
+                                                vocabulary.createdAt,
+                                                vocabulary.updatedAt
+                                        )
                                 ),
                                 // 데이터가 없을 때를 대비해 coalesce(0.0) 추가
                                 wordStatistic.isLearned.when(true).then(1.0).otherwise(0.0).avg().coalesce(0.0),
@@ -89,12 +99,13 @@ public class VocabularyDetailJpaRepositoryCustomImpl implements VocabularyDetail
                                         .coalesce(0.0)
                         ))
                         .from(vocabulary)
-                        .leftJoin(wordStatistic).on(wordStatistic.word.vocabulary.id.eq(vocabulary.id))
+                        .leftJoin(word).on(word.vocabulary.id.eq(vocabulary.id))
+                        .leftJoin(wordStatistic).on(wordStatistic.wordId.eq(word.id))
                         .where(
-                                vocabulary.user.id.eq(userId),
+                                vocabulary.userId.eq(userId),
                                 vocabulary.id.eq(vocabularyId)
                         )
-                        .groupBy(vocabulary.id, vocabulary.title, vocabulary.description, vocabulary.createdAt, vocabulary.wordCount)
+                        .groupBy(vocabulary.id)
                         .fetchOne());
     }
 }

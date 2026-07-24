@@ -16,16 +16,37 @@ public interface WordStatisticJpaRepository extends JpaRepository<WordStatisticJ
             "case when ws.isLearned = true then 1 else 0 end" +
             ")) / count(ws), 0.0)" +
             " from WordStatisticJpaEntity ws" +
-            " where ws.word.vocabulary.id = :vocabularyId and ws.word.vocabulary.user.id = :userId")
+            " join WordJpaEntity w on ws.wordId = w.id" +
+            " where w.vocabulary.id = :vocabularyId and w.vocabulary.userId = :userId")
     double getVocabularyLearningRate(@Param("vocabularyId") UUID vocabularyId, @Param("userId") UUID userId);
 
-    List<WordStatisticJpaEntity> findByWord_Vocabulary_User_Id(UUID userId);
+    @Query("SELECT ws FROM WordStatisticJpaEntity ws" +
+            " JOIN WordJpaEntity w on ws.wordId = w.id" +
+            " WHERE w.vocabulary.userId = :userId")
+    List<WordStatisticJpaEntity> findByUserId(UUID userId);
 
-    List<WordStatisticJpaEntity> findByWord_Vocabulary_IdAndWord_Vocabulary_User_Id(UUID vocabularyId, UUID userId);
+    @Query("SELECT ws FROM WordStatisticJpaEntity ws" +
+            " JOIN WordJpaEntity w ON ws.wordId = w.id" +
+            " WHERE w.vocabulary.userId = :userId" +
+            " AND w.vocabulary.id = :vocabularyId")
+    List<WordStatisticJpaEntity> findByVocabularyIdAndUserId(
+            @Param("vocabularyId") UUID vocabularyId,
+            @Param("userId") UUID userId
+    );
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query("select ws from WordStatisticJpaEntity ws where ws.word.id = :wordId and ws.word.vocabulary.user.id = :userId")
-    Optional<WordStatisticJpaEntity> findForUpdate(@Param("wordId") UUID wordId, @Param("userId") UUID userId);
+    @Query("SELECT ws FROM WordStatisticJpaEntity ws" +
+            " JOIN WordJpaEntity w ON ws.wordId = w.id" +
+            " WHERE w.id = :wordId" +
+            " AND w.vocabulary.userId = :userId")
+    Optional<WordStatisticJpaEntity> findForUpdate(
+            @Param("wordId") UUID wordId,
+            @Param("userId") UUID userId
+    );
 
-    Optional<WordStatisticJpaEntity> findByWordIdAndWord_Vocabulary_User_Id(UUID wordId, UUID wordVocabularyUserId);
+    @Query("SELECT ws FROM WordStatisticJpaEntity ws" +
+            " JOIN WordJpaEntity w ON ws.wordId = w.id" +
+            " WHERE w.id = :wordId" +
+            " AND w.vocabulary.userId = :userId")
+    Optional<WordStatisticJpaEntity> findByWordIdAndUserId(@Param("wordId") UUID wordId, @Param("userId") UUID userId);
 }

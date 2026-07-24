@@ -1,6 +1,7 @@
 package com.kthowns.mobidic.domain.vocabulary.model;
 
-import java.time.LocalDateTime;
+import com.kthowns.mobidic.domain.global.model.AuditTime;
+
 import java.util.UUID;
 
 public record Vocabulary(
@@ -9,27 +10,27 @@ public record Vocabulary(
         String title,
         String description,
         long wordCount,
-        LocalDateTime createdAt
+        AuditTime auditTime
 ) {
-    public static Vocabulary create(UUID userId, String title, String description) {
+    public static Vocabulary create(UUID userId, String title, String description, long wordCount) {
         return new Vocabulary(
                 null,
                 userId,
                 title,
                 description,
-                0,
-                null
+                wordCount,
+                AuditTime.create()
         );
     }
 
-    public Vocabulary updateInfo(String title, String description) {
+    public Vocabulary update(String title, String description) {
         return new Vocabulary(
                 this.id,
                 this.userId,
-                title,
-                description,
+                title != null ? title : this.title,
+                description != null ? description : this.description,
                 this.wordCount,
-                this.createdAt
+                AuditTime.update(this.auditTime)
         );
     }
 }

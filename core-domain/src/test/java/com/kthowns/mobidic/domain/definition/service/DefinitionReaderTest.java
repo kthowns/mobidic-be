@@ -4,6 +4,7 @@ import com.kthowns.mobidic.common.exception.ApiException;
 import com.kthowns.mobidic.domain.definition.model.Definition;
 import com.kthowns.mobidic.domain.definition.model.PartOfSpeech;
 import com.kthowns.mobidic.domain.definition.repository.DefinitionRepository;
+import com.kthowns.mobidic.domain.global.model.AuditTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -35,7 +36,7 @@ class DefinitionReaderTest {
     @DisplayName("readByWordId 테스트 - 성공")
     void readByWordIdTest() {
         // Given
-        List<Definition> expected = List.of(new Definition(UUID.randomUUID(), wordId, "의미", PartOfSpeech.NOUN));
+        List<Definition> expected = List.of(new Definition(UUID.randomUUID(), wordId, "의미", PartOfSpeech.NOUN, AuditTime.create()));
         given(definitionRepository.readByWordId(wordId, userId)).willReturn(expected);
 
         // When
@@ -50,7 +51,7 @@ class DefinitionReaderTest {
     void readByIdAndUserIdTest() {
         // Given
         UUID defId = UUID.randomUUID();
-        Definition expected = new Definition(defId, wordId, "의미", PartOfSpeech.NOUN);
+        Definition expected = new Definition(defId, wordId, "의미", PartOfSpeech.NOUN, AuditTime.create());
         given(definitionRepository.readByIdAndUserId(defId, userId)).willReturn(Optional.of(expected));
 
         // When
@@ -68,8 +69,8 @@ class DefinitionReaderTest {
         UUID id2 = UUID.randomUUID();
         List<UUID> ids = List.of(id1, id2);
         List<Definition> expected = List.of(
-                new Definition(id1, wordId, "의미1", PartOfSpeech.NOUN),
-                new Definition(id2, wordId, "의미2", PartOfSpeech.VERB)
+                new Definition(id1, wordId, "의미1", PartOfSpeech.NOUN, AuditTime.create()),
+                new Definition(id2, wordId, "의미2", PartOfSpeech.VERB, AuditTime.create())
         );
         given(definitionRepository.readByIdsAndWordIdAndUserId(ids, wordId, userId)).willReturn(expected);
 
@@ -88,7 +89,7 @@ class DefinitionReaderTest {
         UUID id1 = UUID.randomUUID();
         UUID id2 = UUID.randomUUID();
         List<UUID> ids = List.of(id1, id2);
-        List<Definition> found = List.of(new Definition(id1, wordId, "의미1", PartOfSpeech.NOUN)); // id2 누락
+        List<Definition> found = List.of(new Definition(id1, wordId, "의미1", PartOfSpeech.NOUN, AuditTime.create())); // id2 누락
         given(definitionRepository.readByIdsAndWordIdAndUserId(ids, wordId, userId)).willReturn(found);
 
         // When & Then

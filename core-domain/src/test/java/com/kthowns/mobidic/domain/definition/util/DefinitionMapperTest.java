@@ -3,6 +3,7 @@ package com.kthowns.mobidic.domain.definition.util;
 import com.kthowns.mobidic.domain.definition.command.UpdateDefinitionCommand;
 import com.kthowns.mobidic.domain.definition.model.Definition;
 import com.kthowns.mobidic.domain.definition.model.PartOfSpeech;
+import com.kthowns.mobidic.domain.global.model.AuditTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -24,8 +25,8 @@ class DefinitionMapperTest {
         UUID id2 = UUID.randomUUID();
 
         List<Definition> existing = List.of(
-                new Definition(id1, wordId, "기존의미1", PartOfSpeech.NOUN),
-                new Definition(id2, wordId, "기존의미2", PartOfSpeech.NOUN)
+                new Definition(id1, wordId, "기존의미1", PartOfSpeech.NOUN, AuditTime.create()),
+                new Definition(id2, wordId, "기존의미2", PartOfSpeech.NOUN, AuditTime.create())
         );
 
         List<UpdateDefinitionCommand> commands = List.of(

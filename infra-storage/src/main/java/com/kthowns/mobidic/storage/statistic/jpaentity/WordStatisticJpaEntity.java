@@ -1,52 +1,53 @@
 package com.kthowns.mobidic.storage.statistic.jpaentity;
 
+import com.kthowns.mobidic.domain.global.model.AuditTime;
 import com.kthowns.mobidic.domain.statistic.model.WordStatistic;
-import com.kthowns.mobidic.storage.word.jpaentity.WordJpaEntity;
-import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
+import com.kthowns.mobidic.storage.global.jpaentity.BaseAuditingEntity;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
 
 import java.util.UUID;
 
 @Getter
-@AllArgsConstructor
-@NoArgsConstructor
-@Builder
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 @Table(name = "word_statistics")
-public class WordStatisticJpaEntity {
+public class WordStatisticJpaEntity extends BaseAuditingEntity {
     @Id
+    @Column(name = "word_id", columnDefinition = "BINARY(16)", updatable = false, nullable = false)
     private UUID wordId;
 
-    @MapsId
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "word_id")
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    private WordJpaEntity word;
-
     @Column(name = "correct_count", nullable = false)
-    @Builder.Default
-    private long correctCount = 0L;
+    private long correctCount;
 
     @Column(name = "incorrect_count", nullable = false)
-    @Builder.Default
-    private long incorrectCount = 0L;
+    private long incorrectCount;
 
     @Column(name = "difficulty", nullable = false)
-    @Builder.Default
-    private double difficulty = 0.5;
+    private double difficulty;
 
     @Column(name = "accuracy", nullable = false)
-    @Builder.Default
-    private double accuracy = 0.0;
+    private double accuracy;
 
     @Column(name = "is_learned", nullable = false)
-    @Builder.Default
-    private boolean isLearned = false;
+    private boolean isLearned;
+
+    public static WordStatisticJpaEntity createFromModel(WordStatistic wordStatistic) {
+        return new WordStatisticJpaEntity(
+                wordStatistic.wordId(),
+                0L,
+                0L,
+                0.0,
+                0.0,
+                false
+        );
+    }
 
     public void updateFromModel(WordStatistic wordStatistic) {
         this.correctCount = wordStatistic.correctCount();
@@ -56,18 +57,6 @@ public class WordStatisticJpaEntity {
         this.isLearned = wordStatistic.isLearned();
     }
 
-    public static WordStatisticJpaEntity fromModel(WordStatistic wordStatistic, WordJpaEntity word) {
-        return new WordStatisticJpaEntity(
-                null,
-                word,
-                wordStatistic.correctCount(),
-                wordStatistic.incorrectCount(),
-                wordStatistic.difficulty(),
-                wordStatistic.accuracy(),
-                wordStatistic.isLearned()
-        );
-    }
-
     public WordStatistic toModel() {
         return new WordStatistic(
                 this.wordId,
@@ -75,7 +64,25 @@ public class WordStatisticJpaEntity {
                 this.incorrectCount,
                 this.isLearned,
                 this.difficulty,
-                this.accuracy
+                this.accuracy,
+                AuditTime.of(getCreatedAt(), getUpdatedAt())
         );
+    }
+
+    @Builder(access = AccessLevel.PRIVATE)
+    private WordStatisticJpaEntity(
+            UUID wordId,
+            long correctCount,
+            long incorrectCount,
+            double difficulty,
+            double accuracy,
+            boolean isLearned
+    ) {
+        this.wordId = wordId;
+        this.correctCount = correctCount;
+        this.incorrectCount = incorrectCount;
+        this.difficulty = difficulty;
+        this.accuracy = accuracy;
+        this.isLearned = isLearned;
     }
 }

@@ -2,6 +2,7 @@ package com.kthowns.mobidic.domain.user.service;
 
 import com.kthowns.mobidic.common.code.AuthResponseCode;
 import com.kthowns.mobidic.common.exception.ApiException;
+import com.kthowns.mobidic.domain.global.model.AuditTime;
 import com.kthowns.mobidic.domain.user.model.User;
 import com.kthowns.mobidic.domain.user.model.UserRole;
 import com.kthowns.mobidic.domain.user.repository.UserRepository;
@@ -12,7 +13,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -34,7 +34,7 @@ class UserReaderTest {
     void readByIdTest_Success() {
         // Given
         UUID userId = UUID.randomUUID();
-        User expectedUser = new User(userId, null, "test@test.com", "test", "pass", UserRole.USER, true, LocalDateTime.now(), null);
+        User expectedUser = new User(userId, null, "test@test.com", "test", "pass", UserRole.USER, true, AuditTime.create(), null);
         given(userRepository.readById(userId)).willReturn(Optional.of(expectedUser));
 
         // When

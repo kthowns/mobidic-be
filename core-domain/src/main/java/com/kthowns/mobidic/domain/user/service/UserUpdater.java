@@ -22,6 +22,6 @@ class UserUpdater {
                 ? passwordEncoderClient.encode(password)
                 : null;
 
-        return userRepository.update(user.updateProfile(nickname, encodedPassword));
+        return userRepository.update(user.update(nickname, encodedPassword));
     }
 }

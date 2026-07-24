@@ -1,6 +1,6 @@
 package com.kthowns.mobidic.domain.term.model;
 
-import java.time.LocalDateTime;
+import com.kthowns.mobidic.domain.global.model.AuditTime;
 
 public record Term(
         Long id,
@@ -8,7 +8,7 @@ public record Term(
         String version,
         boolean required,
         String content,
-        LocalDateTime createdAt
+        AuditTime auditTime
 ) {
     public static Term create(TermType type, String version, boolean required, String content) {
         return new Term(
@@ -17,7 +17,7 @@ public record Term(
                 version,
                 required,
                 content,
-                null
+                AuditTime.create()
         );
     }
 }

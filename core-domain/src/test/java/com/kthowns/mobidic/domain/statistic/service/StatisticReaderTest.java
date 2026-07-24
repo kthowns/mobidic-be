@@ -2,6 +2,7 @@ package com.kthowns.mobidic.domain.statistic.service;
 
 import com.kthowns.mobidic.common.code.GeneralResponseCode;
 import com.kthowns.mobidic.common.exception.ApiException;
+import com.kthowns.mobidic.domain.global.model.AuditTime;
 import com.kthowns.mobidic.domain.statistic.model.WordStatistic;
 import com.kthowns.mobidic.domain.statistic.repository.WordStatisticRepository;
 import org.junit.jupiter.api.DisplayName;
@@ -34,7 +35,7 @@ class StatisticReaderTest {
         // Given
         UUID wordId = UUID.randomUUID();
         UUID userId = UUID.randomUUID();
-        WordStatistic expectedStat = new WordStatistic(wordId, 5, 2, true, 0.5, 0.8);
+        WordStatistic expectedStat = new WordStatistic(wordId, 5L, 2L, true, 0.5, 0.8, AuditTime.create());
         given(wordStatisticRepository.readByWordIdAndUserId(wordId, userId)).willReturn(Optional.of(expectedStat));
 
         // When
@@ -65,7 +66,7 @@ class StatisticReaderTest {
         UUID vocabularyId = UUID.randomUUID();
         UUID userId = UUID.randomUUID();
         List<WordStatistic> expectedStats = List.of(
-                new WordStatistic(UUID.randomUUID(), 1, 0, true, 0.0, 1.0)
+                new WordStatistic(UUID.randomUUID(), 1L, 0L, true, 0.0, 1.0, AuditTime.create())
         );
         given(wordStatisticRepository.readByVocabularyId(vocabularyId, userId)).willReturn(expectedStats);
 
@@ -82,7 +83,7 @@ class StatisticReaderTest {
         // Given
         UUID userId = UUID.randomUUID();
         List<WordStatistic> expectedStats = List.of(
-                new WordStatistic(UUID.randomUUID(), 1, 0, true, 0.0, 1.0)
+                new WordStatistic(UUID.randomUUID(), 1L, 0L, true, 0.0, 1.0, AuditTime.create())
         );
         given(wordStatisticRepository.readByUserId(userId)).willReturn(expectedStats);
 

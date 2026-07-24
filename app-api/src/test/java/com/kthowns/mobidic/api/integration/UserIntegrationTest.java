@@ -67,13 +67,8 @@ public class UserIntegrationTest {
     @BeforeEach
     void setup() {
         testUser = transactionTemplate.execute(status -> {
-            UserJpaEntity user = userJpaRepository.save(UserJpaEntity.builder()
-                    .email("test@test.com")
-                    .nickname("test")
-                    .password(passwordEncoder.encode("password123!"))
-                    .role(UserRole.USER)
-                    .active(true)
-                    .build());
+            UserJpaEntity user = userJpaRepository.save(UserJpaEntity.createFromModel(
+                    User.create("test@test.com", "test", passwordEncoder.encode("password123!"), UserRole.USER)));
             return user;
         });
 
@@ -126,12 +121,8 @@ public class UserIntegrationTest {
     @DisplayName("사용자 닉네임 수정 실패 - 중복된 닉네임")
     void updateNicknameFailDuplicated() throws Exception {
         // Given
-        userJpaRepository.save(UserJpaEntity.builder()
-                .email("other@test.com")
-                .nickname("other")
-                .password("pass")
-                .role(UserRole.USER)
-                .build());
+        userJpaRepository.save(UserJpaEntity.createFromModel(
+                User.create("other@test.com", "other", "pass", UserRole.USER)));
 
         UpdateUserRequestDto request = UpdateUserRequestDto.builder()
                 .nickname("other")

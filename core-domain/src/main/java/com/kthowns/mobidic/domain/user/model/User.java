@@ -1,6 +1,7 @@
 package com.kthowns.mobidic.domain.user.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.kthowns.mobidic.domain.global.model.AuditTime;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -13,10 +14,12 @@ public record User(
         @JsonIgnore String password,
         UserRole role,
         boolean isActive,
-        LocalDateTime createdAt,
+        AuditTime auditTime,
         LocalDateTime deactivatedAt
 ) {
     public static User create(String email, String nickname, String password, UserRole role) {
+        // TODO: UserRole 파라미터 제거하고 Role 별 사용자 생성 팩토리 메서드 분리하기
+
         return new User(
                 null,
                 null,
@@ -25,12 +28,14 @@ public record User(
                 password,
                 role,
                 true,
-                null,
+                AuditTime.create(),
                 null
         );
     }
 
     public static User createKakao(Long kakaoId, String email, String nickname, String password, UserRole role) {
+        // TODO: UserRole 파라미터 제거하고 Role 별 사용자 생성 팩토리 메서드 분리하기
+
         return new User(
                 null,
                 kakaoId,
@@ -39,47 +44,21 @@ public record User(
                 password,
                 role,
                 true,
-                null,
+                AuditTime.create(),
                 null
         );
     }
 
-    public User updateProfile(String nickname, String password) {
-        User user = this;
-        if (nickname != null && !nickname.isBlank()) {
-            user = user.changeNickname(nickname);
-        }
-        if (password != null && !password.isBlank()) {
-            user = user.changePassword(password);
-        }
-
-        return user;
-    }
-
-    public User changeNickname(String newNickname) {
+    public User update(String newNickname, String newPassword) {
         return new User(
                 this.id,
                 this.kakaoId,
                 this.email,
-                newNickname,
-                this.password,
+                newNickname != null ? newNickname : this.nickname,
+                newPassword != null ? newPassword : this.password,
                 this.role,
                 this.isActive,
-                this.createdAt,
-                this.deactivatedAt
-        );
-    }
-
-    public User changePassword(String newPassword) {
-        return new User(
-                this.id,
-                this.kakaoId,
-                this.email,
-                this.nickname,
-                newPassword,
-                this.role,
-                this.isActive,
-                this.createdAt,
+                AuditTime.update(this.auditTime),
                 this.deactivatedAt
         );
     }
@@ -93,7 +72,7 @@ public record User(
                 this.password,
                 this.role,
                 false,
-                this.createdAt,
+                AuditTime.update(this.auditTime),
                 LocalDateTime.now()
         );
     }

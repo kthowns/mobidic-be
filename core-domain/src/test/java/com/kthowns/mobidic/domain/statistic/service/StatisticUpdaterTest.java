@@ -2,6 +2,7 @@ package com.kthowns.mobidic.domain.statistic.service;
 
 import com.kthowns.mobidic.common.code.GeneralResponseCode;
 import com.kthowns.mobidic.common.exception.ApiException;
+import com.kthowns.mobidic.domain.global.model.AuditTime;
 import com.kthowns.mobidic.domain.statistic.model.WordStatistic;
 import com.kthowns.mobidic.domain.statistic.repository.WordStatisticRepository;
 import org.junit.jupiter.api.DisplayName;
@@ -36,7 +37,7 @@ class StatisticUpdaterTest {
         // Given
         UUID userId = UUID.randomUUID();
         UUID wordId = UUID.randomUUID();
-        WordStatistic existingStat = new WordStatistic(wordId, 0, 0, false, 0.0, 0.0);
+        WordStatistic existingStat = new WordStatistic(wordId, 0L, 0L, false, 0.0, 0.0, AuditTime.create());
         given(wordStatisticRepository.readForUpdate(wordId, userId)).willReturn(Optional.of(existingStat));
 
         // When
@@ -68,7 +69,7 @@ class StatisticUpdaterTest {
         // Given
         UUID userId = UUID.randomUUID();
         UUID wordId = UUID.randomUUID();
-        WordStatistic existingStat = new WordStatistic(wordId, 0, 0, false, 0.0, 0.0);
+        WordStatistic existingStat = new WordStatistic(wordId, 0L, 0L, false, 0.0, 0.0, AuditTime.create());
         given(wordStatisticRepository.readForUpdate(wordId, userId)).willReturn(Optional.of(existingStat));
 
         // When
@@ -100,7 +101,7 @@ class StatisticUpdaterTest {
         // Given
         UUID userId = UUID.randomUUID();
         UUID wordId = UUID.randomUUID();
-        WordStatistic existingStat = new WordStatistic(wordId, 0, 0, false, 0.0, 0.0);
+        WordStatistic existingStat = new WordStatistic(wordId, 0L, 0L, false, 0.0, 0.0, AuditTime.create());
         given(wordStatisticRepository.readForUpdate(wordId, userId)).willReturn(Optional.of(existingStat));
 
         // When

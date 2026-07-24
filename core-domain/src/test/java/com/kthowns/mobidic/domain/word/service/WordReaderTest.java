@@ -2,6 +2,7 @@ package com.kthowns.mobidic.domain.word.service;
 
 import com.kthowns.mobidic.common.code.GeneralResponseCode;
 import com.kthowns.mobidic.common.exception.ApiException;
+import com.kthowns.mobidic.domain.global.model.AuditTime;
 import com.kthowns.mobidic.domain.word.model.Word;
 import com.kthowns.mobidic.domain.word.model.WordDetail;
 import com.kthowns.mobidic.domain.word.repository.WordRepository;
@@ -35,7 +36,7 @@ class WordReaderTest {
         // Given
         UUID userId = UUID.randomUUID();
         UUID vocabularyId = UUID.randomUUID();
-        WordDetail detail = new WordDetail(UUID.randomUUID(), "expression", 0.0, 0.0, false, List.of(), null);
+        WordDetail detail = new WordDetail(UUID.randomUUID(), "expression", 0.0, 0.0, false, List.of(), null, null);
         List<WordDetail> expectedDetails = List.of(detail);
         given(wordRepository.readDetailsByVocabularyId(userId, vocabularyId, false)).willReturn(expectedDetails);
 
@@ -52,7 +53,7 @@ class WordReaderTest {
         // Given
         UUID wordId = UUID.randomUUID();
         UUID userId = UUID.randomUUID();
-        Word expectedWord = new Word(wordId, UUID.randomUUID(), "expression", null);
+        Word expectedWord = new Word(wordId, UUID.randomUUID(), "expression", AuditTime.create());
         given(wordRepository.readByIdAndUserId(wordId, userId)).willReturn(Optional.of(expectedWord));
 
         // When

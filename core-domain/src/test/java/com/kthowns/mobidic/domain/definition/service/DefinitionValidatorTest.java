@@ -4,6 +4,7 @@ import com.kthowns.mobidic.common.exception.ApiException;
 import com.kthowns.mobidic.domain.definition.model.Definition;
 import com.kthowns.mobidic.domain.definition.model.PartOfSpeech;
 import com.kthowns.mobidic.domain.definition.repository.DefinitionRepository;
+import com.kthowns.mobidic.domain.global.model.AuditTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -63,7 +64,7 @@ class DefinitionValidatorTest {
         UUID wordId = UUID.randomUUID();
         UUID userId = UUID.randomUUID();
         List<Definition> definitions = List.of(
-                new Definition(UUID.randomUUID(), wordId, "의미1", PartOfSpeech.NOUN)
+                new Definition(UUID.randomUUID(), wordId, "의미1", PartOfSpeech.NOUN, AuditTime.create())
         );
         given(definitionRepository.existsByMeaningsForUpdate(anyList(), anyList(), eq(wordId), eq(userId))).willReturn(false);
 
@@ -79,7 +80,7 @@ class DefinitionValidatorTest {
         UUID wordId = UUID.randomUUID();
         UUID userId = UUID.randomUUID();
         List<Definition> definitions = List.of(
-                new Definition(UUID.randomUUID(), wordId, "중복의미", PartOfSpeech.NOUN)
+                new Definition(UUID.randomUUID(), wordId, "중복의미", PartOfSpeech.NOUN, AuditTime.create())
         );
         given(definitionRepository.existsByMeaningsForUpdate(anyList(), anyList(), eq(wordId), eq(userId))).willReturn(true);
 

@@ -5,6 +5,7 @@ import com.kthowns.mobidic.domain.definition.command.UpdateDefinitionCommand;
 import com.kthowns.mobidic.domain.definition.model.Definition;
 import com.kthowns.mobidic.domain.definition.model.PartOfSpeech;
 import com.kthowns.mobidic.domain.definition.util.DefinitionMapper;
+import com.kthowns.mobidic.domain.global.model.AuditTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -66,8 +67,8 @@ class DefinitionServiceTest {
         List<UpdateDefinitionCommand> commands = List.of(
                 new UpdateDefinitionCommand(defId, wordId, "수정의미", PartOfSpeech.VERB)
         );
-        List<Definition> existing = List.of(new Definition(defId, wordId, "기존의미", PartOfSpeech.NOUN));
-        List<Definition> updated = List.of(new Definition(defId, wordId, "수정의미", PartOfSpeech.VERB));
+        List<Definition> existing = List.of(new Definition(defId, wordId, "기존의미", PartOfSpeech.NOUN, AuditTime.create()));
+        List<Definition> updated = List.of(new Definition(defId, wordId, "수정의미", PartOfSpeech.VERB, AuditTime.create()));
 
         given(definitionReader.readByIdsAndWordIdAndUserId(anyList(), eq(wordId), eq(userId))).willReturn(existing);
         given(definitionMapper.mapToUpdated(existing, commands)).willReturn(updated);

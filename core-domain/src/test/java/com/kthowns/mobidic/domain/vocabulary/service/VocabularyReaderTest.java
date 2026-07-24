@@ -2,6 +2,7 @@ package com.kthowns.mobidic.domain.vocabulary.service;
 
 import com.kthowns.mobidic.common.code.GeneralResponseCode;
 import com.kthowns.mobidic.common.exception.ApiException;
+import com.kthowns.mobidic.domain.global.model.AuditTime;
 import com.kthowns.mobidic.domain.vocabulary.model.Vocabulary;
 import com.kthowns.mobidic.domain.vocabulary.model.VocabularyDetail;
 import com.kthowns.mobidic.domain.vocabulary.repository.VocabularyRepository;
@@ -34,7 +35,7 @@ class VocabularyReaderTest {
     void readDetailsByUserIdTest() {
         // Given
         UUID userId = UUID.randomUUID();
-        VocabularyDetail detail = new VocabularyDetail(new Vocabulary(UUID.randomUUID(), userId, "title", "desc", 0, null), 0.0, 0.0);
+        VocabularyDetail detail = new VocabularyDetail(new Vocabulary(UUID.randomUUID(), userId, "title", "desc", 0, AuditTime.create()), 0.0, 0.0);
         List<VocabularyDetail> expectedDetails = List.of(detail);
         given(vocabularyRepository.readDetailsByUserId(userId)).willReturn(expectedDetails);
 
@@ -51,7 +52,7 @@ class VocabularyReaderTest {
         // Given
         UUID vocabId = UUID.randomUUID();
         UUID userId = UUID.randomUUID();
-        Vocabulary expectedVocab = new Vocabulary(vocabId, userId, "title", "desc", 0, null);
+        Vocabulary expectedVocab = new Vocabulary(vocabId, userId, "title", "desc", 0, AuditTime.create());
         given(vocabularyRepository.readByIdAndUserId(vocabId, userId)).willReturn(Optional.of(expectedVocab));
 
         // When
@@ -81,7 +82,7 @@ class VocabularyReaderTest {
         // Given
         UUID vocabId = UUID.randomUUID();
         UUID userId = UUID.randomUUID();
-        VocabularyDetail expectedDetail = new VocabularyDetail(new Vocabulary(vocabId, userId, "title", "desc", 0, null), 0.0, 0.0);
+        VocabularyDetail expectedDetail = new VocabularyDetail(new Vocabulary(vocabId, userId, "title", "desc", 0, AuditTime.create()), 0.0, 0.0);
         given(vocabularyRepository.readDetailById(vocabId, userId)).willReturn(Optional.of(expectedDetail));
 
         // When
