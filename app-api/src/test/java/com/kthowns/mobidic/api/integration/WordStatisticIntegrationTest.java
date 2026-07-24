@@ -176,6 +176,17 @@ public class WordStatisticIntegrationTest {
     }
 
     @Test
+    @DisplayName("사용자의 모든 단어장 평균 정확도 조회 성공")
+    void getTotalAvgAccuracySuccess() throws Exception {
+        // When
+        mockMvc.perform(get("/api/users/me/accuracy")
+                        .header("Authorization", "Bearer " + userToken))
+                // Then
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data").value(0.5));
+    }
+
+    @Test
     @DisplayName("단어 학습 상태 토글 성공")
     void toggleLearnedStatusSuccess() throws Exception {
         // When
