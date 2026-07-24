@@ -1,44 +1,55 @@
 package com.kthowns.mobidic.storage.term.jpaentity;
 
-import com.kthowns.mobidic.storage.user.jpaentity.UserJpaEntity;
-import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
+import com.kthowns.mobidic.storage.global.jpaentity.BaseAuditingEntity;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Getter
-@AllArgsConstructor
-@NoArgsConstructor
-@Builder
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 @Table(
         name = "user_agreements",
         uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "term_id"})
 )
-@EntityListeners(AuditingEntityListener.class)
-public class UserAgreementJpaEntity {
+public class UserAgreementJpaEntity extends BaseAuditingEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    private UserJpaEntity user;
+    @Column(name = "user_id", nullable = false)
+    private UUID userId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "term_id", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private TermJpaEntity term;
 
-    @Column(name = "agreed_at", nullable = false, updatable = false)
-    @CreatedDate
-    private LocalDateTime agreedAt;
+    public static UserAgreementJpaEntity create(UUID userId, TermJpaEntity term) {
+        return UserAgreementJpaEntity.builder()
+                .userId(userId)
+                .term(term)
+                .build();
+    }
+
+    @Builder(access = AccessLevel.PRIVATE)
+    private UserAgreementJpaEntity(UUID userId, TermJpaEntity term) {
+        this.userId = userId;
+        this.term = term;
+    }
 }

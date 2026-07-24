@@ -9,13 +9,13 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface DefinitionJpaRepository extends JpaRepository<DefinitionJpaEntity, UUID> {
-    Optional<DefinitionJpaEntity> findByIdAndWord_Vocabulary_User_Id(UUID id, UUID wordVocabularyUserId);
+    Optional<DefinitionJpaEntity> findByIdAndWord_Vocabulary_UserId(UUID id, UUID wordVocabularyUserId);
 
-    List<DefinitionJpaEntity> findByWord_IdAndWord_Vocabulary_User_Id(UUID wordId, UUID userId);
+    List<DefinitionJpaEntity> findByWord_IdAndWord_Vocabulary_UserId(UUID wordId, UUID userId);
 
-    boolean existsByMeaningInAndWord_IdAndWord_Vocabulary_User_Id(Collection<String> meanings, UUID wordId, UUID wordVocabularyUserId);
+    boolean existsByMeaningInAndWord_IdAndWord_Vocabulary_UserId(Collection<String> meanings, UUID wordId, UUID wordVocabularyUserId);
 
-    boolean existsByMeaningInAndIdNotInAndWord_IdAndWord_Vocabulary_User_Id(List<String> meanings, List<UUID> ids, UUID wordId, UUID userId);
+    boolean existsByMeaningInAndIdNotInAndWord_IdAndWord_Vocabulary_UserId(List<String> meanings, List<UUID> ids, UUID wordId, UUID userId);
 
-    List<DefinitionJpaEntity> findByIdInAndWord_IdAndWord_Vocabulary_User_Id(Collection<UUID> ids, UUID wordId, UUID wordVocabularyUserId);
+    List<DefinitionJpaEntity> findByIdInAndWord_IdAndWord_Vocabulary_UserId(Collection<UUID> ids, UUID wordId, UUID wordVocabularyUserId);
 }

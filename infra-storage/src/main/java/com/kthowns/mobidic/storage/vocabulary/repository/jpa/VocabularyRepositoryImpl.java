@@ -5,10 +5,8 @@ import com.kthowns.mobidic.common.exception.ApiException;
 import com.kthowns.mobidic.domain.vocabulary.model.Vocabulary;
 import com.kthowns.mobidic.domain.vocabulary.model.VocabularyDetail;
 import com.kthowns.mobidic.domain.vocabulary.repository.VocabularyRepository;
-import com.kthowns.mobidic.storage.user.jpaentity.UserJpaEntity;
 import com.kthowns.mobidic.storage.vocabulary.jpaentity.VocabularyJpaEntity;
 import com.kthowns.mobidic.storage.vocabulary.jparepository.VocabularyJpaRepository;
-import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -20,7 +18,6 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class VocabularyRepositoryImpl implements VocabularyRepository {
     private final VocabularyJpaRepository vocabularyJpaRepository;
-    private final EntityManager em;
 
     @Override
     public List<VocabularyDetail> readDetailsByUserId(UUID userId) {
@@ -29,14 +26,13 @@ public class VocabularyRepositoryImpl implements VocabularyRepository {
 
     @Override
     public Vocabulary append(Vocabulary vocabulary) {
-        UserJpaEntity user = em.getReference(UserJpaEntity.class, vocabulary.userId());
-        VocabularyJpaEntity vocabularyJpaEntity = VocabularyJpaEntity.fromModel(vocabulary, user);
+        VocabularyJpaEntity vocabularyJpaEntity = VocabularyJpaEntity.createFromModel(vocabulary);
         return vocabularyJpaRepository.save(vocabularyJpaEntity).toModel();
     }
 
     @Override
     public Optional<Vocabulary> readByIdAndUserId(UUID vocabularyId, UUID userId) {
-        return vocabularyJpaRepository.findByIdAndUser_Id(vocabularyId, userId)
+        return vocabularyJpaRepository.findByIdAndUserId(vocabularyId, userId)
                 .map(VocabularyJpaEntity::toModel);
     }
 
@@ -47,12 +43,12 @@ public class VocabularyRepositoryImpl implements VocabularyRepository {
 
     @Override
     public boolean existsByIdAndUser_Id(UUID vocabularyId, UUID userId) {
-        return vocabularyJpaRepository.existsByIdAndUser_Id(vocabularyId, userId);
+        return vocabularyJpaRepository.existsByIdAndUserId(vocabularyId, userId);
     }
 
     @Override
     public void delete(UUID vocabularyId, UUID userId) {
-        VocabularyJpaEntity vocabularyJpaEntity = vocabularyJpaRepository.findByIdAndUser_Id(vocabularyId, userId)
+        VocabularyJpaEntity vocabularyJpaEntity = vocabularyJpaRepository.findByIdAndUserId(vocabularyId, userId)
                 .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_VOCAB));
         vocabularyJpaRepository.delete(vocabularyJpaEntity);
     }
@@ -69,6 +65,7 @@ public class VocabularyRepositoryImpl implements VocabularyRepository {
 
     @Override
     public void update(Vocabulary vocabulary) {
+        // TODO: 불필요한 비관락 제거하기 (모든 도메인 점검 필요)
         VocabularyJpaEntity vocabularyJpaEntity = vocabularyJpaRepository.findForUpdate(vocabulary.id(), vocabulary.userId())
                 .orElseThrow(() -> new ApiException(GeneralResponseCode.NO_VOCAB));
 
@@ -77,16 +74,16 @@ public class VocabularyRepositoryImpl implements VocabularyRepository {
 
     @Override
     public boolean existsByTitleAndUserId(String title, UUID userId) {
-        return vocabularyJpaRepository.existsByTitleAndUser_Id(title, userId);
+        return vocabularyJpaRepository.existsByTitleAndUserId(title, userId);
     }
 
     @Override
     public boolean existsByTitleAndIdNotAndUserId(String title, UUID vocabularyId, UUID userId) {
-        return vocabularyJpaRepository.existsByTitleAndIdNotAndUser_Id(title, vocabularyId, userId);
+        return vocabularyJpaRepository.existsByTitleAndIdNotAndUserId(title, vocabularyId, userId);
     }
 
     @Override
     public boolean existsByUserId(UUID userId) {
-        return vocabularyJpaRepository.existsByUser_Id(userId);
+        return vocabularyJpaRepository.existsByUserId(userId);
     }
 }

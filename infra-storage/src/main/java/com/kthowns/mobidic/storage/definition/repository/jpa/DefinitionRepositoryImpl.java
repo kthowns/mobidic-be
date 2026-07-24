@@ -49,13 +49,13 @@ public class DefinitionRepositoryImpl implements DefinitionRepository {
 
     @Override
     public Optional<Definition> readByIdAndUserId(UUID definitionId, UUID userId) {
-        return definitionJpaRepository.findByIdAndWord_Vocabulary_User_Id(definitionId, userId)
+        return definitionJpaRepository.findByIdAndWord_Vocabulary_UserId(definitionId, userId)
                 .map(DefinitionJpaEntity::toModel);
     }
 
     @Override
     public List<Definition> readByWordId(UUID wordId, UUID userId) {
-        return definitionJpaRepository.findByWord_IdAndWord_Vocabulary_User_Id(wordId, userId).stream()
+        return definitionJpaRepository.findByWord_IdAndWord_Vocabulary_UserId(wordId, userId).stream()
                 .map(DefinitionJpaEntity::toModel)
                 .collect(Collectors.toList());
     }
@@ -88,25 +88,25 @@ public class DefinitionRepositoryImpl implements DefinitionRepository {
 
     @Override
     public boolean existsByMeaningsForAppend(List<String> meanings, UUID wordId, UUID userId) {
-        return definitionJpaRepository.existsByMeaningInAndWord_IdAndWord_Vocabulary_User_Id(meanings, wordId, userId);
+        return definitionJpaRepository.existsByMeaningInAndWord_IdAndWord_Vocabulary_UserId(meanings, wordId, userId);
     }
 
     @Override
     public boolean existsByMeaningsForUpdate(List<String> meanings, List<UUID> ids, UUID wordId, UUID userId) {
-        return definitionJpaRepository.existsByMeaningInAndIdNotInAndWord_IdAndWord_Vocabulary_User_Id(
+        return definitionJpaRepository.existsByMeaningInAndIdNotInAndWord_IdAndWord_Vocabulary_UserId(
                 meanings, ids, wordId, userId
         );
     }
 
     @Override
     public List<Definition> readByIdsAndWordIdAndUserId(List<UUID> definitionIds, UUID wordId, UUID userId) {
-        return definitionJpaRepository.findByIdInAndWord_IdAndWord_Vocabulary_User_Id(definitionIds, wordId, userId)
+        return definitionJpaRepository.findByIdInAndWord_IdAndWord_Vocabulary_UserId(definitionIds, wordId, userId)
                 .stream().map(DefinitionJpaEntity::toModel).toList();
     }
 
     @Override
     public void deleteAll(List<UUID> ids, UUID wordId, UUID userId) {
-        List<DefinitionJpaEntity> definitions = definitionJpaRepository.findByIdInAndWord_IdAndWord_Vocabulary_User_Id(ids, wordId, userId);
+        List<DefinitionJpaEntity> definitions = definitionJpaRepository.findByIdInAndWord_IdAndWord_Vocabulary_UserId(ids, wordId, userId);
 
         if (ids.size() != definitions.size()) {
             throw new ApiException(GeneralResponseCode.INVALID_REQUEST_BODY);

@@ -1,20 +1,21 @@
 package com.kthowns.mobidic.domain.word.model;
 
-import java.time.LocalDateTime;
+import com.kthowns.mobidic.domain.global.model.AuditTime;
+
 import java.util.UUID;
 
 public record Word(
         UUID id,
         UUID vocabularyId,
         String expression,
-        LocalDateTime createdAt
+        AuditTime auditTime
 ) {
     public static Word create(UUID vocabularyId, String expression) {
         return new Word(
                 null,
                 vocabularyId,
                 expression,
-                null
+                AuditTime.create()
         );
     }
 
@@ -23,7 +24,7 @@ public record Word(
                 this.id,
                 this.vocabularyId,
                 expression,
-                this.createdAt
+                AuditTime.update(this.auditTime)
         );
     }
 }

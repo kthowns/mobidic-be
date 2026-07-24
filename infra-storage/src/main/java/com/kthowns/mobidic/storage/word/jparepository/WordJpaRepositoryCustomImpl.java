@@ -12,7 +12,11 @@ import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -36,10 +40,10 @@ public class WordJpaRepositoryCustomImpl implements WordJpaRepositoryCustom {
                         word.createdAt
                 ))
                 .from(word)
-                .leftJoin(wordStatistic).on(wordStatistic.word.id.eq(word.id))
+                .leftJoin(wordStatistic).on(wordStatistic.wordId.eq(word.id))
                 .where(
                         word.vocabulary.id.eq(vocabularyId),
-                        word.vocabulary.user.id.eq(userId),
+                        word.vocabulary.userId.eq(userId),
                         isNotLearned(notLearned)
                 )
                 .fetch();
@@ -70,7 +74,9 @@ public class WordJpaRepositoryCustomImpl implements WordJpaRepositoryCustom {
                                 tuple.get(definition.id),
                                 tuple.get(definition.word.id),
                                 tuple.get(definition.meaning),
-                                tuple.get(definition.part)
+                                tuple.get(definition.part),
+                                tuple.get(definition.createdAt),
+                                tuple.get(definition.updatedAt)
                         ), Collectors.toList())
                 ));
 

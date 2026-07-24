@@ -1,76 +1,74 @@
 package com.kthowns.mobidic.storage.vocabulary.jpaentity;
 
+import com.kthowns.mobidic.domain.global.model.AuditTime;
 import com.kthowns.mobidic.domain.vocabulary.model.Vocabulary;
-import com.kthowns.mobidic.storage.user.jpaentity.UserJpaEntity;
-import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
+import com.kthowns.mobidic.storage.global.jpaentity.BaseAuditingEntity;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Getter
-@AllArgsConstructor
-@NoArgsConstructor
-@Builder
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 @Table(name = "vocabularies")
-@EntityListeners(AuditingEntityListener.class)
-public class VocabularyJpaEntity {
+public class VocabularyJpaEntity extends BaseAuditingEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id", columnDefinition = "BINARY(16)")
     private UUID id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", columnDefinition = "BINARY(16)")
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    private UserJpaEntity user;
+    @Column(name = "user_id", nullable = false)
+    private UUID userId;
 
     @Column(name = "title", nullable = false)
     private String title;
 
     @Column(name = "word_count", nullable = false)
-    @Builder.Default
-    private Long wordCount = 0L;
+    private long wordCount;
 
     @Column(name = "description")
     private String description;
 
-    @Column(name = "created_at", nullable = false, updatable = false)
-    @CreatedDate
-    private LocalDateTime createdAt;
-
-    public static VocabularyJpaEntity fromModel(Vocabulary vocabulary, UserJpaEntity user) {
-        return new VocabularyJpaEntity(
-                vocabulary.id(),
-                user,
-                vocabulary.title(),
-                vocabulary.wordCount(),
-                vocabulary.description(),
-                vocabulary.createdAt()
-        );
+    public static VocabularyJpaEntity createFromModel(Vocabulary vocabulary) {
+        return VocabularyJpaEntity.builder()
+                .userId(vocabulary.userId())
+                .title(vocabulary.title())
+                .description(vocabulary.description())
+                .build();
     }
 
     public void updateFromModel(Vocabulary vocabulary) {
+        this.userId = vocabulary.userId();
         this.title = vocabulary.title();
         this.description = vocabulary.description();
+        this.wordCount = vocabulary.wordCount();
     }
 
     public Vocabulary toModel() {
         return new Vocabulary(
                 this.id,
-                this.user.getId(),
+                this.userId,
                 this.title,
                 this.description,
                 this.wordCount,
-                this.createdAt
+                AuditTime.of(getCreatedAt(), getUpdatedAt())
         );
+    }
+
+    @Builder(access = AccessLevel.PRIVATE)
+    private VocabularyJpaEntity(UUID userId, String title, String description) {
+        this.userId = userId;
+        this.title = title;
+        this.description = description;
+        this.wordCount = 0L;
     }
 }

@@ -1,6 +1,6 @@
 package com.kthowns.mobidic.domain.term.model;
 
-import java.time.LocalDateTime;
+import com.kthowns.mobidic.domain.global.model.AuditTime;
 
 public record SimpleTerm(
         Long id,
@@ -8,6 +8,6 @@ public record SimpleTerm(
         String version,
         boolean required,
         String contentUri,
-        LocalDateTime createdAt
+        AuditTime auditTime
 ) {
 }

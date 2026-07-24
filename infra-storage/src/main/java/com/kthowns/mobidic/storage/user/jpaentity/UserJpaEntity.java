@@ -1,32 +1,36 @@
 package com.kthowns.mobidic.storage.user.jpaentity;
 
+import com.kthowns.mobidic.domain.global.model.AuditTime;
 import com.kthowns.mobidic.domain.user.model.User;
 import com.kthowns.mobidic.domain.user.model.UserRole;
-import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
+import com.kthowns.mobidic.storage.global.jpaentity.BaseAuditingEntity;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Getter
-@AllArgsConstructor
-@NoArgsConstructor
-@Builder
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 @Table(name = "users")
-@EntityListeners(AuditingEntityListener.class)
-public class UserJpaEntity {
+public class UserJpaEntity extends BaseAuditingEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id", columnDefinition = "BINARY(16)")
     private UUID id;
 
-    @Column(name = "kakaoId", unique = true)
+    @Column(name = "kakao_id", unique = true)
     private Long kakaoId;
 
     @Column(name = "email", nullable = false, unique = true)
@@ -39,17 +43,11 @@ public class UserJpaEntity {
     private String password;
 
     @Column(name = "is_active", nullable = false)
-    @Builder.Default
-    private boolean active = true;
+    private boolean active;
 
     @Column(name = "role", nullable = false)
     @Enumerated(EnumType.STRING)
-    @Builder.Default
-    private UserRole role = UserRole.USER;
-
-    @CreatedDate
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
+    private UserRole role;
 
     @Column(name = "deactivated_at")
     private LocalDateTime deactivatedAt;
@@ -63,30 +61,36 @@ public class UserJpaEntity {
                 this.getPassword(),
                 this.getRole(),
                 this.active,
-                this.createdAt,
+                AuditTime.of(getCreatedAt(), getUpdatedAt()),
                 this.deactivatedAt
         );
     }
 
     public static UserJpaEntity createFromModel(User user) {
-        return new UserJpaEntity(
-                user.id(),
-                user.kakaoId(),
-                user.email(),
-                user.nickname(),
-                user.password(),
-                user.isActive(),
-                user.role(),
-                user.createdAt(),
-                user.deactivatedAt()
-        );
+        return UserJpaEntity.builder()
+                .kakaoId(user.kakaoId())
+                .email(user.email())
+                .nickname(user.nickname())
+                .password(user.password())
+                .build();
     }
 
     public void updateFromModel(User user) {
+        this.email = user.email();
         this.nickname = user.nickname();
         this.password = user.password();
         this.role = user.role();
-        this.active = user.isActive();
         this.deactivatedAt = user.deactivatedAt();
+        this.active = user.isActive();
+    }
+
+    @Builder(access = AccessLevel.PRIVATE)
+    private UserJpaEntity(Long kakaoId, String email, String nickname, String password) {
+        this.kakaoId = kakaoId;
+        this.email = email;
+        this.nickname = nickname;
+        this.password = password;
+        this.role = UserRole.USER;
+        this.active = true;
     }
 }

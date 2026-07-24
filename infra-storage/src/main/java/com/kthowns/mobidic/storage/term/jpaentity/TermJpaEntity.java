@@ -1,23 +1,28 @@
 package com.kthowns.mobidic.storage.term.jpaentity;
 
+import com.kthowns.mobidic.domain.global.model.AuditTime;
 import com.kthowns.mobidic.domain.term.model.SimpleTerm;
 import com.kthowns.mobidic.domain.term.model.Term;
 import com.kthowns.mobidic.domain.term.model.TermType;
-import jakarta.persistence.*;
-import lombok.*;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
-import java.time.LocalDateTime;
+import com.kthowns.mobidic.storage.global.jpaentity.BaseAuditingEntity;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
-@AllArgsConstructor
-@NoArgsConstructor
-@Builder
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 @Table(name = "terms")
-@EntityListeners(AuditingEntityListener.class)
-public class TermJpaEntity {
+public class TermJpaEntity extends BaseAuditingEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
@@ -31,29 +36,21 @@ public class TermJpaEntity {
     private String version;
 
     @Column(name = "is_required", nullable = false, updatable = false)
-    @Builder.Default
-    private boolean required = false;
+    private boolean required;
 
-    @Setter
     @Column(name = "is_active", nullable = false)
-    @Builder.Default
-    private boolean active = true;
+    private boolean active;
 
     @Column(name = "content", nullable = false, columnDefinition = "LONGTEXT")
     private String content;
 
-    @Column(name = "created_at", nullable = false, updatable = false)
-    @CreatedDate
-    private LocalDateTime createdAt;
-
-    public static TermJpaEntity fromModel(Term term) {
+    public static TermJpaEntity createFromModel(Term term) {
         return TermJpaEntity.builder()
                 .id(term.id())
                 .type(term.type())
                 .version(term.version())
                 .required(term.required())
                 .content(term.content())
-                .createdAt(term.createdAt())
                 .active(true)
                 .build();
     }
@@ -65,7 +62,7 @@ public class TermJpaEntity {
                 this.version,
                 this.required,
                 this.content,
-                this.createdAt
+                AuditTime.of(getCreatedAt(), getUpdatedAt())
         );
     }
 
@@ -76,7 +73,25 @@ public class TermJpaEntity {
                 this.version,
                 this.required,
                 "/terms/" + this.type.name().toLowerCase() + "?version=" + this.version,
-                this.createdAt
+                AuditTime.of(getCreatedAt(), getUpdatedAt())
         );
+    }
+
+    @Builder(access = AccessLevel.PRIVATE)
+    private TermJpaEntity(
+            Long id,
+            TermType type,
+            String version,
+            boolean required,
+            boolean active,
+            String content
+    ) {
+
+        this.id = id;
+        this.type = type;
+        this.version = version;
+        this.required = required;
+        this.active = active;
+        this.content = content;
     }
 }

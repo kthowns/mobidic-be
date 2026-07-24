@@ -13,6 +13,6 @@ class VocabularyAppender {
     private final VocabularyRepository vocabularyRepository;
 
     public Vocabulary append(String title, String description, UUID userId) {
-        return vocabularyRepository.append(Vocabulary.create(userId, title, description));
+        return vocabularyRepository.append(Vocabulary.create(userId, title, description, 0));
     }
 }
