@@ -2,6 +2,7 @@ package com.kthowns.mobidic.domain.term.service;
 
 import com.kthowns.mobidic.common.code.GeneralResponseCode;
 import com.kthowns.mobidic.common.exception.ApiException;
+import com.kthowns.mobidic.domain.global.model.AuditTime;
 import com.kthowns.mobidic.domain.term.model.SimpleTerm;
 import com.kthowns.mobidic.domain.term.model.Term;
 import com.kthowns.mobidic.domain.term.model.TermType;
@@ -13,7 +14,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -36,7 +36,7 @@ class TermReaderTest {
         // Given
         TermType type = TermType.SERVICE;
         String version = "1.0.0";
-        Term expectedTerm = new Term(1L, type, version, true, "내용", LocalDateTime.now());
+        Term expectedTerm = new Term(1L, type, version, true, "내용", AuditTime.create());
         given(termRepository.readByTypeAndVersion(type, version)).willReturn(Optional.of(expectedTerm));
 
         // When
@@ -51,7 +51,7 @@ class TermReaderTest {
     void readTermTest_NullVersion() {
         // Given
         TermType type = TermType.SERVICE;
-        Term expectedTerm = new Term(1L, type, "2.0.0", true, "최신 내용", LocalDateTime.now());
+        Term expectedTerm = new Term(1L, type, "2.0.0", true, "최신 내용", AuditTime.create());
         given(termRepository.readLatestByType(type)).willReturn(Optional.of(expectedTerm));
 
         // When
@@ -80,8 +80,8 @@ class TermReaderTest {
     void readActiveTermsTest() {
         // Given
         List<SimpleTerm> expectedTerms = List.of(
-                new SimpleTerm(1L, TermType.SERVICE, "1.0.0", true, "uri", LocalDateTime.now()),
-                new SimpleTerm(2L, TermType.PRIVACY, "1.0.0", false, "uri", LocalDateTime.now())
+                new SimpleTerm(1L, TermType.SERVICE, "1.0.0", true, "uri", AuditTime.create()),
+                new SimpleTerm(2L, TermType.PRIVACY, "1.0.0", false, "uri", AuditTime.create())
         );
         given(termRepository.readActiveTerms()).willReturn(expectedTerms);
 

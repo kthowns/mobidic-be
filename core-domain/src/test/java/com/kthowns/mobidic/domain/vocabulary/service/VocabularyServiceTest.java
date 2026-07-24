@@ -1,5 +1,6 @@
 package com.kthowns.mobidic.domain.vocabulary.service;
 
+import com.kthowns.mobidic.domain.global.model.AuditTime;
 import com.kthowns.mobidic.domain.vocabulary.model.Vocabulary;
 import com.kthowns.mobidic.domain.vocabulary.model.VocabularyDetail;
 import org.junit.jupiter.api.DisplayName;
@@ -45,7 +46,7 @@ class VocabularyServiceTest {
         // given
         String title = "title";
         String description = "description";
-        Vocabulary vocabulary = new Vocabulary(vocabId, userId, title, description, 0L, null);
+        Vocabulary vocabulary = new Vocabulary(vocabId, userId, title, description, 0L, AuditTime.create());
 
         given(vocabularyAppender.append(title, description, userId)).willReturn(vocabulary);
 
@@ -64,7 +65,7 @@ class VocabularyServiceTest {
     void getVocabularyDetailsSuccess() {
         // given
         List<VocabularyDetail> details = List.of(
-                new VocabularyDetail(new Vocabulary(vocabId, userId, "title", "desc", 0L, null), 0.0, 0.0)
+                new VocabularyDetail(new Vocabulary(vocabId, userId, "title", "desc", 0L, AuditTime.create()), 0.0, 0.0)
         );
         given(vocabularyReader.readDetailsByUserId(userId)).willReturn(details);
 
@@ -80,7 +81,7 @@ class VocabularyServiceTest {
     @DisplayName("[VocabService] Get vocab by id success")
     void getVocabularyByIdSuccess() {
         // given
-        VocabularyDetail detail = new VocabularyDetail(new Vocabulary(vocabId, userId, "title", "desc", 0L, null), 0.0, 0.0);
+        VocabularyDetail detail = new VocabularyDetail(new Vocabulary(vocabId, userId, "title", "desc", 0L, AuditTime.create()), 0.0, 0.0);
         given(vocabularyReader.readDetailById(userId, vocabId)).willReturn(detail);
 
         // when

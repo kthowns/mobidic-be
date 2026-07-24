@@ -20,7 +20,9 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -55,8 +57,8 @@ class QuizServiceTest {
     void getOXQuizzesSuccess() {
         // given
         List<WordDetail> wordDetails = List.of(
-                new WordDetail(wordId, "apple", 0.5, 0.0, false, List.of(), null),
-                new WordDetail(UUID.randomUUID(), "banana", 0.5, 0.0, false, List.of(), null)
+                new WordDetail(wordId, "apple", 0.5, 0.0, false, List.of(), null, null),
+                new WordDetail(UUID.randomUUID(), "banana", 0.5, 0.0, false, List.of(), null, null)
         );
         given(wordService.getWordDetailsNotLearnedByVocabularyId(userId, vocabId)).willReturn(wordDetails);
         given(quizProperties.getExpPerQuiz()).willReturn(15000L);

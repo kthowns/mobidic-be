@@ -49,13 +49,13 @@ public record User(
         );
     }
 
-    public User updateProfile(String newNickname, String newPassword) {
+    public User update(String newNickname, String newPassword) {
         return new User(
                 this.id,
                 this.kakaoId,
                 this.email,
-                newNickname,
-                newPassword,
+                newNickname != null ? newNickname : this.nickname,
+                newPassword != null ? newPassword : this.password,
                 this.role,
                 this.isActive,
                 AuditTime.update(this.auditTime),

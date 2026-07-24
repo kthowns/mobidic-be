@@ -2,6 +2,7 @@ package com.kthowns.mobidic.api.integration;
 
 import com.kthowns.mobidic.security.util.JwtProvider;
 import com.kthowns.mobidic.domain.auth.repository.AuthRedisKey;
+import com.kthowns.mobidic.domain.user.model.User;
 import com.kthowns.mobidic.domain.user.model.UserRole;
 import com.kthowns.mobidic.storage.user.jpaentity.UserJpaEntity;
 import com.kthowns.mobidic.storage.user.jparepository.UserJpaRepository;
@@ -51,21 +52,13 @@ public class BlackListFallbackIntegrationTest {
     @BeforeEach
     void setup() {
         transactionTemplate.execute(status -> {
-            activeUser = userJpaRepository.save(UserJpaEntity.builder()
-                    .email("active@test.com")
-                    .nickname("active")
-                    .password("pass")
-                    .role(UserRole.USER)
-                    .active(true)
-                    .build());
+            activeUser = userJpaRepository.save(UserJpaEntity.createFromModel(
+                    User.create("active@test.com", "active", "pass", UserRole.USER)));
 
-            deactivatedUser = userJpaRepository.save(UserJpaEntity.builder()
-                    .email("deactivated@test.com")
-                    .nickname("deactivated")
-                    .password("pass")
-                    .role(UserRole.USER)
-                    .active(false)
-                    .build());
+            User deactivatedUserModel = User.create("deactivated@test.com", "deactivated", "pass", UserRole.USER).deactivate();
+            UserJpaEntity deactivatedEntity = UserJpaEntity.createFromModel(deactivatedUserModel);
+            deactivatedEntity.updateFromModel(deactivatedUserModel);
+            deactivatedUser = userJpaRepository.save(deactivatedEntity);
             return null;
         });
 

@@ -3,11 +3,16 @@ package com.kthowns.mobidic.api.integration;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kthowns.mobidic.api.quiz.dto.request.QuizRateRequest;
-import com.kthowns.mobidic.security.util.JwtProvider;
 import com.kthowns.mobidic.common.code.GeneralResponseCode;
+import com.kthowns.mobidic.domain.definition.model.Definition;
 import com.kthowns.mobidic.domain.definition.model.PartOfSpeech;
 import com.kthowns.mobidic.domain.quiz.model.QuizInfo;
+import com.kthowns.mobidic.domain.statistic.model.WordStatistic;
+import com.kthowns.mobidic.domain.user.model.User;
 import com.kthowns.mobidic.domain.user.model.UserRole;
+import com.kthowns.mobidic.domain.vocabulary.model.Vocabulary;
+import com.kthowns.mobidic.domain.word.model.Word;
+import com.kthowns.mobidic.security.util.JwtProvider;
 import com.kthowns.mobidic.storage.definition.jpaentity.DefinitionJpaEntity;
 import com.kthowns.mobidic.storage.definition.jparepository.DefinitionJpaRepository;
 import com.kthowns.mobidic.storage.statistic.jpaentity.WordStatisticJpaEntity;
@@ -89,17 +94,11 @@ public class QuizIntegrationTest {
     @BeforeEach
     void setup() {
         transactionTemplate.execute(status -> {
-            testUser = userJpaRepository.save(UserJpaEntity.builder()
-                    .email("test@test.com")
-                    .nickname("test")
-                    .password(passwordEncoder.encode("password123!"))
-                    .role(UserRole.USER)
-                    .build());
+            testUser = userJpaRepository.save(UserJpaEntity.createFromModel(
+                    User.create("test@test.com", "test", passwordEncoder.encode("password123!"), UserRole.USER)));
 
-            testVocab = vocabularyJpaRepository.save(VocabularyJpaEntity.builder()
-                    .user(testUser)
-                    .title("퀴즈 단어장")
-                    .build());
+            testVocab = vocabularyJpaRepository.save(VocabularyJpaEntity.createFromModel(
+                    Vocabulary.create(testUser.getId(), "퀴즈 단어장", null, 0L)));
 
             String[] expressions = {"apple", "banana", "car", "dog", "elephant"};
             String[] meanings = {"사과", "바나나", "자동차", "개", "코끼리"};
@@ -112,20 +111,14 @@ public class QuizIntegrationTest {
             );
 
             for (int i = 0; i < expressions.length; i++) {
-                WordJpaEntity word = wordJpaRepository.save(WordJpaEntity.builder()
-                        .vocabulary(testVocab)
-                        .expression(expressions[i])
-                        .build());
+                WordJpaEntity word = wordJpaRepository.save(WordJpaEntity.createFromModel(
+                        Word.create(testVocab.getId(), expressions[i]), testVocab));
 
-                definitionJpaRepository.save(DefinitionJpaEntity.builder()
-                        .word(word)
-                        .meaning(meanings[i])
-                        .part(PartOfSpeech.NOUN)
-                        .build());
+                definitionJpaRepository.save(DefinitionJpaEntity.createFromModel(
+                        Definition.create(word.getId(), meanings[i], PartOfSpeech.NOUN), word));
 
-                wordStatisticJpaRepository.save(WordStatisticJpaEntity.builder()
-                        .word(word)
-                        .build());
+                wordStatisticJpaRepository.save(WordStatisticJpaEntity.createFromModel(
+                        WordStatistic.create(word.getId())));
             }
             return null;
         });
@@ -201,7 +194,7 @@ public class QuizIntegrationTest {
         // Given
         List<QuizInfo> quizzes = objectMapper.readValue(
                 objectMapper.readTree(generateResult.getResponse().getContentAsString()).path("data").toString(),
-                new TypeReference<List<QuizInfo>>() {
+                new TypeReference<>() {
                 }
         );
 
@@ -275,7 +268,7 @@ public class QuizIntegrationTest {
                 .andReturn();
         return objectMapper.readValue(
                 objectMapper.readTree(result.getResponse().getContentAsString()).path("data").toString(),
-                new TypeReference<List<QuizInfo>>() {
+                new TypeReference<>() {
                 }
         );
     }

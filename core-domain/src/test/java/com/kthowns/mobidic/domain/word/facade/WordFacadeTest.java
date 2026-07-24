@@ -3,6 +3,7 @@ package com.kthowns.mobidic.domain.word.facade;
 import com.kthowns.mobidic.domain.definition.command.AddDefinitionCommand;
 import com.kthowns.mobidic.domain.definition.command.UpdateDefinitionCommand;
 import com.kthowns.mobidic.domain.definition.service.DefinitionService;
+import com.kthowns.mobidic.domain.global.model.AuditTime;
 import com.kthowns.mobidic.domain.statistic.service.StatisticService;
 import com.kthowns.mobidic.domain.vocabulary.service.VocabularyService;
 import com.kthowns.mobidic.domain.word.command.AddWordCommand;
@@ -49,7 +50,7 @@ class WordFacadeTest {
         // Given
         AddWordCommand addWordCommand = new AddWordCommand("apple");
         List<AddDefinitionCommand> addDefinitionCommands = List.of();
-        Word word = new Word(wordId, vocabId, "apple", null);
+        Word word = new Word(wordId, vocabId, "apple", AuditTime.create());
 
         given(wordService.addWord(userId, vocabId, "apple")).willReturn(word);
 

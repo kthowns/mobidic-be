@@ -29,7 +29,10 @@ public interface WordStatisticJpaRepository extends JpaRepository<WordStatisticJ
             " JOIN WordJpaEntity w ON ws.wordId = w.id" +
             " WHERE w.vocabulary.userId = :userId" +
             " AND w.vocabulary.id = :vocabularyId")
-    List<WordStatisticJpaEntity> findByVocabularyIdAndUserId(UUID vocabularyId, UUID userId);
+    List<WordStatisticJpaEntity> findByVocabularyIdAndUserId(
+            @Param("vocabularyId") UUID vocabularyId,
+            @Param("userId") UUID userId
+    );
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT ws FROM WordStatisticJpaEntity ws" +
@@ -45,5 +48,5 @@ public interface WordStatisticJpaRepository extends JpaRepository<WordStatisticJ
             " JOIN WordJpaEntity w ON ws.wordId = w.id" +
             " WHERE w.id = :wordId" +
             " AND w.vocabulary.userId = :userId")
-    Optional<WordStatisticJpaEntity> findByWordIdAndUserId(UUID wordId, UUID userId);
+    Optional<WordStatisticJpaEntity> findByWordIdAndUserId(@Param("wordId") UUID wordId, @Param("userId") UUID userId);
 }

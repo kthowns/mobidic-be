@@ -23,7 +23,7 @@ public record Word(
         return new Word(
                 this.id,
                 this.vocabularyId,
-                expression,
+                expression != null ? expression : this.expression,
                 AuditTime.update(this.auditTime)
         );
     }

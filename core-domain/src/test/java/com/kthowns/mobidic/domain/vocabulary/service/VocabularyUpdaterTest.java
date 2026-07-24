@@ -1,5 +1,6 @@
 package com.kthowns.mobidic.domain.vocabulary.service;
 
+import com.kthowns.mobidic.domain.global.model.AuditTime;
 import com.kthowns.mobidic.domain.vocabulary.model.Vocabulary;
 import com.kthowns.mobidic.domain.vocabulary.repository.VocabularyRepository;
 import org.junit.jupiter.api.DisplayName;
@@ -37,7 +38,7 @@ class VocabularyUpdaterTest {
         String newTitle = "새로운 제목";
         String newDescription = "새로운 설명";
 
-        Vocabulary existingVocab = new Vocabulary(vocabId, userId, "기존 제목", "기존 설명", 0, null);
+        Vocabulary existingVocab = new Vocabulary(vocabId, userId, "기존 제목", "기존 설명", 0, AuditTime.create());
         given(vocabularyReader.readById(vocabId, userId)).willReturn(existingVocab);
 
         // When

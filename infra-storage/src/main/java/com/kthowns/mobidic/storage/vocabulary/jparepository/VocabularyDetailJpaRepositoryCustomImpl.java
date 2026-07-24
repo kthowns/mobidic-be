@@ -1,5 +1,6 @@
 package com.kthowns.mobidic.storage.vocabulary.jparepository;
 
+import com.kthowns.mobidic.domain.global.model.AuditTime;
 import com.kthowns.mobidic.domain.vocabulary.model.Vocabulary;
 import com.kthowns.mobidic.domain.vocabulary.model.VocabularyDetail;
 import com.kthowns.mobidic.storage.statistic.jpaentity.QWordStatisticJpaEntity;
@@ -32,7 +33,10 @@ public class VocabularyDetailJpaRepositoryCustomImpl implements VocabularyDetail
                                 vocabulary.title,
                                 vocabulary.description,
                                 vocabulary.wordCount,
-                                vocabulary.createdAt
+                                Projections.constructor(AuditTime.class,
+                                        vocabulary.createdAt,
+                                        vocabulary.updatedAt
+                                )
                         ),
                         // 데이터가 없을 때를 대비해 coalesce(0.0) 추가
                         wordStatistic.isLearned.when(true).then(1.0).otherwise(0.0).avg().coalesce(0.0),
@@ -56,7 +60,7 @@ public class VocabularyDetailJpaRepositoryCustomImpl implements VocabularyDetail
                 .leftJoin(word).on(word.vocabulary.id.eq(vocabulary.id))
                 .leftJoin(wordStatistic).on(wordStatistic.wordId.eq(word.id))
                 .where(vocabulary.userId.eq(userId))
-                .groupBy(vocabulary.id, vocabulary.title, vocabulary.description, vocabulary.createdAt, vocabulary.wordCount)
+                .groupBy(vocabulary.id)
                 .fetch();
     }
 
@@ -71,7 +75,10 @@ public class VocabularyDetailJpaRepositoryCustomImpl implements VocabularyDetail
                                         vocabulary.title,
                                         vocabulary.description,
                                         vocabulary.wordCount,
-                                        vocabulary.createdAt
+                                        Projections.constructor(AuditTime.class,
+                                                vocabulary.createdAt,
+                                                vocabulary.updatedAt
+                                        )
                                 ),
                                 // 데이터가 없을 때를 대비해 coalesce(0.0) 추가
                                 wordStatistic.isLearned.when(true).then(1.0).otherwise(0.0).avg().coalesce(0.0),
@@ -98,7 +105,7 @@ public class VocabularyDetailJpaRepositoryCustomImpl implements VocabularyDetail
                                 vocabulary.userId.eq(userId),
                                 vocabulary.id.eq(vocabularyId)
                         )
-                        .groupBy(vocabulary.id, vocabulary.title, vocabulary.description, vocabulary.createdAt, vocabulary.wordCount)
+                        .groupBy(vocabulary.id)
                         .fetchOne());
     }
 }

@@ -59,7 +59,6 @@ public class PresetRepositoryImpl implements PresetRepository {
                 WordJpaEntity w = WordJpaEntity.createFromModel(
                         Word.create(v.getId(), pw.getExpression()),
                         v
-
                 );
                 allWords.add(w);
 

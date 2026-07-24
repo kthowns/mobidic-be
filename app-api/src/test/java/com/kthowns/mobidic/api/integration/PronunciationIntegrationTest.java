@@ -4,7 +4,10 @@ import com.kthowns.mobidic.security.util.JwtProvider;
 import com.kthowns.mobidic.common.code.AuthResponseCode;
 import com.kthowns.mobidic.common.code.GeneralResponseCode;
 import com.kthowns.mobidic.domain.pronunciation.client.SpeechToTextClient;
+import com.kthowns.mobidic.domain.user.model.User;
 import com.kthowns.mobidic.domain.user.model.UserRole;
+import com.kthowns.mobidic.domain.vocabulary.model.Vocabulary;
+import com.kthowns.mobidic.domain.word.model.Word;
 import com.kthowns.mobidic.storage.user.jpaentity.UserJpaEntity;
 import com.kthowns.mobidic.storage.user.jparepository.UserJpaRepository;
 import com.kthowns.mobidic.storage.vocabulary.jpaentity.VocabularyJpaEntity;
@@ -23,7 +26,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.UUID;
@@ -73,22 +75,14 @@ public class PronunciationIntegrationTest {
     @BeforeEach
     void setup() {
         transactionTemplate.execute(status -> {
-            testUser = userJpaRepository.save(UserJpaEntity.builder()
-                    .email("test@test.com")
-                    .nickname("test")
-                    .password(passwordEncoder.encode("password123!"))
-                    .role(UserRole.USER)
-                    .build());
+            testUser = userJpaRepository.save(UserJpaEntity.createFromModel(
+                    User.create("test@test.com", "test", passwordEncoder.encode("password123!"), UserRole.USER)));
 
-            VocabularyJpaEntity vocabulary = vocabularyJpaRepository.save(VocabularyJpaEntity.builder()
-                    .user(testUser)
-                    .title("테스트 단어장")
-                    .build());
+            VocabularyJpaEntity vocabulary = vocabularyJpaRepository.save(VocabularyJpaEntity.createFromModel(
+                    Vocabulary.create(testUser.getId(), "테스트 단어장", null, 0L)));
 
-            testWord = wordJpaRepository.save(WordJpaEntity.builder()
-                    .vocabulary(vocabulary)
-                    .expression("apple")
-                    .build());
+            testWord = wordJpaRepository.save(WordJpaEntity.createFromModel(
+                    Word.create(vocabulary.getId(), "apple"), vocabulary));
             return null;
         });
 

@@ -3,13 +3,17 @@ package com.kthowns.mobidic.api.integration;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kthowns.mobidic.api.definition.dto.request.AddDefinitionRequestDto;
 import com.kthowns.mobidic.api.definition.dto.request.UpdateDefinitionRequestDto;
-import com.kthowns.mobidic.security.util.JwtProvider;
 import com.kthowns.mobidic.api.word.dto.request.AddWordRequestDto;
 import com.kthowns.mobidic.api.word.dto.request.UpdateWordAndDefinitionsRequestDto;
 import com.kthowns.mobidic.common.code.AuthResponseCode;
 import com.kthowns.mobidic.common.code.GeneralResponseCode;
+import com.kthowns.mobidic.domain.definition.model.Definition;
 import com.kthowns.mobidic.domain.definition.model.PartOfSpeech;
+import com.kthowns.mobidic.domain.user.model.User;
 import com.kthowns.mobidic.domain.user.model.UserRole;
+import com.kthowns.mobidic.domain.vocabulary.model.Vocabulary;
+import com.kthowns.mobidic.domain.word.model.Word;
+import com.kthowns.mobidic.security.util.JwtProvider;
 import com.kthowns.mobidic.storage.definition.jpaentity.DefinitionJpaEntity;
 import com.kthowns.mobidic.storage.definition.jparepository.DefinitionJpaRepository;
 import com.kthowns.mobidic.storage.statistic.jparepository.WordStatisticJpaRepository;
@@ -35,7 +39,10 @@ import org.springframework.transaction.support.TransactionTemplate;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -81,17 +88,11 @@ public class WordIntegrationTest {
     @BeforeEach
     void setup() {
         transactionTemplate.execute(status -> {
-            testUser = userJpaRepository.save(UserJpaEntity.builder()
-                    .email("test@test.com")
-                    .nickname("test")
-                    .password(passwordEncoder.encode("password123!"))
-                    .role(UserRole.USER)
-                    .build());
+            testUser = userJpaRepository.save(UserJpaEntity.createFromModel(
+                    User.create("test@test.com", "test", passwordEncoder.encode("password123!"), UserRole.USER)));
 
-            testVocab = vocabularyJpaRepository.save(VocabularyJpaEntity.builder()
-                    .user(testUser)
-                    .title("테스트 단어장")
-                    .build());
+            testVocab = vocabularyJpaRepository.save(VocabularyJpaEntity.createFromModel(
+                    Vocabulary.create(testUser.getId(), "테스트 단어장", null, 0L)));
             return null;
         });
 
@@ -131,7 +132,7 @@ public class WordIntegrationTest {
                 .filter(w -> w.getExpression().equals("apple"))
                 .findFirst().orElseThrow();
 
-        List<DefinitionJpaEntity> definitions = definitionJpaRepository.findByWord_IdAndWord_Vocabulary_User_Id(savedWord.getId(), testUser.getId());
+        List<DefinitionJpaEntity> definitions = definitionJpaRepository.findByWord_IdAndWord_Vocabulary_UserId(savedWord.getId(), testUser.getId());
         assertThat(definitions).hasSize(2);
     }
 
@@ -143,15 +144,13 @@ public class WordIntegrationTest {
         final DefinitionJpaEntity[] defs = new DefinitionJpaEntity[2];
 
         transactionTemplate.execute(status -> {
-            word[0] = wordJpaRepository.save(WordJpaEntity.builder()
-                    .vocabulary(testVocab)
-                    .expression("oldExpression")
-                    .build());
+            word[0] = wordJpaRepository.save(WordJpaEntity.createFromModel(
+                    Word.create(testVocab.getId(), "oldExpression"), testVocab));
 
-            defs[0] = definitionJpaRepository.save(DefinitionJpaEntity.builder()
-                    .word(word[0]).meaning("기존뜻1").part(PartOfSpeech.NOUN).build());
-            defs[1] = definitionJpaRepository.save(DefinitionJpaEntity.builder()
-                    .word(word[0]).meaning("기존뜻2").part(PartOfSpeech.NOUN).build());
+            defs[0] = definitionJpaRepository.save(DefinitionJpaEntity.createFromModel(
+                    Definition.create(word[0].getId(), "기존뜻1", PartOfSpeech.NOUN), word[0]));
+            defs[1] = definitionJpaRepository.save(DefinitionJpaEntity.createFromModel(
+                    Definition.create(word[0].getId(), "기존뜻2", PartOfSpeech.NOUN), word[0]));
             return null;
         });
 
@@ -178,7 +177,7 @@ public class WordIntegrationTest {
         WordJpaEntity updatedWord = wordJpaRepository.findById(word[0].getId()).orElseThrow();
         assertThat(updatedWord.getExpression()).isEqualTo("newExpression");
 
-        List<DefinitionJpaEntity> currentDefs = definitionJpaRepository.findByWord_IdAndWord_Vocabulary_User_Id(word[0].getId(), testUser.getId());
+        List<DefinitionJpaEntity> currentDefs = definitionJpaRepository.findByWord_IdAndWord_Vocabulary_UserId(word[0].getId(), testUser.getId());
         assertThat(currentDefs).hasSize(2);
         assertThat(currentDefs).extracting(DefinitionJpaEntity::getMeaning)
                 .containsExactlyInAnyOrder("수정된뜻1", "새로운뜻1")
@@ -193,10 +192,10 @@ public class WordIntegrationTest {
         final DefinitionJpaEntity[] def = new DefinitionJpaEntity[1];
 
         transactionTemplate.execute(status -> {
-            word[0] = wordJpaRepository.save(WordJpaEntity.builder()
-                    .vocabulary(testVocab).expression("apple").build());
-            def[0] = definitionJpaRepository.save(DefinitionJpaEntity.builder()
-                    .word(word[0]).meaning("사과").part(PartOfSpeech.NOUN).build());
+            word[0] = wordJpaRepository.save(WordJpaEntity.createFromModel(
+                    Word.create(testVocab.getId(), "apple"), testVocab));
+            def[0] = definitionJpaRepository.save(DefinitionJpaEntity.createFromModel(
+                    Definition.create(word[0].getId(), "사과", PartOfSpeech.NOUN), word[0]));
             return null;
         });
 
@@ -220,10 +219,8 @@ public class WordIntegrationTest {
     @DisplayName("단어 수정 성공")
     void updateWordSuccess() throws Exception {
         // Given
-        WordJpaEntity word = wordJpaRepository.save(WordJpaEntity.builder()
-                .vocabulary(testVocab)
-                .expression("flower")
-                .build());
+        WordJpaEntity word = wordJpaRepository.save(WordJpaEntity.createFromModel(
+                Word.create(testVocab.getId(), "flower"), testVocab));
 
         UpdateWordAndDefinitionsRequestDto request = UpdateWordAndDefinitionsRequestDto.builder()
                 .expression("garden")
@@ -246,10 +243,8 @@ public class WordIntegrationTest {
     @DisplayName("단어 삭제 성공")
     void deleteWordSuccess() throws Exception {
         // Given
-        WordJpaEntity word = wordJpaRepository.save(WordJpaEntity.builder()
-                .vocabulary(testVocab)
-                .expression("home")
-                .build());
+        WordJpaEntity word = wordJpaRepository.save(WordJpaEntity.createFromModel(
+                Word.create(testVocab.getId(), "home"), testVocab));
 
         // When
         mockMvc.perform(delete("/api/words/" + word.getId())
@@ -289,18 +284,18 @@ public class WordIntegrationTest {
         final WordJpaEntity[] myWord = new WordJpaEntity[1];
 
         transactionTemplate.execute(status -> {
-            UserJpaEntity otherUser = userJpaRepository.save(UserJpaEntity.builder()
-                    .email("other@test.com").nickname("other").password("pass").role(UserRole.USER).build());
-            VocabularyJpaEntity otherVocab = vocabularyJpaRepository.save(VocabularyJpaEntity.builder()
-                    .user(otherUser).title("타인단어장").build());
-            WordJpaEntity otherWord = wordJpaRepository.save(WordJpaEntity.builder()
-                    .vocabulary(otherVocab).expression("other").build());
-            otherDef[0] = definitionJpaRepository.save(DefinitionJpaEntity.builder()
-                    .word(otherWord).meaning("타인의뜻").part(PartOfSpeech.NOUN).build());
+            UserJpaEntity otherUser = userJpaRepository.save(UserJpaEntity.createFromModel(
+                    User.create("other@test.com", "other", "pass", UserRole.USER)));
+            VocabularyJpaEntity otherVocab = vocabularyJpaRepository.save(VocabularyJpaEntity.createFromModel(
+                    Vocabulary.create(otherUser.getId(), "타인단어장", null, 0L)));
+            WordJpaEntity otherWord = wordJpaRepository.save(WordJpaEntity.createFromModel(
+                    Word.create(otherVocab.getId(), "other"), otherVocab));
+            otherDef[0] = definitionJpaRepository.save(DefinitionJpaEntity.createFromModel(
+                    Definition.create(otherWord.getId(), "타인의뜻", PartOfSpeech.NOUN), otherWord));
 
             // 나의 단어 생성
-            myWord[0] = wordJpaRepository.save(WordJpaEntity.builder()
-                    .vocabulary(testVocab).expression("my").build());
+            myWord[0] = wordJpaRepository.save(WordJpaEntity.createFromModel(
+                    Word.create(testVocab.getId(), "my"), testVocab));
             return null;
         });
 
@@ -332,10 +327,10 @@ public class WordIntegrationTest {
         final DefinitionJpaEntity[] def = new DefinitionJpaEntity[1];
 
         transactionTemplate.execute(status -> {
-            word[0] = wordJpaRepository.save(WordJpaEntity.builder()
-                    .vocabulary(testVocab).expression("test").build());
-            def[0] = definitionJpaRepository.save(DefinitionJpaEntity.builder()
-                    .word(word[0]).meaning("뜻").part(PartOfSpeech.NOUN).build());
+            word[0] = wordJpaRepository.save(WordJpaEntity.createFromModel(
+                    Word.create(testVocab.getId(), "test"), testVocab));
+            def[0] = definitionJpaRepository.save(DefinitionJpaEntity.createFromModel(
+                    Definition.create(word[0].getId(), "뜻", PartOfSpeech.NOUN), word[0]));
             return null;
         });
 
@@ -364,10 +359,10 @@ public class WordIntegrationTest {
         final DefinitionJpaEntity[] def = new DefinitionJpaEntity[1];
 
         transactionTemplate.execute(status -> {
-            word[0] = wordJpaRepository.save(WordJpaEntity.builder()
-                    .vocabulary(testVocab).expression("apple").build());
-            def[0] = definitionJpaRepository.save(DefinitionJpaEntity.builder()
-                    .word(word[0]).meaning("사과").part(PartOfSpeech.NOUN).build());
+            word[0] = wordJpaRepository.save(WordJpaEntity.createFromModel(
+                    Word.create(testVocab.getId(), "apple"), testVocab));
+            def[0] = definitionJpaRepository.save(DefinitionJpaEntity.createFromModel(
+                    Definition.create(word[0].getId(), "사과", PartOfSpeech.NOUN), word[0]));
             return null;
         });
 
@@ -390,8 +385,8 @@ public class WordIntegrationTest {
     @DisplayName("안전성 테스트 - 리스트 필드 누락(Null) 요청 시 DTO Getter가 안전하게 방어하여 성공")
     void updateWordWithNullListsSuccess() throws Exception {
         // Given
-        WordJpaEntity word = wordJpaRepository.save(WordJpaEntity.builder()
-                .vocabulary(testVocab).expression("apple").build());
+        WordJpaEntity word = wordJpaRepository.save(WordJpaEntity.createFromModel(
+                Word.create(testVocab.getId(), "apple"), testVocab));
 
         // JSON에서 adding/updating/deleting 필드를 아예 생략
         String jsonRequest = "{\"expression\":\"banana\"}";
@@ -416,13 +411,13 @@ public class WordIntegrationTest {
         final DefinitionJpaEntity[] defToDelete = new DefinitionJpaEntity[1];
 
         transactionTemplate.execute(status -> {
-            word[0] = wordJpaRepository.save(WordJpaEntity.builder()
-                    .vocabulary(testVocab).expression("oldWord").build());
+            word[0] = wordJpaRepository.save(WordJpaEntity.createFromModel(
+                    Word.create(testVocab.getId(), "oldWord"), testVocab));
 
-            defToDelete[0] = definitionJpaRepository.save(DefinitionJpaEntity.builder()
-                    .word(word[0]).meaning("삭제될뜻").part(PartOfSpeech.NOUN).build());
-            definitionJpaRepository.save(DefinitionJpaEntity.builder()
-                    .word(word[0]).meaning("기존뜻").part(PartOfSpeech.NOUN).build());
+            defToDelete[0] = definitionJpaRepository.save(DefinitionJpaEntity.createFromModel(
+                    Definition.create(word[0].getId(), "삭제될뜻", PartOfSpeech.NOUN), word[0]));
+            definitionJpaRepository.save(DefinitionJpaEntity.createFromModel(
+                    Definition.create(word[0].getId(), "기존뜻", PartOfSpeech.NOUN), word[0]));
             return null;
         });
 

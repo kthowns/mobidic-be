@@ -1,5 +1,6 @@
 package com.kthowns.mobidic.domain.word.service;
 
+import com.kthowns.mobidic.domain.global.model.AuditTime;
 import com.kthowns.mobidic.domain.word.model.Word;
 import com.kthowns.mobidic.domain.word.repository.WordRepository;
 import org.junit.jupiter.api.DisplayName;
@@ -33,7 +34,7 @@ class WordUpdaterTest {
         UUID wordId = UUID.randomUUID();
         String newExpression = "banana";
 
-        Word existingWord = new Word(wordId, UUID.randomUUID(), "apple", null);
+        Word existingWord = new Word(wordId, UUID.randomUUID(), "apple", AuditTime.create());
 
         // When
         wordUpdater.update(userId, existingWord, newExpression);

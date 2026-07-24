@@ -6,6 +6,8 @@ import com.kthowns.mobidic.security.util.JwtProvider;
 import com.kthowns.mobidic.api.user.dto.request.SignUpRequestDto;
 import com.kthowns.mobidic.common.code.AuthResponseCode;
 import com.kthowns.mobidic.common.code.GeneralResponseCode;
+import com.kthowns.mobidic.domain.user.model.User;
+import com.kthowns.mobidic.domain.user.model.UserRole;
 import com.kthowns.mobidic.storage.user.jpaentity.UserJpaEntity;
 import com.kthowns.mobidic.storage.user.jparepository.UserJpaRepository;
 import org.junit.jupiter.api.AfterEach;
@@ -92,11 +94,8 @@ public class AuthIntegrationTest {
     @DisplayName("회원가입 실패 - 중복된 이메일로 가입할 수 없다.")
     void joinFailDuplicatedEmail() throws Exception {
         // Given
-        userJpaRepository.save(UserJpaEntity.builder()
-                .email("test@test.com")
-                .nickname("other")
-                .password(passwordEncoder.encode("password123!"))
-                .build());
+        userJpaRepository.save(UserJpaEntity.createFromModel(User.create(
+                "test@test.com", "other", passwordEncoder.encode("password123!"), UserRole.USER)));
 
         SignUpRequestDto request = SignUpRequestDto.builder()
                 .email("test@test.com")
@@ -118,11 +117,8 @@ public class AuthIntegrationTest {
     @DisplayName("회원가입 실패 - 중복된 닉네임으로 가입할 수 없다.")
     void joinFailDuplicatedNickname() throws Exception {
         // Given
-        userJpaRepository.save(UserJpaEntity.builder()
-                .email("other@test.com")
-                .nickname("test")
-                .password(passwordEncoder.encode("password123!"))
-                .build());
+        userJpaRepository.save(UserJpaEntity.createFromModel(User.create(
+                "other@test.com", "test", passwordEncoder.encode("password123!"), UserRole.USER)));
 
         SignUpRequestDto request = SignUpRequestDto.builder()
                 .email("test@test.com")
@@ -170,11 +166,8 @@ public class AuthIntegrationTest {
     @DisplayName("로그인 성공 - 올바른 자격 증명을 입력하면 액세스 토큰을 반환한다.")
     void loginSuccess() throws Exception {
         // Given
-        userJpaRepository.save(UserJpaEntity.builder()
-                .email("test@test.com")
-                .nickname("test")
-                .password(passwordEncoder.encode("password123!"))
-                .build());
+        userJpaRepository.save(UserJpaEntity.createFromModel(User.create(
+                "test@test.com", "test", passwordEncoder.encode("password123!"), UserRole.USER)));
 
         LoginRequest loginRequest = LoginRequest.builder()
                 .email("test@test.com")
@@ -198,11 +191,8 @@ public class AuthIntegrationTest {
     @DisplayName("로그인 실패 - 틀린 비밀번호로는 로그인할 수 없다.")
     void loginFailWrongPassword() throws Exception {
         // Given
-        userJpaRepository.save(UserJpaEntity.builder()
-                .email("test@test.com")
-                .nickname("test")
-                .password(passwordEncoder.encode("password123!"))
-                .build());
+        userJpaRepository.save(UserJpaEntity.createFromModel(User.create(
+                "test@test.com", "test", passwordEncoder.encode("password123!"), UserRole.USER)));
 
         LoginRequest loginRequest = LoginRequest.builder()
                 .email("test@test.com")

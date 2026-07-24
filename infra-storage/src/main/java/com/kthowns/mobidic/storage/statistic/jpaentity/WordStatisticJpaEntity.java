@@ -20,7 +20,7 @@ import java.util.UUID;
 @Table(name = "word_statistics")
 public class WordStatisticJpaEntity extends BaseAuditingEntity {
     @Id
-    @Column(name = "word_id", columnDefinition = "uuid", updatable = false, nullable = false)
+    @Column(name = "word_id", columnDefinition = "BINARY(16)", updatable = false, nullable = false)
     private UUID wordId;
 
     @Column(name = "correct_count", nullable = false)

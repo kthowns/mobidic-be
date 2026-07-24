@@ -28,7 +28,7 @@ import java.util.UUID;
 public class PresetDefinitionJpaEntity extends BaseAuditingEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(columnDefinition = "uuid", updatable = false, nullable = false)
+    @Column(columnDefinition = "BINARY(16)", updatable = false, nullable = false)
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)

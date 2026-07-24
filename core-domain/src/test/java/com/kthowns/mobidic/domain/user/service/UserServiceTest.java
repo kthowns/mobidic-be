@@ -2,6 +2,7 @@ package com.kthowns.mobidic.domain.user.service;
 
 import com.kthowns.mobidic.common.code.AuthResponseCode;
 import com.kthowns.mobidic.common.exception.ApiException;
+import com.kthowns.mobidic.domain.global.model.AuditTime;
 import com.kthowns.mobidic.domain.user.model.User;
 import com.kthowns.mobidic.domain.user.model.UserRole;
 import org.junit.jupiter.api.DisplayName;
@@ -50,7 +51,7 @@ class UserServiceTest {
         String nickname = "test";
         String password = "password123!";
         String encodedPassword = "encodedPassword";
-        User user = new User(userId, null, email, nickname, encodedPassword, UserRole.USER, true, LocalDateTime.now(), null);
+        User user = new User(userId, null, email, nickname, encodedPassword, UserRole.USER, true, AuditTime.create(), null);
 
         given(userAppender.append(email, nickname, password, UserRole.USER)).willReturn(user);
 
@@ -71,7 +72,7 @@ class UserServiceTest {
         Long kakaoId = 12345L;
         String email = "kakao@test.com";
         String nickname = "kakaoUser";
-        User user = new User(userId, kakaoId, email, nickname, "pw", UserRole.USER, true, LocalDateTime.now(), null);
+        User user = new User(userId, kakaoId, email, nickname, "pw", UserRole.USER, true, AuditTime.create(), null);
 
         given(userAppender.appendKakao(org.mockito.ArgumentMatchers.eq(kakaoId), org.mockito.ArgumentMatchers.eq(email), org.mockito.ArgumentMatchers.eq(nickname), org.mockito.ArgumentMatchers.anyString(), org.mockito.ArgumentMatchers.eq(UserRole.USER))).willReturn(user);
 
@@ -88,7 +89,7 @@ class UserServiceTest {
         // given
         String newNickname = "newNick";
         String newPassword = "newPassword123!";
-        User user = new User(userId, null, "test@test.com", newNickname, "encodedNewPassword", UserRole.USER, true, LocalDateTime.now(), null);
+        User user = new User(userId, null, "test@test.com", newNickname, "encodedNewPassword", UserRole.USER, true, AuditTime.create(), null);
 
         given(userUpdater.update(userId, newNickname, newPassword)).willReturn(user);
 
@@ -107,7 +108,7 @@ class UserServiceTest {
         // given
         String newNickname = ""; // empty
         String newPassword = null; // null
-        User user = new User(userId, null, "test@test.com", "original", "pw", UserRole.USER, true, LocalDateTime.now(), null);
+        User user = new User(userId, null, "test@test.com", "original", "pw", UserRole.USER, true, AuditTime.create(), null);
 
         given(userUpdater.update(userId, newNickname, newPassword)).willReturn(user);
 
@@ -125,7 +126,7 @@ class UserServiceTest {
     void deactivateUserSuccess() {
         // given
         long ttlMillis = 3600000L;
-        User user = new User(userId, null, "test@test.com", "nick", "pw", UserRole.USER, false, LocalDateTime.now(), LocalDateTime.now());
+        User user = new User(userId, null, "test@test.com", "nick", "pw", UserRole.USER, false, AuditTime.create(), LocalDateTime.now());
         given(userRemover.deactivate(userId)).willReturn(user);
 
         // when
@@ -140,7 +141,7 @@ class UserServiceTest {
     @DisplayName("[UserService] Get user by id success")
     void getUserByIdSuccess() {
         // given
-        User user = new User(userId, null, "test@test.com", "nick", "pw", UserRole.USER, true, LocalDateTime.now(), null);
+        User user = new User(userId, null, "test@test.com", "nick", "pw", UserRole.USER, true, AuditTime.create(), null);
         given(userReader.readById(userId)).willReturn(user);
 
         // when

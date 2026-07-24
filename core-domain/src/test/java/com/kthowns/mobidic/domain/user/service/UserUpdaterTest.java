@@ -1,5 +1,6 @@
 package com.kthowns.mobidic.domain.user.service;
 
+import com.kthowns.mobidic.domain.global.model.AuditTime;
 import com.kthowns.mobidic.domain.user.client.PasswordEncoderClient;
 import com.kthowns.mobidic.domain.user.model.User;
 import com.kthowns.mobidic.domain.user.model.UserRole;
@@ -12,7 +13,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -45,11 +45,11 @@ class UserUpdaterTest {
         String newPassword = "newPassword";
         String encodedPassword = "encodedPassword";
 
-        User existingUser = new User(userId, null, "test@test.com", "oldNick", "oldPass", UserRole.USER, true, LocalDateTime.now(), null);
+        User existingUser = new User(userId, null, "test@test.com", "oldNick", "oldPass", UserRole.USER, true, AuditTime.create(), null);
         given(userReader.readById(userId)).willReturn(existingUser);
         given(passwordEncoderClient.encode(newPassword)).willReturn(encodedPassword);
 
-        User updatedUser = existingUser.updateProfile(newNickname, encodedPassword);
+        User updatedUser = existingUser.update(newNickname, encodedPassword);
         given(userRepository.update(any(User.class))).willReturn(updatedUser);
 
         // When
@@ -74,10 +74,10 @@ class UserUpdaterTest {
         String newNickname = "newNick";
         String newPassword = null;
 
-        User existingUser = new User(userId, null, "test@test.com", "oldNick", "oldPass", UserRole.USER, true, LocalDateTime.now(), null);
+        User existingUser = new User(userId, null, "test@test.com", "oldNick", "oldPass", UserRole.USER, true, AuditTime.create(), null);
         given(userReader.readById(userId)).willReturn(existingUser);
 
-        User updatedUser = existingUser.updateProfile(newNickname, null);
+        User updatedUser = existingUser.update(newNickname, null);
         given(userRepository.update(any(User.class))).willReturn(updatedUser);
 
         // When

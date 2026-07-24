@@ -43,6 +43,7 @@ public class VocabularyJpaEntity extends BaseAuditingEntity {
                 .userId(vocabulary.userId())
                 .title(vocabulary.title())
                 .description(vocabulary.description())
+                .wordCount(vocabulary.wordCount())
                 .build();
     }
 
@@ -65,10 +66,10 @@ public class VocabularyJpaEntity extends BaseAuditingEntity {
     }
 
     @Builder(access = AccessLevel.PRIVATE)
-    private VocabularyJpaEntity(UUID userId, String title, String description) {
+    private VocabularyJpaEntity(UUID userId, String title, String description, long wordCount) {
         this.userId = userId;
         this.title = title;
         this.description = description;
-        this.wordCount = 0L;
+        this.wordCount = wordCount;
     }
 }

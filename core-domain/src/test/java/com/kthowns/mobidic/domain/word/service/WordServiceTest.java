@@ -1,5 +1,6 @@
 package com.kthowns.mobidic.domain.word.service;
 
+import com.kthowns.mobidic.domain.global.model.AuditTime;
 import com.kthowns.mobidic.domain.vocabulary.service.VocabularyService;
 import com.kthowns.mobidic.domain.word.model.Word;
 import com.kthowns.mobidic.domain.word.model.WordDetail;
@@ -45,7 +46,7 @@ class WordServiceTest {
     void addWordSuccess() {
         // given
         String expression = "testWord";
-        Word word = new Word(wordId, vocabId, expression, null);
+        Word word = new Word(wordId, vocabId, expression, AuditTime.create());
 
         given(vocabularyService.existsByIdAndUser(vocabId, userId)).willReturn(true);
         given(wordAppender.append(expression, vocabId)).willReturn(word);
@@ -63,7 +64,7 @@ class WordServiceTest {
     @DisplayName("[WordService] Get word by id success")
     void getWordByIdSuccess() {
         // given
-        Word word = new Word(wordId, vocabId, "expression", null);
+        Word word = new Word(wordId, vocabId, "expression", AuditTime.create());
         given(wordReader.readByIdAndUserId(wordId, userId)).willReturn(word);
 
         // when
@@ -78,7 +79,7 @@ class WordServiceTest {
     void getWordDetailsByVocabularyIdSuccess() {
         // given
         List<WordDetail> wordDetails = List.of(
-                new WordDetail(wordId, "expression", 0, 0, false, List.of(), null)
+                new WordDetail(wordId, "expression", 0, 0, false, List.of(), null, null)
         );
         given(vocabularyService.existsByIdAndUser(vocabId, userId)).willReturn(true);
         given(wordReader.readDetailsByVocabularyId(userId, vocabId, false)).willReturn(wordDetails);
@@ -95,7 +96,7 @@ class WordServiceTest {
     void updateWordSuccess() {
         // given
         String newExpression = "newExpression";
-        Word existingWord = new Word(wordId, vocabId, "oldExpression", null);
+        Word existingWord = new Word(wordId, vocabId, "oldExpression", AuditTime.create());
         given(wordReader.readByIdAndUserId(wordId, userId)).willReturn(existingWord);
 
         // when
@@ -110,7 +111,7 @@ class WordServiceTest {
     @DisplayName("[WordService] Delete word success")
     void deleteWordSuccess() {
         // given
-        Word word = new Word(wordId, vocabId, "expression", null);
+        Word word = new Word(wordId, vocabId, "expression", AuditTime.create());
         given(wordReader.readByIdAndUserId(wordId, userId)).willReturn(word);
 
         // when

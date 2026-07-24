@@ -1,5 +1,6 @@
 package com.kthowns.mobidic.domain.word.service;
 
+import com.kthowns.mobidic.domain.global.model.AuditTime;
 import com.kthowns.mobidic.domain.word.model.Word;
 import com.kthowns.mobidic.domain.word.repository.WordRepository;
 import org.junit.jupiter.api.DisplayName;
@@ -32,7 +33,7 @@ class WordAppenderTest {
         // Given
         String expression = "apple";
         UUID vocabularyId = UUID.randomUUID();
-        Word expectedWord = new Word(UUID.randomUUID(), vocabularyId, expression, null);
+        Word expectedWord = new Word(UUID.randomUUID(), vocabularyId, expression, AuditTime.create());
         given(wordRepository.append(any(Word.class))).willReturn(expectedWord);
 
         // When

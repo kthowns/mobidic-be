@@ -23,7 +23,7 @@ import java.util.UUID;
 public class PresetVocabularyJpaEntity extends BaseAuditingEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(columnDefinition = "uuid", updatable = false, nullable = false)
+    @Column(columnDefinition = "BINARY(16)", updatable = false, nullable = false)
     private UUID id;
 
     @Column(name = "title", nullable = false)

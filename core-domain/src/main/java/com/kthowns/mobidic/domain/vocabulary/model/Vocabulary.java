@@ -27,8 +27,8 @@ public record Vocabulary(
         return new Vocabulary(
                 this.id,
                 this.userId,
-                title,
-                description,
+                title != null ? title : this.title,
+                description != null ? description : this.description,
                 this.wordCount,
                 AuditTime.update(this.auditTime)
         );
